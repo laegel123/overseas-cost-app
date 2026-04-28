@@ -395,6 +395,17 @@ export function expectComparePair(rendered, expected: { mult: string; sw: number
 
 각 모듈의 **모든 테스트 케이스** 를 빠짐없이 나열. 누락 발견 시 본 문서를 먼저 갱신하고 테스트를 추가한다.
 
+### 9.0 `src/__test-utils__/` Bootstrap Sanity
+
+#### `sanity.test.ts`
+
+- [x] `colors.orange === '#FC6011'`
+- [x] `HOT_MULTIPLIER_THRESHOLD === 2.0`
+
+#### `rntl-import.test.ts`
+
+- [x] RNTL `render` function importable
+
 ### 9.1 `src/lib/format.ts`
 
 #### `formatKRW(value: number): string`
