@@ -72,10 +72,7 @@ NativeWind preset 과 충돌 없이 동작해야 한다. 기존 step 1 의 babel
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: [
-      ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
-      'nativewind/babel',
-    ],
+    presets: [['babel-preset-expo', { jsxImportSource: 'nativewind' }], 'nativewind/babel'],
     plugins: [
       [
         'module-resolver',

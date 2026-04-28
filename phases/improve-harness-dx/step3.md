@@ -27,6 +27,7 @@ execute.py reset <phase-dir> --all
 ### 리셋 시 처리
 
 status를 `"pending"`으로 변경하고 아래 필드를 제거한다:
+
 - `error_message`
 - `blocked_reason`
 - `failed_at`
@@ -44,6 +45,7 @@ status를 `"pending"`으로 변경하고 아래 필드를 제거한다:
 ```
 
 에러 케이스:
+
 - phase 디렉터리 없음 → `"ERROR: phases/<dir> not found"` 후 exit 1
 - `--step N` 지정 시 해당 step이 error/blocked 아님 → `"WARN: Step N is '<status>', not error/blocked. Skipping."` 출력 후 exit 0
 - 리셋할 step이 없음 → `"No error or blocked steps found in <phase-dir>."` 출력 후 exit 0

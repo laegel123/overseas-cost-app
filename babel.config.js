@@ -1,6 +1,7 @@
 module.exports = function (api) {
   api.cache(true);
   const isTest = process.env.NODE_ENV === 'test';
+  const isProd = process.env.NODE_ENV === 'production';
   return {
     presets: [
       ['babel-preset-expo', { jsxImportSource: 'nativewind', reanimated: !isTest }],
@@ -16,6 +17,7 @@ module.exports = function (api) {
           },
         },
       ],
-    ],
+      isProd && 'transform-remove-console',
+    ].filter(Boolean),
   };
 };

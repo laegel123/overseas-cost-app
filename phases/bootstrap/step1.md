@@ -29,60 +29,57 @@ NativeWind v4 셋업과 디자인 토큰의 단일 출처 (tailwind.config.js + 
 ```js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: [
-    './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
-  ],
+  content: ['./app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
       colors: {
-        orange:        '#FC6011',
+        orange: '#FC6011',
         'orange-soft': '#FFE9DC',
         'orange-tint': '#FFF4ED',
-        navy:          '#11263C',
-        'navy-2':      '#1d3a55',
-        gray:          '#52616B',
-        'gray-2':      '#8A98A0',
-        light:         '#F0F5F9',
-        'light-2':     '#F7FAFC',
-        white:         '#FFFFFF',
-        line:          '#E4ECF2',
+        navy: '#11263C',
+        'navy-2': '#1d3a55',
+        gray: '#52616B',
+        'gray-2': '#8A98A0',
+        light: '#F0F5F9',
+        'light-2': '#F7FAFC',
+        white: '#FFFFFF',
+        line: '#E4ECF2',
       },
       fontFamily: {
         // 실제 로딩은 Step 5 에서. fallback chain 은 여기 정의.
-        manrope:    ['Manrope', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
-        mulish:     ['Mulish', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
+        manrope: ['Manrope', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
+        mulish: ['Mulish', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
         pretendard: ['Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
       },
       fontSize: {
         // [size, lineHeight 또는 letterSpacing 별도 className]
-        display: ['30px', { lineHeight: '33px', letterSpacing: '-0.6px' }],   // 30 * -0.02em
-        h1:      ['24px', { lineHeight: '28px', letterSpacing: '-0.48px' }],
-        h2:      ['18px', { lineHeight: '22px', letterSpacing: '-0.18px' }],  // 18 * -0.01em
-        h3:      ['14px', { lineHeight: '18px' }],
-        body:    ['14px', { lineHeight: '20px' }],     // 14 * 1.4
-        small:   ['12px', { lineHeight: '16px' }],
-        tiny:    ['11px', { lineHeight: '14px' }],
+        display: ['30px', { lineHeight: '33px', letterSpacing: '-0.6px' }], // 30 * -0.02em
+        h1: ['24px', { lineHeight: '28px', letterSpacing: '-0.48px' }],
+        h2: ['18px', { lineHeight: '22px', letterSpacing: '-0.18px' }], // 18 * -0.01em
+        h3: ['14px', { lineHeight: '18px' }],
+        body: ['14px', { lineHeight: '20px' }], // 14 * 1.4
+        small: ['12px', { lineHeight: '16px' }],
+        tiny: ['11px', { lineHeight: '14px' }],
         'mono-label': ['10px', { lineHeight: '12px', letterSpacing: '1px' }], // 10 * 0.1em
       },
       borderRadius: {
-        chip:    '999px',
-        button:  '14px',
-        card:    '16px',
+        chip: '999px',
+        button: '14px',
+        card: '16px',
         'card-lg': '18px',
-        hero:    '20px',
+        hero: '20px',
         'hero-lg': '22px',
         'icon-sm': '10px',
         'icon-md': '16px',
       },
       spacing: {
         // 디자인 mock 기준 자주 쓰이는 값 별칭 — 일반 4px 그리드는 Tailwind 기본 유지
-        'screen-x': '20px',  // phone padding 16~22 의 중앙
+        'screen-x': '20px', // phone padding 16~22 의 중앙
         'screen-x-tight': '16px',
         'screen-x-loose': '22px',
-        'section': '16px',   // section gap 14~18 의 중앙
-        'card-pad': '14px',  // card internal padding 12~18 의 중앙
+        section: '16px', // section gap 14~18 의 중앙
+        'card-pad': '14px', // card internal padding 12~18 의 중앙
       },
     },
   },
@@ -104,10 +101,7 @@ module.exports = {
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: [
-      ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
-      'nativewind/babel',
-    ],
+    presets: [['babel-preset-expo', { jsxImportSource: 'nativewind' }], 'nativewind/babel'],
   };
 };
 ```
@@ -143,17 +137,17 @@ NativeWind 클래스만으로 처리 어려운 값 (gradient, shadow, fontWeight
  */
 
 export const colors = {
-  orange:       '#FC6011',
-  orangeSoft:   '#FFE9DC',
-  orangeTint:   '#FFF4ED',
-  navy:         '#11263C',
-  navy2:        '#1d3a55',
-  gray:         '#52616B',
-  gray2:        '#8A98A0',
-  light:        '#F0F5F9',
-  light2:       '#F7FAFC',
-  white:        '#FFFFFF',
-  line:         '#E4ECF2',
+  orange: '#FC6011',
+  orangeSoft: '#FFE9DC',
+  orangeTint: '#FFF4ED',
+  navy: '#11263C',
+  navy2: '#1d3a55',
+  gray: '#52616B',
+  gray2: '#8A98A0',
+  light: '#F0F5F9',
+  light2: '#F7FAFC',
+  white: '#FFFFFF',
+  line: '#E4ECF2',
 } as const;
 
 export type ColorToken = keyof typeof colors;
@@ -171,27 +165,52 @@ import { Platform } from 'react-native';
  */
 export const shadows = {
   card: Platform.select({
-    ios: { shadowColor: colors.navy, shadowOpacity: 0.06, shadowRadius: 24, shadowOffset: { width: 0, height: 8 } },
+    ios: {
+      shadowColor: colors.navy,
+      shadowOpacity: 0.06,
+      shadowRadius: 24,
+      shadowOffset: { width: 0, height: 8 },
+    },
     android: { elevation: 2 },
     default: {},
   }),
   deep: Platform.select({
-    ios: { shadowColor: colors.navy, shadowOpacity: 0.10, shadowRadius: 50, shadowOffset: { width: 0, height: 20 } },
+    ios: {
+      shadowColor: colors.navy,
+      shadowOpacity: 0.1,
+      shadowRadius: 50,
+      shadowOffset: { width: 0, height: 20 },
+    },
     android: { elevation: 6 },
     default: {},
   }),
   orangeCta: Platform.select({
-    ios: { shadowColor: colors.orange, shadowOpacity: 0.25, shadowRadius: 16, shadowOffset: { width: 0, height: 6 } },
+    ios: {
+      shadowColor: colors.orange,
+      shadowOpacity: 0.25,
+      shadowRadius: 16,
+      shadowOffset: { width: 0, height: 6 },
+    },
     android: { elevation: 4 },
     default: {},
   }),
   orangeHero: Platform.select({
-    ios: { shadowColor: colors.orange, shadowOpacity: 0.25, shadowRadius: 32, shadowOffset: { width: 0, height: 12 } },
+    ios: {
+      shadowColor: colors.orange,
+      shadowOpacity: 0.25,
+      shadowRadius: 32,
+      shadowOffset: { width: 0, height: 12 },
+    },
     android: { elevation: 8 },
     default: {},
   }),
   navyCard: Platform.select({
-    ios: { shadowColor: colors.navy, shadowOpacity: 0.18, shadowRadius: 32, shadowOffset: { width: 0, height: 12 } },
+    ios: {
+      shadowColor: colors.navy,
+      shadowOpacity: 0.18,
+      shadowRadius: 32,
+      shadowOffset: { width: 0, height: 12 },
+    },
     android: { elevation: 6 },
     default: {},
   }),
@@ -202,10 +221,10 @@ export const shadows = {
  * NativeWind className 으로 fontFamily 만 지정하고 weight 는 inline style 로 설정할 때 사용.
  */
 export const fontWeight = {
-  regular:   '400',
-  medium:    '500',
-  semibold:  '600',
-  bold:      '700',
+  regular: '400',
+  medium: '500',
+  semibold: '600',
+  bold: '700',
   extrabold: '800',
 } as const;
 export type FontWeight = (typeof fontWeight)[keyof typeof fontWeight];

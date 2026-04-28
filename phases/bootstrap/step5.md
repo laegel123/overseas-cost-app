@@ -53,16 +53,16 @@ import { useFonts as useExpoFonts } from 'expo-font';
  * 와 정확히 일치해야 한다 (tailwind.config.js fontFamily 참조).
  */
 export const FONT_MAP = {
-  Manrope:            require('../../assets/fonts/Manrope-Regular.ttf'),
-  'Manrope-Medium':   require('../../assets/fonts/Manrope-Medium.ttf'),
+  Manrope: require('../../assets/fonts/Manrope-Regular.ttf'),
+  'Manrope-Medium': require('../../assets/fonts/Manrope-Medium.ttf'),
   'Manrope-SemiBold': require('../../assets/fonts/Manrope-SemiBold.ttf'),
-  'Manrope-Bold':     require('../../assets/fonts/Manrope-Bold.ttf'),
+  'Manrope-Bold': require('../../assets/fonts/Manrope-Bold.ttf'),
   'Manrope-ExtraBold': require('../../assets/fonts/Manrope-ExtraBold.ttf'),
-  Mulish:             require('../../assets/fonts/Mulish-Regular.ttf'),
-  'Mulish-Medium':    require('../../assets/fonts/Mulish-Medium.ttf'),
-  'Mulish-SemiBold':  require('../../assets/fonts/Mulish-SemiBold.ttf'),
-  'Mulish-Bold':      require('../../assets/fonts/Mulish-Bold.ttf'),
-  Pretendard:         require('../../assets/fonts/Pretendard-Regular.ttf'),
+  Mulish: require('../../assets/fonts/Mulish-Regular.ttf'),
+  'Mulish-Medium': require('../../assets/fonts/Mulish-Medium.ttf'),
+  'Mulish-SemiBold': require('../../assets/fonts/Mulish-SemiBold.ttf'),
+  'Mulish-Bold': require('../../assets/fonts/Mulish-Bold.ttf'),
+  Pretendard: require('../../assets/fonts/Pretendard-Regular.ttf'),
 } as const;
 
 /**
@@ -177,7 +177,10 @@ module.exports = {
     // any 금지 (CLAUDE.md CRITICAL — strict 모드)
     '@typescript-eslint/no-explicit-any': 'error',
     // 미사용 import 제거 강제
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
+    ],
     // RN: inline style 사용은 허용 (NativeWind 는 className 우선이지만 inline 보강 필요)
     'react-native/no-inline-styles': 'off',
     'react-native/no-color-literals': 'warn', // 색 hex 직접 박지 마라 (CLAUDE.md CRITICAL)
@@ -192,18 +195,20 @@ module.exports = {
     'ios/',
     'android/',
     'docs/design/hifi/**', // 웹 React 레퍼런스 (RN 아님)
-    '*.config.js',          // root config 는 ESLint scope 외
+    '*.config.js', // root config 는 ESLint scope 외
   ],
 };
 ```
 
 > `eslint-import-resolver-babel-module` 와 `eslint-import-resolver-typescript` 는 `babel-plugin-module-resolver` 의 `@/*` alias 와 typescript paths 를 동시 인식하기 위해 둘 다 필요. devDependencies 에 추가:
+>
 > - `eslint-import-resolver-typescript` (`^3.6.x`)
 > - `eslint-import-resolver-babel-module` (`^5.3.x`)
 
 ### 5. Prettier 셋업
 
 `devDependencies`:
+
 - `prettier` (`^3.3.x`)
 - `eslint-config-prettier` (`^9.x`) — ESLint 와 충돌 룰 비활성화
 
@@ -232,10 +237,7 @@ module.exports = {
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: [
-      ['babel-preset-expo', { jsxImportSource: 'nativewind' }],
-      'nativewind/babel',
-    ],
+    presets: [['babel-preset-expo', { jsxImportSource: 'nativewind' }], 'nativewind/babel'],
     plugins: [
       [
         'module-resolver',
@@ -338,7 +340,7 @@ npm run dev
 
 ## 금지사항
 
-- 폰트 weight 별 typography 컴포넌트 (`<H1>`, `<Body>` 등) 작성 금지. 이유: Phase 2 (design-system) 의 책임. 본 step 은 폰트 *등록* 만.
+- 폰트 weight 별 typography 컴포넌트 (`<H1>`, `<Body>` 등) 작성 금지. 이유: Phase 2 (design-system) 의 책임. 본 step 은 폰트 _등록_ 만.
 - `expo-font` 의 직접 import 금지 (반드시 `useAppFonts` hook 경유). 이유: Phase 3 의 hydration 게이트 합성 시 단일 진입점 필요.
 - ESLint rule 을 약화시켜 lint 통과 시도 금지. 이유: 본 phase 에서 작성된 코드가 룰을 만족하지 못하면 코드를 고친다 — 룰을 늘리는 건 가능하지만 줄이는 건 ADR.
 - `react-native/no-color-literals` 를 `off` 처리 금지. 이유: CLAUDE.md CRITICAL — 토큰 외 hex 금지.

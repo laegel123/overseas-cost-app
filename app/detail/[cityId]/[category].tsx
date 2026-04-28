@@ -1,6 +1,7 @@
 // Placeholder. 실제 구현은 Phase 5 (screens) 에서.
-import { useLocalSearchParams } from 'expo-router';
 import { SafeAreaView, Text, View } from 'react-native';
+
+import { useLocalSearchParams } from 'expo-router';
 
 export default function DetailScreen() {
   const { cityId, category } = useLocalSearchParams<{ cityId: string; category: string }>();

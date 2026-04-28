@@ -15,6 +15,7 @@
 기존 `PreToolUse` 훅의 command에 git commit 감지 로직을 추가한다. `git commit` 명령이 감지되면 먼저 lint/test/build를 실행하고, 실패 시 커밋을 차단한다.
 
 프로젝트 타입을 자동 감지한다:
+
 - `package.json` 존재 → `npm run lint && npm run build && npm run test`
 - `scripts/execute.py` 존재 (Python 프로젝트) → `python3 -m py_compile scripts/execute.py && python3 -m pytest scripts/ -q`
 - 둘 다 없으면 검사 생략 (통과)
@@ -56,10 +57,12 @@ fi
 ```json
 {
   "matcher": "Write",
-  "hooks": [{
-    "type": "command",
-    "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '\"file_path\".*\\.env'; then echo 'BLOCKED: .env 파일은 직접 작성할 수 없습니다.' >&2; exit 1; fi"
-  }]
+  "hooks": [
+    {
+      "type": "command",
+      "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE '\"file_path\".*\\.env'; then echo 'BLOCKED: .env 파일은 직접 작성할 수 없습니다.' >&2; exit 1; fi"
+    }
+  ]
 }
 ```
 

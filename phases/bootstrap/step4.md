@@ -46,11 +46,11 @@ module.exports = {
     '!**/__test-utils__/**',
   ],
   coverageThreshold: {
-    global:              { statements: 85, branches: 80, lines: 85, functions: 85 },
-    'src/lib/**':        { statements: 100, branches: 95, lines: 100, functions: 100 },
-    'src/store/**':      { statements: 100, branches: 90, lines: 100, functions: 100 },
+    global: { statements: 85, branches: 80, lines: 85, functions: 85 },
+    'src/lib/**': { statements: 100, branches: 95, lines: 100, functions: 100 },
+    'src/store/**': { statements: 100, branches: 90, lines: 100, functions: 100 },
     'src/components/**': { statements: 85, branches: 75, lines: 85, functions: 85 },
-    'app/**':            { statements: 75, branches: 65, lines: 75, functions: 75 },
+    'app/**': { statements: 75, branches: 65, lines: 75, functions: 75 },
   },
 };
 ```
@@ -63,9 +63,8 @@ module.exports = {
 import 'react-native-gesture-handler/jestSetup';
 
 // AsyncStorage
-jest.mock(
-  '@react-native-async-storage/async-storage',
-  () => require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
 // expo-font

@@ -141,6 +141,7 @@ PRD 기준 5개 핵심 화면을 hi-fi로 mock한 상태입니다.
 - `lastSync`: ISO date string.
 
 데이터 모델 예시:
+
 ```ts
 type City = {
   id: string;
@@ -206,6 +207,7 @@ type ItemComparison = {
 - 두 폰트 모두 한국어 fallback 필요 (Pretendard, Apple SD Gothic Neo, system-ui 권장).
 
 Type scale:
+
 ```
 display:   30px / Manrope 800 / line-height 1.1
 h1:        24px / Manrope 800 / -0.02em

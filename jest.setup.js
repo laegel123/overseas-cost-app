@@ -1,9 +1,8 @@
 import 'react-native-gesture-handler/jestSetup';
 
 // AsyncStorage
-jest.mock(
-  '@react-native-async-storage/async-storage',
-  () => require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
 // expo-font (모든 폰트 즉시 로딩 완료로 처리)

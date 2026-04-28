@@ -1,12 +1,30 @@
 import '../global.css';
+
+import { useEffect } from 'react';
+
 import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
-/**
- * 루트 레이아웃. 폰트 로딩 / Zustand hydration gate 는 각각 Step 5 / Phase 3 에서 추가된다.
- * 본 step 에서는 Stack 만 깐다.
- */
+import { useAppFonts } from '@/theme/fonts';
+
+SplashScreen.preventAutoHideAsync().catch(() => {
+  /* splash 가 이미 hide 된 경우 무시 — dev fast refresh */
+});
+
 export default function RootLayout() {
+  const { ready, error } = useAppFonts();
+
+  useEffect(() => {
+    if (ready || error) {
+      SplashScreen.hideAsync().catch(() => undefined);
+    }
+  }, [ready, error]);
+
+  if (!ready && !error) {
+    return null;
+  }
+
   return (
     <>
       <StatusBar style="dark" />

@@ -16,6 +16,7 @@
 기존 테스트들이 `"execute.py <phase_dir>"` 형식을 사용했다면, 새 형식인 `"execute.py run <phase_dir>"` 으로 수정한다.
 
 업데이트 방향:
+
 - `sys.argv` 패치를 새 subcommand 형식으로 변경
 - subcommand 없이 실행 시 에러로 종료됨을 검증하는 테스트 추가
 - `--help` 출력에 subcommand 이름들이 포함되는지 검증하는 테스트 추가
@@ -30,6 +31,7 @@ class TestRunCmd(unittest.TestCase):
 ```
 
 검증할 케이스:
+
 - `run <phase>` → `from_step=0`, `model="claude-opus-4-5"`, `timeout=1800`, `verbose=False` 기본값 확인
 - `run <phase> --from-step 2` → `from_step=2`
 - `run <phase> --model claude-sonnet-4-5` → `model="claude-sonnet-4-5"`
@@ -40,6 +42,7 @@ class TestRunCmd(unittest.TestCase):
 ### 3. `TestInvokeClaude` 업데이트
 
 `_invoke_claude()`가 `self._model`과 `self._timeout`을 사용하도록 변경되었으므로, 관련 테스트에서:
+
 - subprocess 호출 시 `--model <model>` 인자가 포함되는지 검증
 - timeout 값이 `self._timeout`으로 전달되는지 검증
 - `verbose=True` 케이스: subprocess가 `capture_output=False` 또는 threading 방식으로 호출되는지 검증
