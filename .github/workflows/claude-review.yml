@@ -35,3 +35,17 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            이 Pull Request 를 한국어로 리뷰해주세요.
+
+            검토 항목:
+            1. **코드 품질·버그·엣지 케이스**
+            2. **보안** 우려 (입력 검증, 시크릿 노출, 권한 등)
+            3. **성능** 이슈 (불필요한 리렌더, N+1, 큰 번들 등)
+            4. **프로젝트 규칙 준수** — `CLAUDE.md` 의 CRITICAL 규칙, `docs/ARCHITECTURE.md`, `docs/UI_GUIDE.md`, `docs/TESTING.md`, `docs/DATA.md`, `docs/ADR.md` 의 결정 사항
+            5. **테스트 커버리지** — `docs/TESTING.md` 인벤토리 갱신 여부
+
+            출력 형식:
+            - 구체적 이슈는 **인라인 코멘트** 로 해당 라인에 직접
+            - 전체 평가는 **요약 코멘트** 1개 (Approve / Request Changes / Comment)
+            - 간결하고 건설적으로. 칭찬·문제·개선 제안 균형있게.
