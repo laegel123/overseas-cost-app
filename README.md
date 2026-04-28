@@ -1,4 +1,17 @@
-# Harness Framework
+# Overseas Cost Compare App
+
+한국인 이주 준비자(유학생·취업자)가 **서울과 해외 도시의 생활비**를 항목별로 1:1 비교하는 모바일 앱. 출시 도시 20개 + 서울. 공공 출처 기반 자동 데이터 갱신.
+
+자세한 기획·설계는 `docs/` 참조:
+- `docs/PRD.md` — 제품 요구사항
+- `docs/ARCHITECTURE.md` — 아키텍처
+- `docs/UI_GUIDE.md` — 디자인 시스템
+- `docs/TESTING.md` — 테스트 전략
+- `docs/AUTOMATION.md` — 데이터 자동화 인프라
+
+---
+
+## Harness Framework
 
 Claude Code CLI를 orchestrate하는 Python 자동화 프레임워크. 복잡한 개발 작업을 step으로 분해하고, 각 step을 독립 Claude 세션에서 실행하며 자가 교정한다.
 
