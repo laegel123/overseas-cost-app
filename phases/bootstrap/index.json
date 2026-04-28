@@ -39,7 +39,7 @@
       "name": "testing-setup",
       "status": "completed",
       "started_at": "2026-04-28T16:30:03+0900",
-      "completed_at": "2026-04-28T16:35:12+0900",
+      "completed_at": "2026-04-28T16:39:30+0900",
       "summary": "Jest 29 + jest-expo + @testing-library/react-native 12 설치. jest.config.js (path alias, coverage threshold), jest.setup.js (6개 글로벌 mock), sanity.test.ts + rntl-import.test.ts smoke test 추가. react-native-worklets stub 생성 postinstall 스크립트."
     },
     {
