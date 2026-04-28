@@ -7,7 +7,7 @@
       "name": "expo-init",
       "status": "completed",
       "started_at": "2026-04-28T16:14:44+0900",
-      "completed_at": "2026-04-28T16:45:00+0900",
+      "completed_at": "2026-04-28T16:19:30+0900",
       "summary": "Expo 52 + TypeScript strict 스켈레톤 생성. expo-router, expo-constants, expo-linking, expo-asset 설치. expo-doctor 17/17 체크 통과."
     },
     {
