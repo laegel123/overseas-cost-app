@@ -43,3 +43,10 @@ build/
 data/all.json
 data/all.json.gz
 data/seed/all.json
+
+# Expo / React Native additional
+web-build/
+ios/
+android/
+*.jks
+*.keystore

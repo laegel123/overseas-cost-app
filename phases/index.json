@@ -4,6 +4,10 @@
       "dir": "improve-harness-dx",
       "status": "completed",
       "completed_at": "2026-04-16T10:59:38+0900"
+    },
+    {
+      "dir": "bootstrap",
+      "status": "pending"
     }
   ]
 }
