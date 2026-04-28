@@ -1,0 +1,80 @@
+{
+  "project": "harness-framework",
+  "phase": "improve-harness-dx",
+  "steps": [
+    {
+      "step": 0,
+      "name": "cli-subcommands",
+      "status": "completed",
+      "started_at": "2026-04-16T10:39:12+0900",
+      "summary": "execute.py를 subparser 구조로 교체, --from-step/--model/--timeout/--verbose 파라미터 추가",
+      "completed_at": "2026-04-16T10:40:30+0900"
+    },
+    {
+      "step": 1,
+      "name": "cli-test-update",
+      "status": "completed",
+      "started_at": "2026-04-16T10:40:30+0900",
+      "summary": "TestMainCli를 subparser 형식으로 업데이트, TestRunCmd 추가, TestInvokeClaude에 model/timeout/verbose 검증 추가",
+      "completed_at": "2026-04-16T10:42:54+0900"
+    },
+    {
+      "step": 2,
+      "name": "status-command",
+      "status": "completed",
+      "started_at": "2026-04-16T10:42:54+0900",
+      "completed_at": "2026-04-16T10:46:00+0900",
+      "summary": "cmd_status() 구현 완료, 전체/상세 조회 지원, TestStatusCmd 추가 (20 tests)"
+    },
+    {
+      "step": 3,
+      "name": "reset-command",
+      "status": "completed",
+      "started_at": "2026-04-16T10:46:00+0900",
+      "completed_at": "2026-04-16T10:49:02+0900",
+      "summary": "cmd_reset() 구현 완료, --step/--all 지원, TestResetCmd 추가 (20 tests)"
+    },
+    {
+      "step": 4,
+      "name": "init-command",
+      "status": "completed",
+      "started_at": "2026-04-16T10:49:02+0900",
+      "summary": "cmd_init() 구현 완료, index.json/step*.md 스캐폴딩 자동 생성, TestInitCmd 추가 (23 tests)",
+      "completed_at": "2026-04-16T10:52:09+0900"
+    },
+    {
+      "step": 5,
+      "name": "preflight-validation",
+      "status": "completed",
+      "started_at": "2026-04-16T10:52:10+0900",
+      "summary": "_preflight_check() 추가, step 파일 존재/연속성/from-step 범위 검증, TestPreflightCheck 추가 (16 tests)",
+      "completed_at": "2026-04-16T10:54:56+0900"
+    },
+    {
+      "step": 6,
+      "name": "phase-summary",
+      "status": "completed",
+      "started_at": "2026-04-16T10:54:56+0900",
+      "completed_at": "2026-04-16T10:57:40+0900",
+      "summary": "_print_phase_summary() 추가, _finalize()에서 호출, TestPhaseSummary 추가 (18 tests)"
+    },
+    {
+      "step": 7,
+      "name": "hooks",
+      "status": "completed",
+      "started_at": "2026-04-16T10:57:40+0900",
+      "summary": "pre-commit lint/test/build 훅 추가, .env/인증서 파일 보호 훅 추가, Write/Edit 도구 .env 직접 쓰기 차단 추가",
+      "completed_at": "2026-04-16T10:58:41+0900"
+    },
+    {
+      "step": 8,
+      "name": "readme",
+      "status": "completed",
+      "started_at": "2026-04-16T10:58:41+0900",
+      "summary": "README.md 신규 작성, 5분 시작 가이드/CLI 레퍼런스/에러 복구 가이드 포함",
+      "completed_at": "2026-04-16T10:59:38+0900"
+    }
+  ],
+  "created_at": "2026-04-16T10:39:12+0900",
+  "completed_at": "2026-04-16T10:59:38+0900"
+}

@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>해외 생활비 비교 앱 — Hi-Fi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Mulish:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --orange: #FC6011;
+    --orange-soft: #FFE9DC;
+    --orange-tint: #FFF4ED;
+    --navy: #11263C;
+    --gray: #52616B;
+    --gray-2: #8A98A0;
+    --light: #F0F5F9;
+    --light-2: #F7FAFC;
+    --white: #FFFFFF;
+    --line: #E4ECF2;
+    --shadow-card: 0 8px 24px rgba(17,38,60,0.06);
+    --shadow-deep: 0 20px 50px rgba(17,38,60,0.10);
+  }
+  * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+  html, body { margin: 0; padding: 0; background: var(--light); color: var(--navy); }
+  body {
+    font-family: 'Mulish', system-ui, sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
+    line-height: 1.4;
+  }
+  .page { padding: 28px 32px 80px; max-width: 100%; }
+
+  header.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    padding-bottom: 16px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  header.top h1 {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 28px;
+    margin: 0;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+  }
+  header.top .sub {
+    color: var(--gray);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  header.top .meta {
+    text-align: right;
+    font-size: 11px;
+    color: var(--gray-2);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  header.top .meta strong { color: var(--navy); }
+
+  nav.tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  nav.tabs button {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 18px;
+    background: var(--white);
+    color: var(--gray);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 150ms;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  nav.tabs button:hover { border-color: var(--gray-2); color: var(--navy); }
+  nav.tabs button.active {
+    background: var(--navy);
+    color: var(--white);
+    border-color: var(--navy);
+  }
+  nav.tabs button .num {
+    font-size: 10px;
+    opacity: 0.6;
+    font-weight: 500;
+  }
+  nav.tabs button.active .num { opacity: 0.7; }
+
+  .screen-intro {
+    margin-bottom: 24px;
+    max-width: 720px;
+  }
+  .screen-intro .kicker {
+    font-size: 11px;
+    color: var(--orange);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .screen-intro h2 {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    font-size: 26px;
+    color: var(--navy);
+    margin: 0 0 6px;
+    letter-spacing: -0.02em;
+  }
+  .screen-intro p {
+    color: var(--gray);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .stage {
+    display: flex;
+    align-items: flex-start;
+    gap: 64px;
+    padding: 32px 0 16px;
+    flex-wrap: wrap;
+  }
+  .stage .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .phone-tag {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gray-2);
+  }
+
+  /* Phone shell — modern bezel */
+  .phone {
+    width: 320px;
+    height: 680px;
+    background: var(--white);
+    border-radius: 44px;
+    border: 8px solid var(--navy);
+    padding: 0;
+    overflow: hidden;
+    position: relative;
+    box-shadow: var(--shadow-deep);
+  }
+  .phone::after {
+    /* dynamic island */
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 96px;
+    height: 22px;
+    background: #000;
+    border-radius: 14px;
+    z-index: 30;
+  }
+  .screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--white);
+  }
+  .statusbar {
+    height: 44px;
+    padding: 0 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--navy);
+    flex-shrink: 0;
+  }
+  .statusbar .icons {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .statusbar .icons svg { display: block; }
+
+  .screen-body {
+    flex: 1;
+    overflow: hidden;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Bottom tab bar */
+  .bottom-tabs {
+    height: 64px;
+    border-top: 1px solid var(--line);
+    background: var(--white);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: 14px;
+    flex-shrink: 0;
+  }
+  .bottom-tabs .ti {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: var(--gray-2);
+    font-size: 10px;
+    font-weight: 600;
+  }
+  .bottom-tabs .ti.active { color: var(--orange); }
+  .bottom-tabs .ti .ic {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Reusable bits */
+  .btn-primary {
+    background: var(--orange);
+    color: var(--white);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 16px;
+    width: 100%;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(252,96,17,0.25);
+    transition: transform 100ms;
+  }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--gray);
+    font-weight: 600;
+    border: none;
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .btn-secondary {
+    background: var(--white);
+    color: var(--navy);
+    font-weight: 700;
+    font-size: 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px;
+  }
+  .card.flat {
+    border: none;
+    background: var(--light-2);
+  }
+  .card.solid {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+  }
+  .card.orange {
+    background: var(--orange);
+    color: var(--white);
+    border: none;
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--light);
+    color: var(--gray);
+    border: 1px solid var(--line);
+  }
+  .chip.solid { background: var(--navy); color: var(--white); border-color: var(--navy); }
+  .chip.orange { background: var(--orange-soft); color: var(--orange); border-color: transparent; }
+
+  .label-mono {
+    font-family: 'Manrope', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray-2);
+    font-weight: 600;
+  }
+
+  .h-display {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .h1 { font-size: 24px; font-family: 'Manrope', sans-serif; font-weight: 800; color: var(--navy); letter-spacing: -0.02em; }
+  .h2 { font-size: 18px; font-family: 'Manrope', sans-serif; font-weight: 700; color: var(--navy); letter-spacing: -0.01em; }
+  .h3 { font-size: 14px; font-family: 'Manrope', sans-serif; font-weight: 700; color: var(--navy); }
+  .small { font-size: 12px; color: var(--gray); }
+  .tiny { font-size: 11px; color: var(--gray-2); }
+
+  .hide-scroll::-webkit-scrollbar { display: none; }
+  .hide-scroll { scrollbar-width: none; }
+
+  .row { display: flex; align-items: center; }
+  .col { display: flex; flex-direction: column; }
+  .between { justify-content: space-between; }
+  .gap-4 { gap: 4px; } .gap-6 { gap: 6px; } .gap-8 { gap: 8px; } .gap-10 { gap: 10px; } .gap-12 { gap: 12px; } .gap-14 { gap: 14px; } .gap-16 { gap: 16px; }
+
+  /* Bar chart */
+  .bar-track {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--light);
+    overflow: hidden;
+    position: relative;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 4px;
+  }
+  .bar-fill.navy { background: var(--navy); }
+  .bar-fill.orange { background: var(--orange); }
+  .bar-fill.gray { background: var(--gray-2); }
+
+  /* Annotation in side stage */
+  .stage-anno {
+    max-width: 240px;
+    color: var(--gray);
+    font-size: 13px;
+    line-height: 1.5;
+    padding-top: 50px;
+  }
+  .stage-anno .anno-title {
+    font-family: 'Manrope', sans-serif;
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+  .stage-anno ul { padding-left: 16px; margin: 8px 0 0; }
+  .stage-anno li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+  <div class="page">
+    <header class="top">
+      <div>
+        <h1>해외 생활비 비교 앱 — Hi-Fi</h1>
+        <div class="sub">선택된 변형(온보딩 A · 홈 A · 비교 A · 상세 A · 설정 D)을 jhotpot 스타일로 적용</div>
+      </div>
+      <div class="meta">
+        <div>STATE · HI-FI v1</div>
+        <div><strong>2026-04-28</strong></div>
+      </div>
+    </header>
+
+    <nav class="tabs" id="tabs"></nav>
+    <div id="tab-content"></div>
+  </div>
+
+  <template id="__bundler_thumbnail">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#11263C"/><circle cx="50" cy="50" r="22" fill="#FC6011"/><text x="50" y="56" text-anchor="middle" font-family="sans-serif" font-size="20" font-weight="800" fill="#fff">₩</text></svg>
+  </template>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="hifi/_shared.jsx"></script>
+  <script type="text/babel" src="hifi/onboarding.jsx"></script>
+  <script type="text/babel" src="hifi/home.jsx"></script>
+  <script type="text/babel" src="hifi/compare.jsx"></script>
+  <script type="text/babel" src="hifi/detail.jsx"></script>
+  <script type="text/babel" src="hifi/settings.jsx"></script>
+  <script type="text/babel" src="hifi/app.jsx"></script>
+</body>
+</html>
