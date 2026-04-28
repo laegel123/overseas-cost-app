@@ -31,7 +31,7 @@
       "name": "folder-aliases",
       "status": "completed",
       "started_at": "2026-04-28T16:27:19+0900",
-      "completed_at": "2026-04-28T16:32:00+0900",
+      "completed_at": "2026-04-28T16:30:03+0900",
       "summary": "src/{components,store,lib,types,theme,__fixtures__,__test-utils__,i18n} 디렉터리 + path alias @/* (tsconfig + babel-plugin-module-resolver)"
     },
     {
