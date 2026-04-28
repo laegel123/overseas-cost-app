@@ -9,6 +9,35 @@
 - `docs/TESTING.md` — 테스트 전략
 - `docs/AUTOMATION.md` — 데이터 자동화 인프라
 
+## 기술 스택
+
+| 레이어 | 선택 |
+|---|---|
+| 프레임워크 | React Native (Expo Managed) + Expo Router |
+| 언어 | TypeScript (strict) |
+| 스타일링 | NativeWind v4 |
+| 상태 관리 | Zustand + AsyncStorage |
+| 데이터 | GitHub Raw + jsDelivr CDN (단일 `all.json` batch) |
+| 환율 | open.er-api.com → ECB → 한국은행 (3중 fallback) |
+| 자동화 | GitHub Actions cron (공공 출처 100% 자동 갱신) |
+| 테스트 | Jest + @testing-library/react-native (~1,500 케이스) |
+
+## Phase 진행 현황
+
+7개 phase / 28개 step 으로 분해된 청사진을 따라 진행:
+
+| Phase | 이름 | 상태 |
+|---|---|---|
+| 1 | bootstrap | ⏳ 예정 |
+| 2 | design-system | ⏳ 예정 |
+| 3 | state-data | ⏳ 예정 |
+| 4 | domain-components | ⏳ 예정 |
+| 5 | screens | ⏳ 예정 |
+| 6 | data-automation | ⏳ 예정 |
+| 7 | app-finalization-and-release | ⏳ 예정 |
+
+각 phase 의 step 명세는 `docs/` 참조. 자세한 진행은 `phases/<phase>/index.json` 에 추적.
+
 ---
 
 ## Harness Framework
