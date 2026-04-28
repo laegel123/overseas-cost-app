@@ -35,6 +35,11 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # 진행 상황·결과를 sticky 코멘트로 PR 에 자동 게시
+          track_progress: true
+          use_sticky_comment: true
+          # 디버깅: Claude SDK 출력 전체 노출
+          show_full_output: true
           prompt: |
             이 Pull Request 를 한국어로 리뷰해주세요.
 
