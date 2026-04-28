@@ -48,7 +48,7 @@
     "babel-plugin-module-resolver": "^5.0.3",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "eslint": "^8.57.1",
-    "eslint-config-expo": "^9.2.0",
+    "eslint-config-expo": "~8.0.1",
     "eslint-config-prettier": "^9.1.2",
     "eslint-import-resolver-babel-module": "^5.3.2",
     "eslint-import-resolver-typescript": "^3.10.1",
