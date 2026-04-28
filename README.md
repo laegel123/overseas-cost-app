@@ -139,3 +139,7 @@ python3 scripts/execute.py run my-feature
 ```bash
 pytest scripts/test_execute.py -v
 ```
+
+## License
+
+TBD — v1.0 출시 직전 결정 (ADR-018).
