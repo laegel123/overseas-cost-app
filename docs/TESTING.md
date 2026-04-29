@@ -37,7 +37,7 @@
 ```js
 module.exports = {
   preset: 'jest-expo',
-  setupFilesAfterEach: ['<rootDir>/jest.setup.js'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testPathIgnorePatterns: ['/node_modules/', '/.expo/', '/dist/'],
   transformIgnorePatterns: [
     'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|nativewind))',
@@ -120,13 +120,13 @@ jest.mock('expo-font', () => ({
   isLoaded: jest.fn(() => true),
 }));
 
-// expo-router
+// expo-router (Stack/Tabs 가 children 렌더 + Screen subcomponent 양립 형태)
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
   useLocalSearchParams: () => ({}),
   Link: ({ children }) => children,
-  Stack: { Screen: () => null },
-  Tabs: { Screen: () => null },
+  Stack: Object.assign(({ children }) => children, { Screen: () => null }),
+  Tabs: Object.assign(({ children }) => children, { Screen: () => null }),
   Slot: ({ children }) => children,
   Redirect: () => null,
 }));
