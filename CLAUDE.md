@@ -3,6 +3,7 @@
 서울 거주 한국인이 유학·취업 등 해외 이주 준비 시 **서울 vs 해외 도시**의 생활비를 항목별로 1:1 비교하는 모바일 앱. v1.0 출시 도시 20개 + 서울. 페르소나(유학생 / 취업자 / 모름) 분기. 사이드 프로젝트, 무료 인프라로 시작. 자세한 요구사항은 `docs/PRD.md`.
 
 ## 기술 스택
+
 - **React Native (Expo Managed Workflow)** + **Expo Router** (파일 기반 라우팅)
 - **TypeScript** (strict mode)
 - **NativeWind v4** (Tailwind for RN)
@@ -14,6 +15,7 @@
 - 폰트: Manrope, Mulish (Google Fonts) + Pretendard (한국어 fallback)
 
 ## 아키텍처 규칙
+
 - **CRITICAL**: 모든 디자인 토큰(색·폰트·간격·라운드·shadow)은 `tailwind.config.js` + `src/theme/tokens.ts` 단일 출처에서만 정의한다. 컴포넌트에 매직 넘버 색상값을 직접 박지 않는다.
 - **CRITICAL**: 외부 데이터(도시 JSON, 환율)는 반드시 `src/lib/data.ts` / `src/lib/currency.ts` 를 경유한다. 컴포넌트가 `fetch` 를 직접 호출하지 않는다.
 - **CRITICAL**: 데이터는 **공공 출처에서 자동으로** 만 갱신한다 (ADR-032). 정부 통계 API·공식 정부 페이지·공식 교통공사·공식 대학 페이지 외 출처 (Numbeo·Expatistan·Zillow·Kijiji·Yelp 등 상업 플랫폼) 사용 금지. 자동 fetch 는 `scripts/refresh/<source>.mjs` + GitHub Actions cron 으로만 (수동 큐레이션 금지).
@@ -26,6 +28,7 @@
 - 한국어 문구를 1차로 사용한다. 영어 fallback 은 도시 영문명·통화 코드처럼 본질적으로 영어인 경우에만.
 
 ## 네이밍·코드 스타일
+
 - 컴포넌트: `PascalCase.tsx` (1파일 1컴포넌트 원칙)
 - hook·util: `camelCase.ts` (`useFoo`, `formatKRW`)
 - 타입: `PascalCase` (`CityCostData`)
@@ -34,6 +37,7 @@
 - import 순서: 1) RN/Expo 표준 → 2) 외부 라이브러리 → 3) `src/` alias → 4) 상대 경로. ESLint 가 강제.
 
 ## 개발 프로세스
+
 - **CRITICAL**: 새 lib·컴포넌트·화면 추가 시 같은 step 안에서 **테스트를 함께 작성**한다 (TDD 지향). 신규 모듈은 반드시 `docs/TESTING.md` §7 인벤토리에 항목을 추가. 인벤토리 누락 = step 미완.
 - **CRITICAL**: 커밋 메시지는 conventional commits — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`. 하네스가 자동 생성하는 메시지 (`feat(<phase>): step N — <name>`) 도 이 규칙을 따른다.
 - **CRITICAL**: 새 외부 의존성·결정 사항은 `docs/ADR.md` 에 ADR-N 추가 후 도입.
@@ -42,6 +46,7 @@
 - 데이터 추가/갱신은 `docs/DATA.md` 의 큐레이션 절차를 따른다. 출처 미기재 데이터 추가 금지.
 
 ## 명령어
+
 ```bash
 npm run dev         # Expo 개발 서버 (Expo Go 또는 iOS/Android 시뮬레이터)
 npm run typecheck   # tsc --noEmit
@@ -51,6 +56,7 @@ npm run build       # eas build — 요청 시에만 실행
 ```
 
 하네스 명령:
+
 ```bash
 python3 scripts/execute.py status                       # 전체 phase 현황
 python3 scripts/execute.py run <phase>                  # phase 실행
@@ -59,6 +65,7 @@ python3 scripts/execute.py init <phase> --steps N --project overseas-cost-app
 ```
 
 ## 문서 색인
+
 - `docs/PRD.md` — 제품 요구사항 (단일 출처, 수정 금지)
 - `docs/ARCHITECTURE.md` — 디렉터리 구조, 데이터 흐름, 라우팅·상태·hydration·에러 핸들링
 - `docs/UI_GUIDE.md` — 디자인 토큰, 타이포, 컴포넌트 사양, 인터랙션, 시트·토스트·스플래시, 안티패턴

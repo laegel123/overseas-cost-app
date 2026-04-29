@@ -7,7 +7,7 @@
 - `scripts/execute.py` — 전체 파일. 특히 `cmd_init` stub, `_read_json()`, `_write_json()`, `ROOT` 상수를 확인하라.
 - `phases/improve-harness-dx/index.json` — 생성해야 할 index.json의 정확한 구조를 파악하라.
 - `phases/index.json` — top-level index 구조를 확인하라.
-- `.claude/commands/harness.md` — step*.md 템플릿 형식(D-3 섹션)을 확인하라.
+- `.claude/commands/harness.md` — step\*.md 템플릿 형식(D-3 섹션)을 확인하라.
 
 ## 작업
 
@@ -41,11 +41,11 @@ execute.py init <phase-name> --steps N [--project NAME]
 
 `--project` 미지정 시 `ROOT` 디렉터리명을 기본값으로 사용한다.
 
-### step*.md 템플릿 형식
+### step\*.md 템플릿 형식
 
 각 step 파일은 아래 구조의 마크다운으로 생성한다:
 
-```markdown
+````markdown
 # Step N: step-N
 
 ## 읽어야 할 파일
@@ -59,6 +59,7 @@ execute.py init <phase-name> --steps N [--project NAME]
 ## 작업
 
 TODO: 이 step에서 수행할 작업을 구체적으로 작성하라.
+
 - 파일 경로, 함수/클래스 시그니처, 핵심 로직을 포함할 것
 - 인터페이스만 제시하고 구현은 에이전트에게 맡길 것
 - 설계 의도에서 벗어나면 안 되는 핵심 규칙은 명시할 것
@@ -69,6 +70,7 @@ TODO: 이 step에서 수행할 작업을 구체적으로 작성하라.
 # TODO: 실제 실행 가능한 검증 커맨드를 작성하라
 npm run build && npm test
 ```
+````
 
 ## 검증 절차
 
@@ -86,6 +88,7 @@ npm run build && npm test
 
 - TODO: 이 step에서 하지 말아야 할 것을 "X를 하지 마라. 이유: Y" 형식으로 작성하라.
 - 기존 테스트를 깨뜨리지 마라.
+
 ```
 
 ### 에러 케이스
@@ -96,17 +99,17 @@ npm run build && npm test
 ### 완료 출력
 
 ```
-  ✓ Created phases/<phase-name>/
-  ✓ Created phases/<phase-name>/index.json (3 steps)
-  ✓ Created phases/<phase-name>/step0.md
-  ✓ Created phases/<phase-name>/step1.md
-  ✓ Created phases/<phase-name>/step2.md
-  ✓ Updated phases/index.json
 
-  Next steps:
-    1. Edit step files: phases/<phase-name>/step*.md
-    2. Run: python3 scripts/execute.py run <phase-name>
-```
+✓ Created phases/<phase-name>/
+✓ Created phases/<phase-name>/index.json (3 steps)
+✓ Created phases/<phase-name>/step0.md
+✓ Created phases/<phase-name>/step1.md
+✓ Created phases/<phase-name>/step2.md
+✓ Updated phases/index.json
+
+Next steps: 1. Edit step files: phases/<phase-name>/step\*.md 2. Run: python3 scripts/execute.py run <phase-name>
+
+````
 
 ## Acceptance Criteria
 
@@ -130,7 +133,7 @@ python3 scripts/execute.py status test-smoke
 # (phases/index.json에서 test-smoke 항목도 수동 제거)
 
 pytest scripts/test_execute.py -k "TestInitCmd" -v
-```
+````
 
 ## 검증 절차
 

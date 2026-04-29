@@ -3,6 +3,7 @@
 한국인 이주 준비자(유학생·취업자)가 **서울과 해외 도시의 생활비**를 항목별로 1:1 비교하는 모바일 앱. 출시 도시 20개 + 서울. 공공 출처 기반 자동 데이터 갱신.
 
 자세한 기획·설계는 `docs/` 참조:
+
 - `docs/PRD.md` — 제품 요구사항
 - `docs/ARCHITECTURE.md` — 아키텍처
 - `docs/UI_GUIDE.md` — 디자인 시스템
@@ -11,30 +12,30 @@
 
 ## 기술 스택
 
-| 레이어 | 선택 |
-|---|---|
-| 프레임워크 | React Native (Expo Managed) + Expo Router |
-| 언어 | TypeScript (strict) |
-| 스타일링 | NativeWind v4 |
-| 상태 관리 | Zustand + AsyncStorage |
-| 데이터 | GitHub Raw + jsDelivr CDN (단일 `all.json` batch) |
-| 환율 | open.er-api.com → ECB → 한국은행 (3중 fallback) |
-| 자동화 | GitHub Actions cron (공공 출처 100% 자동 갱신) |
-| 테스트 | Jest + @testing-library/react-native (~1,500 케이스) |
+| 레이어     | 선택                                                 |
+| ---------- | ---------------------------------------------------- |
+| 프레임워크 | React Native (Expo Managed) + Expo Router            |
+| 언어       | TypeScript (strict)                                  |
+| 스타일링   | NativeWind v4                                        |
+| 상태 관리  | Zustand + AsyncStorage                               |
+| 데이터     | GitHub Raw + jsDelivr CDN (단일 `all.json` batch)    |
+| 환율       | open.er-api.com → ECB → 한국은행 (3중 fallback)      |
+| 자동화     | GitHub Actions cron (공공 출처 100% 자동 갱신)       |
+| 테스트     | Jest + @testing-library/react-native (~1,500 케이스) |
 
 ## Phase 진행 현황
 
 7개 phase / 28개 step 으로 분해된 청사진을 따라 진행:
 
-| Phase | 이름 | 상태 |
-|---|---|---|
-| 1 | bootstrap | ⏳ 예정 |
-| 2 | design-system | ⏳ 예정 |
-| 3 | state-data | ⏳ 예정 |
-| 4 | domain-components | ⏳ 예정 |
-| 5 | screens | ⏳ 예정 |
-| 6 | data-automation | ⏳ 예정 |
-| 7 | app-finalization-and-release | ⏳ 예정 |
+| Phase | 이름                         | 상태    |
+| ----- | ---------------------------- | ------- |
+| 1     | bootstrap                    | ⏳ 예정 |
+| 2     | design-system                | ⏳ 예정 |
+| 3     | state-data                   | ⏳ 예정 |
+| 4     | domain-components            | ⏳ 예정 |
+| 5     | screens                      | ⏳ 예정 |
+| 6     | data-automation              | ⏳ 예정 |
+| 7     | app-finalization-and-release | ⏳ 예정 |
 
 각 phase 의 step 명세는 `docs/` 참조. 자세한 진행은 `phases/<phase>/index.json` 에 추적.
 
@@ -77,20 +78,20 @@ init → edit step*.md → run → [completed]
 
 ## CLI 레퍼런스
 
-| 커맨드 | 설명 |
-|--------|------|
-| `run <phase>` | Phase 내 step 순차 실행 |
-| `run <phase> --push` | 실행 후 git push |
-| `run <phase> --from-step N` | N번 step부터 시작 |
-| `run <phase> --verbose` | Claude 출력 실시간 표시 |
-| `run <phase> --model M` | Claude 모델 지정 |
-| `run <phase> --timeout S` | 타임아웃(초) 지정 |
-| `status` | 전체 phase 현황 |
-| `status <phase>` | 특정 phase 상세 현황 |
-| `reset <phase>` | 첫 번째 error/blocked step 리셋 |
-| `reset <phase> --all` | 모든 error/blocked step 리셋 |
-| `reset <phase> --step N` | 특정 step만 리셋 |
-| `init <phase> --steps N` | 새 phase 스캐폴딩 생성 |
+| 커맨드                      | 설명                            |
+| --------------------------- | ------------------------------- |
+| `run <phase>`               | Phase 내 step 순차 실행         |
+| `run <phase> --push`        | 실행 후 git push                |
+| `run <phase> --from-step N` | N번 step부터 시작               |
+| `run <phase> --verbose`     | Claude 출력 실시간 표시         |
+| `run <phase> --model M`     | Claude 모델 지정                |
+| `run <phase> --timeout S`   | 타임아웃(초) 지정               |
+| `status`                    | 전체 phase 현황                 |
+| `status <phase>`            | 특정 phase 상세 현황            |
+| `reset <phase>`             | 첫 번째 error/blocked step 리셋 |
+| `reset <phase> --all`       | 모든 error/blocked step 리셋    |
+| `reset <phase> --step N`    | 특정 step만 리셋                |
+| `init <phase> --steps N`    | 새 phase 스캐폴딩 생성          |
 
 ## Step 파일 작성 가이드
 
@@ -100,24 +101,30 @@ init → edit step*.md → run → [completed]
 2. **AC는 실행 가능한 커맨드** — "동작해야 한다" 대신 `npm test` 같은 실제 커맨드로 검증 기준을 명확히 한다.
 3. **시그니처 수준 지시** — 함수/클래스 인터페이스만 제시하고, 구현은 에이전트 재량에 맡긴다.
 
-```markdown
+````markdown
 # Step 0: my-step
 
 ## 읽어야 할 파일
+
 - `scripts/execute.py`
 
 ## 작업
+
 TODO: 구체적인 구현 지시
 
 ## Acceptance Criteria
+
 ```bash
 pytest scripts/test_execute.py -v
 ```
+````
 
 ## 검증 절차
+
 1. 위 AC 커맨드를 실행한다.
 2. 결과에 따라 `phases/<phase>/index.json`의 해당 step을 업데이트한다.
-```
+
+````
 
 ## 에러 복구 가이드
 
@@ -130,7 +137,7 @@ python3 scripts/execute.py reset my-feature
 
 # 재실행
 python3 scripts/execute.py run my-feature
-```
+````
 
 `blocked` 상태는 API 키 발급, 외부 인증 등 수동 조치가 필요한 경우다. `blocked_reason`에 적힌 사유를 해결한 뒤 동일한 절차로 리셋하고 재실행한다.
 

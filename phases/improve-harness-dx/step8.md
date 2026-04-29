@@ -56,24 +56,25 @@ init → edit step*.md → run → [completed]
 
 표 형태로 모든 subcommand와 주요 플래그를 정리한다:
 
-| 커맨드 | 설명 |
-|--------|------|
-| `run <phase>` | Phase 내 step 순차 실행 |
-| `run <phase> --push` | 실행 후 git push |
-| `run <phase> --from-step N` | N번 step부터 시작 |
-| `run <phase> --verbose` | Claude 출력 실시간 표시 |
-| `run <phase> --model M` | Claude 모델 지정 |
-| `run <phase> --timeout S` | 타임아웃(초) 지정 |
-| `status` | 전체 phase 현황 |
-| `status <phase>` | 특정 phase 상세 현황 |
-| `reset <phase>` | 첫 번째 error/blocked step 리셋 |
-| `reset <phase> --all` | 모든 error/blocked step 리셋 |
-| `reset <phase> --step N` | 특정 step만 리셋 |
-| `init <phase> --steps N` | 새 phase 스캐폴딩 생성 |
+| 커맨드                      | 설명                            |
+| --------------------------- | ------------------------------- |
+| `run <phase>`               | Phase 내 step 순차 실행         |
+| `run <phase> --push`        | 실행 후 git push                |
+| `run <phase> --from-step N` | N번 step부터 시작               |
+| `run <phase> --verbose`     | Claude 출력 실시간 표시         |
+| `run <phase> --model M`     | Claude 모델 지정                |
+| `run <phase> --timeout S`   | 타임아웃(초) 지정               |
+| `status`                    | 전체 phase 현황                 |
+| `status <phase>`            | 특정 phase 상세 현황            |
+| `reset <phase>`             | 첫 번째 error/blocked step 리셋 |
+| `reset <phase> --all`       | 모든 error/blocked step 리셋    |
+| `reset <phase> --step N`    | 특정 step만 리셋                |
+| `init <phase> --steps N`    | 새 phase 스캐폴딩 생성          |
 
 #### 6. Step 파일 작성 가이드
 
-step*.md의 구조를 간략히 설명한다. 좋은 step 파일의 핵심 원칙 3가지:
+step\*.md의 구조를 간략히 설명한다. 좋은 step 파일의 핵심 원칙 3가지:
+
 1. **자기완결성** — 세션이 이 파일만으로 맥락을 파악할 수 있어야 함
 2. **AC는 실행 가능한 커맨드** — "동작해야 한다" 대신 `npm test` 같은 실제 커맨드
 3. **시그니처 수준 지시** — 함수 인터페이스만 제시, 구현은 에이전트 재량

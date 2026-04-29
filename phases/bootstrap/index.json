@@ -1,0 +1,56 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "bootstrap",
+  "steps": [
+    {
+      "step": 0,
+      "name": "expo-init",
+      "status": "completed",
+      "started_at": "2026-04-28T16:14:44+0900",
+      "completed_at": "2026-04-28T16:19:30+0900",
+      "summary": "Expo 52 + TypeScript strict 스켈레톤 생성. expo-router, expo-constants, expo-linking, expo-asset 설치. expo-doctor 17/17 체크 통과."
+    },
+    {
+      "step": 1,
+      "name": "nativewind-tokens",
+      "status": "completed",
+      "started_at": "2026-04-28T16:19:30+0900",
+      "completed_at": "2026-04-28T16:23:53+0900",
+      "summary": "NativeWind v4 + tailwindcss 셋업. tailwind.config.js(디자인 토큰 11색 + 타이포 + 간격 + 라운드) + src/theme/tokens.ts(shadow 5종 + gradient + fontWeight + HOT_MULTIPLIER_THRESHOLD=2.0) 단일 출처 확립."
+    },
+    {
+      "step": 2,
+      "name": "expo-router",
+      "status": "completed",
+      "started_at": "2026-04-28T16:23:53+0900",
+      "completed_at": "2026-04-28T16:27:19+0900",
+      "summary": "Expo Router 5 라우트 placeholder (_layout, (tabs)/{index,settings}, onboarding, compare/[cityId], detail/[cityId]/[category])"
+    },
+    {
+      "step": 3,
+      "name": "folder-aliases",
+      "status": "completed",
+      "started_at": "2026-04-28T16:27:19+0900",
+      "completed_at": "2026-04-28T16:30:03+0900",
+      "summary": "src/{components,store,lib,types,theme,__fixtures__,__test-utils__,i18n} 디렉터리 + path alias @/* (tsconfig + babel-plugin-module-resolver)"
+    },
+    {
+      "step": 4,
+      "name": "testing-setup",
+      "status": "completed",
+      "started_at": "2026-04-28T16:30:03+0900",
+      "completed_at": "2026-04-28T16:39:30+0900",
+      "summary": "Jest 29 + jest-expo + @testing-library/react-native 12 설치. jest.config.js (path alias, coverage threshold), jest.setup.js (6개 글로벌 mock), sanity.test.ts + rntl-import.test.ts smoke test 추가. react-native-worklets stub 생성 postinstall 스크립트."
+    },
+    {
+      "step": 5,
+      "name": "fonts-lint",
+      "status": "completed",
+      "started_at": "2026-04-28T16:39:30+0900",
+      "completed_at": "2026-04-28T16:47:55+0900",
+      "summary": "Manrope/Mulish/Pretendard 폰트 7개 등록 (useAppFonts hook + SplashScreen gate). ESLint 8 (expo+typescript-eslint+import-order+prettier). Prettier 3. babel transform-remove-console (prod). 전체 AC 통과."
+    }
+  ],
+  "created_at": "2026-04-28T16:14:44+0900",
+  "completed_at": "2026-04-28T16:47:56+0900"
+}
