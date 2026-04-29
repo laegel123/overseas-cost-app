@@ -42,7 +42,7 @@ build/
 # Generated data (build outputs from scripts/build_data.mjs)
 data/all.json
 data/all.json.gz
-data/seed/all.json
+# data/seed/all.json — ADR-045: v1.0 시드는 fixture 기반으로 repo 에 체크인. 자동화 phase 가능 후 build 산출로 전환.
 
 # Expo / React Native additional
 web-build/

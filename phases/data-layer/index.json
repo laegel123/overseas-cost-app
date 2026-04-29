@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "seed-all-json",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-29T10:12:05+0900",
+      "completed_at": "2026-04-29T10:55:00+0900",
+      "summary": "fixture (seoul-valid + vancouver-valid) 를 data/seed/all.json 으로 채택. ADR-045 (시드 한시성 + 자동화 phase 덮어쓰기 책임) + data/sources.md (출처 색인) + seed-roundtrip 테스트 (drift 방지). 전체 190 테스트 통과."
     },
     {
       "step": 3,
