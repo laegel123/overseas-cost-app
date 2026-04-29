@@ -7,7 +7,8 @@
       "name": "persona-store",
       "status": "completed",
       "started_at": "2026-04-29T16:24:33+0900",
-      "summary": "usePersonaStore (persona: 'student'|'worker'|'unknown', onboarded). zustand v4 + persist + AsyncStorage. 키 persona:v1, hydration race + 손상 캐시 (잘못된 JSON / invalid literal) → INITIAL fallback. 17 테스트 통과, ADR-050 추가."
+      "summary": "usePersonaStore (persona: 'student'|'worker'|'unknown', onboarded). zustand v4 + persist + AsyncStorage. 키 persona:v1, hydration race + 손상 캐시 (잘못된 JSON / invalid literal) → INITIAL fallback. 17 테스트 통과, ADR-050 추가.",
+      "completed_at": "2026-04-29T16:39:17+0900"
     },
     {
       "step": 1,
