@@ -88,7 +88,8 @@ export function convertToKRW(
   currency: string,
   fxTable: ExchangeRates,
 ): number {
-  if (typeof amount !== 'number' || Number.isNaN(amount) || !Number.isFinite(amount)) {
+  // !Number.isFinite 단독으로 NaN / Infinity / -Infinity 모두 처리 (Number.isNaN 중복 X).
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) {
     throw new InvalidAmountError(`expected finite number, got ${String(amount)}`);
   }
   if (amount < 0) {
@@ -256,6 +257,8 @@ async function fetchPrimary(): Promise<ExchangeRates> {
  * 동일 시점 2회 호출 시 fetch 1회만 (in-flight dedup).
  */
 export function fetchExchangeRates(opts?: { bypassCache?: boolean }): Promise<ExchangeRates> {
+  // ADR-046 의 알려진 트레이드오프: 진행 중 inflight 가 있으면 bypassCache=true
+  // 라도 그 Promise 를 그대로 반환 (강제 새로고침 의도가 race 시 무시됨). v2 재검토.
   if (inflight !== null) return inflight;
 
   const bypassCache = opts?.bypassCache === true;

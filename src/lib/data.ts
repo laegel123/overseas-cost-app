@@ -5,8 +5,10 @@
  *
  * Public API:
  *   - loadAllCities({ bypassCache }): 캐시 → primary → backup → seed 순.
- *     절대 throw 하지 않는다 (시드도 손상된 매우 예외적 케이스만 AllCitiesUnavailableError).
  *     성공 시 모듈 메모리 맵 갱신 — 이후 getCity / getAllCities 동기 조회 가능.
+ *     **throw 정책:** 통상 흐름 (네트워크/HTTP/parse 실패) 은 시드 fallback 으로
+ *     흡수되어 throw 되지 않는다. 시드까지 손상된 극단적 케이스 (assets 번들
+ *     깨짐 / 자동화가 잘못된 시드 배포) 에만 `AllCitiesUnavailableError` throw.
  *   - getCity(id): 메모리 맵 동기 조회. loadAllCities 전 또는 미존재 시 undefined.
  *   - getAllCities(): 메모리 맵 동기 조회.
  *   - refreshCache(): 캐시 + 환율 함께 강제 갱신, 결과 + lastSync 반환.
@@ -59,7 +61,12 @@ const PRIMARY_BASE = process.env.EXPO_PUBLIC_DATA_BASE_URL ?? DEFAULT_PRIMARY_BA
 const PRIMARY_URL = `${PRIMARY_BASE}/all.json`;
 
 // jsDelivr 자동 미러 — GitHub raw 다운 시 fallback (DATA.md §6.4).
-const BACKUP_URL = 'https://cdn.jsdelivr.net/gh/laegel123/overseas-cost-app@main/data/all.json';
+// EXPO_PUBLIC_DATA_BACKUP_URL override 가능 — 스테이징/개발 환경에서 primary 와 함께
+// 별도 backup 으로 점프하려면 둘 다 명시적으로 설정 (primary 만 바꾸면 backup 은
+// 그대로 production CDN 가리킴 — 의도적 디커플링: backup 은 "production 동일 데이터의
+// 다른 호스트" 가 본질).
+const DEFAULT_BACKUP_URL = 'https://cdn.jsdelivr.net/gh/laegel123/overseas-cost-app@main/data/all.json';
+const BACKUP_URL = process.env.EXPO_PUBLIC_DATA_BACKUP_URL ?? DEFAULT_BACKUP_URL;
 
 // ─── 내부 상태 ──────────────────────────────────────────────────────────────
 
@@ -173,7 +180,9 @@ function parseLenient(text: string, sourceLabel: string): AllCitiesData {
   const validCities: CitiesMap = {};
   for (const [cityId, cityData] of Object.entries(parsed.cities)) {
     try {
-      validCities[cityId] = validateCity(cityData);
+      // ctxPath 명시 — 도시 schema 위반 시 warn 메시지 / 에러 trace 에 cityId 포함
+      // (citySchema.ts validateAllJson 의 동일 루프와 일치).
+      validCities[cityId] = validateCity(cityData, `${sourceLabel}.cities['${cityId}']`);
     } catch (e) {
       // ADR-048: 부분 가용성 — 그 도시만 제외, dev 콘솔 가시성 유지
       /* istanbul ignore next: __DEV__ 가드는 jest 환경에서 false (TESTING §4) */
@@ -306,6 +315,10 @@ function loadFromSeed(): AllCitiesData {
  * @throws AllCitiesUnavailableError 모든 단계 실패 (시드 손상 포함)
  */
 export function loadAllCities(opts?: { bypassCache?: boolean }): Promise<CitiesMap> {
+  // ADR-046 의 알려진 트레이드오프: 진행 중 inflight 가 있으면 bypassCache=true
+  // 라도 그 Promise 를 그대로 반환한다 (강제 새로고침 의도가 race 시 무시됨).
+  // 정책 근거 — 두 번째 클릭은 첫 번째 결과로 충족되며, 별도 취소 메커니즘은
+  // 복잡도 대비 가치 낮음. v2 사용자 보고 시 재검토.
   if (inflight !== null) return inflight;
 
   const bypassCache = opts?.bypassCache === true;
