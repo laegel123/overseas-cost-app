@@ -266,14 +266,16 @@ beforeEach(async () => {
 ```
 src/__fixtures__/
 ├── cities/
-│   ├── seoul.fixture.ts       # CityCostData (정상 케이스)
-│   ├── vancouver.fixture.ts
-│   ├── tokyo.fixture.ts       # JPY (소수 없는 통화)
-│   ├── invalid.fixture.ts     # 스키마 위반 — 검증 테스트용
-│   └── empty.fixture.ts       # 필드 결측 (graceful degradation)
-├── fx.fixture.ts              # 환율 응답
-└── index.ts                   # re-export
+│   ├── seoul-valid.ts         # CityCostData (정상 케이스, schema-pass)
+│   ├── vancouver-valid.ts     # CityCostData (full-shape, tuition/tax/visa 채움)
+│   ├── (향후 추가) tokyo-valid.ts   # JPY (소수 없는 통화)
+│   ├── (향후 추가) invalid-*.ts     # 스키마 위반 — 검증 테스트용 (현재는 인라인)
+│   └── (향후 추가) empty-*.ts       # 필드 결측 (graceful degradation)
+├── seed-roundtrip.test.ts     # data/seed/all.json drift 방지
+└── (향후 추가) fx.ts          # 환율 응답
 ```
+
+> **명명 규칙:** `<id>-<flavor>.ts` (`seoul-valid`, `tokyo-invalid-currency` 등). v1.0 도입 단계에서는 valid 케이스만 파일로, invalid 케이스는 테스트 인라인.
 
 ### 7.2 빌더 패턴
 
@@ -381,23 +383,32 @@ export const flushPromises = () => new Promise((r) => setImmediate(r));
 
 ### 8.4 `mockFetchSequence`
 
+`src/__test-utils__/mockFetchSequence.ts` — fetch 시퀀스 큐잉 헬퍼. 각 호출은 한 번만 사용된다.
+
 ```ts
-export function mockFetchSequence(
-  responses: Array<{ ok: boolean; status?: number; data?: unknown }>,
-) {
-  const spy = jest.spyOn(global, 'fetch');
-  responses.forEach((r) => {
-    spy.mockImplementationOnce(() =>
-      Promise.resolve({
-        ok: r.ok,
-        status: r.status ?? (r.ok ? 200 : 500),
-        json: () => Promise.resolve(r.data),
-        text: () => Promise.resolve(JSON.stringify(r.data)),
-      } as any),
-    );
-  });
-  return spy;
-}
+export type FetchResponseSpec =
+  | { ok: true; status: number; body: object | string }
+  | { ok: false; status: number; body?: object | string }
+  | { error: 'timeout' | 'network' };
+
+export function mockFetchSequence(responses: FetchResponseSpec[]): jest.SpyInstance;
+```
+
+응답 종류:
+
+- `{ ok: true, status, body }` — 정상 응답. body 가 객체면 자동 직렬화, 문자열은 그대로.
+- `{ ok: false, status }` — HTTP 에러 (status 만, body 선택).
+- `{ error: 'timeout' }` — `AbortError` 시뮬레이션 (currency.ts / data.ts 의 timeout 분기 검증).
+- `{ error: 'network' }` — `TypeError('Network request failed')` 시뮬레이션 (DNS·offline).
+
+사용 예:
+
+```ts
+mockFetchSequence([
+  { ok: true, status: 200, body: { result: 'success', rates: { KRW: 1380 } } },
+  { error: 'timeout' },                    // 두 번째 호출은 타임아웃
+  { ok: false, status: 500 },              // 세 번째는 5xx
+]);
 ```
 
 ### 8.5 `expectCardLabel(component, label)` 등 도메인 헬퍼

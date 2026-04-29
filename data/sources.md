@@ -10,7 +10,7 @@
 | --------- | ------------------- | ---------------------------- | ----------- |
 | rent      | 국토교통부 실거래가 | https://rt.molit.go.kr/      | 2026-04-01  |
 | food      | 한국소비자원 참가격 | https://www.price.go.kr/     | 2026-04-01  |
-| transport | 서울교통공사        | http://www.seoulmetro.co.kr/ | 2026-04-01  |
+| transport | 서울교통공사        | https://www.seoulmetro.co.kr/ | 2026-04-01  |
 
 ## 밴쿠버 (CA)
 

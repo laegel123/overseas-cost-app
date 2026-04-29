@@ -573,6 +573,12 @@
 - 1차 출처 운영자 변경·shape 변경 시 즉시 baseline fallback 으로 동작 — 사용자 화면 깨지지 않음.
 - 운영자 모니터링: 분기마다 1회 응답 shape 검증 (DATA.md §5.4) + 베타·출시 후 1차 실패율 추적.
 
+**알려진 트레이드오프 — `inflight` 와 `bypassCache` 상호작용:**
+
+`fetchExchangeRates({ bypassCache: true })` 가 진행 중인 다른 호출 (`bypassCache: false`, 캐시 hit 반환 예정) 을 만나면 in-flight dedup 으로 인해 **bypassCache 의도가 무시**된다 (이미 진행 중인 Promise 를 그대로 반환). 사용자가 설정 화면에서 "데이터 새로고침" 을 빠르게 두 번 누르거나, 부트로더 fetch 와 새로고침이 겹치는 race condition 에서 발생.
+
+수용한 이유: dedup 는 정상 흐름에서 중복 fetch 를 막는 핵심 기제. bypassCache 우선 처리하려면 dedup 키를 `bypassCache` 별도 분기 또는 inflight 취소 메커니즘 필요 — 복잡도 대비 가치 낮음 (사용자 두 번째 클릭은 첫 번째 결과로 충족됨). 동일 동작이 `src/lib/data.ts` 의 `loadAllCities` 에도 적용. v2 이후 사용자 보고 시 재검토.
+
 **관련:** ADR-026 (3단계 fallback), ADR-047 (baseline 분기 갱신), `src/lib/currency.ts`.
 
 ---

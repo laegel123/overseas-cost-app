@@ -21,7 +21,7 @@
  *   - in-flight dedup: 동일 시점 호출 시 fetch 1회 + 동일 Promise
  *   - 손상된 캐시 자동 정리
  *   - schemaVersion ≠ 1 → CitySchemaError → 다음 단계 fallback 시도
- *   - 한 도시 schema 위반 → 그 도시만 제외 + warn (ADR-K, 부분 가용성)
+ *   - 한 도시 schema 위반 → 그 도시만 제외 + warn (ADR-048, 부분 가용성)
  *
  * 모든 사용자 노출 lib 함수의 throw 는 docs/ARCHITECTURE.md §에러 카탈로그 의
  * City* + AllCitiesUnavailableError 만 사용한다.
@@ -33,7 +33,7 @@ import type { AllCitiesData, CitiesMap, CityCostData } from '@/types/city';
 
 import seedData from '../../data/seed/all.json';
 
-import { validateCity } from './citySchema';
+import { validateAllJson, validateCity } from './citySchema';
 import { refreshFx } from './currency';
 import {
   AllCitiesUnavailableError,
@@ -130,10 +130,10 @@ function isFresh(fetchedAt: number, now: number): boolean {
   return now - fetchedAt < TTL_MS;
 }
 
-// ─── parsing (lenient — ADR-K) ──────────────────────────────────────────────
+// ─── parsing (lenient — ADR-048) ──────────────────────────────────────────────
 
 /**
- * Lenient parser — ADR-K 부분 가용성 정책.
+ * Lenient parser — ADR-048 부분 가용성 정책.
  *
  * - JSON.parse 실패 → CityParseError
  * - top-level shape 위반 (schemaVersion ≠ 1, cities 누락 등) → CitySchemaError
@@ -175,7 +175,7 @@ function parseLenient(text: string, sourceLabel: string): AllCitiesData {
     try {
       validCities[cityId] = validateCity(cityData);
     } catch (e) {
-      // ADR-K: 부분 가용성 — 그 도시만 제외, dev 콘솔 가시성 유지
+      // ADR-048: 부분 가용성 — 그 도시만 제외, dev 콘솔 가시성 유지
       /* istanbul ignore next: __DEV__ 가드는 jest 환경에서 false (TESTING §4) */
       if (e instanceof AppError && __DEV__) {
         // eslint-disable-next-line no-console
@@ -271,11 +271,18 @@ async function loadFromNetwork(): Promise<AllCitiesData> {
 
 /**
  * 시드 fallback. 번들된 `data/seed/all.json` 을 검증해 반환.
- * 시드도 손상된 매우 예외적 케이스만 AllCitiesUnavailableError.
+ *
+ * 시드는 ADR-045 의 fixture-pass 보장이므로 lenient parser (parseLenient) 가 아닌
+ * **strict** `validateAllJson` 으로 직접 검증 — seedData 가 이미 import 시점에
+ * JS 객체로 파싱돼 있어 JSON.stringify → JSON.parse 왕복 불필요.
+ *
+ * 시드 schema 위반은 build-time 오류 신호 (자동화 phase 의 seed 갱신 게이트가
+ * 막아야 하는 케이스) — 부분 가용성으로 살리지 않고 AllCitiesUnavailableError
+ * 로 즉시 전체 실패 (호출자가 ErrorView 표시).
  */
 function loadFromSeed(): AllCitiesData {
   try {
-    return parseLenient(JSON.stringify(seedData), 'seed');
+    return validateAllJson(seedData);
   } catch (cause) {
     throw new AllCitiesUnavailableError('all sources failed including seed', cause);
   }
@@ -371,8 +378,8 @@ export async function refreshCache(): Promise<
 > {
   try {
     await safeRemoveCache();
-    await loadAllCities({ bypassCache: true });
-    await refreshFx();
+    // 도시 batch 와 환율 fetch 는 서로 의존 없음 — 병렬화로 설정 화면 새로고침 UX 개선.
+    await Promise.all([loadAllCities({ bypassCache: true }), refreshFx()]);
     const lastSync = await AsyncStorage.getItem(META_LAST_SYNC_KEY);
     return { ok: true, lastSync: lastSync ?? new Date().toISOString() };
   } catch (e) {
