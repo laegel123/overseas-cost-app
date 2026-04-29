@@ -48,6 +48,7 @@
 ## 명령어
 
 ```bash
+npm install --legacy-peer-deps   # ADR-044: expo-router 6 의 react-server-dom-webpack peerOptional 충돌 회피
 npm run dev         # Expo 개발 서버 (Expo Go 또는 iOS/Android 시뮬레이터)
 npm run typecheck   # tsc --noEmit
 npm run lint        # ESLint
