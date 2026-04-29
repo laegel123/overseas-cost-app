@@ -15,7 +15,7 @@
       "name": "city-schema",
       "status": "completed",
       "started_at": "2026-04-29T10:05:57+0900",
-      "completed_at": "2026-04-29T10:30:00+0900",
+      "completed_at": "2026-04-29T10:12:05+0900",
       "summary": "validateCity / validateAllJson / parseAllCitiesText. DATA.md §2 필수 필드 + 타입 + 값 sanity 검증, CitySchemaError/CityParseError 명시. fixture 2종(seoul, vancouver) 신규. 74 케이스 추가, 전체 183 테스트 통과."
     },
     {
