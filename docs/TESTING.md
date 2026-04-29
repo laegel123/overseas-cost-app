@@ -593,7 +593,9 @@ export function expectComparePair(
 - [ ] 통화 코드 lowercase (`'cad'`): 정규화 후 처리 또는 throws (정책)
 - [ ] 통화 코드 trailing space (`'CAD '`): 정규화 또는 throws
 
-#### `fetchExchangeRates()` — open.er-api.com
+#### `fetchExchangeRates(opts?: { bypassCache?: boolean })` — open.er-api.com
+
+> **v1.0 fallback policy** (ADR-046): 1차 (open.er-api) → 캐시 (stale 포함) → 3차 baseline (`FX_BASELINE_<YYYY>Q<n>` 코드 내 const). 2차 ECB 는 v1.x deferred. 본 함수는 호출자에게 throw 하지 않는다 — 항상 ExchangeRates 반환. 호출자는 `meta:fxLastSync` 메타키로 staleness 별도 판단.
 
 **캐시 hit/miss:**
 
@@ -601,37 +603,50 @@ export function expectComparePair(
 - [ ] cache miss → fetch 호출, AsyncStorage 에 `fx:v1` 저장, 결과 반환
 - [ ] cache 만료(24h + 1s): refetch
 - [ ] 23h 59m: 여전히 hit
-- [ ] 24h 정확: 만료(경계 정책 명시)
+- [ ] 24h 정확: 만료(경계 정책: `<` strict)
+- [ ] `bypassCache: true` → 캐시 무시 + fetch
+- [ ] `refreshFx()` === `bypassCache: true` alias
 
 **HTTP:**
 
-- [ ] HTTP 200 정상 shape: 통과
-- [ ] HTTP 200 응답 빈 body: throws `FxParseError`
-- [ ] HTTP 200 비-JSON (HTML): throws `FxParseError`
-- [ ] HTTP 200 shape 불일치 (rates 없음): throws `FxParseError`
+- [ ] HTTP 200 정상 shape: 통과 (USD base → KRW base 변환)
+- [ ] HTTP 200 응답 빈 body: 내부 `FxParseError` → fallback
+- [ ] HTTP 200 비-JSON (HTML): 내부 `FxParseError` → fallback
+- [ ] HTTP 200 shape 불일치 (rates 없음 / not object / 배열): 내부 `FxParseError` → fallback
+- [ ] HTTP 200 `result !== 'success'`: 내부 `FxParseError` → fallback
+- [ ] HTTP 200 `rates.KRW` 누락 또는 0 / 음수: 내부 `FxParseError` → fallback
+- [ ] HTTP 200 KRW 외 유효 통화 0개: 내부 `FxParseError` → fallback
+- [ ] HTTP 200 비-ISO 4217 코드 (소문자, 숫자) 또는 비-number rate: 결과에서 제외 (다른 통화는 통과)
 - [ ] HTTP 301/302 redirect: fetch 가 자동 추적
-- [ ] HTTP 404: throws `FxFetchError`
-- [ ] HTTP 500: throws `FxFetchError`
-- [ ] HTTP 503 with retry-after: 재시도 (1회) 또는 throws
+- [ ] HTTP 404 / 500: 내부 `FxFetchError` → fallback
+- [ ] response.text() 자체가 throw: 내부 `FxParseError` → fallback
 
 **네트워크:**
 
-- [ ] DNS 실패: throws `FxFetchError`, 캐시 fallback 시도
-- [ ] timeout (10s): throws `FxTimeoutError`
-- [ ] 캐시 stale (>24h) + fetch 실패: stale 반환 + warn 플래그
-- [ ] 캐시 없음 + fetch 실패: throws (호출자가 처리)
+- [ ] DNS 실패 / TypeError: 내부 `FxFetchError` → fallback (캐시 또는 baseline)
+- [ ] timeout (10s, AbortController): 내부 `FxTimeoutError` → fallback
+- [ ] 캐시 stale (>24h) + fetch 실패: stale 캐시 반환, `meta:fxLastSync` 갱신 X
+- [ ] 캐시 없음 + fetch 실패: `FX_BASELINE_<YYYY>Q<n>` **사본** 반환 (mutate-safe), 캐시 / lastSync 갱신 X
+
+**Baseline (3차 fallback):**
+
+- [ ] cold-start (캐시 없음 + 1차 실패) → baseline 반환
+- [ ] baseline 은 사본 — 호출자가 mutate 해도 다음 호출 영향 없음
+- [ ] baseline 분기 갱신 정책 (ADR-047): const 이름 + 값 + 테스트 동시 갱신
 
 **동시성:**
 
-- [ ] 동일 시점 fetchExchangeRates 2회 호출: fetch 1회만 (in-flight dedup)
-- [ ] 첫 호출 진행 중 두 번째 호출: 동일 Promise 반환
+- [ ] 동일 시점 `fetchExchangeRates()` 2회 호출: fetch 1회만 (in-flight dedup), 동일 Promise 반환 (ref equality)
+- [ ] 첫 호출 완료 후 inflight 해제 — 두 번째 호출은 cache hit
+- [ ] 실패 fallback 후에도 inflight 정리 — 다음 호출이 정상 동작
 
-#### `loadCachedFx()` / `saveFx(rates)` (내부 헬퍼)
+**손상된 캐시 자동 정리 (`fx:v1`):**
 
-- [ ] save 후 load → 동일 객체
-- [ ] 저장 timestamp 함께 보존
-- [ ] 잘못된 JSON 캐시 → null + 자동 정리
-- [ ] 다른 키 (구버전 `fx`) 존재 시 무시
+- [ ] 잘못된 JSON → 자동 삭제 + miss 처리
+- [ ] shape 위반 (`rates` 누락 / 비-객체 / 빈 객체 / 음수 환율): 자동 삭제
+- [ ] cache 가 JSON-parseable primitive (예: `"42"`): 자동 삭제
+- [ ] `AsyncStorage.getItem` 자체가 throw: null 처리 (silent)
+- [ ] `AsyncStorage.removeItem` reject 도 best-effort (catch swallow) — 다음 fetch 정상 진행
 
 ### 9.3 `src/lib/compare.ts`
 
