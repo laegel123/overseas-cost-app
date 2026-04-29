@@ -1,8 +1,10 @@
 # macOS
 .DS_Store
-# Finder accidental name-collision duplicates (e.g. `app 2.json`)
+# Finder accidental name-collision duplicates (files: `app 2.json`, dirs: `src 2/`)
 * 2.*
 **/* 2.*
+* 2/
+**/* 2/
 
 # Python
 __pycache__/

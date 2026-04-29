@@ -69,7 +69,8 @@ export const useRecentStore = create<RecentState & RecentActions>()(
       storage: createJSONStorage(() => AsyncStorage),
       version: PERSIST_VERSION,
       partialize: (state) => ({ cityIds: state.cityIds }),
-      // v1 only — v2 도입 시 본 함수에서 변환 로직 작성.
+      // v1 only — v2 도입 시 본 함수를 named export 로 분리 + 테스트에서
+      // jest.spyOn 으로 호출/인자 검증 (TESTING §9.7 의 deferred 항목).
       migrate: (persistedState) => persistedState as RecentState,
       // 손상 캐시 / cityIds 타입 위반 → 초기 상태 fallback. setState(INITIAL_STATE) 가
       // persist middleware 의 자동 setItem 을 트리거 → 손상 데이터 정리됨.

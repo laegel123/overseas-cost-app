@@ -79,16 +79,13 @@ export const usePersonaStore = create<PersonaState & PersonaActions>()(
         persona: state.persona,
         onboarded: state.onboarded,
       }),
-      // v1 only — v2 도입 시 본 함수에서 구버전 → 신버전 변환 로직 작성.
+      // v1 only — v2 도입 시 본 함수를 named export (예: `migratePersonaV1ToV2`)
+      // 로 분리 + 테스트에서 jest.spyOn 으로 호출/인자/결과 검증 (TESTING §9.5
+      // 의 deferred 항목). 현재 stub 은 단순 cast 로 v0/v1 entry 를 통과시킴.
       migrate: (persistedState) => persistedState as PersonaState,
-      // 손상 캐시 / 유효하지 않은 literal → 초기값 + 캐시 정리.
-      // silent fail 금지 (CLAUDE.md CRITICAL) — 명시적으로 정리 후 fallback.
-      // 손상 캐시 / 유효하지 않은 literal → 초기 상태 fallback.
-      // setState 호출 시 persist middleware 가 자동으로 storage 갱신 — 별도
-      // removeItem 호출은 race 발생 가능 (setState 가 다시 setItem 트리거).
-      // 그러므로 setState(INITIAL_STATE) 만으로 "손상 데이터 → INITIAL 직렬화"
-      // 정리가 충분 (다음 부팅 시 정상 INITIAL fallback).
-      // silent fail 금지 (CLAUDE.md CRITICAL) — invalid 시 명시적으로 INITIAL 적용.
+      // 손상 캐시 / 유효하지 않은 literal → INITIAL fallback. silent fail 금지
+      // (CLAUDE.md CRITICAL) — setState(INITIAL_STATE) 가 persist middleware
+      // 를 통해 storage 도 갱신 (별도 removeItem 은 race 가능 — setItem 재트리거).
       onRehydrateStorage: () => (rehydratedState, error) => {
         if (error !== undefined && error !== null) {
           usePersonaStore.setState(INITIAL_STATE);

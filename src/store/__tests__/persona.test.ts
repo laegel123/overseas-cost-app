@@ -172,20 +172,19 @@ describe('Hydration race', () => {
     expect(usePersonaStore.persist.hasHydrated()).toBe(true);
   });
 
-  it('hydration 진행 중 read 는 현재 (이전) state 를 그대로 반환', async () => {
-    // rehydrate() 직후 await 없이 getState 호출 — hasHydrated 는 false 일 수 있고,
-    // state 는 storage merge 가 적용되기 전이라 직전 setState 그대로.
+  it('hydration 진행 중 read 는 직전 setState 결과를 일관되게 반영', async () => {
+    // 본 테스트의 핵심: rehydrate 가 동기 (AsyncStorageMock) 든 비동기 (실 디바이스) 든
+    // 무관하게, 호출 직전 setState 한 메모리 값이 rehydrate 도중·후 일관되게 보인다.
+    // hasHydrated() 의 false/true 타이밍은 storage 어댑터 구현에 의존하므로
+    // 본 테스트에서는 단언하지 않는다 — 메모리 read 일관성만 검증.
     usePersonaStore.getState().setPersona('student');
     usePersonaStore.getState().setOnboarded(true);
 
-    // rehydrate 반환은 void | Promise<void> — Promise 로 좁히기 위해 await 로 안전하게.
     const inflight = Promise.resolve(usePersonaStore.persist.rehydrate());
-    // 동기적으로 hydration 표시는 false (in-flight)
-    expect(usePersonaStore.persist.hasHydrated()).toBe(false);
 
-    // 진행 중 read — storage 에서 읽은 값 (이전에 persist 가 저장한 student/true)
-    // 또는 현재 state 그대로. 메모리는 'student'/true 로 일관.
+    // 진행 중 read — storage merge 가 적용되기 전에는 직전 setState 그대로
     expect(usePersonaStore.getState().persona).toBe('student');
+    expect(usePersonaStore.getState().onboarded).toBe(true);
 
     await inflight;
     expect(usePersonaStore.persist.hasHydrated()).toBe(true);
