@@ -496,3 +496,187 @@
 - `npm run typecheck`, `npm run lint`, `npm test` (3 passed) 모두 통과
 - `npm run dev` → Metro 8081 LISTEN, `packager-status:running`, `expo doctor` `Incorrect dependencies: []`
 - 사용자 디바이스 Expo Go 에서 실 부팅 확인은 머지 전 수동
+
+---
+
+### ADR-045: v1.0 시드 = schema-pass fixture (한시적)
+
+**상태:** 채택 (2026-04-29)
+
+**맥락:**
+
+- v1.0 데이터 레이어는 `docs/ARCHITECTURE.md` §캐시·오프라인 전략 에 따라 네트워크 실패 시 번들 시드로 fallback 해야 한다.
+- ADR-032 가 정한 데이터 정책: 모든 도시 값은 정부 통계 API · 공식 정부 페이지 등 **공공 출처에서 자동으로만** 갱신, 수동 큐레이션 금지.
+- 자동화 phase (`docs/AUTOMATION.md`) 가 GitHub Actions cron + `scripts/refresh/<source>.mjs` 로 `data/all.json` 을 산출하지만, 이 phase 는 본 data-layer phase 보다 **늦게** 구현된다.
+- 그 사이 시드 파일이 비어 있으면: (a) 첫 실행 + 네트워크 없음 = 빈 화면, (b) ARCHITECTURE 의 시드 fallback 명세 위반.
+- data-layer phase step 2 가 WebFetch 로 직접 채집을 시도했으나, 핵심 출처 모두 자동 추출 불가 (KOSIS·한국소비자원 = `KR_DATA_API_KEY` 필수, CMHC RMR = Excel only, StatsCan CPI = CSV only, 서울교통공사 cert error / 403). schema 30 필드 중 5 필드만 추출 가능 → CLAUDE.md CRITICAL 의 추정 금지 규정에 막혀 step blocked.
+
+**결정:**
+
+1. v1.0 의 `data/seed/all.json` 은 step 1 에서 만든 schema-pass fixture (`src/__fixtures__/cities/{seoul,vancouver}-valid.ts`) 의 값을 **그대로** 사용한다.
+2. fixture 값들은 schema 를 통과하고 차원적으로 현실적이지만 (서울 원룸 90만, 밴쿠버 oneBed 2300 CAD 등), **실제 출처 페이지로 검증되지 않은 placeholder** 다.
+3. 출시 전 자동화 phase 가 1회 이상 실행되어 `data/all.json` 을 생성해야 한다. EAS 빌드 직전 게이트 (별도 phase) 가 이를 강제한다 — fixture 시드 상태로 production 빌드 금지.
+4. 자동화 phase 가 산출한 실 `all.json` 이 GitHub raw 로 배포되면, 사용자 앱은 24h 내 자동 fetch 로 fixture 시드 위에 실 데이터를 덮어쓴다. 시드는 _완전 오프라인 신규 사용자_ 에게만 노출된다.
+
+**대안 검토:**
+
+- (A) `KR_DATA_API_KEY` (data.go.kr 공공데이터포털 키) 발급 + step 2 가 직접 채집: 본 phase 가 외부 secret 에 종속 + 자동화 phase 의 책임과 중복. 거부.
+- (B) ADR-032 의 "수동 큐레이션 금지" 를 시드 한정 예외 명시 + 사용자가 PDF·Excel 리포트 손수 옮김: 분기 갱신마다 사람 시간 ~3시간, 드리프트 위험. 거부.
+- (D) 시드 자체 제거, 네트워크 실패 시 ErrorView: ARCHITECTURE.md §캐시·오프라인 전략 위반 + 첫 콜드 스타트 빈 화면. 거부.
+
+**결과 / 영향:**
+
+- 본 phase (data-layer) 의 step 3·4 가 진행 가능 — currency.ts·data.ts 통합 smoke 가 schema-pass payload 로 동작.
+- 자동화 phase 의 책임이 더 명확해진다: "출시 전 한 번은 반드시 실행되어야 한다."
+- 출시 빌드 게이트 ADR (별도) 에서 _fixture seed 검출 → EAS build 거부_ 정책 명시 필요.
+- `data/seed/all.json` 의 `lastUpdated` 와 `accessedAt` 는 fixture 작성일 (`2026-04-01`) 그대로 — 자동화가 덮어쓸 때 갱신.
+- 사용자에게 **노출되는 데이터에는 영향이 없어야 한다** (출시 전 실 데이터로 교체).
+- `src/lib/data.ts` (step 4) 가 시드 fallback 시 dev 콘솔에 명시적 warn 출력 — fixture 사용 가시성 확보.
+
+**관련:** ADR-032 (데이터 자동화 정책), `docs/AUTOMATION.md`.
+
+---
+
+### ADR-046: 환율 fallback v1.0 = 1차(open.er-api) + 3차(하드코딩 baseline) — 2차 ECB 보류
+
+**상태:** 채택 (2026-04-29)
+
+**맥락:**
+
+- ADR-026 이 정한 환율 fallback chain 은 3단계: (1) open.er-api.com (자동) → (2) ECB (자동, EUR base 환산) → (3) 한국은행 분기 하드코딩 값 (수동).
+- data-layer phase step 3 (currency-converter) 에서 1차·3차 는 즉시 구현 가능. ECB 는 별도 작업이 필요하다:
+  - ECB endpoint 는 XML 기반 (`<gesmes:Envelope>` 트리). RN 환경에 XML 파서 (`fast-xml-parser` 등) 신규 의존성 추가 필요.
+  - ECB 는 EUR base 라 KRW 산출 시 두 단계 환산 (X→EUR→KRW) — 변환·테스트 코드 분리 필요.
+- 1차 + 3차 만으로 가용성은 사실상 100% 확보:
+  - 1차 open.er-api 는 무료·무인증, 운영 5년+ 안정 (실패율 측정 부재 — 운영 중 모니터링).
+  - 3차 baseline 은 분기마다 한국은행 평균 환율로 갱신되는 코드 내 const. 1차 실패 + 캐시 stale 인 경우의 마지막 안전망.
+- 사용자 영향: 1차 실패 + 캐시도 없는 cold-start 코너 케이스에서 stale 분기 평균 환율 사용. 비교용 정보로는 충분 (실시간 거래용 X).
+
+**결정:**
+
+1. v1.0 의 `src/lib/currency.ts` 는 fallback 2단계만 구현: `open.er-api` (1차) → 캐시 stale 또는 baseline (3차).
+2. ECB (2차) 는 v1.x deferred. 도입 시 별도 ADR — 도입 조건은 1차 실패율 ≥ 5% 또는 운영자 수동 결정.
+3. 우선순위: `bypassCache=false` + 캐시 신선 → 캐시 hit. 그 외 → 1차 fetch. 실패 시 (네트워크/HTTP/parse/timeout 모두) → 캐시 (있으면 stale 도) 반환. 캐시도 없으면 → `FX_BASELINE_<YYYY>Q<n>` 사본 반환.
+4. fetch 가 성공한 경우에만 `meta:fxLastSync` 갱신 → 호출자가 staleness 감지 가능.
+5. `fetchExchangeRates` 는 호출자에게 throw 하지 않는다 (항상 ExchangeRates 반환). 에러 카탈로그 (FxFetchError·FxParseError·FxTimeoutError) 는 내부 fetchPrimary 단계에서 정확한 분기 처리에만 사용.
+
+**대안 검토:**
+
+- (A) 즉시 ECB 도입: XML 파서 의존성 추가 + 환산 로직 + 테스트 매트릭스 ~4시간. 일정 영향. 도입 시점 가치 < 비용. 거부.
+- (B) 1차만 + 실패 시 throws: ARCHITECTURE.md §캐시 전략 의 "stale 캐시 + 경고 배지" 패턴 위반 + cold-start 시 환율 N/A 화면. 거부.
+- (C) baseline 무시, 캐시 없으면 환율 N/A: cold-start 사용자가 "?" 만 보게 됨 — 비교 앱 핵심 기능 마비. 거부.
+
+**결과 / 영향:**
+
+- step 3 currency.ts 가 현재 phase 안에서 완결. step 4 data.ts 와 독립.
+- ECB 도입 시 `fetchExchangeRates` 내부에 1차 catch 후 ECB 시도 + 실패 시 stale/baseline 으로 fallthrough — 본 ADR 의 외부 계약 (throw 안 함, 항상 반환) 은 유지.
+- 1차 출처 운영자 변경·shape 변경 시 즉시 baseline fallback 으로 동작 — 사용자 화면 깨지지 않음.
+- 운영자 모니터링: 분기마다 1회 응답 shape 검증 (DATA.md §5.4) + 베타·출시 후 1차 실패율 추적.
+
+**알려진 트레이드오프 — `inflight` 와 `bypassCache` 상호작용:**
+
+`fetchExchangeRates({ bypassCache: true })` 가 진행 중인 다른 호출 (`bypassCache: false`, 캐시 hit 반환 예정) 을 만나면 in-flight dedup 으로 인해 **bypassCache 의도가 무시**된다 (이미 진행 중인 Promise 를 그대로 반환). 사용자가 설정 화면에서 "데이터 새로고침" 을 빠르게 두 번 누르거나, 부트로더 fetch 와 새로고침이 겹치는 race condition 에서 발생.
+
+수용한 이유: dedup 는 정상 흐름에서 중복 fetch 를 막는 핵심 기제. bypassCache 우선 처리하려면 dedup 키를 `bypassCache` 별도 분기 또는 inflight 취소 메커니즘 필요 — 복잡도 대비 가치 낮음 (사용자 두 번째 클릭은 첫 번째 결과로 충족됨). 동일 동작이 `src/lib/data.ts` 의 `loadAllCities` 에도 적용. v2 이후 사용자 보고 시 재검토.
+
+**관련:** ADR-026 (3단계 fallback), ADR-047 (baseline 분기 갱신), `src/lib/currency.ts`.
+
+---
+
+### ADR-047: `FX_BASELINE_<YYYY>Q<n>` 분기 갱신 정책
+
+**상태:** 채택 (2026-04-29)
+
+**맥락:**
+
+- ADR-046 이 정한 3차 fallback 은 코드 내 const (`src/lib/currency.ts` 의 `FX_BASELINE_<YYYY>Q<n>`).
+- 1차 (open.er-api) 가 일별 갱신이라 매우 신선하지만, 3차는 정의상 "최후의 안전망" — 분기 평균값으로 충분.
+- 그러나 1년 이상 갱신 안 된 baseline 은 환율 변동 누적 시 비교 결과 왜곡 (예: KRW/USD 가 30% 변동한 채 1년 stale 이면 비교 앱 신뢰성 손상).
+- 운영자 수동 갱신 + 자동화 워크플로우 (`refresh-fx.yml`, AUTOMATION.md §4.6) 둘 다 옵션. 자동화는 후속 phase 책임.
+
+**결정:**
+
+1. `FX_BASELINE_<YYYY>Q<n>` 의 const 이름 자체에 분기 정보를 박는다 (예: `FX_BASELINE_2026Q2`). 새 분기 진입 시 const 이름 + 값 동시 갱신.
+2. 출처는 한국은행 ECOS 시스템 (https://ecos.bok.or.kr/) 의 통화별 분기 평균 환율. const 위 주석에 출처 URL 명시.
+3. 분기 시작 후 첫 PR 시 갱신 — 분기 1일~7일 사이. 늦어도 분기 1개월 이내.
+4. 자동화 phase 가 도입되는 시점에 `scripts/refresh/fx_backup.mjs` 가 본 const 를 자동 갱신하도록 통합 (AUTOMATION.md §4.6 참조). 그때까지는 운영자 수동.
+5. 갱신 시 currency.test.ts 의 hardcoded 기대값 (예: `FX_BASELINE_2026Q2.USD === 1380`) 도 동시 수정 필요.
+
+**대안 검토:**
+
+- (A) baseline 을 정적 JSON 파일 (`data/static/fx_fallback.json`) 에서 로드: 런타임 의존성 추가 + RN 번들에 정적 자산 포함 필요. const 가 더 단순.
+- (B) baseline 없이 stale 캐시만 fallback: cold-start + 캐시 없는 코너 케이스에서 환율 N/A — ADR-046 거부 사유 동일.
+
+**결과 / 영향:**
+
+- 분기마다 `currency.ts` 한 줄 + 테스트 한 줄 갱신. 5분 작업.
+- const 이름이 분기를 명시하므로 `git blame` 로 마지막 갱신 분기 즉시 확인 가능.
+- 자동화 phase 도입 시 본 ADR 갱신 (수동 → 자동 전환).
+- 출시 직전 (M6) 빌드 게이트가 baseline 의 stale 정도를 검증할 수 있음 (별도 phase).
+
+**관련:** ADR-046 (fallback v1.0 정책), ADR-026 (3단계 fallback), AUTOMATION.md §4.6.
+
+### ADR-048: 부분 schema 실패 정책 — 한 도시 invalid → 그 도시 제외 + warn
+
+**상태:** 채택 (2026-04-29)
+
+**맥락:**
+
+- `src/lib/data.ts` 가 fetch 한 `all.json` 에 21개 도시 + 메타가 들어있다. 운영자 큐레이션 실수 또는 분기 갱신 중 한 도시의 한 필드가 schema 위반 가능.
+- 옵션 (a) 전체 batch 를 reject (`validateAllJson` strict) — 21개 중 1개 깨졌다고 사용자에게 ErrorView 보여주는 건 과도.
+- 옵션 (b) 깨진 도시만 제외하고 나머지 20개 보여주기 — 부분 가용성, 사용자 경험상 합리.
+
+**결정:**
+
+1. `src/lib/data.ts` 는 자체 lenient parser (`parseLenient`) 를 사용. `validateAllJson` (strict) 은 단위 테스트·시드 round-trip 용 단일 출처 검증으로만 사용.
+2. lenient parser:
+   - top-level shape (schemaVersion, generatedAt, fxBaseDate, cities) 위반 → CitySchemaError throw (전체 batch 거부)
+   - 개별 도시 위반 → 그 도시만 제외 + dev 콘솔 `console.warn(\`[data] city '<id>' excluded: <code> <message>\`)`
+   - 0개 도시만 통과 → CitySchemaError throw (의미 있는 데이터 없음)
+3. 사용자가 깨진 도시 ID 로 진입 시도 시 `getCity(id)` 가 undefined 반환 → 화면 단에서 ErrorView 또는 "이 도시 데이터를 불러올 수 없습니다" 처리 (별도 phase 책임).
+4. dev 콘솔 warn 은 silent fail 회피의 가시성 보장 (CLAUDE.md CRITICAL). 프로덕션 빌드 (Release) 에서는 babel transform-remove-console 으로 자연스럽게 무음 — 운영 phase 의 sentry-like 보고는 v2 이후.
+
+**대안 검토:**
+
+- (A) strict — 한 도시 깨지면 전체 ErrorView: 전체 21개를 1개의 잘못된 데이터로 잃는다. 부정확한 사용자 경험.
+- (B) 깨진 도시를 schema-default 값으로 채워서 보여주기: 사용자에게 거짓 정보 표시. 거부 (출처 정합성 위반).
+
+**결과 / 영향:**
+
+- 한 도시 데이터 결함이 다른 19개에 전염되지 않음.
+- dev 빌드에서는 깨진 도시가 빈번히 가시화 → 분기 갱신 시 즉각 발견.
+- `getCity(id)` 의 undefined 반환 의미가 (a) 도시 자체 미존재, (b) schema 위반으로 제외 둘 다 포함 — 사용자에게 표시할 메시지는 화면 phase 에서 결정.
+
+**관련:** CLAUDE.md CRITICAL ("에러 삼키지 않는다"), DATA.md §2 (CityCostData 스키마), `src/lib/citySchema.ts` (strict validateAllJson).
+
+### ADR-049: 시드 fallback 시 부분 가용성 — 서울 + 밴쿠버만, 그 외 도시는 ErrorView
+
+**상태:** 채택 (2026-04-29)
+
+**맥락:**
+
+- ADR-045 가 v1.0 시드를 서울 + 밴쿠버 2개로 정함 (시드 크기 통제 + 출시자 개인 연결).
+- 사용자가 첫 콜드 스타트 + 네트워크 없음 상태에서 다른 19개 도시 (예: 도쿄) 진입 시도하면, `getCity('tokyo')` 가 undefined 반환.
+- v1.0 의 화면 phase 가 이 상태를 어떻게 처리할지 미리 정해둘 필요.
+
+**결정:**
+
+1. 시드 fallback 으로 떨어진 상태에서 사용자가 도쿄 같은 도시 진입 시: 화면 단에서 **ErrorView** 표시 + "재시도" CTA + 상단 "현재 오프라인 데이터로 동작 중" 배지.
+2. 홈 화면 (`/(tabs)/index`) 의 도시 목록은 시드 도시 (서울+밴쿠버) 만 표시 — `getAllCities()` 가 메모리에 있는 것만 반환하니 자연스럽게.
+3. 즐겨찾기에 도쿄 같은 도시가 들어있는데 시드 fallback 상태이면, 즐겨찾기 카드는 "오프라인" 배지 + 탭 시 ErrorView.
+4. 홈 화면 상단에 (시드 fallback 활성 시) 한 줄 안내: `데이터 갱신 실패 · 다시 시도` (ARCHITECTURE.md §에러 핸들링 §2 의 inline 경고 배지 패턴).
+5. 시드 fallback 감지: `getAllCities()` 의 키 집합이 `{seoul, vancouver}` 와 정확히 일치하면서 `meta:lastSync` 가 빈 값일 때. (또는 별도 플래그 — 별도 phase 에서 결정.)
+6. v1.1 검토 — 시드에 더 많은 도시 추가 (예: 도쿄·뉴욕·런던 — Top-3). 단 시드 크기 ≤ 30 KB gzipped 유지.
+
+**대안 검토:**
+
+- (A) 시드를 21개 모두 포함: 시드 크기 ~30 KB gzipped 가 ~150 KB 로 증가. 첫 다운로드 부담 + AppStore 바이너리 증가. 거부.
+- (B) 시드 fallback 시에도 19개 도시 비교 화면을 빈 데이터로 진입 허용: 사용자에게 거짓 정보 표시. 거부.
+
+**결과 / 영향:**
+
+- 첫 콜드 스타트 + 네트워크 없음 = 서울 vs 밴쿠버 비교는 항상 가능 (출시자 본인 페르소나 만족).
+- 19개 도시는 네트워크 1회 fetch 후 사용 가능 — 사용자가 한 번이라도 온라인이면 24h 내 자동 fetch.
+- ErrorView 메시지 (i18n/errors.ko 별도 phase) 는 "데이터 불러오기 실패 · 다시 시도" 정도.
+
+**관련:** ADR-045 (시드 = fixture 2도시), ARCHITECTURE.md §캐시·오프라인 전략, DATA.md §6.5 (fallback chain).

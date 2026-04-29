@@ -1,0 +1,47 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "data-layer",
+  "steps": [
+    {
+      "step": 0,
+      "name": "types-errors",
+      "status": "completed",
+      "started_at": "2026-04-29T10:02:24+0900",
+      "completed_at": "2026-04-29T10:05:57+0900",
+      "summary": "CityCostData/Persona/CitiesMap/AllCitiesData/ExchangeRates 타입 + AppError 베이스 + 15개 서브클래스 카탈로그. instanceof/code/cause/toJSON 매트릭스 테스트 106개 통과."
+    },
+    {
+      "step": 1,
+      "name": "city-schema",
+      "status": "completed",
+      "started_at": "2026-04-29T10:05:57+0900",
+      "completed_at": "2026-04-29T10:12:05+0900",
+      "summary": "validateCity / validateAllJson / parseAllCitiesText. DATA.md §2 필수 필드 + 타입 + 값 sanity 검증, CitySchemaError/CityParseError 명시. fixture 2종(seoul, vancouver) 신규. 74 케이스 추가, 전체 183 테스트 통과."
+    },
+    {
+      "step": 2,
+      "name": "seed-all-json",
+      "status": "completed",
+      "started_at": "2026-04-29T10:12:05+0900",
+      "completed_at": "2026-04-29T10:40:43+0900",
+      "summary": "fixture (seoul-valid + vancouver-valid) 를 data/seed/all.json 으로 채택. ADR-045 (시드 한시성 + 자동화 phase 덮어쓰기 책임) + data/sources.md (출처 색인) + seed-roundtrip 테스트 (drift 방지). 전체 190 테스트 통과."
+    },
+    {
+      "step": 3,
+      "name": "currency-converter",
+      "status": "completed",
+      "started_at": "2026-04-29T10:40:43+0900",
+      "completed_at": "2026-04-29T11:03:58+0900",
+      "summary": "convertToKRW (순수) + fetchExchangeRates (open.er-api → 하드코딩 fallback, 24h fx:v1 캐시, in-flight dedup, 10s timeout). ADR-046 (fallback v1.0 정책) + ADR-047 (하드코딩 분기 갱신 정책). currency.ts 100% lib coverage, 70 신규 테스트 추가, 전체 260 통과."
+    },
+    {
+      "step": 4,
+      "name": "data-loader",
+      "status": "completed",
+      "started_at": "2026-04-29T11:03:59+0900",
+      "completed_at": "2026-04-29T11:50:00+0900",
+      "summary": "loadAllCities/getCity/getAllCities/refreshCache. GitHub raw (laegel123/overseas-cost-app) → jsDelivr → seed fallback chain, data:all:v1 24h 캐시, in-flight dedup, 10s timeout, ADR-K 부분 가용성 (lenient parser). 통합 smoke (시드 + 환율 → KRW). ADR-048 (부분 schema 정책) + ADR-049 (시드 부분 가용성). lib 4파일 100/95+/100/100 커버리지 통과. 본 step 은 API quota 한도로 하네스 자동 실행 불가 → 수동 진행. 전체 320 테스트 통과."
+    }
+  ],
+  "created_at": "2026-04-29T10:02:24+0900"
+}
