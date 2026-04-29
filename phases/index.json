@@ -9,6 +9,10 @@
       "dir": "bootstrap",
       "status": "completed",
       "completed_at": "2026-04-28T16:47:56+0900"
+    },
+    {
+      "dir": "data-layer",
+      "status": "pending"
     }
   ]
 }
