@@ -933,7 +933,8 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 - [ ] AsyncStorage 키: `persona:v1`
 - [ ] hydration: `useStore.persist.hasHydrated()` 가 false → true 전이
 - [ ] hydration 미완 시 read: 초기값 반환
-- [ ] AsyncStorage 손상 (잘못된 JSON): 초기 상태 fallback + 캐시 정리
+- [ ] AsyncStorage 손상 (잘못된 JSON): 초기 상태 fallback + INITIAL 직렬화로 정리 (다음 부팅 시 정상 fallback)
+- [ ] AsyncStorage 손상 (유효하지 않은 persona literal): isValidPersistedState 검증 후 초기 상태 fallback
 
 **Hydration race:**
 
@@ -943,8 +944,9 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 
 **마이그레이션:**
 
-- [ ] v1 → v2: 새 필드 `homeCity` 추가 시 (예시) 기본값 'seoul' 채움
-- [ ] 마이그레이션 함수가 호출되는지 spy
+- [ ] v1 entry: version 일치 → migrate 함수 호출 안 됨 (rehydrate 정상 동작 검증)
+- [ ] 미래 v0 entry (구버전) → migrate stub 이 state 통과 (v2 도입 시 본 케이스가 실 변환 검증으로 확장)
+- [ ] (v2 도입 시 추가) v1 → v2: 새 필드 기본값 채움 / migrate 함수 spy
 
 **Selector:**
 
