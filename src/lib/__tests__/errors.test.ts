@@ -19,7 +19,7 @@ import {
 
 type ErrorCtor = new (msg: string, cause?: unknown) => AppError;
 
-const errorCases: Array<[ErrorCtor, string]> = [
+const errorCases: [ErrorCtor, string][] = [
   [InvalidNumberError, 'INVALID_NUMBER'],
   [InvalidMultiplierError, 'INVALID_MULTIPLIER'],
   [InvalidAmountError, 'INVALID_AMOUNT'],
