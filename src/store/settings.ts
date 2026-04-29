@@ -47,6 +47,16 @@ const INITIAL_STATE: SettingsState = {
 const PERSIST_KEY = 'settings:v1';
 const PERSIST_VERSION = 1;
 
+/**
+ * 의도적으로 ISO 문자열 *유효성* 은 검증하지 않는다 — string 이기만 하면 통과.
+ *
+ * 이유: 본 store 는 reactive 표시용 (UI 가 "마지막 갱신: <date>" 로 보여주는 용도).
+ * 입력 경로는 (a) `updateLastSync` — 자체 NaN Date 검증 후에만 저장,
+ * (b) AsyncStorage 직접 write 를 다른 곳에서 하지 않음. 그러므로 "string 이지만
+ * 잘못된 ISO" 가 들어오는 시나리오는 사용자가 디바이스 저장소를 임의 조작한
+ * 경우뿐 — 그건 신뢰 경계 밖. 화면 단 (별도 phase) 에서 표시 직전 한 번 더
+ * `new Date(value).toString()` 으로 출력 가공할 수 있다.
+ */
 function isValidPersistedState(v: unknown): v is SettingsState {
   /* istanbul ignore next: defensive — zustand 의 default merge 가 항상 객체를 반환하므로 발생 불가 */
   if (v === null || typeof v !== 'object') return false;
@@ -88,7 +98,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       storage: createJSONStorage(() => AsyncStorage),
       version: PERSIST_VERSION,
       partialize: (state) => ({ lastSync: state.lastSync }),
-      // v1 only — v2 도입 시 본 함수에서 변환 로직 작성.
+      // v1 only — v2 도입 시 본 함수를 named export 로 분리 + 테스트에서
+      // jest.spyOn 으로 호출/인자 검증 (TESTING §9.8 의 deferred 항목).
       migrate: (persistedState) => persistedState as SettingsState,
       // 손상 캐시 / lastSync 타입 위반 → 초기 상태 fallback. setState(INITIAL_STATE) 가
       // persist middleware 의 자동 setItem 을 트리거 → 손상 데이터 정리됨.
