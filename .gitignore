@@ -1,5 +1,8 @@
 # macOS
 .DS_Store
+# Finder accidental name-collision duplicates (e.g. `app 2.json`)
+* 2.*
+**/* 2.*
 
 # Python
 __pycache__/
@@ -24,6 +27,9 @@ build/
 *.ipa
 *.apk
 *.aab
+
+# Test coverage (jest --coverage)
+coverage/
 
 # Env / secrets (never commit)
 .env
