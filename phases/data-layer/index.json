@@ -7,7 +7,7 @@
       "name": "types-errors",
       "status": "completed",
       "started_at": "2026-04-29T10:02:24+0900",
-      "completed_at": "2026-04-29T10:30:00+0900",
+      "completed_at": "2026-04-29T10:05:57+0900",
       "summary": "CityCostData/Persona/CitiesMap/AllCitiesData/ExchangeRates 타입 + AppError 베이스 + 15개 서브클래스 카탈로그. instanceof/code/cause/toJSON 매트릭스 테스트 106개 통과."
     },
     {
