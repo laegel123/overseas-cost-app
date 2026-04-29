@@ -48,6 +48,7 @@ const PERSIST_VERSION = 1;
 // persist 가 디스크에서 읽은 값이 PersonaState 인지 검증.
 // 손상된 캐시 또는 유효하지 않은 persona literal → 초기값 fallback.
 function isValidPersistedState(v: unknown): v is PersonaState {
+  /* istanbul ignore next: defensive — zustand 의 default merge 가 항상 객체를 반환하므로 발생 불가 */
   if (v === null || typeof v !== 'object') return false;
   const candidate = v as Record<string, unknown>;
   if (

@@ -725,3 +725,72 @@ zustand persist 는 모든 `setState` (액션 호출 포함) 후 storage 에 자
 
 **관련:** ADR-004 (Zustand + AsyncStorage 도메인 분리), ADR-022 (스키마 마이그레이션 v 접미사), ADR-044 (Expo SDK 54 / React 19), DATA.md §13.5.1 (AsyncStorage 키 카탈로그).
 
+---
+
+### ADR-051: store hydration 합성은 단일 boundary 함수 (`waitForAllStoresHydrated`)
+
+**상태:** 채택 (2026-04-29)
+
+**맥락:**
+
+- 4 도메인 store (persona / favorites / recent / settings) 는 ADR-004·ADR-050 정책에 따라 분리. 각 store 는 zustand persist 의 자체 hydration cycle 을 가진다.
+- 부트로더 (`app/_layout.tsx`, app-shell phase 책임) 는 useFonts + 4 store hydration 을 동시 await 후 SplashScreen.hideAsync 를 호출 (ARCHITECTURE.md §부팅·hydration 순서).
+- store 끼리는 cross-import 금지 (도메인별 분리 — ADR-004). 그러나 부트로더 단계에서 4 store 모두를 동시에 기다리는 합성 점이 필요.
+
+**결정:**
+
+1. 4 store 의 hydration 동시 await 는 `src/store/hydration.ts` 의 단일 함수 `waitForAllStoresHydrated(): Promise<void>` 가 책임.
+2. 본 함수만이 4 store 를 모두 import 하는 유일한 모듈 — 도메인 분리 위반이 아닌 명시적 boundary.
+3. 새 store 추가 시 본 함수의 `Promise.all` 인자에 한 줄 추가 (선형 확장).
+4. 각 store 의 `persist.hasHydrated()` 가 이미 true 면 즉시 resolve, 아니면 `onFinishHydration` 콜백으로 비동기 wait + resolve 시 unsubscribe 호출 (콜백 누수 방지).
+
+**대안 검토:**
+
+- (A) 부트로더가 직접 4 store 를 import + Promise.all: 부트로더가 store 추가 영향을 받음 + 패턴 노이즈. 거부.
+- (B) store index 가 hydration array 를 export: 4 store 간 순서 / 의존성이 노출됨. boundary 가 분산됨. 거부.
+- (C) zustand store wrapper 에 helper 통합: zustand v4 default API 와 다른 패턴 도입 → 학습 비용. 거부.
+
+**결과 / 영향:**
+
+- 부트로더는 `await Promise.all([useFonts(...), waitForAllStoresHydrated()])` 한 줄로 4 store hydration 합성.
+- 신규 store 도입 시 변경 면적: hydration.ts 에 한 줄, MEMORY.md / TESTING.md §9.4.2 에 한 줄.
+
+**관련:** ADR-004 (도메인 store 분리), ADR-050 (zustand v4 표준), ARCHITECTURE.md §부팅·hydration 순서.
+
+---
+
+### ADR-052: zustand persist 의 JSON.parse 실패 시 hydration 영구 미완 (latent edge case, v1.x defer)
+
+**상태:** 채택 (2026-04-29)
+
+**맥락:**
+
+- zustand v4 persist 미들웨어의 hydrate 함수는 storage 의 deserialize (`createJSONStorage` 의 `JSON.parse`) 가 throw 하면 catch 분기로 진입해 `postRehydrationCallback(undefined, error)` 만 호출하고 `_hasHydrated` 를 true 로 전이시키지 않는다 (`finishHydrationListeners` 도 발화하지 않음).
+- 우리 4 store 의 `onRehydrateStorage` 는 error 시 `setState(INITIAL_STATE)` 로 메모리 상태는 정리하나, `_hasHydrated` 는 그대로 false.
+- 결과: 사용자 디바이스에서 AsyncStorage 의 한 store entry 가 깨진 JSON 으로 손상된 경우 (예: OS-level write 도중 중단), 부트로더의 `waitForAllStoresHydrated()` 가 영구 hang → splash screen 무한 대기.
+- 발생 빈도: 이론상 매우 낮음 (AsyncStorage 의 atomic write 보장 + 정상 종료 흐름). 그러나 0 은 아님.
+
+**결정:**
+
+1. v1.0 은 본 latent edge case 를 **수용**. 부트로더의 hang 은 사용자가 앱 강제 종료 + 재실행 시 zustand persist 의 다음 부팅에서 동일 시나리오 반복 — 사실상 unrecoverable.
+2. 단, 우리 store 의 `setState(INITIAL_STATE)` 가 자동 setItem 을 트리거하므로 손상 entry 가 INITIAL 직렬화로 덮어씌워진다. 다음 cold start 에서는 정상 hydration. 즉 **첫 부팅만 hang, 두 번째 부팅은 정상**.
+3. 본격 fix 는 v1.x 의 별도 ADR — 옵션:
+   - (A) 부트로더에 timeout (예: 5초) 추가 + 강제 INITIAL fallback
+   - (B) `onRehydrateStorage` error 분기에서 `AsyncStorage.removeItem` + 재호출 `persist.rehydrate()` (race 위험 감수)
+   - (C) zustand v5 마이그레이션 시 hydration API 변경 여부 확인
+4. 사용자 보고 시점에 본 ADR 갱신 + fix ADR 추가.
+
+**대안 검토:**
+
+- (A) v1.0 에 즉시 fix: timeout 도입은 splash 정상 흐름의 latency 검증 부담 + race 시나리오 새로 발생. v1.0 일정 영향. 거부.
+- (B) helper 자체에 timeout: helper 는 단순한 합성 boundary — 도메인 정책이 helper 안에 들어가는 것은 책임 분산. 거부.
+- (C) 무시: silent fail 정책 위반 + 사용자 경험 (splash 무한 대기) 명시적으로 인지하지 못한 상태로 남김. 거부.
+
+**결과 / 영향:**
+
+- TESTING.md §9.4.2 의 latent 항목은 v1.0 통과 기준에 포함하지 않음 (체크박스 표시).
+- 사용자 부팅 hang 보고 시점에 fix ADR 추가 + 부트로더에 timeout fallback 도입 검토.
+- 본 edge case 의 구체 trigger 는 `JSON.parse` 실패 — 사용자 측 직접 storage 조작 외에는 일반 흐름에서 거의 발생 안 함.
+
+**관련:** ADR-050 (zustand v4 + setState 자동 storage write), ADR-051 (waitForAllStoresHydrated boundary), ARCHITECTURE.md §부팅·hydration 순서.
+

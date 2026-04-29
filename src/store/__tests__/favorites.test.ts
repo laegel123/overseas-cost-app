@@ -123,6 +123,15 @@ describe('Bulk', () => {
     useFavoritesStore.getState().removeMany(['vancouver']);
     expect(useFavoritesStore.getState().cityIds).toEqual(['toronto', 'paris']);
   });
+
+  it('removeMany 가 모두 미존재 id 인 경우: state 변경 없음 (set 호출 X)', () => {
+    useFavoritesStore.getState().addMany(['vancouver', 'toronto']);
+    const before = useFavoritesStore.getState().cityIds;
+
+    useFavoritesStore.getState().removeMany(['paris', 'lyon']);
+    // 길이 동일 분기 — set 호출 안 됨, ref 동일
+    expect(useFavoritesStore.getState().cityIds).toBe(before);
+  });
 });
 
 describe('Persist', () => {
@@ -228,6 +237,34 @@ describe('Persist', () => {
     await Promise.resolve();
 
     expect(useFavoritesStore.getState().cityIds).toEqual([]);
+  });
+
+  it('구버전 entry (v0) → migrate stub 통과 + 메모리 반영', async () => {
+    // migrate 함수는 v1 only 단계의 placeholder. v0 → v1 으로 변환 시 호출되어
+    // persistedState 를 그대로 통과시키는지만 검증 (v2 도입 시 본 테스트가 실 변환
+    // 검증으로 확장됨).
+    await AsyncStorage.setItem(
+      PERSIST_KEY,
+      JSON.stringify({
+        state: { cityIds: ['vancouver', 'toronto'] },
+        version: 0,
+      }),
+    );
+
+    await useFavoritesStore.persist.rehydrate();
+    expect(useFavoritesStore.getState().cityIds).toEqual(['vancouver', 'toronto']);
+  });
+});
+
+describe('addMany dedupe', () => {
+  it('addMany 가 모두 기존 favorites 에 포함된 경우: { ok: true }, state 변경 없음', () => {
+    useFavoritesStore.getState().addMany(['vancouver', 'toronto']);
+    const before = useFavoritesStore.getState().cityIds;
+
+    const result = useFavoritesStore.getState().addMany(['vancouver', 'toronto']);
+    expect(result).toEqual({ ok: true });
+    // candidates 가 비어 있는 분기 — set 호출 없음, 동일 ref 유지
+    expect(useFavoritesStore.getState().cityIds).toBe(before);
   });
 });
 

@@ -48,6 +48,7 @@ const PERSIST_KEY = 'settings:v1';
 const PERSIST_VERSION = 1;
 
 function isValidPersistedState(v: unknown): v is SettingsState {
+  /* istanbul ignore next: defensive — zustand 의 default merge 가 항상 객체를 반환하므로 발생 불가 */
   if (v === null || typeof v !== 'object') return false;
   const candidate = v as Record<string, unknown>;
   if (candidate.lastSync !== null && typeof candidate.lastSync !== 'string') return false;

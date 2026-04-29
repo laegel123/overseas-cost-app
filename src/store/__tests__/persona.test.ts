@@ -147,6 +147,23 @@ describe('영속화', () => {
     const parsed = JSON.parse(raw as string) as { state: PersonaState };
     expect(parsed.state.persona).toBe('unknown');
   });
+
+  it('손상된 캐시 (onboarded 가 boolean 아님) → 초기 상태 fallback', async () => {
+    await AsyncStorage.setItem(
+      PERSIST_KEY,
+      JSON.stringify({
+        state: { persona: 'student', onboarded: 'yes' },
+        version: 1,
+      }),
+    );
+
+    await usePersonaStore.persist.rehydrate();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(usePersonaStore.getState().persona).toBe('unknown');
+    expect(usePersonaStore.getState().onboarded).toBe(false);
+  });
 });
 
 describe('Hydration race', () => {

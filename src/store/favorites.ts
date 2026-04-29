@@ -50,6 +50,7 @@ const PERSIST_KEY = 'favorites:v1';
 const PERSIST_VERSION = 1;
 
 function isValidPersistedState(v: unknown): v is FavoritesState {
+  /* istanbul ignore next: defensive — zustand 의 default merge 가 항상 객체를 반환하므로 발생 불가 */
   if (v === null || typeof v !== 'object') return false;
   const candidate = v as Record<string, unknown>;
   if (!Array.isArray(candidate.cityIds)) return false;

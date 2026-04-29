@@ -17,7 +17,8 @@
     },
     {
       "dir": "stores",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-04-29T17:06:29+0900"
     }
   ]
 }

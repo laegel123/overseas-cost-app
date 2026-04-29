@@ -25,7 +25,8 @@ module.exports = {
   ],
   coverageThreshold: {
     'src/lib/**': { statements: 100, branches: 95, lines: 100, functions: 100 },
-    // src/store/**, src/components/**, app/** threshold 는 해당 phase 에서 재활성화.
-    // global threshold 는 lib 만 측정 대상이라 의미 없어 제거 (lib threshold 로 충분).
+    'src/store/**': { statements: 100, branches: 90, lines: 100, functions: 100 },
+    // src/components/**, app/** threshold 는 해당 phase 에서 재활성화.
+    // global threshold 는 lib/store 만 측정 대상이라 의미 없어 제거.
   },
 };

@@ -916,6 +916,21 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 - [ ] `refreshCache()`: 네트워크 실패해도 시드 + FX baseline 으로 ok=true + lastSync 반환
 - [ ] `getAllCities()` 가 loadAllCities 호출 전 빈 객체, 후 시드 도시 2개 반환
 
+### 9.4.2 `src/store/hydration.ts` (waitForAllStoresHydrated, stores phase step 4)
+
+4 store 의 `persist.hasHydrated()` 가 모두 true 가 될 때까지 대기하는 boundary
+helper. app-shell phase 의 부트로더가 useFonts + 4 store hydration 을 Promise.all
+로 합성한다 (ARCHITECTURE.md §부팅·hydration 순서). store 추가 시 본 함수의
+`Promise.all` 인자에 한 줄 추가 (ADR-051).
+
+- [x] 모든 store 가 이미 hydrated → 즉시 resolve
+- [x] 한 store 만 미완 → 그 store 의 `onFinishHydration` 콜백 발화 후 resolve
+- [x] 4 store 모두 미완 → 4개 모두 완료 후에야 resolve (3 완료 시점은 pending)
+- [x] resolve 후 등록 unsubscribe 호출 (콜백 누수 방지)
+- [x] 스키마 위반 캐시 → onRehydrateStorage fallback 후 hasHydrated=true → 정상 resolve
+- [ ] (latent) JSON.parse 실패 캐시 → zustand 의 catch 분기로 hasHydrated 가 false 로
+      남아 helper hang. ADR-052 에서 별도 다룸. v1.0 범위 밖.
+
 ### 9.5 `src/store/persona.ts`
 
 **기본 동작:**

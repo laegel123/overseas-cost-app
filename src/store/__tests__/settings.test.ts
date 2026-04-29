@@ -166,4 +166,19 @@ describe('Persist', () => {
 
     expect(useSettingsStore.getState().lastSync).toBeNull();
   });
+
+  it('구버전 entry (v0) → migrate stub 통과 + 메모리 반영', async () => {
+    // migrate 는 v1 only 단계의 placeholder — v0 → v1 변환 시 호출되어
+    // persistedState 를 그대로 통과시키는지만 확인.
+    await AsyncStorage.setItem(
+      PERSIST_KEY,
+      JSON.stringify({
+        state: { lastSync: '2026-01-01T00:00:00.000Z' },
+        version: 0,
+      }),
+    );
+
+    await useSettingsStore.persist.rehydrate();
+    expect(useSettingsStore.getState().lastSync).toBe('2026-01-01T00:00:00.000Z');
+  });
 });

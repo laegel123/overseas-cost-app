@@ -176,4 +176,19 @@ describe('Persist', () => {
 
     expect(useRecentStore.getState().cityIds).toEqual([]);
   });
+
+  it('구버전 entry (v0) → migrate stub 통과 + 메모리 반영', async () => {
+    // migrate 는 v1 only 단계의 placeholder — v0 → v1 변환 시 호출되어
+    // persistedState 를 그대로 통과시키는지만 확인.
+    await AsyncStorage.setItem(
+      PERSIST_KEY,
+      JSON.stringify({
+        state: { cityIds: ['vancouver', 'toronto'] },
+        version: 0,
+      }),
+    );
+
+    await useRecentStore.persist.rehydrate();
+    expect(useRecentStore.getState().cityIds).toEqual(['vancouver', 'toronto']);
+  });
 });
