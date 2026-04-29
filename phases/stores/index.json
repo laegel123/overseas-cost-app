@@ -24,7 +24,7 @@
       "status": "completed",
       "started_at": "2026-04-29T16:42:29+0900",
       "summary": "useRecentStore (cityIds: string[], MAX_RECENT=5). push 흐름 = 기존 위치 제거 → [id, ...filtered].slice(0,5). 최신이 [0], 6번째 진입 시 가장 오래된 (마지막) 항목 evict. throw 안 함 (자동 관리). persist key recent:v1, 손상 캐시 (잘못된 JSON / 비-배열 / 비-string 원소) → INITIAL fallback. 14 테스트 통과.",
-      "completed_at": "2026-04-29T16:44:59+0900"
+      "completed_at": "2026-04-29T16:45:23+0900"
     },
     {
       "step": 3,
