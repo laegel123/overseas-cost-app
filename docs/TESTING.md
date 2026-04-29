@@ -995,11 +995,25 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 
 ### 9.8 `src/store/settings.ts`
 
-- [ ] 초기: `lastSync: null`
-- [ ] `updateLastSync(date)` → ISO 문자열로 저장
-- [ ] `updateLastSync(undefined)`: 정책 (clear vs ignore)
-- [ ] persist round-trip
-- [ ] hydration 후 null 이 아닌 값
+시그니처: `updateLastSync(date: Date | string | null): void` — Date 는 `toISOString()`,
+string 은 `new Date(string).toISOString()` 정규화, null 은 clear. 잘못된 입력 (NaN
+Date) 은 silent 무시 (lib 가 아닌 reactive 표시용 store 라 throw 안 함, ADR-014).
+
+- [x] 초기: `lastSync: null`
+- [x] `updateLastSync(Date)` → ISO 문자열로 저장
+- [x] `updateLastSync(string)` → `new Date(string).toISOString()` 정규화 결과 저장
+- [x] `updateLastSync(string)` 비-UTC ISO → UTC 정규화 (예: `+09:00` → `Z`)
+- [x] `updateLastSync(null)` → clear (`lastSync: null`)
+- [x] 잘못된 string (`'not-a-date'`) → silent 무시, 기존값 유지
+- [x] 잘못된 Date (`new Date('garbage')`) → silent 무시, 기존값 유지
+- [x] `reset()` → 초기 상태 복귀
+- [x] persist key 정확히 `settings:v1`
+- [x] partialize: 액션 미영속화, lastSync 만 저장
+- [x] persist round-trip (rehydrate 후 같은 값)
+- [x] hydration 후 null 이 아닌 값 (저장돼 있던 값 복원)
+- [x] 손상 캐시 (잘못된 JSON) → 초기 상태 fallback + INITIAL 직렬화로 정리
+- [x] 손상 캐시 (lastSync 가 number) → 초기 상태 fallback
+- [x] 손상 캐시 (lastSync 가 객체) → 초기 상태 fallback
 
 ### 9.9 `src/components/typography/Text.tsx`
 

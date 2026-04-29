@@ -266,6 +266,8 @@ loadCityData():
 
 스키마 변경 시: `data:all:v2` 새 키 + 구 키 정리 (ADR-022).
 
+`meta:lastSync` 와 `useSettingsStore.lastSync` 의 동기화는 app-shell phase 부트로더 책임 (store 가 자동 동기화하지 않는다).
+
 ### 6.7 Fetch 시점
 
 | 시점                          | 동작                                                                     |

@@ -29,7 +29,10 @@
     {
       "step": 3,
       "name": "settings-store",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-29T16:45:23+0900",
+      "summary": "useSettingsStore (lastSync: string | null). updateLastSync(date: Date | string | null) — Date.toISOString / new Date(string).toISOString 정규화 / null clear / 잘못된 입력 silent 무시. persist key settings:v1, 손상 캐시 (잘못된 JSON / 비-string 비-null) → INITIAL fallback. meta:lastSync 동기화는 app-shell phase 책임. 15 테스트 통과 (총 70).",
+      "completed_at": "2026-04-29T16:51:00+0900"
     },
     {
       "step": 4,
