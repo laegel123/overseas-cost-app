@@ -916,6 +916,21 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 - [ ] `refreshCache()`: 네트워크 실패해도 시드 + FX baseline 으로 ok=true + lastSync 반환
 - [ ] `getAllCities()` 가 loadAllCities 호출 전 빈 객체, 후 시드 도시 2개 반환
 
+### 9.4.2 `src/store/hydration.ts` (waitForAllStoresHydrated, stores phase step 4)
+
+4 store 의 `persist.hasHydrated()` 가 모두 true 가 될 때까지 대기하는 boundary
+helper. app-shell phase 의 부트로더가 useFonts + 4 store hydration 을 Promise.all
+로 합성한다 (ARCHITECTURE.md §부팅·hydration 순서). store 추가 시 본 함수의
+`Promise.all` 인자에 한 줄 추가 (ADR-051).
+
+- [x] 모든 store 가 이미 hydrated → 즉시 resolve
+- [x] 한 store 만 미완 → 그 store 의 `onFinishHydration` 콜백 발화 후 resolve
+- [x] 4 store 모두 미완 → 4개 모두 완료 후에야 resolve (3 완료 시점은 pending)
+- [x] resolve 후 등록 unsubscribe 호출 (콜백 누수 방지)
+- [x] 스키마 위반 캐시 → onRehydrateStorage fallback 후 hasHydrated=true → 정상 resolve
+- [ ] (latent) JSON.parse 실패 캐시 → zustand 의 catch 분기로 hasHydrated 가 false 로
+      남아 helper hang. ADR-052 에서 별도 다룸. v1.0 범위 밖.
+
 ### 9.5 `src/store/persona.ts`
 
 **기본 동작:**
@@ -933,7 +948,8 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 - [ ] AsyncStorage 키: `persona:v1`
 - [ ] hydration: `useStore.persist.hasHydrated()` 가 false → true 전이
 - [ ] hydration 미완 시 read: 초기값 반환
-- [ ] AsyncStorage 손상 (잘못된 JSON): 초기 상태 fallback + 캐시 정리
+- [ ] AsyncStorage 손상 (잘못된 JSON): 초기 상태 fallback + INITIAL 직렬화로 정리 (다음 부팅 시 정상 fallback)
+- [ ] AsyncStorage 손상 (유효하지 않은 persona literal): isValidPersistedState 검증 후 초기 상태 fallback
 
 **Hydration race:**
 
@@ -943,8 +959,9 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 
 **마이그레이션:**
 
-- [ ] v1 → v2: 새 필드 `homeCity` 추가 시 (예시) 기본값 'seoul' 채움
-- [ ] 마이그레이션 함수가 호출되는지 spy
+- [ ] v1 entry: version 일치 → migrate 함수 호출 안 됨 (rehydrate 정상 동작 검증)
+- [ ] 미래 v0 entry (구버전) → migrate stub 이 state 통과 (v2 도입 시 본 케이스가 실 변환 검증으로 확장)
+- [ ] (v2 도입 시 추가) v1 → v2: 새 필드 기본값 채움 / migrate 함수 spy
 
 **Selector:**
 
@@ -993,11 +1010,25 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 
 ### 9.8 `src/store/settings.ts`
 
-- [ ] 초기: `lastSync: null`
-- [ ] `updateLastSync(date)` → ISO 문자열로 저장
-- [ ] `updateLastSync(undefined)`: 정책 (clear vs ignore)
-- [ ] persist round-trip
-- [ ] hydration 후 null 이 아닌 값
+시그니처: `updateLastSync(date: Date | string | null): void` — Date 는 `toISOString()`,
+string 은 `new Date(string).toISOString()` 정규화, null 은 clear. 잘못된 입력 (NaN
+Date) 은 silent 무시 (lib 가 아닌 reactive 표시용 store 라 throw 안 함, ADR-014).
+
+- [x] 초기: `lastSync: null`
+- [x] `updateLastSync(Date)` → ISO 문자열로 저장
+- [x] `updateLastSync(string)` → `new Date(string).toISOString()` 정규화 결과 저장
+- [x] `updateLastSync(string)` 비-UTC ISO → UTC 정규화 (예: `+09:00` → `Z`)
+- [x] `updateLastSync(null)` → clear (`lastSync: null`)
+- [x] 잘못된 string (`'not-a-date'`) → silent 무시, 기존값 유지
+- [x] 잘못된 Date (`new Date('garbage')`) → silent 무시, 기존값 유지
+- [x] `reset()` → 초기 상태 복귀
+- [x] persist key 정확히 `settings:v1`
+- [x] partialize: 액션 미영속화, lastSync 만 저장
+- [x] persist round-trip (rehydrate 후 같은 값)
+- [x] hydration 후 null 이 아닌 값 (저장돼 있던 값 복원)
+- [x] 손상 캐시 (잘못된 JSON) → 초기 상태 fallback + INITIAL 직렬화로 정리
+- [x] 손상 캐시 (lastSync 가 number) → 초기 상태 fallback
+- [x] 손상 캐시 (lastSync 가 객체) → 초기 상태 fallback
 
 ### 9.9 `src/components/typography/Text.tsx`
 
