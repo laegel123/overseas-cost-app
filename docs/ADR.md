@@ -609,3 +609,68 @@
 - 출시 직전 (M6) 빌드 게이트가 baseline 의 stale 정도를 검증할 수 있음 (별도 phase).
 
 **관련:** ADR-046 (fallback v1.0 정책), ADR-026 (3단계 fallback), AUTOMATION.md §4.6.
+
+### ADR-048: 부분 schema 실패 정책 — 한 도시 invalid → 그 도시 제외 + warn
+
+**상태:** 채택 (2026-04-29)
+
+**맥락:**
+
+- `src/lib/data.ts` 가 fetch 한 `all.json` 에 21개 도시 + 메타가 들어있다. 운영자 큐레이션 실수 또는 분기 갱신 중 한 도시의 한 필드가 schema 위반 가능.
+- 옵션 (a) 전체 batch 를 reject (`validateAllJson` strict) — 21개 중 1개 깨졌다고 사용자에게 ErrorView 보여주는 건 과도.
+- 옵션 (b) 깨진 도시만 제외하고 나머지 20개 보여주기 — 부분 가용성, 사용자 경험상 합리.
+
+**결정:**
+
+1. `src/lib/data.ts` 는 자체 lenient parser (`parseLenient`) 를 사용. `validateAllJson` (strict) 은 단위 테스트·시드 round-trip 용 단일 출처 검증으로만 사용.
+2. lenient parser:
+   - top-level shape (schemaVersion, generatedAt, fxBaseDate, cities) 위반 → CitySchemaError throw (전체 batch 거부)
+   - 개별 도시 위반 → 그 도시만 제외 + dev 콘솔 `console.warn(\`[data] city '<id>' excluded: <code> <message>\`)`
+   - 0개 도시만 통과 → CitySchemaError throw (의미 있는 데이터 없음)
+3. 사용자가 깨진 도시 ID 로 진입 시도 시 `getCity(id)` 가 undefined 반환 → 화면 단에서 ErrorView 또는 "이 도시 데이터를 불러올 수 없습니다" 처리 (별도 phase 책임).
+4. dev 콘솔 warn 은 silent fail 회피의 가시성 보장 (CLAUDE.md CRITICAL). 프로덕션 빌드 (Release) 에서는 babel transform-remove-console 으로 자연스럽게 무음 — 운영 phase 의 sentry-like 보고는 v2 이후.
+
+**대안 검토:**
+
+- (A) strict — 한 도시 깨지면 전체 ErrorView: 전체 21개를 1개의 잘못된 데이터로 잃는다. 부정확한 사용자 경험.
+- (B) 깨진 도시를 schema-default 값으로 채워서 보여주기: 사용자에게 거짓 정보 표시. 거부 (출처 정합성 위반).
+
+**결과 / 영향:**
+
+- 한 도시 데이터 결함이 다른 19개에 전염되지 않음.
+- dev 빌드에서는 깨진 도시가 빈번히 가시화 → 분기 갱신 시 즉각 발견.
+- `getCity(id)` 의 undefined 반환 의미가 (a) 도시 자체 미존재, (b) schema 위반으로 제외 둘 다 포함 — 사용자에게 표시할 메시지는 화면 phase 에서 결정.
+
+**관련:** CLAUDE.md CRITICAL ("에러 삼키지 않는다"), DATA.md §2 (CityCostData 스키마), `src/lib/citySchema.ts` (strict validateAllJson).
+
+### ADR-049: 시드 fallback 시 부분 가용성 — 서울 + 밴쿠버만, 그 외 도시는 ErrorView
+
+**상태:** 채택 (2026-04-29)
+
+**맥락:**
+
+- ADR-045 가 v1.0 시드를 서울 + 밴쿠버 2개로 정함 (시드 크기 통제 + 출시자 개인 연결).
+- 사용자가 첫 콜드 스타트 + 네트워크 없음 상태에서 다른 19개 도시 (예: 도쿄) 진입 시도하면, `getCity('tokyo')` 가 undefined 반환.
+- v1.0 의 화면 phase 가 이 상태를 어떻게 처리할지 미리 정해둘 필요.
+
+**결정:**
+
+1. 시드 fallback 으로 떨어진 상태에서 사용자가 도쿄 같은 도시 진입 시: 화면 단에서 **ErrorView** 표시 + "재시도" CTA + 상단 "현재 오프라인 데이터로 동작 중" 배지.
+2. 홈 화면 (`/(tabs)/index`) 의 도시 목록은 시드 도시 (서울+밴쿠버) 만 표시 — `getAllCities()` 가 메모리에 있는 것만 반환하니 자연스럽게.
+3. 즐겨찾기에 도쿄 같은 도시가 들어있는데 시드 fallback 상태이면, 즐겨찾기 카드는 "오프라인" 배지 + 탭 시 ErrorView.
+4. 홈 화면 상단에 (시드 fallback 활성 시) 한 줄 안내: `데이터 갱신 실패 · 다시 시도` (ARCHITECTURE.md §에러 핸들링 §2 의 inline 경고 배지 패턴).
+5. 시드 fallback 감지: `getAllCities()` 의 키 집합이 `{seoul, vancouver}` 와 정확히 일치하면서 `meta:lastSync` 가 빈 값일 때. (또는 별도 플래그 — 별도 phase 에서 결정.)
+6. v1.1 검토 — 시드에 더 많은 도시 추가 (예: 도쿄·뉴욕·런던 — Top-3). 단 시드 크기 ≤ 30 KB gzipped 유지.
+
+**대안 검토:**
+
+- (A) 시드를 21개 모두 포함: 시드 크기 ~30 KB gzipped 가 ~150 KB 로 증가. 첫 다운로드 부담 + AppStore 바이너리 증가. 거부.
+- (B) 시드 fallback 시에도 19개 도시 비교 화면을 빈 데이터로 진입 허용: 사용자에게 거짓 정보 표시. 거부.
+
+**결과 / 영향:**
+
+- 첫 콜드 스타트 + 네트워크 없음 = 서울 vs 밴쿠버 비교는 항상 가능 (출시자 본인 페르소나 만족).
+- 19개 도시는 네트워크 1회 fetch 후 사용 가능 — 사용자가 한 번이라도 온라인이면 24h 내 자동 fetch.
+- ErrorView 메시지 (i18n/errors.ko 별도 phase) 는 "데이터 불러오기 실패 · 다시 시도" 정도.
+
+**관련:** ADR-045 (시드 = fixture 2도시), ARCHITECTURE.md §캐시·오프라인 전략, DATA.md §6.5 (fallback chain).

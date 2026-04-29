@@ -885,6 +885,16 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 - [ ] 새 필드 기본값 채움
 - [ ] 마이그레이션 후 새 키 (`city:<id>:v2`) 에 저장 + 구 키 삭제
 
+### 9.4.1 `__integration__/dataLayer.integration.test.ts` (data-layer phase step 4)
+
+시드 fallback 경로 + 환율 변환 round-trip 을 모듈 경계 너머 검증. 실 네트워크 의존 없음.
+
+- [ ] 네트워크 실패 → 시드 fallback → 메모리 맵 갱신 → `getCity('vancouver')` / `getAllCities()` 즉시 반환
+- [ ] 서울 KRW pass-through (`convertToKRW(amount, 'KRW', {})` === amount)
+- [ ] 밴쿠버 CAD → KRW 변환 (`fetchExchangeRates({ bypassCache: true })` 가 fetch 실패 시 hardcoded baseline 반환 → `convertToKRW` 가 정수 KRW)
+- [ ] `refreshCache()`: 네트워크 실패해도 시드 + FX baseline 으로 ok=true + lastSync 반환
+- [ ] `getAllCities()` 가 loadAllCities 호출 전 빈 객체, 후 시드 도시 2개 반환
+
 ### 9.5 `src/store/persona.ts`
 
 **기본 동작:**

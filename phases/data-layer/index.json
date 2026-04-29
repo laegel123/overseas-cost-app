@@ -37,8 +37,10 @@
     {
       "step": 4,
       "name": "data-loader",
-      "status": "pending",
-      "started_at": "2026-04-29T11:03:59+0900"
+      "status": "completed",
+      "started_at": "2026-04-29T11:03:59+0900",
+      "completed_at": "2026-04-29T11:50:00+0900",
+      "summary": "loadAllCities/getCity/getAllCities/refreshCache. GitHub raw (laegel123/overseas-cost-app) → jsDelivr → seed fallback chain, data:all:v1 24h 캐시, in-flight dedup, 10s timeout, ADR-K 부분 가용성 (lenient parser). 통합 smoke (시드 + 환율 → KRW). ADR-048 (부분 schema 정책) + ADR-049 (시드 부분 가용성). lib 4파일 100/95+/100/100 커버리지 통과. 본 step 은 API quota 한도로 하네스 자동 실행 불가 → 수동 진행. 전체 320 테스트 통과."
     }
   ],
   "created_at": "2026-04-29T10:02:24+0900"

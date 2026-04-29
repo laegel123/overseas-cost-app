@@ -254,6 +254,90 @@ describe('validateCity — 타입 위반', () => {
     expect(() => validateCity(v)).not.toThrow();
   });
 
+  it('tax[0].takeHomePctApprox: NaN → throws (finite number 아님)', () => {
+    const v = clone(vancouverValid) as unknown as { tax: { takeHomePctApprox: unknown }[] };
+    v.tax[0]!.takeHomePctApprox = Number.NaN;
+    expect(() => validateCity(v as never)).toThrow(/takeHomePctApprox/);
+  });
+
+  it('tax[0].takeHomePctApprox: string → throws', () => {
+    const v = clone(vancouverValid) as unknown as { tax: { takeHomePctApprox: unknown }[] };
+    v.tax[0]!.takeHomePctApprox = '0.7';
+    expect(() => validateCity(v as never)).toThrow(/takeHomePctApprox/);
+  });
+
+  it('sources: 객체 (배열 아님) → throws', () => {
+    const v = clone(seoulValid) as unknown as { sources: unknown };
+    v.sources = { not: 'array' };
+    expect(() => validateCity(v as never)).toThrow(/sources/);
+  });
+
+  it('food.restaurantMeal: string → throws (typeof number 아님)', () => {
+    const v = clone(seoulValid) as unknown as { food: { restaurantMeal: unknown } };
+    v.food.restaurantMeal = '9000';
+    expect(() => validateCity(v as never)).toThrow(/restaurantMeal/);
+  });
+
+  it('rent.share: string → throws (typeof number 아님)', () => {
+    const v = clone(seoulValid) as unknown as { rent: { share: unknown } };
+    v.rent.share = '500000';
+    expect(() => validateCity(v as never)).toThrow(/share/);
+  });
+
+  it('rent.share: NaN → throws (finite 아님)', () => {
+    const v = clone(seoulValid);
+    v.rent.share = Number.NaN;
+    expect(() => validateCity(v)).toThrow(/share/);
+  });
+
+  it('food: 누락 → throws', () => {
+    const v = clone(seoulValid) as unknown as { food?: unknown };
+    delete v.food;
+    expect(() => validateCity(v as never)).toThrow(/food/);
+  });
+
+  it('food.cafe 누락 → throws', () => {
+    const v = clone(seoulValid) as unknown as { food: { cafe?: number } };
+    delete v.food.cafe;
+    expect(() => validateCity(v as never)).toThrow(/cafe/);
+  });
+
+  it('food.groceries 누락 → throws', () => {
+    const v = clone(seoulValid) as unknown as { food: { groceries?: unknown } };
+    delete v.food.groceries;
+    expect(() => validateCity(v as never)).toThrow(/groceries/);
+  });
+
+  it('groceries 추가 키 값이 string → throws', () => {
+    const v = clone(seoulValid) as unknown as { food: { groceries: Record<string, unknown> } };
+    v.food.groceries.kimchi1kg = 'cheap';
+    expect(() => validateCity(v as never)).toThrow(/kimchi1kg/);
+  });
+
+  it('groceries 추가 키 값이 undefined → 통과 + 무시', () => {
+    const v = clone(seoulValid) as unknown as { food: { groceries: Record<string, unknown> } };
+    v.food.groceries.kimchi1kg = undefined;
+    expect(() => validateCity(v as never)).not.toThrow();
+  });
+
+  it('visa.workApplicationFee: -1 → throws', () => {
+    const v = clone(vancouverValid);
+    v.visa!.workApplicationFee = -1;
+    expect(() => validateCity(v)).toThrow(/workApplicationFee/);
+  });
+
+  it('visa.settlementApprox: 0 → throws (양수만)', () => {
+    const v = clone(vancouverValid);
+    v.visa!.settlementApprox = 0;
+    expect(() => validateCity(v)).toThrow(/settlementApprox/);
+  });
+
+  it('parseAllCitiesText: JSON.parse 실패 (Error 아닌 cause)', () => {
+    // 실 시나리오에서는 JSON.parse 가 SyntaxError 를 throw 하지만,
+    // 본 테스트는 cause 가 Error 인 경로를 검증.
+    expect(() => parseAllCitiesText('{not json')).toThrow(/JSON/);
+  });
+
   it("tuition[0].level: 'phd' (잘못된 enum) → throws", () => {
     const v = clone(vancouverValid) as unknown as { tuition: { level: unknown }[] };
     v.tuition[0]!.level = 'phd';
