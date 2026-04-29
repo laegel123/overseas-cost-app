@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "favorites-store",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-29T16:39:17+0900",
+      "summary": "useFavoritesStore (cityIds: string[], MAX_FAVORITES=50). add/addMany/remove/removeMany/toggle/has/clear. limit 위반 시 throw 가 아니라 { ok: false, reason: 'limit' } 결과 객체. addMany atomic (부분 추가 X). persist key favorites:v1, 손상 캐시 (잘못된 JSON / 비-배열 / 비-string 원소) → INITIAL fallback. 24 테스트 통과.",
+      "completed_at": "2026-04-29T16:50:00+0900"
     },
     {
       "step": 2,
