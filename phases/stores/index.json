@@ -40,7 +40,7 @@
       "status": "completed",
       "started_at": "2026-04-29T16:49:10+0900",
       "summary": "src/store/hydration.ts (waitForAllStoresHydrated) — 4 store persist.hasHydrated 동시 await + onFinishHydration 콜백 + unsubscribe. src/store/index.ts re-export. jest.config.js src/store/** threshold 100/90/100/100 활성. ADR-051 (boundary helper 패턴) + ADR-052 (latent JSON-parse hang 수용). store 4개 커버리지 100% (migrate stub + addMany dedupe + removeMany no-op + onboarded 검증). 전체 404 테스트 통과 (lib + store).",
-      "completed_at": "2026-04-29T17:06:29+0900"
+      "completed_at": "2026-04-29T17:07:42+0900"
     }
   ],
   "created_at": "2026-04-29T16:24:33+0900"
