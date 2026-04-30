@@ -45,7 +45,7 @@ import {
   UtensilsCrossed,
 } from 'lucide-react-native';
 
-import { colors } from '@/theme/tokens';
+import { type ColorToken, colors } from '@/theme/tokens';
 
 export const ICON_NAMES = [
   'home',
@@ -80,7 +80,11 @@ export type IconName = (typeof ICON_NAMES)[number];
 export type IconProps = {
   name: IconName;
   size?: number;
-  color?: string;
+  /**
+   * 디자인 토큰 hex (`tokens.ts` 의 `colors`) 만 허용 — 매직 hex 직접 박지
+   * 못하도록 좁힘 (CLAUDE.md CRITICAL).
+   */
+  color?: (typeof colors)[ColorToken];
   strokeWidth?: number;
   testID?: string;
   accessibilityLabel?: string;
@@ -130,11 +134,16 @@ export function Icon({
   const Component = ICON_MAP[name];
   // lucide-react-native 는 testID / accessibilityLabel 을 svg 로 propagate 하지
   // 않으므로 View 로 wrap. style width/height = size 로 hitbox 정합성 유지.
+  // accessibilityLabel 이 있으면 의미 있는 아이콘 → 'image' role + 스크린 리더 노출.
+  // 없으면 데코레이티브 → importantForAccessibility='no' 로 스킵.
+  const hasLabel = accessibilityLabel !== undefined;
   return (
     <View
       style={{ width: size, height: size }}
-      {...(testID !== undefined ? { testID } : {})}
-      {...(accessibilityLabel !== undefined ? { accessibilityLabel } : {})}
+      accessibilityRole={hasLabel ? 'image' : undefined}
+      importantForAccessibility={hasLabel ? 'yes' : 'no'}
+      testID={testID}
+      accessibilityLabel={accessibilityLabel}
     >
       <Component size={size} color={color} strokeWidth={strokeWidth} />
     </View>

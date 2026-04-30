@@ -51,9 +51,17 @@ describe('Text 8 variant', () => {
       expect(screen.getByText('안녕하세요')).toBeTruthy();
     });
 
-    it.each(VARIANTS)('$name — 영문 렌더', ({ Component }) => {
-      render(<Component>Hello World</Component>);
-      // MonoLabel 은 uppercase 자동 변환되므로 영문 케이스는 별도 검증 (아래 uppercase 섹션).
+    it.each(VARIANTS.filter((v) => v.name !== 'mono-label'))(
+      '$name — 영문 렌더',
+      ({ Component }) => {
+        render(<Component>Hello World</Component>);
+        expect(screen.getByText('Hello World')).toBeTruthy();
+      },
+    );
+
+    it('mono-label — 영문 입력 → 대문자 변환 후 렌더 (별도 uppercase 섹션 참조)', () => {
+      render(<MonoLabel>Hello World</MonoLabel>);
+      expect(screen.getByText('HELLO WORLD')).toBeTruthy();
     });
 
     it.each(VARIANTS)('$name — 한글+이모지 렌더', ({ Component, name }) => {

@@ -99,7 +99,7 @@ const VARIANT_CONFIG: Record<Variant, VariantConfig> = {
 };
 
 function makeVariant(variant: Variant) {
-  return function VariantComponent({
+  function VariantComponent({
     children,
     color,
     numberOfLines,
@@ -123,14 +123,17 @@ function makeVariant(variant: Variant) {
       <RNText
         className={composedClassName}
         accessibilityRole={role}
-        {...(numberOfLines !== undefined ? { numberOfLines } : {})}
-        {...(style !== undefined ? { style } : {})}
-        {...(testID !== undefined ? { testID } : {})}
+        numberOfLines={numberOfLines}
+        style={style}
+        testID={testID}
       >
         {content}
       </RNText>
     );
-  };
+  }
+  // React DevTools 에서 'Display' / 'H1' 등 명시적 이름으로 보이도록.
+  VariantComponent.displayName = variant;
+  return VariantComponent;
 }
 
 export const Display = makeVariant('display');

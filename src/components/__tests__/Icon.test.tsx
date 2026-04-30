@@ -10,6 +10,8 @@ import * as React from 'react';
 
 import { render, screen } from '@testing-library/react-native';
 
+import { colors } from '@/theme/tokens';
+
 import { Icon, ICON_NAMES, type IconName } from '../Icon';
 
 describe('Icon', () => {
@@ -70,10 +72,26 @@ describe('Icon', () => {
     });
 
     it('color / strokeWidth 는 lucide 컴포넌트로 전달 — wrapper 자체엔 영향 없음', () => {
-      // 본 테스트는 Icon wrapper 가 color/strokeWidth 를 받아도 throw 하지 않는지만 검증.
-      // 실제 SVG stroke 색상은 lucide 라이브러리 책임.
-      render(<Icon name="home" color="#FC6011" strokeWidth={1.5} testID="icon-color" />);
+      // 본 테스트는 Icon wrapper 가 color/strokeWidth prop 을 받아도 crash 하지
+      // 않는지만 검증 (lucide 내부 SVG 색상 적용은 라이브러리 책임).
+      render(
+        <Icon name="home" color={colors.orange} strokeWidth={1.5} testID="icon-color" />,
+      );
       expect(screen.getByTestId('icon-color')).toBeTruthy();
+    });
+
+    it('accessibilityLabel 있을 때 → role="image" + importantForAccessibility="yes"', () => {
+      render(<Icon name="star" accessibilityLabel="즐겨찾기" testID="a11y-yes" />);
+      const node = screen.getByTestId('a11y-yes');
+      expect(node.props.accessibilityRole).toBe('image');
+      expect(node.props.importantForAccessibility).toBe('yes');
+    });
+
+    it('accessibilityLabel 없을 때 (데코레이티브) → importantForAccessibility="no" + role 미설정', () => {
+      render(<Icon name="star" testID="a11y-no" />);
+      const node = screen.getByTestId('a11y-no');
+      expect(node.props.accessibilityRole).toBeUndefined();
+      expect(node.props.importantForAccessibility).toBe('no');
     });
   });
 

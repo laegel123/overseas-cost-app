@@ -1103,11 +1103,13 @@ import 금지.
 
 **Props:**
 
-- [x] `size` 기본 22, 커스텀 32 적용
-- [x] `color` 기본 navy, 커스텀 orange 적용
-- [x] `strokeWidth` 기본 2, 커스텀 1.5 적용
+- [x] `size` 기본 22 → wrapper width/height 22, 커스텀 32 적용 검증
+- [x] `color` / `strokeWidth` prop 전달 시 crash 없음 (lucide 내부 색상 / stroke 적용은 라이브러리 책임 — 테스트 환경에서 SVG props 검증 어려움)
+- [x] `color` 타입은 `tokens.colors` literal union 만 허용 (매직 hex 차단)
 - [x] `testID` 전달
-- [x] `accessibilityLabel` 전달 / 미제공 시 미전달
+- [x] `accessibilityLabel` 전달 / 미제공 모두 검증
+- [x] `accessibilityLabel` 있을 때 → `accessibilityRole='image'` + `importantForAccessibility='yes'`
+- [x] `accessibilityLabel` 없을 때 (데코레이티브) → `importantForAccessibility='no'` + role 미설정
 
 **Stroke 정합성:**
 
