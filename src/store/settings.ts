@@ -40,7 +40,8 @@ export type SettingsActions = {
   reset: () => void;
 };
 
-const INITIAL_STATE: SettingsState = {
+// app-shell phase 의 hydration timeout guard (ADR-052) 도 본 상수를 참조.
+export const INITIAL_STATE: SettingsState = {
   lastSync: null,
 };
 

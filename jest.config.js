@@ -4,16 +4,15 @@ module.exports = {
   testPathIgnorePatterns: ['/node_modules/', '/.expo/', '/dist/'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // global.css (NativeWind) 는 metro/babel 에서 처리되며 jest 런타임에서는 빈 객체로 stub.
+    '\\.css$': '<rootDir>/__mocks__/styleMock.js',
   },
   transformIgnorePatterns: [
     'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|nativewind|react-native-css-interop))',
   ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
-    // 다음은 후속 phase 의 책임 — 해당 phase 에서 활성화:
-    //   'app/**/*.{ts,tsx}'  : app-shell phase (placeholder routes from bootstrap)
-    //   'src/store/**'        : stores phase (zustand 영속화)
-    //   'src/components/**'   : components phase (UI primitives)
+    'app/**/*.{ts,tsx}',
     '!**/*.d.ts',
     '!**/index.ts',
     '!**/__fixtures__/**',
@@ -26,7 +25,9 @@ module.exports = {
   coverageThreshold: {
     'src/lib/**': { statements: 100, branches: 95, lines: 100, functions: 100 },
     'src/store/**': { statements: 100, branches: 90, lines: 100, functions: 100 },
-    // src/components/**, app/** threshold 는 해당 phase 에서 재활성화.
-    // global threshold 는 lib/store 만 측정 대상이라 의미 없어 제거.
+    'src/components/**': { statements: 100, branches: 100, lines: 100, functions: 100 },
+    // app/** threshold 는 화면 구현 phase 에서 재검토 — 현재는 RootLayout 만 있고
+    // 부트로더 합성 로직이라 100% 가능하나 후속 화면 phase 가 라우트별 임계치를
+    // 다시 정할 가능성이 커서 우선 미설정.
   },
 };

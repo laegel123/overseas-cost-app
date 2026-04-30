@@ -34,7 +34,8 @@ export type RecentActions = {
 
 export const MAX_RECENT = 5;
 
-const INITIAL_STATE: RecentState = {
+// app-shell phase 의 hydration timeout guard (ADR-052) 도 본 상수를 참조.
+export const INITIAL_STATE: RecentState = {
   cityIds: [],
 };
 

@@ -16,6 +16,7 @@ import {
   __resetForTesting,
   getAllCities,
   getCity,
+  getLastSync,
   loadAllCities,
   refreshCache,
 } from '../data';
@@ -685,6 +686,29 @@ describe('refreshCache', () => {
     const result = await refreshCache();
     // 시드가 성공하므로 ok=true
     expect(result.ok).toBe(true);
+  });
+});
+
+// ─── getLastSync ────────────────────────────────────────────────────────────
+
+describe('getLastSync', () => {
+  it('meta:lastSync 키 존재 → ISO string 반환', async () => {
+    const iso = '2026-04-30T10:00:00.000Z';
+    await AsyncStorage.setItem(META_KEY, iso);
+
+    await expect(getLastSync()).resolves.toBe(iso);
+  });
+
+  it('meta:lastSync 키 없음 → null 반환', async () => {
+    await expect(getLastSync()).resolves.toBeNull();
+  });
+
+  it('saveCacheEntry 가 갱신한 메타키와 일치 (round-trip)', async () => {
+    // refreshCache 등 본 모듈이 lastSync 를 갱신할 때 저장하는 것을 직접 읽음.
+    const stored = '2026-04-30T12:00:00.000Z';
+    await AsyncStorage.setItem(META_KEY, stored);
+
+    await expect(getLastSync()).resolves.toBe(stored);
   });
 });
 

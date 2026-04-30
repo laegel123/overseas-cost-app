@@ -1,11 +1,13 @@
 import '../global.css';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
+import { ErrorBoundary } from '@/components';
+import { bridgeLastSyncFromMeta, usePersonaStore, waitForStoresOrTimeout } from '@/store';
 import { useAppFonts } from '@/theme/fonts';
 import { colors } from '@/theme/tokens';
 
@@ -14,25 +16,75 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 });
 
 export default function RootLayout() {
-  const { ready, error } = useAppFonts();
+  const { ready: fontsReady, error: fontsError } = useAppFonts();
+  const [storesHydrated, setStoresHydrated] = useState(false);
+  const router = useRouter();
+  const segments = useSegments();
+  const onboarded = usePersonaStore((s) => s.onboarded);
 
   useEffect(() => {
-    if (error) {
+    let cancelled = false;
+    // timeout 결과는 INITIAL_STATE fallback 으로 onboarded=false → 라우팅이
+    // 자연스럽게 /onboarding 진입. 별도 state 노출은 미사용이라 제거.
+    waitForStoresOrTimeout().then(() => {
+      if (cancelled) return;
+      setStoresHydrated(true);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (fontsError) {
       // ADR-014: silent fail 금지. 폰트 로드 실패는 system font 로 fallback 되어
       // 화면은 뜨지만, 운영 가시성을 위해 명시적으로 기록한다.
-      console.error('[RootLayout] font load failed:', error);
+      console.error('[RootLayout] font load failed:', fontsError);
     }
-    if (ready || error) {
+  }, [fontsError]);
+
+  // 폰트 실패는 system font fallback 으로 진행. store hydration 실패는 ADR-052
+  // timeout guard 가 INITIAL_STATE fallback 으로 회복 — hydrationTimedOut 상태는
+  // 후속 step (라우팅 / ErrorView) 이 참조.
+  const fontsResolved = fontsReady || fontsError !== null;
+  const bootReady = fontsResolved && storesHydrated;
+
+  useEffect(() => {
+    if (bootReady) {
       SplashScreen.hideAsync().catch(() => undefined);
     }
-  }, [ready, error]);
+  }, [bootReady]);
 
-  if (!ready && !error) {
+  useEffect(() => {
+    if (!bootReady) return;
+    // 무한 redirect 방지 — 현재 segment 가 이미 대상이면 no-op.
+    const isOnAuthFlow = segments[0] === 'onboarding';
+    if (!onboarded && !isOnAuthFlow) {
+      router.replace('/onboarding');
+    } else if (onboarded && isOnAuthFlow) {
+      router.replace('/(tabs)');
+    }
+  }, [bootReady, onboarded, segments, router]);
+
+  // meta:lastSync ↔ useSettingsStore.lastSync 단방향 sync (DATA.md §269).
+  // 비차단 best-effort — bridge 실패는 부팅 흐름 차단 안 함.
+  useEffect(() => {
+    if (!storesHydrated) return;
+    bridgeLastSyncFromMeta().catch((e: unknown) => {
+      /* istanbul ignore else: __DEV__ 는 jest 환경에서 항상 true — production 분기는 운영 빌드 한정 */
+      if (__DEV__) {
+        console.error('[app-shell] lastSync bridge failed:', e);
+      }
+    });
+  }, [storesHydrated]);
+
+  if (!bootReady) {
+    // FOUC + AsyncStorage race 방지 — ARCHITECTURE.md §부팅·hydration 순서.
     return null;
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -40,6 +92,6 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.white },
         }}
       />
-    </>
+    </ErrorBoundary>
   );
 }

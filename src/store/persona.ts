@@ -37,7 +37,8 @@ export type PersonaActions = {
 };
 
 // 초기 상태 — reset() 와 손상 캐시 fallback 이 같은 상수를 참조 (drift 방지).
-const INITIAL_STATE: PersonaState = {
+// app-shell phase 의 hydration timeout guard (ADR-052) 도 본 상수를 참조.
+export const INITIAL_STATE: PersonaState = {
   persona: 'unknown',
   onboarded: false,
 };

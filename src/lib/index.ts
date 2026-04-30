@@ -10,4 +10,4 @@
 export * from './errors';
 export { parseAllCitiesText, validateAllJson, validateCity } from './citySchema';
 export { convertToKRW, fetchExchangeRates, FX_BASELINE_2026Q2, refreshFx } from './currency';
-export { getAllCities, getCity, loadAllCities, refreshCache } from './data';
+export { getAllCities, getCity, getLastSync, loadAllCities, refreshCache } from './data';

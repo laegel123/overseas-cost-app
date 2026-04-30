@@ -1,0 +1,47 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "app-shell",
+  "steps": [
+    {
+      "step": 0,
+      "name": "bootloader-hydration",
+      "status": "completed",
+      "started_at": "2026-04-30T12:30:00+0900",
+      "summary": "RootLayout 부트로더 — useFonts + waitForAllStoresHydrated 합성 await. 둘 다 완료해야 Stack 렌더 + SplashScreen.hideAsync 1회. 폰트 에러는 system font fallback 으로 진행 (silent fail 금지 — 콘솔 로그). cancelled 플래그로 unmount race 방어. 5 테스트 통과 (총 409). timeout/라우팅/ErrorBoundary/lastSync 는 step 1~4. jest CSS stub 추가 (__mocks__/styleMock.js).",
+      "completed_at": "2026-04-30T12:55:00+0900"
+    },
+    {
+      "step": 1,
+      "name": "bootloader-timeout-guard",
+      "status": "completed",
+      "started_at": "2026-04-30T13:00:00+0900",
+      "summary": "ADR-052 강제 요구사항 — waitForStoresOrTimeout(timeoutMs=5000) 추가. 미완 store 만 INITIAL_STATE 강제 (정상 hydrated 보존), 정상 완료 시 'ok'/timeout 시 'timeout' 반환 + dev warn. 4 store INITIAL_STATE export. _layout.tsx 가 timeout 결과 state 보유 (reader 는 step 2/3). 8 신규 테스트 (총 419) + src/store 커버리지 100/100/100/100 유지.",
+      "completed_at": "2026-04-30T13:25:00+0900"
+    },
+    {
+      "step": 2,
+      "name": "persona-routing",
+      "status": "completed",
+      "started_at": "2026-04-30T13:25:00+0900",
+      "summary": "RootLayout 의 useEffect 가 bootReady 진입 후 페르소나 onboarded 기반 라우팅. !onboarded → /onboarding, onboarded + onboarding segment → /(tabs). 무한 redirect 방지 (현재 segment 검사) + push 대신 replace. timeout fallback 은 INITIAL onboarded=false 로 자연 onboarding 진입. 6 신규 테스트 (총 425).",
+      "completed_at": "2026-04-30T13:50:00+0900"
+    },
+    {
+      "step": 3,
+      "name": "error-boundary",
+      "status": "completed",
+      "started_at": "2026-04-30T13:50:00+0900",
+      "summary": "ErrorBoundary class component (RN/React 표준) + ErrorView 3-variant (fatal/inline/screen). RootLayout Stack 을 ErrorBoundary 로 wrap. AppError vs 외부 Error 메시지 분기 + DEV detail 표시 + component-level reset. 15 신규 테스트 (총 440). src/components 커버리지 100/100/100/100.",
+      "completed_at": "2026-04-30T14:15:00+0900"
+    },
+    {
+      "step": 4,
+      "name": "last-sync-bridge",
+      "status": "completed",
+      "started_at": "2026-04-30T14:15:00+0900",
+      "summary": "data layer (meta:lastSync) → useSettingsStore.lastSync 단방향 sync. src/lib/data.ts 에 getLastSync() public export 추가. src/store/lastSyncBridge.ts (bridgeLastSyncFromMeta) 신규 — meta != store 일 때만 setState. RootLayout 가 storesHydrated 후 비차단 호출 (실패는 dev 콘솔 로그). 10 신규 테스트 (총 450). 전체 lib/store/components 100% 커버리지.",
+      "completed_at": "2026-04-30T14:35:00+0900"
+    }
+  ],
+  "completed_at": "2026-04-30T14:35:00+0900"
+}

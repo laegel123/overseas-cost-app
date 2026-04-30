@@ -19,6 +19,11 @@
       "dir": "stores",
       "status": "completed",
       "completed_at": "2026-04-29T17:07:42+0900"
+    },
+    {
+      "dir": "app-shell",
+      "status": "completed",
+      "completed_at": "2026-04-30T14:35:00+0900"
     }
   ]
 }

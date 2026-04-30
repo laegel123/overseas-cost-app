@@ -18,10 +18,16 @@
  * store 추가 시 본 함수의 Promise.all 인자에 한 줄 추가하는 패턴 (ADR-051).
  */
 
-import { useFavoritesStore } from './favorites';
-import { usePersonaStore } from './persona';
-import { useRecentStore } from './recent';
-import { useSettingsStore } from './settings';
+import {
+  INITIAL_STATE as FAVORITES_INITIAL,
+  useFavoritesStore,
+} from './favorites';
+import { INITIAL_STATE as PERSONA_INITIAL, usePersonaStore } from './persona';
+import { INITIAL_STATE as RECENT_INITIAL, useRecentStore } from './recent';
+import {
+  INITIAL_STATE as SETTINGS_INITIAL,
+  useSettingsStore,
+} from './settings';
 
 type PersistStoreLike<S> = {
   persist: {
@@ -47,4 +53,64 @@ export function waitForAllStoresHydrated(): Promise<void> {
     waitOne(useRecentStore),
     waitOne(useSettingsStore),
   ]).then(() => undefined);
+}
+
+/**
+ * ADR-052 강제 요구사항 — hydration 영구 미완 latent edge case 차단.
+ *
+ * zustand persist middleware 는 JSON.parse 가 throw 하면 _hasHydrated 를 true
+ * 로 전이시키지 않고 finishHydrationListeners 도 발화하지 않는다. 이 상태에서
+ * 부트로더가 await 하면 splash 무한 hang. 본 헬퍼는 timeout 으로 race 를 끊고:
+ *   - 미완 store 각각에 setState(INITIAL_STATE) 호출 → persist 가 자동 setItem
+ *     트리거하여 손상 entry 가 INITIAL 직렬화로 덮어씌워진다 (ADR-050).
+ *   - 정상 hydrated store 는 사용자 데이터 손실 방지 위해 보존.
+ *   - dev 빌드는 console.warn. 운영 보고는 v2 이후 별도 ADR.
+ *
+ * @param timeoutMs 기본 5000ms — 정상 hydration 은 콜드스타트에서도 ~수십ms.
+ * @returns 'ok' (정상 완료) | 'timeout' (fallback 적용)
+ */
+export const DEFAULT_HYDRATION_TIMEOUT_MS = 5000;
+
+export async function waitForStoresOrTimeout(
+  timeoutMs: number = DEFAULT_HYDRATION_TIMEOUT_MS,
+): Promise<'ok' | 'timeout'> {
+  // clearTimeout(undefined) 는 안전한 no-op — non-null 단언 없이 undefined-safe.
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<'timeout'>((resolve) => {
+    timeoutId = setTimeout(() => resolve('timeout'), timeoutMs);
+  });
+  const result = await Promise.race([
+    waitForAllStoresHydrated().then(() => 'ok' as const),
+    timeoutPromise,
+  ]);
+  clearTimeout(timeoutId);
+  if (result === 'timeout') {
+    forceInitialOnUnhydratedStores();
+    /* istanbul ignore else: __DEV__ 는 jest 환경에서 항상 true — production 분기는 운영 빌드 한정 */
+    if (__DEV__) {
+      console.warn(
+        `[app-shell] store hydration timeout (>=${timeoutMs}ms). INITIAL_STATE fallback applied. ADR-052.`,
+      );
+    }
+  }
+  return result;
+}
+
+/**
+ * hasHydrated() === false 인 store 만 INITIAL_STATE 로 강제. 정상 hydrated 인
+ * store 는 사용자 데이터 보존 위해 건드리지 않는다.
+ */
+function forceInitialOnUnhydratedStores(): void {
+  if (!usePersonaStore.persist.hasHydrated()) {
+    usePersonaStore.setState(PERSONA_INITIAL);
+  }
+  if (!useFavoritesStore.persist.hasHydrated()) {
+    useFavoritesStore.setState(FAVORITES_INITIAL);
+  }
+  if (!useRecentStore.persist.hasHydrated()) {
+    useRecentStore.setState(RECENT_INITIAL);
+  }
+  if (!useSettingsStore.persist.hasHydrated()) {
+    useSettingsStore.setState(SETTINGS_INITIAL);
+  }
 }

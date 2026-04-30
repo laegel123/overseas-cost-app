@@ -18,4 +18,9 @@ export type { RecentActions, RecentState } from './recent';
 export { useSettingsStore } from './settings';
 export type { SettingsActions, SettingsState } from './settings';
 
-export { waitForAllStoresHydrated } from './hydration';
+export {
+  DEFAULT_HYDRATION_TIMEOUT_MS,
+  waitForAllStoresHydrated,
+  waitForStoresOrTimeout,
+} from './hydration';
+export { bridgeLastSyncFromMeta } from './lastSyncBridge';
