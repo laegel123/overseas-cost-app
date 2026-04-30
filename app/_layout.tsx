@@ -2,11 +2,11 @@ import '../global.css';
 
 import { useEffect, useState } from 'react';
 
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
-import { waitForStoresOrTimeout } from '@/store';
+import { usePersonaStore, waitForStoresOrTimeout } from '@/store';
 import { useAppFonts } from '@/theme/fonts';
 import { colors } from '@/theme/tokens';
 
@@ -17,9 +17,13 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 export default function RootLayout() {
   const { ready: fontsReady, error: fontsError } = useAppFonts();
   const [storesHydrated, setStoresHydrated] = useState(false);
-  // hydrationTimedOut 의 reader 는 step 2/3 (라우팅 / ErrorView 토스트) 에서
-  // 추가. 본 step 은 setter 만 노출.
+  // hydrationTimedOut 의 reader 는 step 3 (ErrorView 토스트) 에서 추가. 본 step
+  // 의 라우팅은 INITIAL_STATE 의 onboarded=false 를 통해 자연스럽게 onboarding
+  // 으로 redirect 되므로 별도 분기 불필요.
   const [, setHydrationTimedOut] = useState(false);
+  const router = useRouter();
+  const segments = useSegments();
+  const onboarded = usePersonaStore((s) => s.onboarded);
 
   useEffect(() => {
     let cancelled = false;
@@ -52,6 +56,17 @@ export default function RootLayout() {
       SplashScreen.hideAsync().catch(() => undefined);
     }
   }, [bootReady]);
+
+  useEffect(() => {
+    if (!bootReady) return;
+    // 무한 redirect 방지 — 현재 segment 가 이미 대상이면 no-op.
+    const isOnAuthFlow = segments[0] === 'onboarding';
+    if (!onboarded && !isOnAuthFlow) {
+      router.replace('/onboarding');
+    } else if (onboarded && isOnAuthFlow) {
+      router.replace('/(tabs)');
+    }
+  }, [bootReady, onboarded, segments, router]);
 
   if (!bootReady) {
     // FOUC + AsyncStorage race 방지 — ARCHITECTURE.md §부팅·hydration 순서.

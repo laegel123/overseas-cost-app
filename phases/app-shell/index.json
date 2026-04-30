@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "persona-routing",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T13:25:00+0900",
+      "summary": "RootLayout 의 useEffect 가 bootReady 진입 후 페르소나 onboarded 기반 라우팅. !onboarded → /onboarding, onboarded + onboarding segment → /(tabs). 무한 redirect 방지 (현재 segment 검사) + push 대신 replace. timeout fallback 은 INITIAL onboarded=false 로 자연 onboarding 진입. 6 신규 테스트 (총 425).",
+      "completed_at": "2026-04-30T13:50:00+0900"
     },
     {
       "step": 3,
