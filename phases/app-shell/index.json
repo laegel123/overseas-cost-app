@@ -29,7 +29,10 @@
     {
       "step": 3,
       "name": "error-boundary",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T13:50:00+0900",
+      "summary": "ErrorBoundary class component (RN/React 표준) + ErrorView 3-variant (fatal/inline/screen). RootLayout Stack 을 ErrorBoundary 로 wrap. AppError vs 외부 Error 메시지 분기 + DEV detail 표시 + component-level reset. 15 신규 테스트 (총 440). src/components 커버리지 100/100/100/100.",
+      "completed_at": "2026-04-30T14:15:00+0900"
     },
     {
       "step": 4,

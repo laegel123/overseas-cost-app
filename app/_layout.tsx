@@ -6,6 +6,7 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
+import { ErrorBoundary } from '@/components';
 import { usePersonaStore, waitForStoresOrTimeout } from '@/store';
 import { useAppFonts } from '@/theme/fonts';
 import { colors } from '@/theme/tokens';
@@ -74,7 +75,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <ErrorBoundary>
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -82,6 +83,6 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colors.white },
         }}
       />
-    </>
+    </ErrorBoundary>
   );
 }
