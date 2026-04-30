@@ -47,6 +47,10 @@ import {
 
 import { type ColorToken, colors } from '@/theme/tokens';
 
+// `home` 과 `house` 는 의도적으로 분리:
+//   - home  → 하단 탭 / 헤더용 (lucide Home, 단순 외곽)
+//   - house → ComparePair 의 'rent' 카테고리 아이콘 (lucide House, 디테일 있음)
+// design/README.md §Assets 와 hifi/_shared.jsx 에서 두 아이콘이 다른 컨텍스트로 노출.
 export const ICON_NAMES = [
   'home',
   'compare',
@@ -134,12 +138,17 @@ export function Icon({
   const Component = ICON_MAP[name];
   // lucide-react-native 는 testID / accessibilityLabel 을 svg 로 propagate 하지
   // 않으므로 View 로 wrap. style width/height = size 로 hitbox 정합성 유지.
-  // accessibilityLabel 이 있으면 의미 있는 아이콘 → 'image' role + 스크린 리더 노출.
-  // 없으면 데코레이티브 → importantForAccessibility='no' 로 스킵.
+  //
+  // 크로스플랫폼 a11y 제어:
+  //   - iOS:     accessible={false} 로 VoiceOver 가 데코레이티브 아이콘 skip
+  //   - Android: importantForAccessibility='no' 로 TalkBack skip
+  //   둘 다 설정해야 양쪽 OS 에서 데코레이티브 아이콘이 누락 처리됨.
+  // accessibilityLabel 이 있으면 의미 있는 아이콘 → 'image' role + 양쪽 활성화.
   const hasLabel = accessibilityLabel !== undefined;
   return (
     <View
       style={{ width: size, height: size }}
+      accessible={hasLabel}
       accessibilityRole={hasLabel ? 'image' : undefined}
       importantForAccessibility={hasLabel ? 'yes' : 'no'}
       testID={testID}

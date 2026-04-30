@@ -202,6 +202,26 @@ describe('Text 8 variant', () => {
     });
   });
 
+  // ─── displayName ─────────────────────────────────────────────────────────
+  describe('displayName (React DevTools)', () => {
+    it.each([
+      ['Display', Display],
+      ['H1', H1],
+      ['H2', H2],
+      ['H3', H3],
+      ['Body', Body],
+      ['Small', Small],
+      ['Tiny', Tiny],
+      ['MonoLabel', MonoLabel],
+    ] as const)('%s — displayName 이 export 이름과 일치', (expected, Component) => {
+      // React 가 function name 또는 displayName 으로 컴포넌트를 식별.
+      // PascalCase export 이름 그대로 노출되어야 DevTools 가독성 확보.
+      expect(
+        (Component as unknown as { displayName?: string }).displayName,
+      ).toBe(expected);
+    });
+  });
+
   // ─── MonoLabel uppercase ─────────────────────────────────────────────────
   describe('MonoLabel uppercase', () => {
     it('영문 소문자 → 대문자 자동 변환', () => {

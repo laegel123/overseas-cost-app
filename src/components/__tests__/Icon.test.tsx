@@ -80,18 +80,24 @@ describe('Icon', () => {
       expect(screen.getByTestId('icon-color')).toBeTruthy();
     });
 
-    it('accessibilityLabel 있을 때 → role="image" + importantForAccessibility="yes"', () => {
+    it('accessibilityLabel 있을 때 → accessible + role="image" + importantForAccessibility="yes"', () => {
       render(<Icon name="star" accessibilityLabel="즐겨찾기" testID="a11y-yes" />);
       const node = screen.getByTestId('a11y-yes');
-      expect(node.props.accessibilityRole).toBe('image');
+      // iOS VoiceOver: accessible=true 로 노출
+      expect(node.props.accessible).toBe(true);
+      // Android TalkBack: importantForAccessibility='yes'
       expect(node.props.importantForAccessibility).toBe('yes');
+      expect(node.props.accessibilityRole).toBe('image');
     });
 
-    it('accessibilityLabel 없을 때 (데코레이티브) → importantForAccessibility="no" + role 미설정', () => {
+    it('accessibilityLabel 없을 때 (데코레이티브) → accessible=false + importantForAccessibility="no"', () => {
       render(<Icon name="star" testID="a11y-no" />);
       const node = screen.getByTestId('a11y-no');
-      expect(node.props.accessibilityRole).toBeUndefined();
+      // iOS VoiceOver: accessible=false 로 데코레이티브 아이콘 skip
+      expect(node.props.accessible).toBe(false);
+      // Android TalkBack: importantForAccessibility='no'
       expect(node.props.importantForAccessibility).toBe('no');
+      expect(node.props.accessibilityRole).toBeUndefined();
     });
   });
 

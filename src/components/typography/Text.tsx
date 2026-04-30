@@ -13,6 +13,11 @@ import * as React from 'react';
 
 import { Text as RNText, type StyleProp, type TextStyle } from 'react-native';
 
+// kebab-case 는 의도적 — Tailwind class suffix (`text-gray-2`) 와 1:1 대응.
+// `tokens.ts` 의 `ColorToken` (camelCase, `gray2`) 과 의도적으로 다름:
+//   - TextColor: 컴포넌트 prop 사용자가 className 과 멘탈 모델 통일
+//   - ColorToken: tokens.ts 의 JS 키 (camelCase 가 JS 관용)
+// `Text` 가 내부에서 `text-${color}` 클래스로 변환 — drift 가 있으면 빌드 실패.
 export type TextColor = 'navy' | 'gray' | 'gray-2' | 'white' | 'orange';
 
 export type TextProps = {
@@ -98,6 +103,19 @@ const VARIANT_CONFIG: Record<Variant, VariantConfig> = {
   },
 };
 
+// React DevTools 에 export 이름 ('Display', 'H1', 'MonoLabel') 그대로 노출하기
+// 위해 variant key → PascalCase 매핑.
+const VARIANT_DISPLAY_NAME: Record<Variant, string> = {
+  display: 'Display',
+  h1: 'H1',
+  h2: 'H2',
+  h3: 'H3',
+  body: 'Body',
+  small: 'Small',
+  tiny: 'Tiny',
+  'mono-label': 'MonoLabel',
+};
+
 function makeVariant(variant: Variant) {
   function VariantComponent({
     children,
@@ -131,8 +149,8 @@ function makeVariant(variant: Variant) {
       </RNText>
     );
   }
-  // React DevTools 에서 'Display' / 'H1' 등 명시적 이름으로 보이도록.
-  VariantComponent.displayName = variant;
+  // React DevTools 에 export 이름 그대로 노출 (`Display` / `H1` / `MonoLabel`).
+  VariantComponent.displayName = VARIANT_DISPLAY_NAME[variant];
   return VariantComponent;
 }
 
