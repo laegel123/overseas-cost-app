@@ -1222,9 +1222,9 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] rightText 긴 경우 → numberOfLines={1}
 - [x] isLast=true → bottom border 미적용
 - [x] isLast 미지정 (default false) → border-b border-line 적용
-- [x] disabled=true → opacity-50 + accessibilityState.disabled + onPress 미호출
+- [x] disabled=true → opacity-50 + accessibilityState.disabled + onPress 미호출. Pressable `disabled` prop 도 전달 (Android ripple / iOS pressed opacity 차단 — RN 내부 처리라 RNTL host node 로 surface 안 됨, 사용자 관점 동작으로만 검증)
 - [x] disabled=false → onPress 호출
-- [x] showChevron=true (default) → chev-right 렌더
+- [x] showChevron=true (default) → chev-right 렌더 (testID `${testID}-chevron`)
 - [x] showChevron=false → chevron 미렌더 (dim 류)
 - [x] a11y — accessibilityRole='button' + accessibilityLabel = label prop
 
@@ -1241,7 +1241,7 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] 탭 → onSelect 호출
 - [x] hit slop 44×44 — `{ top: 8, bottom: 8, left: 8, right: 8 }` (padding + slop ≥ 44)
 - [x] a11y — accessibilityRole='button' + accessibilityLabel = displayLabel (count 포함)
-- [ ] hit slop 44×44 보장
+- [x] snapshot — active / inactive 각 1 케이스 (TESTING.md §6.1 — 단순 시각 컴포넌트)
 
 ### 9.17 `src/components/ComparePair.tsx`
 

@@ -81,6 +81,10 @@ export function MenuRow({
   return (
     <Pressable
       onPress={disabled ? undefined : onPress}
+      // disabled prop 명시 — Pressable 의 native press feedback (Android ripple,
+      // iOS pressed opacity) 까지 차단. onPress=undefined 만으로는 시각 피드백
+      // 이 발생할 수 있음.
+      disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityState={{ disabled }}
@@ -98,9 +102,19 @@ export function MenuRow({
         </Body>
       </View>
       {rightText !== undefined && (
+        // Tiny 의 default color (gray-2) 가 모든 variant 에서 동일 — design/README
+        // §5 의 메뉴 row 사양상 right text 는 항상 회색 보조 정보. dim variant
+        // 에서도 별도 강조 필요 없음.
         <Tiny numberOfLines={1}>{rightText}</Tiny>
       )}
-      {showChevron && <Icon name="chev-right" size={22} color={colors.gray2} />}
+      {showChevron && (
+        <Icon
+          name="chev-right"
+          size={22}
+          color={colors.gray2}
+          {...(testID !== undefined ? { testID: `${testID}-chevron` } : {})}
+        />
+      )}
     </Pressable>
   );
 }

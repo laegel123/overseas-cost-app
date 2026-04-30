@@ -85,4 +85,19 @@ describe('RegionPill', () => {
       expect(screen.getByTestId('p').props.accessibilityRole).toBe('button');
     });
   });
+
+  // ─── snapshot — TESTING.md §6.1 단순 시각 컴포넌트 ────────────────────────
+  describe('snapshot', () => {
+    it('active=true', () => {
+      const { toJSON } = render(
+        <RegionPill label="북미" count={8} active testID="p" />,
+      );
+      expect(toJSON()).toMatchSnapshot();
+    });
+
+    it('active=false (default)', () => {
+      const { toJSON } = render(<RegionPill label="북미" count={8} testID="p" />);
+      expect(toJSON()).toMatchSnapshot();
+    });
+  });
 });

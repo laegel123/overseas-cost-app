@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RegionPill snapshot active=false (default) 1`] = `
+<View
+  accessibilityLabel="북미 (8)"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": false,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="rounded-chip px-3.5 py-2 bg-white border border-line"
+  collapsable={false}
+  focusable={true}
+  hitSlop={
+    {
+      "bottom": 8,
+      "left": 8,
+      "right": 8,
+      "top": 8,
+    }
+  }
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  testID="p"
+>
+  <Text
+    accessibilityRole="text"
+    className="font-mulish text-body text-navy"
+    numberOfLines={1}
+  >
+    북미 (8)
+  </Text>
+</View>
+`;
+
+exports[`RegionPill snapshot active=true 1`] = `
+<View
+  accessibilityLabel="북미 (8)"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": true,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  className="rounded-chip px-3.5 py-2 bg-navy"
+  collapsable={false}
+  focusable={true}
+  hitSlop={
+    {
+      "bottom": 8,
+      "left": 8,
+      "right": 8,
+      "top": 8,
+    }
+  }
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  testID="p"
+>
+  <Text
+    accessibilityRole="text"
+    className="font-mulish text-body text-white"
+    numberOfLines={1}
+  >
+    북미 (8)
+  </Text>
+</View>
+`;
