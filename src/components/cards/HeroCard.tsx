@@ -10,7 +10,7 @@ import { Pressable, type ViewStyle, View } from 'react-native';
 import { colors, HERO_SEOUL_BAR_OPACITY, shadows } from '@/theme/tokens';
 
 import { Icon } from '../Icon';
-import { Display, MonoLabel, Tiny } from '../typography/Text';
+import { Display, H2, MonoLabel, Tiny } from '../typography/Text';
 
 export type HeroCardVariant = 'orange' | 'navy';
 
@@ -141,13 +141,17 @@ export function HeroCard({
         )}
       </View>
 
-      {/* 3-column row: 서울 / 가운데 mult / 도시 */}
+      {/* 3-column row: 서울 / 가운데 mult / 도시
+          - 좌(서울): H2 = 18px Manrope Bold 700 (design §3 / hi-fi compare.jsx)
+          - 가운데(mult): Display = 30px Manrope ExtraBold 800 — 시각 계층 1순위
+          - 우(도시): H2 size (18px) 에 fontFamily inline override → Manrope ExtraBold 800
+            (design 은 우측 값을 좌측보다 무겁게 — 비교 대상 강조). */}
       <View className="flex-row items-end mt-3">
         <View className="flex-1">
           <Tiny color="white">{leftLabel}</Tiny>
-          <Display color="white" numberOfLines={1}>
+          <H2 color="white" numberOfLines={1}>
             {leftValue}
-          </Display>
+          </H2>
         </View>
         <View
           className="items-center px-2 shrink-0"
@@ -167,9 +171,13 @@ export function HeroCard({
         </View>
         <View className="flex-1 items-end">
           <Tiny color="white">{rightLabel}</Tiny>
-          <Display color="white" numberOfLines={1}>
+          <H2
+            color="white"
+            numberOfLines={1}
+            style={{ fontFamily: 'Manrope-ExtraBold' }}
+          >
             {rightValue}
-          </Display>
+          </H2>
         </View>
       </View>
 

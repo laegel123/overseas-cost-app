@@ -1195,6 +1195,7 @@ phase 에서 재검토.
 **Props:**
 
 - [x] leftLabel / leftValue / rightLabel / rightValue / centerMult 모두 렌더
+- [x] 시각 계층 (design §3 / hi-fi compare.jsx) — 좌(서울) 18px Manrope Bold 700 (`H2`), 우(도시) 18px Manrope ExtraBold 800 (`H2` + fontFamily inline override), 가운데(mult) 30px Manrope ExtraBold 800 (`Display`). 가운데 = 시각 1순위.
 - [x] centerCaption 있을 때 렌더 / 미제공 시 미렌더
 - [x] footer 있을 때 렌더 / 미제공 시 미렌더
 - [x] 상단 고정 라벨 "한 달 예상 총비용" 렌더 (한국어는 MonoLabel uppercase 변환 없음)

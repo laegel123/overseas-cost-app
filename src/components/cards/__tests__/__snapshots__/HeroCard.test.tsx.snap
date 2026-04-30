@@ -40,7 +40,7 @@ exports[`HeroCard snapshot navy variant — full props 1`] = `
       </Text>
       <Text
         accessibilityRole="header"
-        className="font-manrope-extrabold text-display text-white"
+        className="font-manrope-bold text-h2 text-white"
         numberOfLines={1}
       >
         175만/월
@@ -76,8 +76,13 @@ exports[`HeroCard snapshot navy variant — full props 1`] = `
       </Text>
       <Text
         accessibilityRole="header"
-        className="font-manrope-extrabold text-display text-white"
+        className="font-manrope-bold text-h2 text-white"
         numberOfLines={1}
+        style={
+          {
+            "fontFamily": "Manrope-ExtraBold",
+          }
+        }
       >
         340만/월
       </Text>
@@ -150,7 +155,7 @@ exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
       </Text>
       <Text
         accessibilityRole="header"
-        className="font-manrope-extrabold text-display text-white"
+        className="font-manrope-bold text-h2 text-white"
         numberOfLines={1}
       >
         175만/월
@@ -186,8 +191,13 @@ exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
       </Text>
       <Text
         accessibilityRole="header"
-        className="font-manrope-extrabold text-display text-white"
+        className="font-manrope-bold text-h2 text-white"
         numberOfLines={1}
+        style={
+          {
+            "fontFamily": "Manrope-ExtraBold",
+          }
+        }
       >
         340만/월
       </Text>

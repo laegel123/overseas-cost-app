@@ -69,15 +69,28 @@ describe('HeroCard', () => {
 
   // ─── Props 렌더 ───────────────────────────────────────────────────────────
   describe('props 렌더', () => {
-    it('left/right label + value + center mult 모두 렌더 + center mult numberOfLines={1}', () => {
+    it('left/right label + value + center mult 모두 렌더 + 시각 계층 (design §3)', () => {
       render(<HeroCard {...baseProps} variant="orange" testID="h" />);
       expect(screen.getByText('서울')).toBeTruthy();
-      expect(screen.getByText('175만/월')).toBeTruthy();
-      const mult = screen.getByText('↑1.9×');
-      expect(mult).toBeTruthy();
-      expect(mult.props.numberOfLines).toBe(1);
       expect(screen.getByText('밴쿠버')).toBeTruthy();
-      expect(screen.getByText('340만/월')).toBeTruthy();
+
+      // 좌측 값 — H2 (18px Manrope Bold 700)
+      const leftValue = screen.getByText('175만/월');
+      expect(leftValue.props.className).toContain('text-h2');
+      expect(leftValue.props.className).toContain('font-manrope-bold');
+      expect(leftValue.props.numberOfLines).toBe(1);
+
+      // 우측 값 — H2 size (18px) + fontFamily inline override (Manrope ExtraBold 800)
+      const rightValue = screen.getByText('340만/월');
+      expect(rightValue.props.className).toContain('text-h2');
+      expect(rightValue.props.style).toEqual({ fontFamily: 'Manrope-ExtraBold' });
+      expect(rightValue.props.numberOfLines).toBe(1);
+
+      // 가운데 mult — Display (30px Manrope ExtraBold 800), 시각 계층 1순위
+      const mult = screen.getByText('↑1.9×');
+      expect(mult.props.className).toContain('text-display');
+      expect(mult.props.className).toContain('font-manrope-extrabold');
+      expect(mult.props.numberOfLines).toBe(1);
     });
 
     it('centerCaption 있을 때 → 렌더 + numberOfLines={1} (슬래시 줄바꿈 방지)', () => {
