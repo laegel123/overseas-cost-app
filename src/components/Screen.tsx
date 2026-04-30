@@ -52,7 +52,11 @@ export function Screen({
   const safeEdges = edges ?? DEFAULT_EDGES;
 
   if (scroll) {
-    // ScrollView 는 padding 을 contentContainerStyle 로 받아야 children flex 가 정상 동작.
+    // ScrollView 의 outer (className) 에 horizontal padding 을 적용 — vertical
+    // scroll 한정에서는 contentContainerStyle 와 시각 차이 없음 (콘텐츠가 안쪽
+    // 으로 들여쓰기되는 효과 동일). horizontal scroll 도입 시 contentContainerStyle
+    // 로 이동 필요. v1.0 은 vertical 만.
+    // contentContainerStyle 의 flexGrow:1 은 children flex 를 유지하기 위함.
     return (
       <SafeAreaView edges={[...safeEdges]} className="flex-1 bg-white">
         <ScrollView

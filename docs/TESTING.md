@@ -1157,7 +1157,8 @@ chrome 클래스 검증은 inner 노드 기준).
 - [x] right 버튼 탭 → onRightPress 호출
 - [x] title 긴 문자열: `numberOfLines=1`
 - [x] subtitle 11px Tiny: `numberOfLines=1`
-- [x] back / right 버튼 a11y — `role='button'` + accessibilityLabel
+- [x] back 버튼 a11y — `role='button'` + label `'뒤로가기'`
+- [x] right 버튼 a11y — `role='button'` + label (default `'우측 메뉴'`, `rightIconAccessibilityLabel` prop 으로 override 가능)
 - [x] testID 미제공 시 정상 렌더 + label 로 조회 가능
 
 ### 9.13 `src/components/BottomTabBar.tsx` (components phase step 2)

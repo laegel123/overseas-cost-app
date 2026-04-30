@@ -23,6 +23,11 @@ export type TopBarProps = {
   onBack?: () => void;
   rightIcon?: IconName;
   rightIconAccent?: 'default' | 'star';
+  /**
+   * 우측 버튼의 스크린 리더 라벨. 미제공 시 fallback `'우측 메뉴'`.
+   * 아이콘 의미 (`'즐겨찾기'`, `'검색'`, `'정보'`) 를 명시하면 a11y 향상.
+   */
+  rightIconAccessibilityLabel?: string;
   onRightPress?: () => void;
   testID?: string;
 };
@@ -35,6 +40,7 @@ export function TopBar({
   onBack,
   rightIcon,
   rightIconAccent = 'default',
+  rightIconAccessibilityLabel,
   onRightPress,
   testID,
 }: TopBarProps): React.ReactElement {
@@ -75,7 +81,7 @@ export function TopBar({
           <Pressable
             onPress={onRightPress}
             accessibilityRole="button"
-            accessibilityLabel="우측 메뉴"
+            accessibilityLabel={rightIconAccessibilityLabel ?? '우측 메뉴'}
             className={`${BUTTON_SIZE_CLASS} ${rightBgClass}`}
             testID={testID !== undefined ? `${testID}-right` : undefined}
           >

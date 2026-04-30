@@ -153,7 +153,7 @@ describe('TopBar', () => {
       expect(sub.props.numberOfLines).toBe(1);
     });
 
-    it('back / right 버튼 accessibility — role + label', () => {
+    it('back / right 버튼 accessibility — role + default label', () => {
       render(
         <TopBar
           title="x"
@@ -164,7 +164,22 @@ describe('TopBar', () => {
         />,
       );
       expect(screen.getByLabelText('뒤로가기')).toBeTruthy();
+      // rightIconAccessibilityLabel 미제공 → '우측 메뉴' fallback
       expect(screen.getByLabelText('우측 메뉴')).toBeTruthy();
+    });
+
+    it('rightIconAccessibilityLabel 명시 → fallback 무시 + custom label 적용', () => {
+      render(
+        <TopBar
+          title="x"
+          rightIcon="star"
+          rightIconAccessibilityLabel="즐겨찾기"
+          onRightPress={jest.fn()}
+          testID="tb"
+        />,
+      );
+      expect(screen.getByLabelText('즐겨찾기')).toBeTruthy();
+      expect(screen.queryByLabelText('우측 메뉴')).toBeNull();
     });
 
     it('testID 미제공 → back/right 의 testID 도 미설정 (정상 렌더)', () => {

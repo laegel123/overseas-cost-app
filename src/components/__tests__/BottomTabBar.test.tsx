@@ -6,7 +6,7 @@ import * as React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
-import { BottomTabBar, type Tab } from '../BottomTabBar';
+import { BottomTabBar } from '../BottomTabBar';
 
 describe('BottomTabBar', () => {
   it('4 탭 모두 한국어 라벨 (홈 / 비교 / 즐겨찾기 / 설정) 렌더', () => {
@@ -85,12 +85,9 @@ describe('BottomTabBar', () => {
   });
 
   it('testID 미제공 → 정상 렌더 + label 로 조회 가능', () => {
-    const tabs: Tab[] = ['home', 'compare', 'favorites', 'settings'];
     const onSelect = jest.fn();
     render(<BottomTabBar active="home" onSelect={onSelect} />);
     fireEvent.press(screen.getByLabelText('비교'));
     expect(onSelect).toHaveBeenCalledWith('compare');
-    // tabs 변수 사용 (eslint no-unused-vars 회피)
-    expect(tabs).toHaveLength(4);
   });
 });
