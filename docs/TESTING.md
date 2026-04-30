@@ -1209,26 +1209,38 @@ chrome 클래스 검증은 inner 노드 기준).
 - [ ] caption 슬래시 줄바꿈 방지 (`+165만/월`)
 - [ ] 이모지 포함 라벨
 
-### 9.15 `src/components/MenuRow.tsx`
+### 9.15 `src/components/MenuRow.tsx` (components phase step 3)
 
-- [ ] 정상: light icon bg, navy text, chevron
-- [ ] hot: orange-soft bg + orange icon
-- [ ] dim: gray-2 (앱 정보 등) + chevron 미표시 옵션
-- [ ] right text 있을 때: 라벨 옆 11px tiny gray-2
-- [ ] right text 없을 때: 공간 미점유
-- [ ] right text 긴 경우: 잘림 방지 (numberOfLines=1)
-- [ ] 마지막 행: bottom border 없음 (`isLast` prop)
-- [ ] disabled state: opacity 0.5 + onPress 미호출
-- [ ] 탭 → onPress
+설정 화면 메뉴 행. 3 variant (default / hot / dim) + isLast border 제어 +
+disabled + showChevron + rightText. design/README §5 (Settings).
 
-### 9.16 `src/components/RegionPill.tsx`
+- [x] default variant — bg-light icon box + navy label + chevron
+- [x] hot variant — orange-soft icon bg + label navy 유지 (icon 만 강조)
+- [x] dim variant — label gray-2
+- [x] rightText 있을 때 → 우측 Tiny 렌더
+- [x] rightText 없을 때 → 미렌더
+- [x] rightText 긴 경우 → numberOfLines={1}
+- [x] isLast=true → bottom border 미적용
+- [x] isLast 미지정 (default false) → border-b border-line 적용
+- [x] disabled=true → opacity-50 + accessibilityState.disabled + onPress 미호출
+- [x] disabled=false → onPress 호출
+- [x] showChevron=true (default) → chev-right 렌더
+- [x] showChevron=false → chevron 미렌더 (dim 류)
+- [x] a11y — accessibilityRole='button' + accessibilityLabel = label prop
 
-- [ ] active=true: navy fill, white text
-- [ ] active=false: white bg, line border, navy text
-- [ ] count 있을 때: `"북미 (8)"`
-- [ ] count 없을 때: `"북미"` (count 안 보임)
-- [ ] 긴 region name: 잘림 또는 wrap
-- [ ] 탭 → onSelect
+### 9.16 `src/components/RegionPill.tsx` (components phase step 3)
+
+홈 권역 필터 chip. design/README §3.
+
+- [x] active=true → bg-navy + white label + accessibilityState.selected=true
+- [x] active=false → bg-white + border-line + navy label + selected=false
+- [x] count 있을 때 → `"북미 (8)"` 형식
+- [x] count 없을 때 → 라벨만
+- [x] count=0 → 명시적으로 `"(0)"` 표기 (정보 보존)
+- [x] 긴 region 이름 → numberOfLines={1}
+- [x] 탭 → onSelect 호출
+- [x] hit slop 44×44 — `{ top: 8, bottom: 8, left: 8, right: 8 }` (padding + slop ≥ 44)
+- [x] a11y — accessibilityRole='button' + accessibilityLabel = displayLabel (count 포함)
 - [ ] hit slop 44×44 보장
 
 ### 9.17 `src/components/ComparePair.tsx`

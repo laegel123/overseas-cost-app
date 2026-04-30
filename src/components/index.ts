@@ -14,6 +14,12 @@ export type { TopBarProps, TopBarTitleVariant } from './TopBar';
 export { BottomTabBar } from './BottomTabBar';
 export type { BottomTabBarProps, Tab } from './BottomTabBar';
 
+export { MenuRow } from './MenuRow';
+export type { MenuRowProps, MenuRowVariant } from './MenuRow';
+
+export { RegionPill } from './RegionPill';
+export type { RegionPillProps } from './RegionPill';
+
 export { ErrorBoundary } from './ErrorBoundary';
 export { ErrorView } from './ErrorView';
 export type { ErrorViewProps, ErrorViewVariant } from './ErrorView';
