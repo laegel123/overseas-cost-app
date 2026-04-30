@@ -1181,33 +1181,40 @@ chrome 클래스 검증은 inner 노드 기준).
 - [ ] 탭 변경 시 햅틱 피드백 — v1.0 미스코프 (별도 ADR)
 - [ ] 라벨 폰트는 design/README "Mulish 600" 이지만 Mulish-SemiBold 에셋 부재로 Mulish Regular 로 대체. v1.x 에셋 추가 시 갱신.
 
-### 9.14 `src/components/cards/HeroCard.tsx`
+### 9.14 `src/components/cards/HeroCard.tsx` (components phase step 4)
+
+Compare 화면 hero card. design/README §3. 2 variant + 정규화 progress bar +
+❓ info 아이콘 hook. gradient 미도입 (단색 fallback) — step4.md 결정, 후속
+phase 에서 재검토.
 
 **Variant:**
 
-- [ ] `variant="orange"`: orange bg, white text, 6px progress, hero shadow
-- [ ] `variant="navy"`: navy bg, white text, 4px progress, mult 색상 orange 강조
+- [x] `variant="orange"`: bg-orange + 6px progress (h-1.5) + mult white + hero shadow
+- [x] `variant="navy"`: bg-navy + 4px progress (h-1) + mult orange 강조 (단색 fallback, gradient 미도입)
 
 **Props:**
 
-- [ ] leftLabel, leftValue 렌더
-- [ ] centerMult 렌더
-- [ ] centerCaption 렌더
-- [ ] rightLabel, rightValue 렌더
-- [ ] swPct + cwPct = 1.0 정규화
-- [ ] swPct=0, cwPct=1 (서울 0, 도시 100): 막대 전부 도시
-- [ ] swPct=1, cwPct=0: 막대 전부 서울
-- [ ] swPct + cwPct ≠ 1: 정규화 또는 warn (정책)
-- [ ] footer 표시
-- [ ] footer omit 가능
-- [ ] ❓ 아이콘 탭 → onInfoPress 호출
-- [ ] ❓ 미표시 옵션
+- [x] leftLabel / leftValue / rightLabel / rightValue / centerMult 모두 렌더
+- [x] centerCaption 있을 때 렌더 / 미제공 시 미렌더
+- [x] footer 있을 때 렌더 / 미제공 시 미렌더
+- [x] 상단 고정 라벨 "한 달 예상 총비용" 렌더 (한국어는 MonoLabel uppercase 변환 없음)
+- [x] swPct + cwPct = 1 → flex 0.5 / 0.5 정규화
+- [x] sw=0, cw=1 → 도시 막대만 렌더 (서울 미렌더)
+- [x] sw=1, cw=0 → 서울 막대만 렌더
+- [x] 합 = 0 → 양쪽 막대 미렌더
+- [x] 합 ≠ 1 (예: 0.4 + 0.6) → 비율 보존 정규화
+- [x] 합 = 2 (1 + 1) → 0.5 / 0.5 로 정규화
+- [x] 음수 / >1 입력 → clamp + dev console.warn
+- [x] ❓ info 아이콘 — `showInfoIcon=true (default)` + onInfoPress 있음 → 렌더 + 탭 콜백
+- [x] ❓ 미표시 (`showInfoIcon=false` 또는 onInfoPress 미제공) → 렌더 안 함 (silent no-op 회피)
+- [x] info 버튼 a11y — role=button + label "가정값 자세히 보기"
+- [x] testID 미제공 → info / bar testID 분기 false branch 정상 동작
 
 **스트레스:**
 
-- [ ] 긴 값 ("999만") squeeze 안 됨 (numberOfLines=1, adjustsFontSizeToFit)
-- [ ] caption 슬래시 줄바꿈 방지 (`+165만/월`)
-- [ ] 이모지 포함 라벨
+- [x] 긴 값 ("9,999만/월" / "99,999만/월") → numberOfLines={1} squeeze 방지
+- [ ] caption 슬래시 줄바꿈 방지 (`+165만/월`) — 현재 numberOfLines={1} 만 적용. RN 의 `adjustsFontSizeToFit` 은 화면 phase 진입 시 실기기 검증 후 결정 (defer).
+- [ ] 이모지 포함 라벨 — RN Text 기본 이모지 렌더 라이브러리 책임 (검증 불요)
 
 ### 9.15 `src/components/MenuRow.tsx` (components phase step 3)
 

@@ -20,6 +20,9 @@ export type { MenuRowProps, MenuRowVariant } from './MenuRow';
 export { RegionPill } from './RegionPill';
 export type { RegionPillProps } from './RegionPill';
 
+export { HeroCard } from './cards/HeroCard';
+export type { HeroCardProps, HeroCardVariant } from './cards/HeroCard';
+
 export { ErrorBoundary } from './ErrorBoundary';
 export { ErrorView } from './ErrorView';
 export type { ErrorViewProps, ErrorViewVariant } from './ErrorView';
