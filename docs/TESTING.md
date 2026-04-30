@@ -1189,8 +1189,8 @@ phase 에서 재검토.
 
 **Variant:**
 
-- [x] `variant="orange"`: bg-orange + 6px progress (h-1.5) + mult white + hero shadow
-- [x] `variant="navy"`: bg-navy + 4px progress (h-1) + mult orange 강조 (단색 fallback, gradient 미도입)
+- [x] `variant="orange"`: bg-orange + p-hero-pad (18px) + rounded-hero-lg (22px) + 6px progress (h-1.5) + mult white + `shadows.orangeHero` (rgba 0.25)
+- [x] `variant="navy"`: bg-navy + p-4 (16px) + rounded-hero (20px) + 4px progress (h-1) + mult orange 강조 + `shadows.navyCard` (rgba 0.18). 단색 fallback (gradient 미도입)
 
 **Props:**
 

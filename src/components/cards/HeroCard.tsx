@@ -19,7 +19,7 @@
 
 import * as React from 'react';
 
-import { Pressable, View } from 'react-native';
+import { Pressable, type ViewStyle, View } from 'react-native';
 
 import { colors, HERO_SEOUL_BAR_OPACITY, shadows } from '@/theme/tokens';
 
@@ -56,22 +56,34 @@ export type HeroCardProps = {
 
 type VariantConfig = {
   bgClass: string;
-  /** progress 막대 두께 — orange 6px / navy 4px */
+  /** padding 토큰 — orange 18px (`p-hero-pad`) / navy 16px (`p-4`, design Detail §4) */
+  paddingClass: string;
+  /** border-radius 토큰 — orange 22px (`rounded-hero-lg`) / navy 20px (`rounded-hero`) */
+  radiusClass: string;
+  /** progress 막대 두께 — orange 6px (`h-1.5`) / navy 4px (`h-1`) */
   barHeightClass: string;
   /** mult 텍스트 색 — orange variant 는 흰색, navy variant 는 orange 강조 */
   multColor: 'white' | 'orange';
+  /** shadow 토큰 — orange 는 orangeHero (rgba 0.25), navy 는 navyCard (rgba 0.18) */
+  shadowStyle: ViewStyle;
 };
 
 const VARIANT_CONFIG: Record<HeroCardVariant, VariantConfig> = {
   orange: {
     bgClass: 'bg-orange',
-    barHeightClass: 'h-1.5', // 6px
+    paddingClass: 'p-hero-pad',
+    radiusClass: 'rounded-hero-lg',
+    barHeightClass: 'h-1.5',
     multColor: 'white',
+    shadowStyle: shadows.orangeHero,
   },
   navy: {
     bgClass: 'bg-navy',
-    barHeightClass: 'h-1', // 4px
+    paddingClass: 'p-4',
+    radiusClass: 'rounded-hero',
+    barHeightClass: 'h-1',
     multColor: 'orange',
+    shadowStyle: shadows.navyCard,
   },
 };
 
@@ -114,8 +126,8 @@ export function HeroCard({
 
   return (
     <View
-      style={shadows.card}
-      className={`rounded-hero-lg p-card-pad ${v.bgClass}`}
+      style={v.shadowStyle}
+      className={`${v.radiusClass} ${v.paddingClass} ${v.bgClass}`}
       testID={testID}
     >
       {/* 상단 라벨 + ❓ info 아이콘 */}

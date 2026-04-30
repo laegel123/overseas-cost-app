@@ -7,7 +7,7 @@ import * as React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
-import { HERO_SEOUL_BAR_OPACITY } from '@/theme/tokens';
+import { HERO_SEOUL_BAR_OPACITY, shadows } from '@/theme/tokens';
 
 import { HeroCard } from '../HeroCard';
 
@@ -24,29 +24,40 @@ const baseProps = {
 describe('HeroCard', () => {
   // ─── Variant ──────────────────────────────────────────────────────────────
   describe('variant', () => {
-    it('orange — bg-orange + 6px progress bar (h-1.5)', () => {
+    it('orange — bg-orange + p-hero-pad + rounded-hero-lg + 6px bar + orangeHero shadow', () => {
       render(
         <HeroCard {...baseProps} variant="orange" swPct={0.5} cwPct={0.5} testID="h" />,
       );
       const root = screen.getByTestId('h');
       expect(root.props.className).toContain('bg-orange');
+      expect(root.props.className).toContain('p-hero-pad');
+      expect(root.props.className).toContain('rounded-hero-lg');
+      // shadow — design/README §3 의 orange hero 스펙 (rgba 0.25). tokens.ts 단일 출처.
+      expect(root.props.style).toEqual(shadows.orangeHero);
       const bars = screen.getByTestId('h-bars');
       expect(bars.props.className).toContain('h-1.5');
     });
 
-    it('navy — bg-navy + 4px progress bar (h-1) + mult orange 강조', () => {
+    it('navy — bg-navy + p-4 + rounded-hero (20px) + 4px bar + mult orange + navyCard shadow', () => {
       render(
         <HeroCard {...baseProps} variant="navy" swPct={0.5} cwPct={0.5} testID="h" />,
       );
       const root = screen.getByTestId('h');
-      expect(root.props.className).toContain('bg-navy');
+      const rootClasses = root.props.className.split(/\s+/);
+      expect(rootClasses).toContain('bg-navy');
+      // p-4 (16px, tailwind default) — design/README §4 Detail navy hero
+      expect(rootClasses).toContain('p-4');
+      // rounded-hero (20px) ≠ rounded-hero-lg (22px). split 으로 prefix 충돌 차단.
+      expect(rootClasses).toContain('rounded-hero');
+      expect(rootClasses).not.toContain('rounded-hero-lg');
+      // shadow — design §4 navy hero 스펙 (rgba 0.18)
+      expect(root.props.style).toEqual(shadows.navyCard);
       const mult = screen.getByText('↑1.9×');
       expect(mult.props.className).toContain('text-orange');
       const bars = screen.getByTestId('h-bars');
-      // h-1 은 h-1.5 의 prefix 라 split + 정확 토큰 검사로 false-positive 차단
-      const classes = bars.props.className.split(/\s+/);
-      expect(classes).toContain('h-1');
-      expect(classes).not.toContain('h-1.5');
+      const barClasses = bars.props.className.split(/\s+/);
+      expect(barClasses).toContain('h-1');
+      expect(barClasses).not.toContain('h-1.5');
     });
 
     it('orange — mult 색은 white', () => {
@@ -167,6 +178,19 @@ describe('HeroCard', () => {
         />,
       );
       expect(screen.getByLabelText('가정값 자세히 보기')).toBeTruthy();
+    });
+
+    it('info 버튼 hitSlop — 13×4 → icon 18 + slop 26 = 44 (UI_GUIDE §617)', () => {
+      render(
+        <HeroCard
+          {...baseProps}
+          variant="orange"
+          onInfoPress={jest.fn()}
+          testID="h"
+        />,
+      );
+      const btn = screen.getByTestId('h-info');
+      expect(btn.props.hitSlop).toEqual({ top: 13, bottom: 13, left: 13, right: 13 });
     });
   });
 

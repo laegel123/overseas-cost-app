@@ -63,6 +63,9 @@ module.exports = {
         'screen-x-loose': '22px',
         section: '16px',
         'card-pad': '14px',
+        // HeroCard orange variant 전용 (design/README §3 — padding 18).
+        // navy variant 는 16px = tailwind default `p-4` 재사용.
+        'hero-pad': '18px',
       },
     },
   },
