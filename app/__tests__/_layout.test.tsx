@@ -20,6 +20,7 @@ import RootLayout from '../_layout';
 jest.mock('@/store', () => ({
   waitForStoresOrTimeout: jest.fn(),
   usePersonaStore: jest.fn(),
+  bridgeLastSyncFromMeta: jest.fn(),
 }));
 
 jest.mock('@/theme/fonts', () => ({
@@ -39,6 +40,8 @@ const mockedUseAppFonts = jest.requireMock('@/theme/fonts').useAppFonts as jest.
 const mockedWaitForStoresOrTimeout = jest.requireMock('@/store')
   .waitForStoresOrTimeout as jest.Mock;
 const mockedUsePersonaStore = jest.requireMock('@/store').usePersonaStore as jest.Mock;
+const mockedBridgeLastSync = jest.requireMock('@/store')
+  .bridgeLastSyncFromMeta as jest.Mock;
 const mockedUseRouter = jest.requireMock('expo-router').useRouter as jest.Mock;
 const mockedUseSegments = jest.requireMock('expo-router').useSegments as jest.Mock;
 const mockedHideAsync = SplashScreen.hideAsync as jest.Mock;
@@ -75,6 +78,7 @@ describe('RootLayout 부트로더', () => {
     mockedUseRouter.mockReturnValue({ replace: replaceMock, push: jest.fn(), back: jest.fn() });
     mockedUseSegments.mockReturnValue([]);
     setPersona(true); // 기본: onboarded=true → step 2 의 redirect 가 트리거되지 않음
+    mockedBridgeLastSync.mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -243,6 +247,54 @@ describe('RootLayout 부트로더', () => {
     });
 
     expect(replaceMock).not.toHaveBeenCalled();
+  });
+
+  // ─── step 4 ────────────────────────────────────────────────────────────
+
+  it('storesHydrated 진입 시 bridgeLastSyncFromMeta 1회 호출', async () => {
+    mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
+    mockedWaitForStoresOrTimeout.mockResolvedValue('ok');
+
+    render(<RootLayout />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(mockedBridgeLastSync).toHaveBeenCalledTimes(1);
+  });
+
+  it('bridge 실패 → 부팅 흐름 차단 안 함 (replace 정상 호출)', async () => {
+    mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
+    mockedWaitForStoresOrTimeout.mockResolvedValue('ok');
+    mockedBridgeLastSync.mockRejectedValue(new Error('bridge boom'));
+    setPersona(false);
+    mockedUseSegments.mockReturnValue(['(tabs)']);
+
+    render(<RootLayout />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    // 라우팅은 진행
+    expect(replaceMock).toHaveBeenCalledWith('/onboarding');
+    // dev 콘솔 로그 (silent fail 금지)
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '[app-shell] lastSync bridge failed:',
+      expect.any(Error),
+    );
+  });
+
+  it('storesHydrated false 동안 bridge 호출 0회', async () => {
+    mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
+    mockedWaitForStoresOrTimeout.mockReturnValue(new Promise(() => undefined));
+
+    render(<RootLayout />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(mockedBridgeLastSync).not.toHaveBeenCalled();
   });
 
   it('timeout fallback → INITIAL onboarded=false 가정 시 /onboarding 자연 redirect', async () => {

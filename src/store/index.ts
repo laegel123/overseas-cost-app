@@ -23,3 +23,4 @@ export {
   waitForAllStoresHydrated,
   waitForStoresOrTimeout,
 } from './hydration';
+export { bridgeLastSyncFromMeta } from './lastSyncBridge';

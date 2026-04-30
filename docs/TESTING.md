@@ -818,6 +818,15 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 - [ ] 호출 전: 빈 객체 또는 throws (정책)
 - [ ] 동기 함수
 
+#### `getLastSync(): Promise<string | null>` (app-shell phase step 4)
+
+`meta:lastSync` 메타키 즉시 read. 캐시 새로고침 트리거 안 함. 부트로더가
+`useSettingsStore.lastSync` 단방향 sync 에 사용 (DATA.md §269).
+
+- [x] 메타키 존재 → ISO string 반환
+- [x] 메타키 없음 → null 반환
+- [x] saveCacheEntry 가 갱신한 메타키와 round-trip 일치
+
 #### `validateCity(json): CityCostData` — 개별 도시 스키마 검증
 
 (§14 에서 상세 매트릭스)
@@ -1302,6 +1311,17 @@ throw → `<ErrorView fatal />` + "다시 시작" CTA. AppError vs 외부 Error
 - [x] reset → 자식 다시 mount (에러 멎으면 정상 렌더)
 - [x] onError 콜백 — error + componentStack 정보 전달
 
+### 9.20.3 `src/store/lastSyncBridge.ts` (app-shell phase step 4)
+
+`meta:lastSync` (data layer) → `useSettingsStore.lastSync` 단방향 동기화.
+data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
+후 1회 호출. 비차단 best-effort — bridge 실패는 부팅 흐름 차단 안 함.
+
+- [x] meta = ISO string, store = null → store 갱신
+- [x] meta = null, store = ISO string → store null 로 갱신 (data 가 source)
+- [x] meta === store → no-op (불필요한 setState 방지)
+- [x] meta != store → store 가 새 값으로 갱신
+
 ### 9.21 `app/_layout.tsx` (루트 레이아웃)
 
 - [x] 폰트 로딩 + 모든 스토어 hydration 완료 전: SplashScreen 유지 (app-shell step 0)
@@ -1317,7 +1337,8 @@ throw → `<ErrorView fatal />` + "다시 시작" CTA. AppError vs 외부 Error
 - [x] 폰트 로드 실패: graceful fallback (시스템 폰트) (app-shell step 0)
 - [x] hydration timeout (5s) → INITIAL_STATE fallback + warn (app-shell step 1, ADR-052)
 - [x] unmount race: cancelled 플래그로 setState after unmount 방지 (app-shell step 0)
-- [ ] meta:lastSync → useSettingsStore.lastSync 단방향 sync (app-shell step 4)
+- [x] meta:lastSync → useSettingsStore.lastSync 단방향 sync (app-shell step 4)
+- [x] bridge 실패 → 부팅 흐름 차단 안 함 + dev 콘솔 로그 (app-shell step 4)
 
 ### 9.22 `app/onboarding.tsx`
 

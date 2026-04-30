@@ -379,6 +379,29 @@ export function getAllCities(): CitiesMap {
 }
 
 /**
+ * AsyncStorage 의 meta:lastSync 를 즉시 반환. 캐시 새로고침 트리거 안 함.
+ *
+ * 부트로더 (app-shell phase) 가 store 의 useSettingsStore.lastSync 를 data layer
+ * 측 source of truth 와 동기화할 때 사용 (DATA.md §269). IO 에러 / 손상은 null
+ * 로 fallback (silent fail 아님 — DEV 콘솔 로그 + null 안전 반환).
+ *
+ * @returns ISO string (메타키 존재) | null (콜드스타트 / 시드 fallback / IO 실패)
+ */
+export async function getLastSync(): Promise<string | null> {
+  try {
+    return await AsyncStorage.getItem(META_LAST_SYNC_KEY);
+  } catch (e) {
+    /* istanbul ignore next: AsyncStorage 가 throw 하는 경로는 native 측 이슈 — 테스트 환경에서 도달 불가하지만 운영 가시성 위해 가드 */
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.error('[data] getLastSync IO 실패:', e);
+    }
+    /* istanbul ignore next */
+    return null;
+  }
+}
+
+/**
  * 강제 새로고침 — 설정 화면 "데이터 갱신" 메뉴.
  *
  * - data:all:v1 캐시 삭제 → bypassCache=true 로 loadAllCities 호출

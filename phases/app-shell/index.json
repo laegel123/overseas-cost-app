@@ -37,7 +37,11 @@
     {
       "step": 4,
       "name": "last-sync-bridge",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T14:15:00+0900",
+      "summary": "data layer (meta:lastSync) → useSettingsStore.lastSync 단방향 sync. src/lib/data.ts 에 getLastSync() public export 추가. src/store/lastSyncBridge.ts (bridgeLastSyncFromMeta) 신규 — meta != store 일 때만 setState. RootLayout 가 storesHydrated 후 비차단 호출 (실패는 dev 콘솔 로그). 10 신규 테스트 (총 450). 전체 lib/store/components 100% 커버리지.",
+      "completed_at": "2026-04-30T14:35:00+0900"
     }
-  ]
+  ],
+  "completed_at": "2026-04-30T14:35:00+0900"
 }

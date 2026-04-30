@@ -7,7 +7,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
 import { ErrorBoundary } from '@/components';
-import { usePersonaStore, waitForStoresOrTimeout } from '@/store';
+import { bridgeLastSyncFromMeta, usePersonaStore, waitForStoresOrTimeout } from '@/store';
 import { useAppFonts } from '@/theme/fonts';
 import { colors } from '@/theme/tokens';
 
@@ -68,6 +68,17 @@ export default function RootLayout() {
       router.replace('/(tabs)');
     }
   }, [bootReady, onboarded, segments, router]);
+
+  // meta:lastSync ↔ useSettingsStore.lastSync 단방향 sync (DATA.md §269).
+  // 비차단 best-effort — bridge 실패는 부팅 흐름 차단 안 함.
+  useEffect(() => {
+    if (!storesHydrated) return;
+    bridgeLastSyncFromMeta().catch((e: unknown) => {
+      if (__DEV__) {
+        console.error('[app-shell] lastSync bridge failed:', e);
+      }
+    });
+  }, [storesHydrated]);
 
   if (!bootReady) {
     // FOUC + AsyncStorage race 방지 — ARCHITECTURE.md §부팅·hydration 순서.
