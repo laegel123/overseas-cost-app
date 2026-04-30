@@ -37,6 +37,9 @@ const PADDING_CLASS: Record<ScreenPadding, string> = {
 
 const DEFAULT_EDGES: readonly ScreenEdge[] = ['top', 'bottom'];
 
+// 모듈 레벨 상수 — 매 렌더 새 객체 참조 회피로 ScrollView 의 불필요한 re-render 방지.
+const SCROLL_CONTENT_STYLE: ViewStyle = { flexGrow: 1 };
+
 export function Screen({
   children,
   scroll = false,
@@ -50,11 +53,10 @@ export function Screen({
 
   if (scroll) {
     // ScrollView 는 padding 을 contentContainerStyle 로 받아야 children flex 가 정상 동작.
-    const contentContainerStyle: ViewStyle = { flexGrow: 1 };
     return (
       <SafeAreaView edges={[...safeEdges]} className="flex-1 bg-white">
         <ScrollView
-          contentContainerStyle={contentContainerStyle}
+          contentContainerStyle={SCROLL_CONTENT_STYLE}
           className={paddingClass}
           testID={testID}
         >

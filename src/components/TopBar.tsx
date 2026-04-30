@@ -5,7 +5,7 @@
  * 은 tailwind config — 매직 hex / px 금지.
  *
  * 좌측 back 버튼: 36×36 light bg + Icon 'back'.
- * 우측 버튼: 36×36, 기본 bg 없음. accent='star' 일 때 orange-soft bg (즐겨찾기 강조).
+ * 우측 버튼: 36×36, 기본 bg-light. accent='star' 일 때 orange-soft bg (즐겨찾기 강조).
  * title: H2 navy, 가운데 정렬, 1줄 ellipsis.
  * subtitle: title 아래 Tiny gray-2, 1줄 ellipsis.
  */

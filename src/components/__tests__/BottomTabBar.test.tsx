@@ -62,16 +62,18 @@ describe('BottomTabBar', () => {
   });
 
   it('iPhone SE (no home indicator) — bottom inset 0 가정', () => {
-    // Per-test mockReturnValue 갱신.
+    // Per-test mockReturnValue 갱신. assertion 실패해도 다른 테스트가 SE 값으로
+    // 오염되지 않도록 try/finally 로 복원 보장.
     const safeArea = jest.requireMock('react-native-safe-area-context');
     const original = safeArea.useSafeAreaInsets;
     safeArea.useSafeAreaInsets = () => ({ top: 20, bottom: 0, left: 0, right: 0 });
 
-    render(<BottomTabBar active="home" onSelect={jest.fn()} testID="tb-se" />);
-    const root = screen.getByTestId('tb-se');
-    expect(root.props.style).toMatchObject({ paddingBottom: 0 });
-
-    safeArea.useSafeAreaInsets = original;
+    try {
+      render(<BottomTabBar active="home" onSelect={jest.fn()} testID="tb-se" />);
+      expect(screen.getByTestId('tb-se').props.style).toMatchObject({ paddingBottom: 0 });
+    } finally {
+      safeArea.useSafeAreaInsets = original;
+    }
   });
 
   it('탭의 accessibilityLabel — 한국어 라벨 그대로', () => {
