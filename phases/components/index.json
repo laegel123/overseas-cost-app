@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "layout-chrome",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T15:35:00+0900",
+      "summary": "Screen + TopBar + BottomTabBar — 화면 chrome. Screen: SafeAreaView wrap + padding 토큰 4 case + 선택적 ScrollView. TopBar: 8 prop 매트릭스 + back/right 버튼. BottomTabBar: 4 탭 한국어 라벨 + active orange / inactive gray-2 + safe area bottom inset. tab-label fontSize 토큰 신규 (10px non-uppercase). jest.setup.js 에 react-native-safe-area-context mock 추가 (passthrough + iPhone-X inset). 53 신규 테스트 (총 601). src/components 100/100/100/100.",
+      "completed_at": "2026-04-30T16:05:00+0900"
     },
     {
       "step": 3,

@@ -43,6 +43,9 @@ module.exports = {
         small: ['12px', { lineHeight: '16px' }],
         tiny: ['11px', { lineHeight: '14px' }],
         'mono-label': ['10px', { lineHeight: '12px', letterSpacing: '1px' }],
+        // BottomTabBar 라벨 전용 — mono-label 과 size 동일 (10px) 하지만
+        // letter-spacing / uppercase 없음. design/README §Bottom Tab Bar.
+        'tab-label': ['10px', { lineHeight: '12px' }],
       },
       borderRadius: {
         chip: '999px',
