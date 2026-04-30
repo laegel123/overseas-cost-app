@@ -1211,6 +1211,9 @@ phase 에서 재검토.
 - [x] info 버튼 hitSlop = 13×4 → icon 18 + slop 26 = 44 (UI_GUIDE §617 최소 터치 타겟)
 - [x] centerCaption `numberOfLines={1}` — `+165만/월` 같은 슬래시 줄바꿈 방지 (design §3)
 - [ ] orange variant decorative circle (120×120, white opacity 0.08, 우상단 absolute) — 화면 phase 진입 시 구현 (defer)
+- [x] 가운데 컬럼 `shrink-0` — design §3 의 squeeze 방지. 좌우 flex-1 grow 압력에도 mult/caption 폭 보존
+- [x] center mult `numberOfLines={1}` — 좌우 value 와 일관 (squeeze 방지)
+- [x] snapshot — orange / navy variant 각 1 (TESTING.md §6.1 복잡 컴포넌트 요건)
 - [x] ❓ info 아이콘 — `showInfoIcon=true (default)` + onInfoPress 있음 → 렌더 + 탭 콜백
 - [x] ❓ 미표시 (`showInfoIcon=false` 또는 onInfoPress 미제공) → 렌더 안 함 (silent no-op 회피)
 - [x] info 버튼 a11y — role=button + label "가정값 자세히 보기"

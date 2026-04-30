@@ -69,11 +69,13 @@ describe('HeroCard', () => {
 
   // ─── Props 렌더 ───────────────────────────────────────────────────────────
   describe('props 렌더', () => {
-    it('left/right label + value + center mult 모두 렌더', () => {
+    it('left/right label + value + center mult 모두 렌더 + center mult numberOfLines={1}', () => {
       render(<HeroCard {...baseProps} variant="orange" testID="h" />);
       expect(screen.getByText('서울')).toBeTruthy();
       expect(screen.getByText('175만/월')).toBeTruthy();
-      expect(screen.getByText('↑1.9×')).toBeTruthy();
+      const mult = screen.getByText('↑1.9×');
+      expect(mult).toBeTruthy();
+      expect(mult.props.numberOfLines).toBe(1);
       expect(screen.getByText('밴쿠버')).toBeTruthy();
       expect(screen.getByText('340만/월')).toBeTruthy();
     });
@@ -301,6 +303,21 @@ describe('HeroCard', () => {
       expect(screen.queryByTestId('h-bar-seoul')).toBeNull();
     });
 
+    it('가운데 컬럼 shrink-0 — squeeze 방지 (design §3)', () => {
+      // 좌우 flex-1 의 grow 압력에 가운데 mult/caption 폭이 squeeze 되지 않도록.
+      render(
+        <HeroCard
+          {...baseProps}
+          variant="orange"
+          centerMult="↑10.0×"
+          centerCaption="+9,999만/월"
+          testID="h"
+        />,
+      );
+      const center = screen.getByTestId('h-center');
+      expect(center.props.className).toContain('shrink-0');
+    });
+
     it('음수 / >1 입력 → clamp 후 정규화 + dev warn', () => {
       const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
       try {
@@ -321,6 +338,34 @@ describe('HeroCard', () => {
       } finally {
         warnSpy.mockRestore();
       }
+    });
+  });
+
+  // ─── snapshot — TESTING.md §6.1 복잡 컴포넌트 variant 별 1 ─────────────────
+  describe('snapshot', () => {
+    it('orange variant — full props (footer 포함)', () => {
+      const { toJSON } = render(
+        <HeroCard
+          {...baseProps}
+          variant="orange"
+          footer="평균 가정 기준"
+          centerCaption="+165만/월"
+          testID="h"
+        />,
+      );
+      expect(toJSON()).toMatchSnapshot();
+    });
+
+    it('navy variant — full props', () => {
+      const { toJSON } = render(
+        <HeroCard
+          {...baseProps}
+          variant="navy"
+          centerCaption="+165만/월"
+          testID="h"
+        />,
+      );
+      expect(toJSON()).toMatchSnapshot();
     });
   });
 });

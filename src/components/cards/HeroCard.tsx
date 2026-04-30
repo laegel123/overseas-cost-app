@@ -149,7 +149,12 @@ export function HeroCard({
             {leftValue}
           </Display>
         </View>
-        <View className="items-center px-2">
+        <View
+          className="items-center px-2 shrink-0"
+          {...(testID !== undefined ? { testID: `${testID}-center` } : {})}
+        >
+          {/* shrink-0 — design §3 의 "flexShrink: 0 으로 squeeze 방지". 좌우
+              flex-1 의 grow 압력에도 가운데 mult / caption 폭 보존. */}
           <Display color={v.multColor} numberOfLines={1}>
             {centerMult}
           </Display>
