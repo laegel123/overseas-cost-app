@@ -29,7 +29,10 @@
     {
       "step": 3,
       "name": "atoms",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T18:20:00+0900",
+      "summary": "MenuRow + RegionPill — 단순 atom 2종. MenuRow: 3 variant (default/hot/dim) + rightText + isLast border + disabled + showChevron. RegionPill: active/inactive + 옵셔널 count + hit slop 44×44. 둘 다 한국어 a11y label + role='button'. 25 신규 테스트 (총 632). src/components 100/100/100/100.",
+      "completed_at": "2026-04-30T18:35:00+0900"
     },
     {
       "step": 4,
