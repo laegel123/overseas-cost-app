@@ -113,3 +113,24 @@ export const HERO_SEOUL_BAR_OPACITY = {
   orange: 0.5,
   navy: 0.15,
 } as const;
+
+/**
+ * HeroCard 의 footer 투명도 (design/README §3) — `평균 가정 기준 · ❓ 자세히`
+ * 가 본문보다 약하게 강조되도록 0.7.
+ */
+export const HERO_FOOTER_OPACITY = 0.7;
+
+/**
+ * RN fontFamily raw 이름 — `useFonts` / `assets/fonts` / tailwind config 의
+ * fontFamily alias 와 1:1 일치. NativeWind className 으로 처리할 수 없는
+ * inline style override 시 본 상수만 사용 (매직 스트링 방지).
+ */
+export const FONT_FAMILY_RAW = {
+  manrope: 'Manrope',
+  manropeMedium: 'Manrope-Medium',
+  manropeSemiBold: 'Manrope-SemiBold',
+  manropeBold: 'Manrope-Bold',
+  manropeExtraBold: 'Manrope-ExtraBold',
+  mulish: 'Mulish',
+  pretendard: 'Pretendard',
+} as const;

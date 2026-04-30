@@ -7,7 +7,12 @@ import * as React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
-import { HERO_SEOUL_BAR_OPACITY, shadows } from '@/theme/tokens';
+import {
+  FONT_FAMILY_RAW,
+  HERO_FOOTER_OPACITY,
+  HERO_SEOUL_BAR_OPACITY,
+  shadows,
+} from '@/theme/tokens';
 
 import { HeroCard } from '../HeroCard';
 
@@ -80,10 +85,12 @@ describe('HeroCard', () => {
       expect(leftValue.props.className).toContain('font-manrope-bold');
       expect(leftValue.props.numberOfLines).toBe(1);
 
-      // 우측 값 — H2 size (18px) + fontFamily inline override (Manrope ExtraBold 800)
+      // 우측 값 — H2 size (18px) + fontFamily 토큰 inline override (ExtraBold 800)
       const rightValue = screen.getByText('340만/월');
       expect(rightValue.props.className).toContain('text-h2');
-      expect(rightValue.props.style).toEqual({ fontFamily: 'Manrope-ExtraBold' });
+      expect(rightValue.props.style).toEqual({
+        fontFamily: FONT_FAMILY_RAW.manropeExtraBold,
+      });
       expect(rightValue.props.numberOfLines).toBe(1);
 
       // 가운데 mult — Display (30px Manrope ExtraBold 800), 시각 계층 1순위
@@ -112,7 +119,7 @@ describe('HeroCard', () => {
       expect(screen.queryByText('+165만/월')).toBeNull();
     });
 
-    it('footer 있을 때 → 렌더', () => {
+    it('footer 있을 때 → 렌더 + opacity 0.7 (design §3)', () => {
       render(
         <HeroCard
           {...baseProps}
@@ -122,11 +129,15 @@ describe('HeroCard', () => {
         />,
       );
       expect(screen.getByText('평균 가정 기준')).toBeTruthy();
+      // footer wrapper 의 opacity 토큰 검증
+      const footerWrap = screen.getByTestId('h-footer');
+      expect(footerWrap.props.style).toMatchObject({ opacity: HERO_FOOTER_OPACITY });
     });
 
-    it('footer 미제공 → 미렌더', () => {
+    it('footer 미제공 → 미렌더 (wrapper 도 없음)', () => {
       render(<HeroCard {...baseProps} variant="orange" testID="h" />);
       expect(screen.queryByText('평균 가정 기준')).toBeNull();
+      expect(screen.queryByTestId('h-footer')).toBeNull();
     });
 
     it('상단 고정 라벨 "한 달 예상 총비용" 렌더 (mono-label uppercase)', () => {

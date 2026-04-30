@@ -229,6 +229,12 @@ exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
   </View>
   <View
     className="mt-3"
+    style={
+      {
+        "opacity": 0.7,
+      }
+    }
+    testID="h-footer"
   >
     <Text
       accessibilityRole="text"

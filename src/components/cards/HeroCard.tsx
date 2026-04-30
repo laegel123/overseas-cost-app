@@ -7,7 +7,13 @@ import * as React from 'react';
 
 import { Pressable, type ViewStyle, View } from 'react-native';
 
-import { colors, HERO_SEOUL_BAR_OPACITY, shadows } from '@/theme/tokens';
+import {
+  colors,
+  FONT_FAMILY_RAW,
+  HERO_FOOTER_OPACITY,
+  HERO_SEOUL_BAR_OPACITY,
+  shadows,
+} from '@/theme/tokens';
 
 import { Icon } from '../Icon';
 import { Display, H2, MonoLabel, Tiny } from '../typography/Text';
@@ -174,7 +180,7 @@ export function HeroCard({
           <H2
             color="white"
             numberOfLines={1}
-            style={{ fontFamily: 'Manrope-ExtraBold' }}
+            style={{ fontFamily: FONT_FAMILY_RAW.manropeExtraBold }}
           >
             {rightValue}
           </H2>
@@ -202,9 +208,13 @@ export function HeroCard({
         )}
       </View>
 
-      {/* footer */}
+      {/* footer — design §3 의 opacity 0.7 (본문보다 약화) */}
       {footer !== undefined && (
-        <View className="mt-3">
+        <View
+          className="mt-3"
+          style={{ opacity: HERO_FOOTER_OPACITY }}
+          {...(testID !== undefined ? { testID: `${testID}-footer` } : {})}
+        >
           <Tiny color="white">{footer}</Tiny>
         </View>
       )}

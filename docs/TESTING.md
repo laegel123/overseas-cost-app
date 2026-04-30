@@ -1195,9 +1195,10 @@ phase 에서 재검토.
 **Props:**
 
 - [x] leftLabel / leftValue / rightLabel / rightValue / centerMult 모두 렌더
-- [x] 시각 계층 (design §3 / hi-fi compare.jsx) — 좌(서울) 18px Manrope Bold 700 (`H2`), 우(도시) 18px Manrope ExtraBold 800 (`H2` + fontFamily inline override), 가운데(mult) 30px Manrope ExtraBold 800 (`Display`). 가운데 = 시각 1순위.
+- [x] 시각 계층 (design §3 / hi-fi compare.jsx) — 좌(서울) 18px Manrope Bold 700 (`H2`), 우(도시) 18px Manrope ExtraBold 800 (`H2` + `FONT_FAMILY_RAW.manropeExtraBold` inline override), 가운데(mult) 30px Manrope ExtraBold 800 (`Display`). 가운데 = 시각 1순위. 폰트 raw 이름은 `tokens.ts FONT_FAMILY_RAW` 단일 출처 (매직 스트링 회피).
 - [x] centerCaption 있을 때 렌더 / 미제공 시 미렌더
-- [x] footer 있을 때 렌더 / 미제공 시 미렌더
+- [x] footer 있을 때 렌더 + wrapper opacity = `HERO_FOOTER_OPACITY` (0.7, design §3 본문 약화)
+- [x] footer 미제공 → wrapper 자체 미렌더
 - [x] 상단 고정 라벨 "한 달 예상 총비용" 렌더 (한국어는 MonoLabel uppercase 변환 없음)
 - [x] orange 합 = 1 → 흰 segment 0.5 / 1.0 대비 (`HERO_SEOUL_BAR_OPACITY.orange`, design §3)
 - [x] navy variant — 트랙 bg-white opacity 0.15 (`HERO_SEOUL_BAR_OPACITY.navy`) + 도시 막대 bg-orange (design §4 detail navy hero)
