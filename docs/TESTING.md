@@ -1181,33 +1181,51 @@ chrome 클래스 검증은 inner 노드 기준).
 - [ ] 탭 변경 시 햅틱 피드백 — v1.0 미스코프 (별도 ADR)
 - [ ] 라벨 폰트는 design/README "Mulish 600" 이지만 Mulish-SemiBold 에셋 부재로 Mulish Regular 로 대체. v1.x 에셋 추가 시 갱신.
 
-### 9.14 `src/components/cards/HeroCard.tsx`
+### 9.14 `src/components/cards/HeroCard.tsx` (components phase step 4)
+
+Compare 화면 hero card. design/README §3. 2 variant + 정규화 progress bar +
+❓ info 아이콘 hook. gradient 미도입 (단색 fallback) — step4.md 결정, 후속
+phase 에서 재검토.
 
 **Variant:**
 
-- [ ] `variant="orange"`: orange bg, white text, 6px progress, hero shadow
-- [ ] `variant="navy"`: navy bg, white text, 4px progress, mult 색상 orange 강조
+- [x] `variant="orange"`: bg-orange + p-hero-pad (18px) + rounded-hero-lg (22px) + 6px progress (h-1.5) + mult white + `shadows.orangeHero` (rgba 0.25)
+- [x] `variant="navy"`: bg-navy + p-4 (16px) + rounded-hero (20px) + 4px progress (h-1) + mult orange 강조 + `shadows.navyCard` (rgba 0.18). 단색 fallback (gradient 미도입)
 
 **Props:**
 
-- [ ] leftLabel, leftValue 렌더
-- [ ] centerMult 렌더
-- [ ] centerCaption 렌더
-- [ ] rightLabel, rightValue 렌더
-- [ ] swPct + cwPct = 1.0 정규화
-- [ ] swPct=0, cwPct=1 (서울 0, 도시 100): 막대 전부 도시
-- [ ] swPct=1, cwPct=0: 막대 전부 서울
-- [ ] swPct + cwPct ≠ 1: 정규화 또는 warn (정책)
-- [ ] footer 표시
-- [ ] footer omit 가능
-- [ ] ❓ 아이콘 탭 → onInfoPress 호출
-- [ ] ❓ 미표시 옵션
+- [x] leftLabel / leftValue / rightLabel / rightValue / centerMult 모두 렌더
+- [x] 시각 계층 (design §3 / hi-fi compare.jsx) — 좌(서울) 18px Manrope Bold 700 (`H2`), 우(도시) 18px Manrope ExtraBold 800 (`H2` + `FONT_FAMILY_RAW.manropeExtraBold` inline override), 가운데(mult) 30px Manrope ExtraBold 800 (`Display`). 가운데 = 시각 1순위. 폰트 raw 이름은 `tokens.ts FONT_FAMILY_RAW` 단일 출처 (매직 스트링 회피).
+- [x] centerCaption 있을 때 렌더 / 미제공 시 미렌더
+- [x] footer 있을 때 렌더 + wrapper opacity = `HERO_FOOTER_OPACITY` (0.7, design §3 본문 약화)
+- [x] footer 미제공 → wrapper 자체 미렌더
+- [x] 상단 고정 라벨 "한 달 예상 총비용" 렌더 (한국어는 MonoLabel uppercase 변환 없음)
+- [x] orange 합 = 1 → 흰 segment 0.5 / 1.0 대비 (`HERO_SEOUL_BAR_OPACITY.orange`, design §3)
+- [x] navy variant — 트랙 bg-white opacity 0.15 (`HERO_SEOUL_BAR_OPACITY.navy`) + 도시 막대 bg-orange (design §4 detail navy hero)
+- [x] sw=0, cw=1 → 도시 막대만 렌더 (서울 미렌더)
+- [x] sw=1, cw=0 → 서울 막대만 렌더
+- [x] 합 = 0 → 양쪽 막대 미렌더
+- [x] 합 = 1 (0.4 / 0.6) → 비율 그대로 보존
+- [x] 합 < 1 (0.3 + 0.3 = 0.6) → 정규화 후 0.5 / 0.5
+- [x] 합 = 2 (1 + 1) → 정규화 후 0.5 / 0.5
+- [x] 음수 / >1 입력 → clamp + dev console.warn
+- [x] progress bar 두께 — orange variant `h-1.5` (6px), navy `h-1` (4px)
+- [x] info 버튼 hitSlop = 13×4 → icon 18 + slop 26 = 44 (UI_GUIDE §617 최소 터치 타겟)
+- [x] centerCaption `numberOfLines={1}` — `+165만/월` 같은 슬래시 줄바꿈 방지 (design §3)
+- [ ] orange variant decorative circle (120×120, white opacity 0.08, 우상단 absolute) — 화면 phase 진입 시 구현 (defer)
+- [x] 가운데 컬럼 `shrink-0` — design §3 의 squeeze 방지. 좌우 flex-1 grow 압력에도 mult/caption 폭 보존
+- [x] center mult `numberOfLines={1}` — 좌우 value 와 일관 (squeeze 방지)
+- [x] snapshot — orange / navy variant 각 1 (TESTING.md §6.1 복잡 컴포넌트 요건)
+- [x] ❓ info 아이콘 — `showInfoIcon=true (default)` + onInfoPress 있음 → 렌더 + 탭 콜백
+- [x] ❓ 미표시 (`showInfoIcon=false` 또는 onInfoPress 미제공) → 렌더 안 함 (silent no-op 회피)
+- [x] info 버튼 a11y — role=button + label "가정값 자세히 보기"
+- [x] testID 미제공 → info / bar testID 분기 false branch 정상 동작
 
 **스트레스:**
 
-- [ ] 긴 값 ("999만") squeeze 안 됨 (numberOfLines=1, adjustsFontSizeToFit)
-- [ ] caption 슬래시 줄바꿈 방지 (`+165만/월`)
-- [ ] 이모지 포함 라벨
+- [x] 긴 값 ("9,999만/월" / "99,999만/월") → numberOfLines={1} squeeze 방지
+- [ ] caption 슬래시 줄바꿈 방지 (`+165만/월`) — 현재 numberOfLines={1} 만 적용. RN 의 `adjustsFontSizeToFit` 은 화면 phase 진입 시 실기기 검증 후 결정 (defer).
+- [ ] 이모지 포함 라벨 — RN Text 기본 이모지 렌더 라이브러리 책임 (검증 불요)
 
 ### 9.15 `src/components/MenuRow.tsx` (components phase step 3)
 

@@ -1,0 +1,247 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HeroCard snapshot navy variant — full props 1`] = `
+<View
+  className="rounded-hero p-4 bg-navy"
+  style={
+    {
+      "shadowColor": "#11263C",
+      "shadowOffset": {
+        "height": 12,
+        "width": 0,
+      },
+      "shadowOpacity": 0.18,
+      "shadowRadius": 32,
+    }
+  }
+  testID="h"
+>
+  <View
+    className="flex-row items-center justify-between"
+  >
+    <Text
+      accessibilityRole="text"
+      className="font-manrope-semibold text-mono-label text-white"
+    >
+      한 달 예상 총비용
+    </Text>
+  </View>
+  <View
+    className="flex-row items-end mt-3"
+  >
+    <View
+      className="flex-1"
+    >
+      <Text
+        accessibilityRole="text"
+        className="font-mulish text-tiny text-white"
+      >
+        서울
+      </Text>
+      <Text
+        accessibilityRole="header"
+        className="font-manrope-bold text-h2 text-white"
+        numberOfLines={1}
+      >
+        175만/월
+      </Text>
+    </View>
+    <View
+      className="items-center px-2 shrink-0"
+      testID="h-center"
+    >
+      <Text
+        accessibilityRole="header"
+        className="font-manrope-extrabold text-display text-orange"
+        numberOfLines={1}
+      >
+        ↑1.9×
+      </Text>
+      <Text
+        accessibilityRole="text"
+        className="font-manrope-semibold text-mono-label text-white"
+        numberOfLines={1}
+      >
+        +165만/월
+      </Text>
+    </View>
+    <View
+      className="flex-1 items-end"
+    >
+      <Text
+        accessibilityRole="text"
+        className="font-mulish text-tiny text-white"
+      >
+        밴쿠버
+      </Text>
+      <Text
+        accessibilityRole="header"
+        className="font-manrope-bold text-h2 text-white"
+        numberOfLines={1}
+        style={
+          {
+            "fontFamily": "Manrope-ExtraBold",
+          }
+        }
+      >
+        340만/월
+      </Text>
+    </View>
+  </View>
+  <View
+    className="flex-row mt-4 gap-1 h-1"
+    testID="h-bars"
+  >
+    <View
+      className="bg-white rounded-full"
+      style={
+        {
+          "flex": 0.5,
+          "opacity": 0.15,
+        }
+      }
+      testID="h-bar-seoul"
+    />
+    <View
+      className="bg-orange rounded-full"
+      style={
+        {
+          "flex": 0.5,
+        }
+      }
+      testID="h-bar-city"
+    />
+  </View>
+</View>
+`;
+
+exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
+<View
+  className="rounded-hero-lg p-hero-pad bg-orange"
+  style={
+    {
+      "shadowColor": "#FC6011",
+      "shadowOffset": {
+        "height": 12,
+        "width": 0,
+      },
+      "shadowOpacity": 0.25,
+      "shadowRadius": 32,
+    }
+  }
+  testID="h"
+>
+  <View
+    className="flex-row items-center justify-between"
+  >
+    <Text
+      accessibilityRole="text"
+      className="font-manrope-semibold text-mono-label text-white"
+    >
+      한 달 예상 총비용
+    </Text>
+  </View>
+  <View
+    className="flex-row items-end mt-3"
+  >
+    <View
+      className="flex-1"
+    >
+      <Text
+        accessibilityRole="text"
+        className="font-mulish text-tiny text-white"
+      >
+        서울
+      </Text>
+      <Text
+        accessibilityRole="header"
+        className="font-manrope-bold text-h2 text-white"
+        numberOfLines={1}
+      >
+        175만/월
+      </Text>
+    </View>
+    <View
+      className="items-center px-2 shrink-0"
+      testID="h-center"
+    >
+      <Text
+        accessibilityRole="header"
+        className="font-manrope-extrabold text-display text-white"
+        numberOfLines={1}
+      >
+        ↑1.9×
+      </Text>
+      <Text
+        accessibilityRole="text"
+        className="font-manrope-semibold text-mono-label text-white"
+        numberOfLines={1}
+      >
+        +165만/월
+      </Text>
+    </View>
+    <View
+      className="flex-1 items-end"
+    >
+      <Text
+        accessibilityRole="text"
+        className="font-mulish text-tiny text-white"
+      >
+        밴쿠버
+      </Text>
+      <Text
+        accessibilityRole="header"
+        className="font-manrope-bold text-h2 text-white"
+        numberOfLines={1}
+        style={
+          {
+            "fontFamily": "Manrope-ExtraBold",
+          }
+        }
+      >
+        340만/월
+      </Text>
+    </View>
+  </View>
+  <View
+    className="flex-row mt-4 gap-1 h-1.5"
+    testID="h-bars"
+  >
+    <View
+      className="bg-white rounded-full"
+      style={
+        {
+          "flex": 0.5,
+          "opacity": 0.5,
+        }
+      }
+      testID="h-bar-seoul"
+    />
+    <View
+      className="bg-white rounded-full"
+      style={
+        {
+          "flex": 0.5,
+        }
+      }
+      testID="h-bar-city"
+    />
+  </View>
+  <View
+    className="mt-3"
+    style={
+      {
+        "opacity": 0.7,
+      }
+    }
+    testID="h-footer"
+  >
+    <Text
+      accessibilityRole="text"
+      className="font-mulish text-tiny text-white"
+    >
+      평균 가정 기준
+    </Text>
+  </View>
+</View>
+`;

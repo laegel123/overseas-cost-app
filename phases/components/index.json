@@ -37,7 +37,10 @@
     {
       "step": 4,
       "name": "hero-card",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T18:35:00+0900",
+      "summary": "HeroCard — Compare 화면 시각 핵심. orange/navy 2 variant, 한 달 총비용 + 서울 vs 도시 듀얼 막대 + ❓ info hook. swPct/cwPct clamp [0,1] + 합 정규화 (합 0 시 막대 미표시) + dev warn. gradient 미도입 (navy variant 단색 fallback) — step4.md 결정. 22 신규 테스트 (총 656). src/components 100/100/100/100.",
+      "completed_at": "2026-04-30T19:10:00+0900"
     },
     {
       "step": 5,
