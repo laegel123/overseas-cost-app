@@ -75,6 +75,11 @@ describe('ErrorView', () => {
     expect(screen.getByLabelText('다시 시도')).toBeTruthy();
   });
 
+  it('screen — DEV 빌드에서 detail 표시', () => {
+    render(<ErrorView variant="screen" message="X" detail="ERR_SCREEN" />);
+    expect(screen.getByText('ERR_SCREEN')).toBeTruthy();
+  });
+
   it('retryLabel 명시 → default 무시', () => {
     const onRetry = jest.fn();
     render(

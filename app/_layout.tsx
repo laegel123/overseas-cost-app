@@ -18,20 +18,17 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 export default function RootLayout() {
   const { ready: fontsReady, error: fontsError } = useAppFonts();
   const [storesHydrated, setStoresHydrated] = useState(false);
-  // hydrationTimedOut 의 reader 는 step 3 (ErrorView 토스트) 에서 추가. 본 step
-  // 의 라우팅은 INITIAL_STATE 의 onboarded=false 를 통해 자연스럽게 onboarding
-  // 으로 redirect 되므로 별도 분기 불필요.
-  const [, setHydrationTimedOut] = useState(false);
   const router = useRouter();
   const segments = useSegments();
   const onboarded = usePersonaStore((s) => s.onboarded);
 
   useEffect(() => {
     let cancelled = false;
-    waitForStoresOrTimeout().then((result) => {
+    // timeout 결과는 INITIAL_STATE fallback 으로 onboarded=false → 라우팅이
+    // 자연스럽게 /onboarding 진입. 별도 state 노출은 미사용이라 제거.
+    waitForStoresOrTimeout().then(() => {
       if (cancelled) return;
       setStoresHydrated(true);
-      if (result === 'timeout') setHydrationTimedOut(true);
     });
     return () => {
       cancelled = true;
@@ -74,6 +71,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (!storesHydrated) return;
     bridgeLastSyncFromMeta().catch((e: unknown) => {
+      /* istanbul ignore else: __DEV__ 는 jest 환경에서 항상 true — production 분기는 운영 빌드 한정 */
       if (__DEV__) {
         console.error('[app-shell] lastSync bridge failed:', e);
       }

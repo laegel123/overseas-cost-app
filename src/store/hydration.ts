@@ -74,8 +74,8 @@ export const DEFAULT_HYDRATION_TIMEOUT_MS = 5000;
 export async function waitForStoresOrTimeout(
   timeoutMs: number = DEFAULT_HYDRATION_TIMEOUT_MS,
 ): Promise<'ok' | 'timeout'> {
-  // Promise 생성자는 동기 — timeoutId 는 Promise.race 진입 전에 항상 할당됨.
-  let timeoutId!: ReturnType<typeof setTimeout>;
+  // clearTimeout(undefined) 는 안전한 no-op — non-null 단언 없이 undefined-safe.
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
   const timeoutPromise = new Promise<'timeout'>((resolve) => {
     timeoutId = setTimeout(() => resolve('timeout'), timeoutMs);
   });
