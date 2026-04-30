@@ -191,6 +191,31 @@ describe('TopBar', () => {
       expect(screen.queryByLabelText('우측 메뉴')).toBeNull();
     });
 
+    it('rightIcon 만 (onRightPress 미제공) → 버튼 미렌더 (silent no-op 회피)', () => {
+      render(<TopBar title="x" rightIcon="star" testID="tb" />);
+      expect(screen.queryByTestId('tb-right')).toBeNull();
+    });
+
+    it('onRightPress 만 (rightIcon 미제공) → 버튼 미렌더', () => {
+      render(<TopBar title="x" onRightPress={jest.fn()} testID="tb" />);
+      expect(screen.queryByTestId('tb-right')).toBeNull();
+    });
+
+    it('titleVariant 기본 → H2 (18px) accessibilityRole=header', () => {
+      render(<TopBar title="제목" />);
+      const titleNode = screen.getByText('제목');
+      expect(titleNode.props.accessibilityRole).toBe('header');
+      // H2 의 className 확인 — text-h2 토큰
+      expect(titleNode.props.className).toContain('text-h2');
+    });
+
+    it('titleVariant="h3" → H3 (14px) — Compare 화면 사양', () => {
+      render(<TopBar title="제목" titleVariant="h3" />);
+      const titleNode = screen.getByText('제목');
+      expect(titleNode.props.className).toContain('text-h3');
+      expect(titleNode.props.className).not.toContain('text-h2');
+    });
+
     it('testID 미제공 → back/right 의 testID 도 미설정 (정상 렌더)', () => {
       // back + right 둘 다 렌더해서 양쪽 testID 분기 모두 cover.
       render(

@@ -1148,6 +1148,11 @@ chrome 클래스 검증은 inner 노드 기준).
 - [x] title + subtitle + right
 - [x] title + subtitle + back + right (full)
 
+**Title variant:**
+
+- [x] `titleVariant` 기본 'h2' (18px Manrope 800) — Home / Settings / Detail
+- [x] `titleVariant='h3'` (14px Manrope 700) — Compare 화면 사양
+
 **개별 동작:**
 
 - [x] back 버튼 탭 → onBack 호출
@@ -1155,6 +1160,7 @@ chrome 클래스 검증은 inner 노드 기준).
 - [x] right accent='star' → `bg-orange-soft`
 - [x] right accent='default' → `bg-light`
 - [x] right 버튼 탭 → onRightPress 호출
+- [x] **`rightIcon` + `onRightPress` 둘 다 있어야 버튼 렌더** — 한쪽만 주면 silent no-op 회피 차원에서 버튼 미렌더 (rightIcon-only / onRightPress-only 두 케이스 모두 검증)
 - [x] title 긴 문자열: `numberOfLines=1`
 - [x] subtitle 11px Tiny: `numberOfLines=1`
 - [x] back 버튼 a11y — `role='button'` + label `'뒤로가기'`

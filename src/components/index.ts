@@ -9,7 +9,7 @@ export { Screen } from './Screen';
 export type { ScreenEdge, ScreenPadding, ScreenProps } from './Screen';
 
 export { TopBar } from './TopBar';
-export type { TopBarProps } from './TopBar';
+export type { TopBarProps, TopBarTitleVariant } from './TopBar';
 
 export { BottomTabBar } from './BottomTabBar';
 export type { BottomTabBarProps, Tab } from './BottomTabBar';

@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 
 import { render, screen } from '@testing-library/react-native';
 
@@ -49,18 +49,17 @@ describe('Screen', () => {
     ['screen-x-tight', 'px-screen-x-tight'],
     ['screen-x-loose', 'px-screen-x-loose'],
   ] as const)('padding=%s → 클래스 %s 적용', (padding, expectedClass) => {
-    const { UNSAFE_getAllByType } = render(
-      <Screen padding={padding}>
+    // testID 기반 검증 — UNSAFE_getAllByType 대신 padding wrapper 의 안정적 조회.
+    render(
+      <Screen padding={padding} testID={`s-${padding}`}>
         <Text>x</Text>
       </Screen>,
     );
-    // 가장 안쪽 View (padding 적용된 wrapper) 확인
-    const views = UNSAFE_getAllByType(View);
-    const innerView = views[views.length - 1];
+    const root = screen.getByTestId(`s-${padding}`);
     if (expectedClass === '') {
-      expect(innerView.props.className ?? '').not.toContain('px-');
+      expect(root.props.className ?? '').not.toContain('px-');
     } else {
-      expect(innerView.props.className).toContain(expectedClass);
+      expect(root.props.className).toContain(expectedClass);
     }
   });
 

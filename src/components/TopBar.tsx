@@ -15,10 +15,18 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Icon, type IconName } from './Icon';
-import { H2, Tiny } from './typography/Text';
+import { H2, H3, Tiny } from './typography/Text';
+
+export type TopBarTitleVariant = 'h2' | 'h3';
 
 export type TopBarProps = {
   title: string;
+  /**
+   * 제목 폰트 사이즈 — design/README 화면별 사양:
+   *   - 'h2' (18px Manrope 800) — Home / Settings / Detail (기본)
+   *   - 'h3' (14px Manrope 700) — Compare 화면 (좁은 헤더)
+   */
+  titleVariant?: TopBarTitleVariant;
   subtitle?: string;
   onBack?: () => void;
   rightIcon?: IconName;
@@ -28,6 +36,10 @@ export type TopBarProps = {
    * 아이콘 의미 (`'즐겨찾기'`, `'검색'`, `'정보'`) 를 명시하면 a11y 향상.
    */
   rightIconAccessibilityLabel?: string;
+  /**
+   * 우측 버튼 onPress. **`rightIcon` 과 함께 제공해야** 버튼이 렌더된다.
+   * 한쪽만 주면 silent no-op 회피 차원에서 버튼 자체가 렌더 안 됨.
+   */
   onRightPress?: () => void;
   testID?: string;
 };
@@ -36,6 +48,7 @@ const BUTTON_SIZE_CLASS = 'w-9 h-9 rounded-icon-md items-center justify-center';
 
 export function TopBar({
   title,
+  titleVariant = 'h2',
   subtitle,
   onBack,
   rightIcon,
@@ -45,9 +58,13 @@ export function TopBar({
   testID,
 }: TopBarProps): React.ReactElement {
   const showBack = onBack !== undefined;
-  const showRight = rightIcon !== undefined;
+  // rightIcon + onRightPress 둘 다 있어야 버튼 렌더 — 한쪽만 주면 silent no-op
+  // 이라 디버깅 어렵고 의미 없음. 의도적 read-only icon 이 필요한 케이스가
+  // 생기면 별도 prop (`rightIconReadOnly`) 추가 후 ADR.
+  const showRight = rightIcon !== undefined && onRightPress !== undefined;
   const rightBgClass =
     rightIconAccent === 'star' ? 'bg-orange-soft' : 'bg-light';
+  const TitleComponent = titleVariant === 'h3' ? H3 : H2;
 
   return (
     <View
@@ -71,7 +88,7 @@ export function TopBar({
 
       {/* 가운데 — title + subtitle */}
       <View className="flex-1 items-center px-2">
-        <H2 numberOfLines={1}>{title}</H2>
+        <TitleComponent numberOfLines={1}>{title}</TitleComponent>
         {subtitle !== undefined && <Tiny numberOfLines={1}>{subtitle}</Tiny>}
       </View>
 
