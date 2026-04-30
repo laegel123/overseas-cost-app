@@ -7,6 +7,8 @@ import * as React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
+import { HERO_SEOUL_BAR_OPACITY } from '@/theme/tokens';
+
 import { HeroCard } from '../HeroCard';
 
 const baseProps = {
@@ -22,18 +24,29 @@ const baseProps = {
 describe('HeroCard', () => {
   // ─── Variant ──────────────────────────────────────────────────────────────
   describe('variant', () => {
-    it('orange — bg-orange + 6px progress (h-1.5)', () => {
-      render(<HeroCard {...baseProps} variant="orange" testID="h" />);
+    it('orange — bg-orange + 6px progress bar (h-1.5)', () => {
+      render(
+        <HeroCard {...baseProps} variant="orange" swPct={0.5} cwPct={0.5} testID="h" />,
+      );
       const root = screen.getByTestId('h');
       expect(root.props.className).toContain('bg-orange');
+      const bars = screen.getByTestId('h-bars');
+      expect(bars.props.className).toContain('h-1.5');
     });
 
-    it('navy — bg-navy + 4px progress (h-1) + mult orange 강조', () => {
-      render(<HeroCard {...baseProps} variant="navy" testID="h" />);
+    it('navy — bg-navy + 4px progress bar (h-1) + mult orange 강조', () => {
+      render(
+        <HeroCard {...baseProps} variant="navy" swPct={0.5} cwPct={0.5} testID="h" />,
+      );
       const root = screen.getByTestId('h');
       expect(root.props.className).toContain('bg-navy');
       const mult = screen.getByText('↑1.9×');
       expect(mult.props.className).toContain('text-orange');
+      const bars = screen.getByTestId('h-bars');
+      // h-1 은 h-1.5 의 prefix 라 split + 정확 토큰 검사로 false-positive 차단
+      const classes = bars.props.className.split(/\s+/);
+      expect(classes).toContain('h-1');
+      expect(classes).not.toContain('h-1.5');
     });
 
     it('orange — mult 색은 white', () => {
@@ -159,14 +172,19 @@ describe('HeroCard', () => {
 
   // ─── swPct / cwPct 정규화 ─────────────────────────────────────────────────
   describe('progress bar 정규화', () => {
-    it('합 = 1 (0.5 / 0.5) → 양쪽 막대 모두 렌더, flex 0.5 / 0.5', () => {
+    it('합 = 1 (0.5 / 0.5) → 양쪽 막대 모두 렌더, flex 0.5 / 0.5 + 서울 opacity 토큰', () => {
       render(
         <HeroCard {...baseProps} variant="orange" swPct={0.5} cwPct={0.5} testID="h" />,
       );
       const seoul = screen.getByTestId('h-bar-seoul');
       const city = screen.getByTestId('h-bar-city');
-      expect(seoul.props.style).toMatchObject({ flex: 0.5, opacity: 0.5 });
+      // opacity 는 tokens.ts 의 HERO_SEOUL_BAR_OPACITY 단일 출처 (매직 넘버 회피).
+      expect(seoul.props.style).toMatchObject({
+        flex: 0.5,
+        opacity: HERO_SEOUL_BAR_OPACITY,
+      });
       expect(city.props.style).toMatchObject({ flex: 0.5 });
+      expect(city.props.style.opacity).toBeUndefined();
     });
 
     it('sw=0, cw=1 → 도시 막대만 렌더 (서울 미렌더)', () => {
@@ -193,7 +211,8 @@ describe('HeroCard', () => {
       expect(screen.queryByTestId('h-bar-city')).toBeNull();
     });
 
-    it('합 ≠ 1 (0.4 + 0.6 = 1.0 정규화) → flex 0.4 / 0.6 비율', () => {
+    it('합 = 1 (0.4 / 0.6) → flex 비율 그대로 보존', () => {
+      // 합이 정확히 1 이면 정규화 결과도 입력값과 동일.
       render(
         <HeroCard {...baseProps} variant="orange" swPct={0.4} cwPct={0.6} testID="h" />,
       );
@@ -201,6 +220,17 @@ describe('HeroCard', () => {
       const city = screen.getByTestId('h-bar-city');
       expect(seoul.props.style).toMatchObject({ flex: 0.4 });
       expect(city.props.style).toMatchObject({ flex: 0.6 });
+    });
+
+    it('합 < 1 (0.3 + 0.3 = 0.6) → 정규화 후 0.5 / 0.5', () => {
+      // 합이 1 미만이면 비율 보존하면서 합을 1 로 끌어올림.
+      render(
+        <HeroCard {...baseProps} variant="orange" swPct={0.3} cwPct={0.3} testID="h" />,
+      );
+      const seoul = screen.getByTestId('h-bar-seoul');
+      const city = screen.getByTestId('h-bar-city');
+      expect(seoul.props.style).toMatchObject({ flex: 0.5 });
+      expect(city.props.style).toMatchObject({ flex: 0.5 });
     });
 
     it('합 = 2 (1 + 1) → 정규화 후 0.5 / 0.5', () => {
@@ -246,7 +276,7 @@ describe('HeroCard', () => {
         expect(screen.queryByTestId('h-bar-seoul')).toBeNull();
         expect(screen.getByTestId('h-bar-city')).toBeTruthy();
         expect(warnSpy).toHaveBeenCalled();
-        expect(warnSpy.mock.calls[0][0]).toContain('clamped');
+        expect(warnSpy.mock.calls[0]?.[0]).toContain('clamped');
       } finally {
         warnSpy.mockRestore();
       }

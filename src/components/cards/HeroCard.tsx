@@ -21,7 +21,7 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 
-import { colors, shadows } from '@/theme/tokens';
+import { colors, HERO_SEOUL_BAR_OPACITY, shadows } from '@/theme/tokens';
 
 import { Icon } from '../Icon';
 import { Display, MonoLabel, Tiny } from '../typography/Text';
@@ -126,7 +126,8 @@ export function HeroCard({
             onPress={onInfoPress}
             accessibilityRole="button"
             accessibilityLabel="가정값 자세히 보기"
-            hitSlop={8}
+            // hitSlop 13*2 + icon 18 = 44 (iOS HIG 최소 터치 타겟, UI_GUIDE §617).
+            hitSlop={{ top: 13, bottom: 13, left: 13, right: 13 }}
             {...(testID !== undefined ? { testID: `${testID}-info` } : {})}
           >
             <Icon name="info" size={18} color={colors.white} />
@@ -159,19 +160,22 @@ export function HeroCard({
       </View>
 
       {/* 하단 split bar — 서울/도시 비율 정규화 */}
-      <View className={`flex-row mt-4 gap-1 ${v.barHeightClass}`}>
+      <View
+        className={`flex-row mt-4 gap-1 ${v.barHeightClass}`}
+        {...(testID !== undefined ? { testID: `${testID}-bars` } : {})}
+      >
         {s > 0 && (
           <View
-            style={{ flex: s, opacity: 0.5 }}
+            style={{ flex: s, opacity: HERO_SEOUL_BAR_OPACITY }}
             className="bg-white rounded-full"
-            testID={testID !== undefined ? `${testID}-bar-seoul` : undefined}
+            {...(testID !== undefined ? { testID: `${testID}-bar-seoul` } : {})}
           />
         )}
         {c > 0 && (
           <View
             style={{ flex: c }}
             className="bg-white rounded-full"
-            testID={testID !== undefined ? `${testID}-bar-city` : undefined}
+            {...(testID !== undefined ? { testID: `${testID}-bar-city` } : {})}
           />
         )}
       </View>

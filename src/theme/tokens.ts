@@ -103,3 +103,9 @@ export type FontWeight = (typeof fontWeight)[keyof typeof fontWeight];
  * isHot(mult) 함수는 src/lib/format.ts 에서 본 상수를 import 한다 (Phase 3).
  */
 export const HOT_MULTIPLIER_THRESHOLD = 2.0;
+
+/**
+ * HeroCard 의 서울 막대 (좌측) 투명도. design/README §3 의 split bar 사양 —
+ * 두 흰 segment 가 opacity 0.5 / 1.0 으로 대비. 도시 막대는 그대로 1.0.
+ */
+export const HERO_SEOUL_BAR_OPACITY = 0.5;
