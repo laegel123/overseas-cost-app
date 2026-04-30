@@ -6,7 +6,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
-import { waitForAllStoresHydrated } from '@/store';
+import { waitForStoresOrTimeout } from '@/store';
 import { useAppFonts } from '@/theme/fonts';
 import { colors } from '@/theme/tokens';
 
@@ -17,11 +17,16 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 export default function RootLayout() {
   const { ready: fontsReady, error: fontsError } = useAppFonts();
   const [storesHydrated, setStoresHydrated] = useState(false);
+  // hydrationTimedOut 의 reader 는 step 2/3 (라우팅 / ErrorView 토스트) 에서
+  // 추가. 본 step 은 setter 만 노출.
+  const [, setHydrationTimedOut] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    waitForAllStoresHydrated().then(() => {
-      if (!cancelled) setStoresHydrated(true);
+    waitForStoresOrTimeout().then((result) => {
+      if (cancelled) return;
+      setStoresHydrated(true);
+      if (result === 'timeout') setHydrationTimedOut(true);
     });
     return () => {
       cancelled = true;
@@ -36,8 +41,9 @@ export default function RootLayout() {
     }
   }, [fontsError]);
 
-  // 폰트 실패는 system font fallback 으로 진행 (현재 동작 유지). store hydration
-  // 실패는 v1.0 에서 latent edge case 로 수용 (ADR-052) — timeout guard 는 step 1.
+  // 폰트 실패는 system font fallback 으로 진행. store hydration 실패는 ADR-052
+  // timeout guard 가 INITIAL_STATE fallback 으로 회복 — hydrationTimedOut 상태는
+  // 후속 step (라우팅 / ErrorView) 이 참조.
   const fontsResolved = fontsReady || fontsError !== null;
   const bootReady = fontsResolved && storesHydrated;
 

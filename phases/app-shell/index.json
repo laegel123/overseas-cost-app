@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "bootloader-timeout-guard",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T13:00:00+0900",
+      "summary": "ADR-052 강제 요구사항 — waitForStoresOrTimeout(timeoutMs=5000) 추가. 미완 store 만 INITIAL_STATE 강제 (정상 hydrated 보존), 정상 완료 시 'ok'/timeout 시 'timeout' 반환 + dev warn. 4 store INITIAL_STATE export. _layout.tsx 가 timeout 결과 state 보유 (reader 는 step 2/3). 8 신규 테스트 (총 419) + src/store 커버리지 100/100/100/100 유지.",
+      "completed_at": "2026-04-30T13:25:00+0900"
     },
     {
       "step": 2,

@@ -19,7 +19,7 @@ import { act, render } from '@testing-library/react-native';
 import RootLayout from '../_layout';
 
 jest.mock('@/store', () => ({
-  waitForAllStoresHydrated: jest.fn(),
+  waitForStoresOrTimeout: jest.fn(),
 }));
 
 jest.mock('@/theme/fonts', () => ({
@@ -27,8 +27,8 @@ jest.mock('@/theme/fonts', () => ({
 }));
 
 const mockedUseAppFonts = jest.requireMock('@/theme/fonts').useAppFonts as jest.Mock;
-const mockedWaitForAllStoresHydrated = jest.requireMock('@/store')
-  .waitForAllStoresHydrated as jest.Mock;
+const mockedWaitForStoresOrTimeout = jest.requireMock('@/store')
+  .waitForStoresOrTimeout as jest.Mock;
 const mockedHideAsync = SplashScreen.hideAsync as jest.Mock;
 const mockedPreventAutoHideAsync = SplashScreen.preventAutoHideAsync as jest.Mock;
 
@@ -39,6 +39,8 @@ function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
   });
   return { promise, resolve };
 }
+
+type HydrationResult = 'ok' | 'timeout';
 
 describe('RootLayout 부트로더', () => {
   let consoleErrorSpy: jest.SpyInstance;
@@ -54,10 +56,10 @@ describe('RootLayout 부트로더', () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it('폰트 + 4 store hydration 모두 완료되면 hideAsync 1회 호출', async () => {
+  it('폰트 + 4 store hydration 모두 완료되면 hideAsync 1회 호출 (ok)', async () => {
     mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
-    const storesD = deferred<void>();
-    mockedWaitForAllStoresHydrated.mockReturnValue(storesD.promise);
+    const storesD = deferred<HydrationResult>();
+    mockedWaitForStoresOrTimeout.mockReturnValue(storesD.promise);
 
     render(<RootLayout />);
 
@@ -65,7 +67,7 @@ describe('RootLayout 부트로더', () => {
     expect(mockedHideAsync).not.toHaveBeenCalled();
 
     await act(async () => {
-      storesD.resolve();
+      storesD.resolve('ok');
       await storesD.promise;
     });
 
@@ -74,7 +76,7 @@ describe('RootLayout 부트로더', () => {
 
   it('폰트 미완 (ready=false, error=null) + stores hydrated → splash 유지', async () => {
     mockedUseAppFonts.mockReturnValue({ ready: false, error: null });
-    mockedWaitForAllStoresHydrated.mockResolvedValue(undefined);
+    mockedWaitForStoresOrTimeout.mockResolvedValue('ok');
 
     render(<RootLayout />);
     await act(async () => {
@@ -87,7 +89,7 @@ describe('RootLayout 부트로더', () => {
   it('폰트 에러 + stores hydrated → 시스템 폰트 fallback 진행 + 콘솔 에러 로그', async () => {
     const fontError = new Error('font load failed');
     mockedUseAppFonts.mockReturnValue({ ready: false, error: fontError });
-    mockedWaitForAllStoresHydrated.mockResolvedValue(undefined);
+    mockedWaitForStoresOrTimeout.mockResolvedValue('ok');
 
     render(<RootLayout />);
     await act(async () => {
@@ -103,7 +105,7 @@ describe('RootLayout 부트로더', () => {
 
   it('store hydration pending + 폰트 ready → splash 유지', async () => {
     mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
-    mockedWaitForAllStoresHydrated.mockReturnValue(new Promise(() => undefined));
+    mockedWaitForStoresOrTimeout.mockReturnValue(new Promise(() => undefined));
 
     render(<RootLayout />);
     await act(async () => {
@@ -115,18 +117,31 @@ describe('RootLayout 부트로더', () => {
 
   it('unmount 후 hydration resolve → setState race 안전 (재마운트 시 재호출)', async () => {
     mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
-    const storesD = deferred<void>();
-    mockedWaitForAllStoresHydrated.mockReturnValue(storesD.promise);
+    const storesD = deferred<HydrationResult>();
+    mockedWaitForStoresOrTimeout.mockReturnValue(storesD.promise);
 
     const { unmount } = render(<RootLayout />);
     unmount();
 
     await act(async () => {
-      storesD.resolve();
+      storesD.resolve('ok');
       await storesD.promise;
     });
 
     // unmount 후에는 hideAsync 가 호출되지 않아야 한다 (cancelled 플래그).
     expect(mockedHideAsync).not.toHaveBeenCalled();
+  });
+
+  it('hydration timeout (ADR-052 fallback) → bootReady 진입 + hideAsync 1회', async () => {
+    mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
+    mockedWaitForStoresOrTimeout.mockResolvedValue('timeout');
+
+    render(<RootLayout />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // INITIAL_STATE fallback 으로 부팅 진행 — 무한 splash 회피.
+    expect(mockedHideAsync).toHaveBeenCalledTimes(1);
   });
 });

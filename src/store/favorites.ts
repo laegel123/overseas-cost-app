@@ -42,7 +42,8 @@ export type FavoritesActions = {
 
 export const MAX_FAVORITES = 50;
 
-const INITIAL_STATE: FavoritesState = {
+// app-shell phase 의 hydration timeout guard (ADR-052) 도 본 상수를 참조.
+export const INITIAL_STATE: FavoritesState = {
   cityIds: [],
 };
 
