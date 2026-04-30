@@ -2,10 +2,11 @@
 module.exports = {
   content: ['./app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
-  // ADR-016: 다크 모드 미지원 (userInterfaceStyle: "light" 강제). NativeWind v4
-  // 기본 'media' 모드가 system 다크 추적을 시도해 web 에서 "Cannot manually set
-  // color scheme" 에러를 일으킨다. 'class' 로 전환하면 우리가 명시적으로 dark
-  // 클래스를 토글할 때만 동작 — 현재 v1.0 에선 토글하지 않으므로 항상 light.
+  // ADR-016 / ADR-053: 다크 모드 미지원 (userInterfaceStyle: "light" 강제).
+  // NativeWind v4 기본 'media' 모드가 system 다크 추적을 시도해 web 에서
+  // "Cannot manually set color scheme" 에러를 일으킨다. 'class' 로 전환하면
+  // 우리가 명시적으로 dark 클래스를 토글할 때만 동작 — v1.0 에선 토글하지
+  // 않으므로 web/native 모두 항상 light.
   darkMode: 'class',
   theme: {
     extend: {
