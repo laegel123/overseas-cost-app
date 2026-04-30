@@ -1084,6 +1084,7 @@ tailwind.config.js 토큰 — 매직 hex / px 금지 (CLAUDE.md CRITICAL).
 - [x] `testID` passthrough
 - [x] `className` prop composed (추가 클래스 결합)
 - [x] `accessibilityRole` (heading 류 default 'header', body/small/tiny default 'text', override 가능)
+- [x] `displayName` — 8 variant 모두 export 이름과 일치 (`Display` / `H1` / `H2` / `H3` / `Body` / `Small` / `Tiny` / `MonoLabel`) — React DevTools 가독성
 - [ ] 한국어 단어 단위 wrap 동작 (RN Text 기본 — 검증 불요)
 - [ ] 매우 긴 텍스트: `numberOfLines` 없을 때 wrap 됨 (RN Text 기본 — 검증 불요)
 - [ ] snapshot per component (TESTING.md §6 안티패턴 — 핵심 텍스트 검증으로 대체)
@@ -1108,8 +1109,8 @@ import 금지.
 - [x] `color` 타입은 `tokens.colors` literal union 만 허용 (매직 hex 차단)
 - [x] `testID` 전달
 - [x] `accessibilityLabel` 전달 / 미제공 모두 검증
-- [x] `accessibilityLabel` 있을 때 → `accessibilityRole='image'` + `importantForAccessibility='yes'`
-- [x] `accessibilityLabel` 없을 때 (데코레이티브) → `importantForAccessibility='no'` + role 미설정
+- [x] **iOS / Android 크로스플랫폼 a11y** — `accessibilityLabel` 있을 때: `accessible=true` (iOS VoiceOver 노출) + `importantForAccessibility='yes'` (Android TalkBack 노출) + `accessibilityRole='image'`
+- [x] **데코레이티브 아이콘** — `accessibilityLabel` 없을 때: `accessible=false` (iOS skip) + `importantForAccessibility='no'` (Android skip) + role 미설정
 
 **Stroke 정합성:**
 
