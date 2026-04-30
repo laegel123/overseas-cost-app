@@ -1,0 +1,44 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "components",
+  "steps": [
+    {
+      "step": 0,
+      "name": "typography",
+      "status": "completed",
+      "started_at": "2026-04-30T14:40:00+0900",
+      "summary": "Text 8 variant (Display/H1/H2/H3/Body/Small/Tiny/MonoLabel) — 단일 base + variant 매핑. tailwind config fontFamily 에 weight 별 alias 추가 (manrope-bold/extrabold/semibold). 5 color token + accessibilityRole + numberOfLines passthrough + MonoLabel uppercase. 59 신규 테스트 (총 510). src/components 100/100/100/100.",
+      "completed_at": "2026-04-30T15:00:00+0900"
+    },
+    {
+      "step": 1,
+      "name": "icon",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "layout-chrome",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "atoms",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "hero-card",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "compare-pair",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "rows",
+      "status": "pending"
+    }
+  ]
+}

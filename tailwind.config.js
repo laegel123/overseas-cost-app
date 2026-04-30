@@ -24,7 +24,13 @@ module.exports = {
         line: '#E4ECF2',
       },
       fontFamily: {
+        // RN 은 weight 별로 별도 fontFamily 명을 요구 (FONT_MAP 의 키와 1:1).
+        // Manrope: 400/500/600/700/800 (regular ~ extra-bold). Mulish 는 regular 만 사용.
         manrope: ['Manrope', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
+        'manrope-medium': ['Manrope-Medium', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
+        'manrope-semibold': ['Manrope-SemiBold', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
+        'manrope-bold': ['Manrope-Bold', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
+        'manrope-extrabold': ['Manrope-ExtraBold', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
         mulish: ['Mulish', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
         pretendard: ['Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
       },
