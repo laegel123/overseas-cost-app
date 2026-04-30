@@ -24,7 +24,13 @@ module.exports = {
         line: '#E4ECF2',
       },
       fontFamily: {
+        // RN 은 weight 별로 별도 fontFamily 명을 요구 (FONT_MAP 의 키와 1:1).
+        // 본 phase (typography) 가 실제 사용하는 weight 만 alias 등록.
+        // 새 weight 가 필요해지면 그 때 추가 (CLAUDE.md "추가는 ADR 로 정당화").
         manrope: ['Manrope', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
+        'manrope-semibold': ['Manrope-SemiBold', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
+        'manrope-bold': ['Manrope-Bold', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
+        'manrope-extrabold': ['Manrope-ExtraBold', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
         mulish: ['Mulish', 'Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
         pretendard: ['Pretendard', 'Apple SD Gothic Neo', 'system-ui'],
       },
