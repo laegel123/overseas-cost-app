@@ -104,6 +104,15 @@ describe('TopBar', () => {
       expect(onBack).toHaveBeenCalledTimes(1);
     });
 
+    it('back 버튼 시각: 36×36 (w-9 h-9) + bg-light + rounded-icon-md', () => {
+      render(<TopBar title="x" onBack={jest.fn()} testID="tb" />);
+      const back = screen.getByTestId('tb-back');
+      expect(back.props.className).toContain('w-9');
+      expect(back.props.className).toContain('h-9');
+      expect(back.props.className).toContain('bg-light');
+      expect(back.props.className).toContain('rounded-icon-md');
+    });
+
     it('right 버튼 탭 → onRightPress 호출', () => {
       const onRight = jest.fn();
       render(

@@ -29,16 +29,18 @@ jest.mock('react-native-svg', () => require('react-native-svg-mock'));
 // react-native-safe-area-context — SafeAreaView / Provider 는 단순 children
 // passthrough. NativeWind 가 RN View 를 transform 해서 mock 안에서 JSX 사용 시
 // _ReactNativeCSSInterop 참조 오류가 나므로 자체 wrapping 없이 children 만 반환.
-// useSafeAreaInsets 는 iPhone-X 류 기본값 (top 47, bottom 14) — per-test 로 갱신
-// 가능. SafeArea 자체의 시각 동작은 라이브러리 책임.
+//
+// useSafeAreaInsets 는 jest.fn().mockReturnValue 로 등록 — per-test 에서
+// `mockReturnValueOnce(seInsets)` 같은 표준 jest API 사용 가능 (try/finally
+// 보일러플레이트 불요). DEFAULT_INSETS 는 iPhone X 류 (top 47, bottom 14).
 jest.mock('react-native-safe-area-context', () => {
-  const insets = { top: 47, bottom: 14, left: 0, right: 0 };
+  const DEFAULT_INSETS = { top: 47, bottom: 14, left: 0, right: 0 };
   return {
     SafeAreaProvider: ({ children }) => children,
     SafeAreaView: ({ children }) => children,
-    useSafeAreaInsets: () => insets,
+    useSafeAreaInsets: jest.fn().mockReturnValue(DEFAULT_INSETS),
     SafeAreaInsetsContext: {
-      Consumer: ({ children }) => children(insets),
+      Consumer: ({ children }) => children(DEFAULT_INSETS),
     },
   };
 });
