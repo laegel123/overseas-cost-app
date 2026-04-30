@@ -1,20 +1,6 @@
 /**
- * HeroCard — Compare 화면의 시각 핵심. 한 달 예상 총비용 + 서울 vs 도시 듀얼
- * 막대 + ❓ info 아이콘 hook. design/README §3 (Compare hero card).
- *
- * variant 2 종:
- *   - 'orange' (Compare 화면 기본): bg-orange + 6px progress + hero shadow
- *   - 'navy' (옵션, persona-style): bg-navy + 4px progress + mult orange 강조
- *
- * 모든 시각 토큰 (bg, text, shadow, radius) 은 tailwind config / tokens.ts —
- * 매직 hex / px 금지 (CLAUDE.md CRITICAL).
- *
- * gradient 도입 보류 (step4.md): expo-linear-gradient 미도입. navy variant
- * 는 단색 fallback. design 의 gradient 는 후속 phase 에서 ADR + 라이브러리
- * 도입으로 결정.
- *
- * swPct / cwPct 정규화: clamp [0, 1] 후 합 = 1 로 비율 보존. 합이 0 이면
- * 막대 미표시.
+ * HeroCard — design/README §3 (orange Compare) + §4 (navy Detail). gradient
+ * 보류 (step4.md, navy 단색 fallback). 시각 토큰은 모두 tailwind / tokens.ts.
  */
 
 import * as React from 'react';
@@ -66,6 +52,10 @@ type VariantConfig = {
   multColor: 'white' | 'orange';
   /** shadow 토큰 — orange 는 orangeHero (rgba 0.25), navy 는 navyCard (rgba 0.18) */
   shadowStyle: ViewStyle;
+  /** 좌측 (서울) 막대 투명도 — orange 0.5, navy 0.15 (트랙) */
+  seoulBarOpacity: number;
+  /** 우측 (도시) 막대 색 — orange variant 는 흰색, navy variant 는 orange fill (design §4) */
+  cityBarClass: string;
 };
 
 const VARIANT_CONFIG: Record<HeroCardVariant, VariantConfig> = {
@@ -76,6 +66,8 @@ const VARIANT_CONFIG: Record<HeroCardVariant, VariantConfig> = {
     barHeightClass: 'h-1.5',
     multColor: 'white',
     shadowStyle: shadows.orangeHero,
+    seoulBarOpacity: HERO_SEOUL_BAR_OPACITY.orange,
+    cityBarClass: 'bg-white',
   },
   navy: {
     bgClass: 'bg-navy',
@@ -84,6 +76,8 @@ const VARIANT_CONFIG: Record<HeroCardVariant, VariantConfig> = {
     barHeightClass: 'h-1',
     multColor: 'orange',
     shadowStyle: shadows.navyCard,
+    seoulBarOpacity: HERO_SEOUL_BAR_OPACITY.navy,
+    cityBarClass: 'bg-orange',
   },
 };
 
@@ -160,7 +154,10 @@ export function HeroCard({
             {centerMult}
           </Display>
           {centerCaption !== undefined && (
-            <MonoLabel color="white">{centerCaption}</MonoLabel>
+            // numberOfLines={1} — design §3 의 "슬래시 줄바꿈 방지" (`+165만/월`)
+            <MonoLabel color="white" numberOfLines={1}>
+              {centerCaption}
+            </MonoLabel>
           )}
         </View>
         <View className="flex-1 items-end">
@@ -178,7 +175,7 @@ export function HeroCard({
       >
         {s > 0 && (
           <View
-            style={{ flex: s, opacity: HERO_SEOUL_BAR_OPACITY }}
+            style={{ flex: s, opacity: v.seoulBarOpacity }}
             className="bg-white rounded-full"
             {...(testID !== undefined ? { testID: `${testID}-bar-seoul` } : {})}
           />
@@ -186,7 +183,7 @@ export function HeroCard({
         {c > 0 && (
           <View
             style={{ flex: c }}
-            className="bg-white rounded-full"
+            className={`${v.cityBarClass} rounded-full`}
             {...(testID !== undefined ? { testID: `${testID}-bar-city` } : {})}
           />
         )}

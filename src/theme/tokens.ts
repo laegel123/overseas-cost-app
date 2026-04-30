@@ -105,7 +105,11 @@ export type FontWeight = (typeof fontWeight)[keyof typeof fontWeight];
 export const HOT_MULTIPLIER_THRESHOLD = 2.0;
 
 /**
- * HeroCard 의 서울 막대 (좌측) 투명도. design/README §3 의 split bar 사양 —
- * 두 흰 segment 가 opacity 0.5 / 1.0 으로 대비. 도시 막대는 그대로 1.0.
+ * HeroCard 의 서울 막대 (좌측) 투명도 — variant 별로 다름.
+ *   - orange (Compare hero, design §3): 흰 segment 0.5 / 1.0 대비
+ *   - navy   (Detail hero,  design §4): 흰 트랙 0.15 / 도시 막대 orange fill
  */
-export const HERO_SEOUL_BAR_OPACITY = 0.5;
+export const HERO_SEOUL_BAR_OPACITY = {
+  orange: 0.5,
+  navy: 0.15,
+} as const;

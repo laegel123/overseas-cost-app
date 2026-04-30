@@ -78,7 +78,7 @@ describe('HeroCard', () => {
       expect(screen.getByText('340만/월')).toBeTruthy();
     });
 
-    it('centerCaption 있을 때 → 렌더', () => {
+    it('centerCaption 있을 때 → 렌더 + numberOfLines={1} (슬래시 줄바꿈 방지)', () => {
       render(
         <HeroCard
           {...baseProps}
@@ -87,7 +87,9 @@ describe('HeroCard', () => {
           testID="h"
         />,
       );
-      expect(screen.getByText('+165만/월')).toBeTruthy();
+      const caption = screen.getByText('+165만/월');
+      expect(caption).toBeTruthy();
+      expect(caption.props.numberOfLines).toBe(1);
     });
 
     it('centerCaption 미제공 → 미렌더', () => {
@@ -196,18 +198,33 @@ describe('HeroCard', () => {
 
   // ─── swPct / cwPct 정규화 ─────────────────────────────────────────────────
   describe('progress bar 정규화', () => {
-    it('합 = 1 (0.5 / 0.5) → 양쪽 막대 모두 렌더, flex 0.5 / 0.5 + 서울 opacity 토큰', () => {
+    it('orange 합 = 1 (0.5 / 0.5) → 흰 segment 0.5 / 1.0 대비 (design §3)', () => {
       render(
         <HeroCard {...baseProps} variant="orange" swPct={0.5} cwPct={0.5} testID="h" />,
       );
       const seoul = screen.getByTestId('h-bar-seoul');
       const city = screen.getByTestId('h-bar-city');
-      // opacity 는 tokens.ts 의 HERO_SEOUL_BAR_OPACITY 단일 출처 (매직 넘버 회피).
       expect(seoul.props.style).toMatchObject({
         flex: 0.5,
-        opacity: HERO_SEOUL_BAR_OPACITY,
+        opacity: HERO_SEOUL_BAR_OPACITY.orange,
       });
+      expect(seoul.props.className).toContain('bg-white');
       expect(city.props.style).toMatchObject({ flex: 0.5 });
+      expect(city.props.style.opacity).toBeUndefined();
+      expect(city.props.className).toContain('bg-white');
+    });
+
+    it('navy variant — seoul 트랙 opacity 0.15 + city bar bg-orange (design §4)', () => {
+      render(
+        <HeroCard {...baseProps} variant="navy" swPct={0.5} cwPct={0.5} testID="h" />,
+      );
+      const seoul = screen.getByTestId('h-bar-seoul');
+      const city = screen.getByTestId('h-bar-city');
+      // 트랙 — bg-white + opacity 0.15
+      expect(seoul.props.className).toContain('bg-white');
+      expect(seoul.props.style).toMatchObject({ opacity: HERO_SEOUL_BAR_OPACITY.navy });
+      // 도시 막대 — orange fill, opacity 미설정
+      expect(city.props.className).toContain('bg-orange');
       expect(city.props.style.opacity).toBeUndefined();
     });
 

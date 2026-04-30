@@ -1198,7 +1198,8 @@ phase 에서 재검토.
 - [x] centerCaption 있을 때 렌더 / 미제공 시 미렌더
 - [x] footer 있을 때 렌더 / 미제공 시 미렌더
 - [x] 상단 고정 라벨 "한 달 예상 총비용" 렌더 (한국어는 MonoLabel uppercase 변환 없음)
-- [x] swPct + cwPct = 1 (0.5 / 0.5) → flex 그대로 + 서울 막대 opacity = `HERO_SEOUL_BAR_OPACITY` 토큰 (도시 1.0)
+- [x] orange 합 = 1 → 흰 segment 0.5 / 1.0 대비 (`HERO_SEOUL_BAR_OPACITY.orange`, design §3)
+- [x] navy variant — 트랙 bg-white opacity 0.15 (`HERO_SEOUL_BAR_OPACITY.navy`) + 도시 막대 bg-orange (design §4 detail navy hero)
 - [x] sw=0, cw=1 → 도시 막대만 렌더 (서울 미렌더)
 - [x] sw=1, cw=0 → 서울 막대만 렌더
 - [x] 합 = 0 → 양쪽 막대 미렌더
@@ -1208,6 +1209,8 @@ phase 에서 재검토.
 - [x] 음수 / >1 입력 → clamp + dev console.warn
 - [x] progress bar 두께 — orange variant `h-1.5` (6px), navy `h-1` (4px)
 - [x] info 버튼 hitSlop = 13×4 → icon 18 + slop 26 = 44 (UI_GUIDE §617 최소 터치 타겟)
+- [x] centerCaption `numberOfLines={1}` — `+165만/월` 같은 슬래시 줄바꿈 방지 (design §3)
+- [ ] orange variant decorative circle (120×120, white opacity 0.08, 우상단 absolute) — 화면 phase 진입 시 구현 (defer)
 - [x] ❓ info 아이콘 — `showInfoIcon=true (default)` + onInfoPress 있음 → 렌더 + 탭 콜백
 - [x] ❓ 미표시 (`showInfoIcon=false` 또는 onInfoPress 미제공) → 렌더 안 함 (silent no-op 회피)
 - [x] info 버튼 a11y — role=button + label "가정값 자세히 보기"
