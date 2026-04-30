@@ -1118,50 +1118,68 @@ import 금지.
 - [ ] 모든 SVG path 가 stroke 속성 사용 (lucide 책임)
 - [ ] `more` 는 lucide 의 `MoreHorizontal` (line dots) — design/README §9.10 의 "fill circle 3개" 와 시각 차이 minor. ADR-054 명시.
 
-### 9.11 `src/components/Screen.tsx`
+### 9.11 `src/components/Screen.tsx` (components phase step 2)
 
-- [ ] 자식 렌더
-- [ ] SafeAreaView 적용 (top/bottom edges 정책)
-- [ ] 배경색 토큰 (white)
-- [ ] `scroll` prop true: ScrollView 래핑 + contentContainerStyle 전달
-- [ ] `scroll=false`: 일반 View
-- [ ] `padding` prop 전달
-- [ ] iOS notch 처리: top safe area
-- [ ] iPhone SE (no notch): top safe area 0
+SafeAreaView wrap + 배경 + horizontal padding + 선택적 ScrollView. testID 는
+inner View / ScrollView 에 부여 (jest 의 SafeAreaView mock 이 passthrough 라
+chrome 클래스 검증은 inner 노드 기준).
 
-### 9.12 `src/components/TopBar.tsx`
+- [x] 자식 렌더
+- [x] SafeAreaView 적용 (default edges `['top', 'bottom']`, prop 으로 override)
+- [x] 배경색 토큰 + flex-1 (SafeAreaView 의 className)
+- [x] `scroll=true`: ScrollView wrap + `contentContainerStyle.flexGrow=1`
+- [x] `scroll=false` (default): 일반 View
+- [x] `padding` 토큰 4 case (none / screen-x / screen-x-tight / screen-x-loose)
+- [x] `scroll=true + padding=none`: ScrollView className 미설정
+- [x] `scroll=true + padding=screen-x`: ScrollView className 에 padding
+- [x] `testID` 전달 (inner View / ScrollView)
+- [ ] iOS notch / iPhone SE: SafeAreaView 라이브러리 책임 — 본 컴포넌트는 prop 위임
+
+### 9.12 `src/components/TopBar.tsx` (components phase step 2)
 
 **Prop 조합 매트릭스 (8개):**
 
-- [ ] title 만
-- [ ] title + back
-- [ ] title + right
-- [ ] title + back + right
-- [ ] title + subtitle
-- [ ] title + subtitle + back
-- [ ] title + subtitle + right
-- [ ] title + subtitle + back + right (full)
+- [x] title 만
+- [x] title + back
+- [x] title + right
+- [x] title + back + right
+- [x] title + subtitle
+- [x] title + subtitle + back
+- [x] title + subtitle + right
+- [x] title + subtitle + back + right (full)
+
+**Title variant:**
+
+- [x] `titleVariant` 기본 'h2' (18px Manrope 800) — Home / Settings / Detail
+- [x] `titleVariant='h3'` (14px Manrope 700) — Compare 화면 사양
 
 **개별 동작:**
 
-- [ ] back 버튼 탭 → onBack 호출
-- [ ] back 버튼 시각: 36×36, light bg `#F0F5F9`
-- [ ] right 버튼: ⭐일 때 orange-soft bg `#FFE9DC`
-- [ ] right 버튼 탭 → onRightPress 호출
-- [ ] title 긴 문자열: 가운데 정렬 + ellipsis
-- [ ] subtitle: 보조 텍스트 11px tiny
-- [ ] subtitle 다중 라인 미허용 (numberOfLines=1)
+- [x] back 버튼 탭 → onBack 호출
+- [x] back 버튼 시각: 36×36, `bg-light` (디자인 토큰)
+- [x] right accent='star' → `bg-orange-soft`
+- [x] right accent='default' → `bg-light`
+- [x] right 버튼 탭 → onRightPress 호출
+- [x] **`rightIcon` + `onRightPress` 둘 다 있어야 버튼 렌더** — 한쪽만 주면 silent no-op 회피 차원에서 버튼 미렌더 (rightIcon-only / onRightPress-only 두 케이스 모두 검증)
+- [x] title 긴 문자열: `numberOfLines=1`
+- [x] subtitle 11px Tiny: `numberOfLines=1`
+- [x] back 버튼 a11y — `role='button'` + label `'뒤로가기'`
+- [x] right 버튼 a11y — `role='button'` + label (default `'우측 메뉴'`, `rightIconAccessibilityLabel` prop 으로 override 가능)
+- [x] testID 미제공 시 정상 렌더 + label 로 조회 가능
 
-### 9.13 `src/components/BottomTabBar.tsx`
+### 9.13 `src/components/BottomTabBar.tsx` (components phase step 2)
 
-- [ ] 4개 탭(홈/비교/즐겨찾기/설정) 렌더
-- [ ] active 탭: orange icon + label
-- [ ] inactive 탭: gray-2
-- [ ] 탭 클릭 → onSelect(tabName)
-- [ ] 아이콘 22px, 라벨 10px Mulish 600
-- [ ] safe area bottom padding (iPhone X+)
-- [ ] iPhone SE (no home indicator): padding 0
-- [ ] 탭 변경 시 햅틱 피드백 (옵션)
+- [x] 4개 탭(홈/비교/즐겨찾기/설정) 한국어 라벨 렌더
+- [x] active 탭 (4 케이스 매트릭스) — `accessibilityState.selected=true`
+- [x] inactive 탭 — `accessibilityState.selected=false`
+- [x] 4 탭 클릭 → onSelect(tab) 호출 (각 탭별 검증)
+- [x] active 탭 라벨 → `text-orange`, inactive → `text-gray-2`
+- [x] safe area bottom padding (iPhone X+ mock 14px)
+- [x] iPhone SE (bottom inset 0) — paddingBottom: 0
+- [x] 탭 a11y — `role='button'` + accessibilityLabel (한국어)
+- [x] testID 미제공 시 정상 렌더 + label 로 조회 가능
+- [ ] 탭 변경 시 햅틱 피드백 — v1.0 미스코프 (별도 ADR)
+- [ ] 라벨 폰트는 design/README "Mulish 600" 이지만 Mulish-SemiBold 에셋 부재로 Mulish Regular 로 대체. v1.x 에셋 추가 시 갱신.
 
 ### 9.14 `src/components/cards/HeroCard.tsx`
 
