@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "icon",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-04-30T15:00:00+0900",
+      "summary": "Icon 컴포넌트 — 25 IconName 의 lucide-react-native 정적 매핑. View wrap 으로 testID/accessibilityLabel passthrough (lucide 가 svg 로 propagate 안 함). ADR-054 신규 — lucide-react-native 도입 결정 + 번들 영향 명시 + more 아이콘 시각 차이 (line dots vs fill circle) 수용. 36 신규 테스트 (총 546). src/components 100/100/100/100.",
+      "completed_at": "2026-04-30T15:35:00+0900"
     },
     {
       "step": 2,

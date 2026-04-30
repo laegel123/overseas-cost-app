@@ -1088,27 +1088,32 @@ tailwind.config.js 토큰 — 매직 hex / px 금지 (CLAUDE.md CRITICAL).
 - [ ] 매우 긴 텍스트: `numberOfLines` 없을 때 wrap 됨 (RN Text 기본 — 검증 불요)
 - [ ] snapshot per component (TESTING.md §6 안티패턴 — 핵심 텍스트 검증으로 대체)
 
-### 9.10 `src/components/Icon.tsx`
+### 9.10 `src/components/Icon.tsx` (components phase step 1)
+
+design/README.md §Assets 의 25 아이콘 카탈로그 단일 진입점. lucide-react-native
+(ADR-054) 정적 매핑. 사용처는 IconName 만 알면 됨 — lucide 컴포넌트 직접
+import 금지.
 
 **전체:**
 
-- [ ] 22개 이름 (`home, compare, star, settings, search, back, more, house, fork, bus, passport, graduation, briefcase, globe, chev-right, chev-down, info, refresh, mail, shield, book, user, plus, filter, up`) 각각 렌더
-- [ ] 잘못된 name (TypeScript 차단 외): 런타임 fallback (`null` 또는 `<View>` 빈 박스)
-- [ ] snapshot per icon
+- [x] 25 IconName (`home, compare, star, settings, search, back, more, house, fork, bus, passport, graduation, briefcase, globe, chev-right, chev-down, info, refresh, mail, shield, book, user, plus, filter, up`) 각각 렌더
+- [x] ICON_NAMES 배열은 25개 + 중복 없음
+- [ ] 잘못된 name (TypeScript 차단) — 런타임 도달 불가, 테스트 불요
+- [ ] snapshot per icon (TESTING.md §6 안티패턴 — props 검증으로 대체)
 
 **Props:**
 
-- [ ] `size` 기본 22, 커스텀 32 적용
-- [ ] `color` 기본 navy, 커스텀 orange 적용
-- [ ] `strokeWidth` 기본 2, 커스텀 1.5 / 2.2
-- [ ] `testID` 전달
-- [ ] `accessibilityLabel` 전달
+- [x] `size` 기본 22, 커스텀 32 적용
+- [x] `color` 기본 navy, 커스텀 orange 적용
+- [x] `strokeWidth` 기본 2, 커스텀 1.5 적용
+- [x] `testID` 전달
+- [x] `accessibilityLabel` 전달 / 미제공 시 미전달
 
 **Stroke 정합성:**
 
-- [ ] 모든 line-style 아이콘: viewBox 24×24
-- [ ] 모든 SVG path 가 stroke 속성 사용 (fill 아님, more 제외)
-- [ ] `more` 는 fill circle 3개
+- [ ] 모든 line-style 아이콘: viewBox 24×24 (lucide-react-native 라이브러리 보증)
+- [ ] 모든 SVG path 가 stroke 속성 사용 (lucide 책임)
+- [ ] `more` 는 lucide 의 `MoreHorizontal` (line dots) — design/README §9.10 의 "fill circle 3개" 와 시각 차이 minor. ADR-054 명시.
 
 ### 9.11 `src/components/Screen.tsx`
 
