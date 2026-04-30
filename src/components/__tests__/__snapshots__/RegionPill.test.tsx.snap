@@ -46,7 +46,7 @@ exports[`RegionPill snapshot active=false (default) 1`] = `
 >
   <Text
     accessibilityRole="text"
-    className="font-mulish text-body text-navy"
+    className="font-mulish text-small text-navy"
     numberOfLines={1}
   >
     북미 (8)
@@ -100,7 +100,7 @@ exports[`RegionPill snapshot active=true 1`] = `
 >
   <Text
     accessibilityRole="text"
-    className="font-mulish text-body text-white"
+    className="font-mulish text-small text-white"
     numberOfLines={1}
   >
     북미 (8)

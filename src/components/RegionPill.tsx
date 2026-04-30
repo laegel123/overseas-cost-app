@@ -11,7 +11,7 @@ import * as React from 'react';
 
 import { Pressable } from 'react-native';
 
-import { Body } from './typography/Text';
+import { Small } from './typography/Text';
 
 export type RegionPillProps = {
   label: string;
@@ -46,9 +46,12 @@ export function RegionPill({
       className={`rounded-chip px-3.5 py-2 ${bgClass}`}
       testID={testID}
     >
-      <Body color={textColor} numberOfLines={1}>
+      <Small color={textColor} numberOfLines={1}>
+        {/* design/README §3 — chip 텍스트 12px (small 토큰) */}
+        {/* TODO(v1.x): count "(8)" 부분만 opacity 0.6 — design 정밀 스펙. 현재
+            단일 노드로 렌더해 균질 alpha. 화면 phase 진입 시 디자인 검토 후 재결정. */}
         {displayLabel}
-      </Body>
+      </Small>
     </Pressable>
   );
 }

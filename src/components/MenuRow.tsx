@@ -70,8 +70,9 @@ export function MenuRow({
   const v = VARIANT_STYLE[variant];
   const borderClass = isLast ? '' : 'border-b border-line';
   const opacityClass = disabled ? 'opacity-50' : '';
+  // padding 14×14 (`px/py-card-pad`) — design/README §5 사양.
   const containerClass = [
-    'flex-row items-center px-card-pad py-3 gap-3',
+    'flex-row items-center px-card-pad py-card-pad gap-3',
     borderClass,
     opacityClass,
   ]
@@ -92,8 +93,9 @@ export function MenuRow({
       testID={testID}
     >
       <View
-        className={`w-9 h-9 rounded-icon-md items-center justify-center ${v.iconBoxClass}`}
+        className={`w-9 h-9 rounded-icon-sm items-center justify-center ${v.iconBoxClass}`}
       >
+        {/* design/README §5 — 아이콘 박스 36×36, 10px 라운드 (rounded-icon-sm) */}
         <Icon name={icon} size={22} color={v.iconColor} />
       </View>
       <View className="flex-1">
