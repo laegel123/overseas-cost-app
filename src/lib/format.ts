@@ -5,7 +5,65 @@
 
 import { HOT_MULTIPLIER_THRESHOLD } from '@/theme/tokens';
 
-import { InvalidMultiplierError } from './errors';
+import { InvalidMultiplierError, InvalidNumberError } from './errors';
+
+/**
+ * 숫자 입력 검증 (NaN, Infinity → throw).
+ */
+function validateNumber(n: number): void {
+  if (typeof n !== 'number' || Number.isNaN(n) || !Number.isFinite(n)) {
+    throw new InvalidNumberError(`invalid number — ${String(n)}`);
+  }
+}
+
+/**
+ * KRW 금액을 한국어 단위로 포매팅.
+ * - 만원 미만: 콤마 구분 + 원 (예: "1,234원")
+ * - 만원 이상: 소수 1자리 + 만원 (예: "175만원", "1.2만원")
+ * - 억원 이상: 소수 1자리 + 억원 (예: "1.2억원")
+ *
+ * @throws InvalidNumberError if n is NaN or Infinity
+ */
+export function formatKRW(n: number): string {
+  validateNumber(n);
+
+  const value = Math.round(n);
+  const absValue = Math.abs(value);
+  const sign = value < 0 ? '-' : '';
+
+  if (absValue >= 100_000_000) {
+    const billions = absValue / 100_000_000;
+    const rounded = Math.round(billions * 10) / 10;
+    const formatted = Number.isInteger(rounded) ? rounded.toString() : rounded.toFixed(1);
+    return `${sign}${formatted}억원`;
+  }
+
+  if (absValue >= 10_000) {
+    const tenThousands = absValue / 10_000;
+    const rounded = Math.round(tenThousands * 10) / 10;
+    const formatted = Number.isInteger(rounded) ? rounded.toString() : rounded.toFixed(1);
+    return `${sign}${formatted}만원`;
+  }
+
+  return `${sign}${absValue.toLocaleString('ko-KR')}원`;
+}
+
+/**
+ * 날짜를 "MM-DD" 형식으로 포매팅 (Compare 헤더용).
+ *
+ * @param d - Date 객체 또는 ISO 문자열
+ * @throws InvalidNumberError if d is invalid
+ */
+export function formatShortDate(d: Date | string): string {
+  const date = typeof d === 'string' ? new Date(d) : d;
+  if (Number.isNaN(date.getTime())) {
+    throw new InvalidNumberError(`invalid date — ${String(d)}`);
+  }
+
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${month}-${day}`;
+}
 
 /**
  * 배수 입력값 검증 (0, 음수, NaN, Infinity → throw).

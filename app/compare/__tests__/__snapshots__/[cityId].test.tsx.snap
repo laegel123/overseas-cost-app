@@ -1,0 +1,1281 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CompareScreen snapshot vancouver + worker 페르소나 snapshot 1`] = `
+<RCTScrollView
+  className="px-screen-x"
+  contentContainerStyle={
+    {
+      "flexGrow": 1,
+    }
+  }
+  testID="compare-screen"
+>
+  <View>
+    <View
+      className="flex-row items-center px-screen-x-tight py-2"
+      testID="compare-topbar"
+    >
+      <View
+        className="w-9"
+      >
+        <View
+          accessibilityLabel="뒤로가기"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          className="w-9 h-9 rounded-icon-md items-center justify-center bg-light"
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          testID="compare-topbar-back"
+        >
+          <View
+            accessible={false}
+            importantForAccessibility="no"
+            style={
+              {
+                "height": 22,
+                "width": 22,
+              }
+            }
+          >
+            <svg
+              fill="none"
+              height={22}
+              stroke="#11263C"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+              width={22}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="m15 18-6-6 6-6"
+                fill="none"
+                stroke="#11263C"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
+          </View>
+        </View>
+      </View>
+      <View
+        className="flex-1 items-center px-2"
+      >
+        <Text
+          accessibilityRole="header"
+          className="font-manrope-bold text-h3 text-navy"
+          numberOfLines={1}
+        >
+          서울 vs 밴쿠버
+        </Text>
+        <Text
+          accessibilityRole="text"
+          className="font-mulish text-tiny text-gray-2"
+          numberOfLines={1}
+        >
+          1 CAD = 980원 · 04-30
+        </Text>
+      </View>
+      <View
+        className="w-9 items-end"
+      >
+        <View
+          accessibilityLabel="즐겨찾기"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          className="w-9 h-9 rounded-icon-md items-center justify-center bg-light"
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+          testID="compare-topbar-right"
+        >
+          <View
+            accessible={false}
+            importantForAccessibility="no"
+            style={
+              {
+                "height": 22,
+                "width": 22,
+              }
+            }
+          >
+            <svg
+              fill="none"
+              height={22}
+              stroke="#11263C"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+              width={22}
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"
+                fill="none"
+                stroke="#11263C"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+              />
+            </svg>
+          </View>
+        </View>
+      </View>
+    </View>
+    <View
+      className="px-screen-x mt-3"
+    >
+      <View
+        className="rounded-hero-lg p-hero-pad bg-orange"
+        style={
+          {
+            "shadowColor": "#FC6011",
+            "shadowOffset": {
+              "height": 12,
+              "width": 0,
+            },
+            "shadowOpacity": 0.25,
+            "shadowRadius": 32,
+          }
+        }
+        testID="compare-hero"
+      >
+        <View
+          className="flex-row items-center justify-between"
+        >
+          <Text
+            accessibilityRole="text"
+            className="font-manrope-semibold text-mono-label text-white"
+          >
+            한 달 예상 총비용
+          </Text>
+        </View>
+        <View
+          className="flex-row items-end mt-3"
+        >
+          <View
+            className="flex-1"
+          >
+            <Text
+              accessibilityRole="text"
+              className="font-mulish text-tiny text-white"
+            >
+              서울
+            </Text>
+            <Text
+              accessibilityRole="header"
+              className="font-manrope-bold text-h2 text-white"
+              numberOfLines={1}
+            >
+              84.5만원
+            </Text>
+          </View>
+          <View
+            className="items-center px-2 shrink-0"
+            testID="compare-hero-center"
+          >
+            <Text
+              accessibilityRole="header"
+              className="font-manrope-extrabold text-display text-white"
+              numberOfLines={1}
+            >
+              ↑9.6×
+            </Text>
+            <Text
+              accessibilityRole="text"
+              className="font-manrope-semibold text-mono-label text-white"
+              numberOfLines={1}
+            >
+              +722.9만원/월
+            </Text>
+          </View>
+          <View
+            className="flex-1 items-end"
+          >
+            <Text
+              accessibilityRole="text"
+              className="font-mulish text-tiny text-white"
+            >
+              밴쿠버
+            </Text>
+            <Text
+              accessibilityRole="header"
+              className="font-manrope-bold text-h2 text-white"
+              numberOfLines={1}
+              style={
+                {
+                  "fontFamily": "Manrope-ExtraBold",
+                }
+              }
+            >
+              807.4만원
+            </Text>
+          </View>
+        </View>
+        <View
+          className="flex-row mt-4 gap-1 h-1.5"
+          testID="compare-hero-bars"
+        >
+          <View
+            className="bg-white rounded-full"
+            style={
+              {
+                "flex": 0.09474547217555337,
+                "opacity": 0.5,
+              }
+            }
+            testID="compare-hero-bar-seoul"
+          />
+          <View
+            className="bg-white rounded-full"
+            style={
+              {
+                "flex": 0.9052545278244466,
+              }
+            }
+            testID="compare-hero-bar-city"
+          />
+        </View>
+        <View
+          className="mt-3"
+          style={
+            {
+              "opacity": 0.7,
+            }
+          }
+          testID="compare-hero-footer"
+        >
+          <Text
+            accessibilityRole="text"
+            className="font-mulish text-tiny text-white"
+          >
+            평균 가정 기준
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      className="px-screen-x mt-4 gap-3"
+    >
+      <View
+        accessibilityLabel="월세 비교 카드"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+      >
+        <View
+          className="bg-white border border-line rounded-card p-3"
+          testID="compare-pair-rent"
+        >
+          <View
+            className="flex-row items-center justify-between mb-2 gap-2"
+          >
+            <View
+              className="flex-row items-center gap-2 flex-1 min-w-0"
+            >
+              <View
+                className="w-8 h-8 rounded-icon-sm items-center justify-center bg-light"
+                testID="compare-pair-rent-icon-box"
+              >
+                <View
+                  accessible={false}
+                  importantForAccessibility="no"
+                  style={
+                    {
+                      "height": 18,
+                      "width": 18,
+                    }
+                  }
+                >
+                  <svg
+                    fill="none"
+                    height={18}
+                    stroke="#11263C"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
+                    width={18}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"
+                      fill="none"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <path
+                      d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"
+                      fill="none"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                  </svg>
+                </View>
+              </View>
+              <Text
+                accessibilityRole="header"
+                className="font-manrope-bold text-h3 text-navy"
+                numberOfLines={1}
+              >
+                월세
+              </Text>
+            </View>
+            <Text
+              accessibilityRole="header"
+              className="font-manrope-bold text-h3 text-navy shrink-0 font-manrope-extrabold"
+              numberOfLines={1}
+              testID="compare-pair-rent-mult"
+            >
+              ↑1.9×
+            </Text>
+          </View>
+          <View
+            className="gap-1.5"
+          >
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-gray-2 w-7 font-manrope-bold"
+                numberOfLines={1}
+              >
+                서울
+              </Text>
+              <View
+                className="flex-1 h-2 bg-light rounded"
+              >
+                <View
+                  className="h-2 bg-gray rounded"
+                  style={
+                    {
+                      "width": "34.940600978336825%",
+                    }
+                  }
+                  testID="compare-pair-rent-bar-seoul"
+                />
+              </View>
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-gray w-14 text-right font-manrope-semibold"
+                numberOfLines={1}
+              >
+                50만원
+              </Text>
+            </View>
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-orange w-7 font-manrope-bold"
+                numberOfLines={1}
+              >
+                CA
+              </Text>
+              <View
+                className="flex-1 h-2 bg-light rounded"
+              >
+                <View
+                  className="h-2 bg-orange rounded"
+                  style={
+                    {
+                      "width": "65.05939902166318%",
+                    }
+                  }
+                  testID="compare-pair-rent-bar-city"
+                />
+              </View>
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-navy w-14 text-right font-manrope-bold"
+                numberOfLines={1}
+              >
+                93.1만원
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        accessibilityLabel="식비 비교 카드"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+      >
+        <View
+          className="bg-white border border-line rounded-card p-3"
+          testID="compare-pair-food"
+        >
+          <View
+            className="flex-row items-center justify-between mb-2 gap-2"
+          >
+            <View
+              className="flex-row items-center gap-2 flex-1 min-w-0"
+            >
+              <View
+                className="w-8 h-8 rounded-icon-sm items-center justify-center bg-orange-soft"
+                testID="compare-pair-food-icon-box"
+              >
+                <View
+                  accessible={false}
+                  importantForAccessibility="no"
+                  style={
+                    {
+                      "height": 18,
+                      "width": 18,
+                    }
+                  }
+                >
+                  <svg
+                    fill="none"
+                    height={18}
+                    stroke="#FC6011"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
+                    width={18}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="m16 2-2.3 2.3a3 3 0 0 0 0 4.2l1.8 1.8a3 3 0 0 0 4.2 0L22 8"
+                      fill="none"
+                      stroke="#FC6011"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <path
+                      d="M15 15 3.3 3.3a4.2 4.2 0 0 0 0 6l7.3 7.3c.7.7 2 .7 2.8 0L15 15Zm0 0 7 7"
+                      fill="none"
+                      stroke="#FC6011"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <path
+                      d="m2.1 21.8 6.4-6.3"
+                      fill="none"
+                      stroke="#FC6011"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <path
+                      d="m19 5-7 7"
+                      fill="none"
+                      stroke="#FC6011"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                  </svg>
+                </View>
+              </View>
+              <Text
+                accessibilityRole="header"
+                className="font-manrope-bold text-h3 text-navy"
+                numberOfLines={1}
+              >
+                식비
+              </Text>
+            </View>
+            <Text
+              accessibilityRole="header"
+              className="font-manrope-bold text-h3 text-orange shrink-0 font-manrope-extrabold"
+              numberOfLines={1}
+              testID="compare-pair-food-mult"
+            >
+              ↑2.0×
+            </Text>
+          </View>
+          <View
+            className="gap-1.5"
+          >
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-gray-2 w-7 font-manrope-bold"
+                numberOfLines={1}
+              >
+                서울
+              </Text>
+              <View
+                className="flex-1 h-2 bg-light rounded"
+              >
+                <View
+                  className="h-2 bg-gray rounded"
+                  style={
+                    {
+                      "width": "33.37338139100254%",
+                    }
+                  }
+                  testID="compare-pair-food-bar-seoul"
+                />
+              </View>
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-gray w-14 text-right font-manrope-semibold"
+                numberOfLines={1}
+              >
+                28만원
+              </Text>
+            </View>
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-orange w-7 font-manrope-bold"
+                numberOfLines={1}
+              >
+                CA
+              </Text>
+              <View
+                className="flex-1 h-2 bg-light rounded"
+              >
+                <View
+                  className="h-2 bg-orange rounded"
+                  style={
+                    {
+                      "width": "66.62661860899746%",
+                    }
+                  }
+                  testID="compare-pair-food-bar-city"
+                />
+              </View>
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-navy w-14 text-right font-manrope-bold"
+                numberOfLines={1}
+              >
+                55.9만원
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        accessibilityLabel="교통 비교 카드"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+      >
+        <View
+          className="bg-white border border-line rounded-card p-3"
+          testID="compare-pair-transport"
+        >
+          <View
+            className="flex-row items-center justify-between mb-2 gap-2"
+          >
+            <View
+              className="flex-row items-center gap-2 flex-1 min-w-0"
+            >
+              <View
+                className="w-8 h-8 rounded-icon-sm items-center justify-center bg-light"
+                testID="compare-pair-transport-icon-box"
+              >
+                <View
+                  accessible={false}
+                  importantForAccessibility="no"
+                  style={
+                    {
+                      "height": 18,
+                      "width": 18,
+                    }
+                  }
+                >
+                  <svg
+                    fill="none"
+                    height={18}
+                    stroke="#11263C"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
+                    width={18}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M8 6v6"
+                      fill="none"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <path
+                      d="M15 6v6"
+                      fill="none"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <path
+                      d="M2 12h19.6"
+                      fill="none"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <path
+                      d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"
+                      fill="none"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <circle
+                      cx="7"
+                      cy="18"
+                      fill="none"
+                      r="2"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <path
+                      d="M9 18h5"
+                      fill="none"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <circle
+                      cx="16"
+                      cy="18"
+                      fill="none"
+                      r="2"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                  </svg>
+                </View>
+              </View>
+              <Text
+                accessibilityRole="header"
+                className="font-manrope-bold text-h3 text-navy"
+                numberOfLines={1}
+              >
+                교통
+              </Text>
+            </View>
+            <Text
+              accessibilityRole="header"
+              className="font-manrope-bold text-h3 text-navy shrink-0 font-manrope-extrabold"
+              numberOfLines={1}
+              testID="compare-pair-transport-mult"
+            >
+              ↑1.6×
+            </Text>
+          </View>
+          <View
+            className="gap-1.5"
+          >
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-gray-2 w-7 font-manrope-bold"
+                numberOfLines={1}
+              >
+                서울
+              </Text>
+              <View
+                className="flex-1 h-2 bg-light rounded"
+              >
+                <View
+                  className="h-2 bg-gray rounded"
+                  style={
+                    {
+                      "width": "38.71351995235259%",
+                    }
+                  }
+                  testID="compare-pair-transport-bar-seoul"
+                />
+              </View>
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-gray w-14 text-right font-manrope-semibold"
+                numberOfLines={1}
+              >
+                6.5만원
+              </Text>
+            </View>
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-orange w-7 font-manrope-bold"
+                numberOfLines={1}
+              >
+                CA
+              </Text>
+              <View
+                className="flex-1 h-2 bg-light rounded"
+              >
+                <View
+                  className="h-2 bg-orange rounded"
+                  style={
+                    {
+                      "width": "61.28648004764741%",
+                    }
+                  }
+                  testID="compare-pair-transport-bar-city"
+                />
+              </View>
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-navy w-14 text-right font-manrope-bold"
+                numberOfLines={1}
+              >
+                10.3만원
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        accessibilityLabel="세금 비교 카드"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+      >
+        <View
+          className="bg-white border border-line rounded-card p-3"
+          testID="compare-pair-tax"
+        >
+          <View
+            className="flex-row items-center justify-between mb-2 gap-2"
+          >
+            <View
+              className="flex-row items-center gap-2 flex-1 min-w-0"
+            >
+              <View
+                className="w-8 h-8 rounded-icon-sm items-center justify-center bg-light"
+                testID="compare-pair-tax-icon-box"
+              >
+                <View
+                  accessible={false}
+                  importantForAccessibility="no"
+                  style={
+                    {
+                      "height": 18,
+                      "width": 18,
+                    }
+                  }
+                >
+                  <svg
+                    fill="none"
+                    height={18}
+                    stroke="#11263C"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
+                    width={18}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"
+                      fill="none"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <rect
+                      fill="none"
+                      height="14"
+                      rx="2"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      width="20"
+                      x="2"
+                      y="6"
+                    />
+                  </svg>
+                </View>
+              </View>
+              <Text
+                accessibilityRole="header"
+                className="font-manrope-bold text-h3 text-navy"
+                numberOfLines={1}
+              >
+                세금
+              </Text>
+            </View>
+            <Text
+              accessibilityRole="header"
+              className="font-manrope-bold text-h3 text-navy shrink-0 font-manrope-extrabold"
+              numberOfLines={1}
+              testID="compare-pair-tax-mult"
+            >
+              신규
+            </Text>
+          </View>
+          <View
+            className="gap-1.5"
+          >
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-gray-2 w-7 font-manrope-bold"
+                numberOfLines={1}
+              >
+                서울
+              </Text>
+              <View
+                className="flex-1 h-2 bg-light rounded"
+              />
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-gray w-14 text-right font-manrope-semibold"
+                numberOfLines={1}
+              >
+                0원
+              </Text>
+            </View>
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-orange w-7 font-manrope-bold"
+                numberOfLines={1}
+              >
+                CA
+              </Text>
+              <View
+                className="flex-1 h-2 bg-light rounded"
+              >
+                <View
+                  className="h-2 bg-orange rounded"
+                  style={
+                    {
+                      "width": "100%",
+                    }
+                  }
+                  testID="compare-pair-tax-bar-city"
+                />
+              </View>
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-navy w-14 text-right font-manrope-bold"
+                numberOfLines={1}
+              >
+                486.4만원
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+      <View
+        accessibilityLabel="비자/정착 비교 카드"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "busy": undefined,
+            "checked": undefined,
+            "disabled": undefined,
+            "expanded": undefined,
+            "selected": undefined,
+          }
+        }
+        accessibilityValue={
+          {
+            "max": undefined,
+            "min": undefined,
+            "now": undefined,
+            "text": undefined,
+          }
+        }
+        accessible={true}
+        collapsable={false}
+        focusable={true}
+        onBlur={[Function]}
+        onClick={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+      >
+        <View
+          className="bg-white border border-line rounded-card p-3"
+          testID="compare-pair-visa"
+        >
+          <View
+            className="flex-row items-center justify-between mb-2 gap-2"
+          >
+            <View
+              className="flex-row items-center gap-2 flex-1 min-w-0"
+            >
+              <View
+                className="w-8 h-8 rounded-icon-sm items-center justify-center bg-light"
+                testID="compare-pair-visa-icon-box"
+              >
+                <View
+                  accessible={false}
+                  importantForAccessibility="no"
+                  style={
+                    {
+                      "height": 18,
+                      "width": 18,
+                    }
+                  }
+                >
+                  <svg
+                    fill="none"
+                    height={18}
+                    stroke="#11263C"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    viewBox="0 0 24 24"
+                    width={18}
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M10 2v8l3-3 3 3V2"
+                      fill="none"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                    <path
+                      d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"
+                      fill="none"
+                      stroke="#11263C"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                    />
+                  </svg>
+                </View>
+              </View>
+              <Text
+                accessibilityRole="header"
+                className="font-manrope-bold text-h3 text-navy"
+                numberOfLines={1}
+              >
+                비자/정착
+              </Text>
+            </View>
+            <Text
+              accessibilityRole="header"
+              className="font-manrope-bold text-h3 text-navy shrink-0 font-manrope-extrabold"
+              numberOfLines={1}
+              testID="compare-pair-visa-mult"
+            >
+              신규
+            </Text>
+          </View>
+          <View
+            className="gap-1.5"
+          >
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-gray-2 w-7 font-manrope-bold"
+                numberOfLines={1}
+              >
+                서울
+              </Text>
+              <View
+                className="flex-1 h-2 bg-light rounded"
+              />
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-gray w-14 text-right font-manrope-semibold"
+                numberOfLines={1}
+              >
+                0원
+              </Text>
+            </View>
+            <View
+              className="flex-row items-center gap-2"
+            >
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-orange w-7 font-manrope-bold"
+                numberOfLines={1}
+              >
+                CA
+              </Text>
+              <View
+                className="flex-1 h-2 bg-light rounded"
+              >
+                <View
+                  className="h-2 bg-orange rounded"
+                  style={
+                    {
+                      "width": "100%",
+                    }
+                  }
+                  testID="compare-pair-visa-bar-city"
+                />
+              </View>
+              <Text
+                accessibilityRole="text"
+                className="font-mulish text-small text-navy w-14 text-right font-manrope-bold"
+                numberOfLines={1}
+              >
+                161.7만원
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+    <View
+      className="px-screen-x mt-6 pt-4 border-t border-dashed border-line"
+    >
+      <View
+        className="flex-row items-center justify-between"
+      >
+        <Text
+          accessibilityRole="text"
+          className="font-mulish text-small text-gray-2"
+        >
+          출처 
+          6
+          개 · 갱신 
+          04-30
+        </Text>
+        <View
+          accessibilityLabel="출처 보기"
+          accessibilityRole="button"
+          accessibilityState={
+            {
+              "busy": undefined,
+              "checked": undefined,
+              "disabled": undefined,
+              "expanded": undefined,
+              "selected": undefined,
+            }
+          }
+          accessibilityValue={
+            {
+              "max": undefined,
+              "min": undefined,
+              "now": undefined,
+              "text": undefined,
+            }
+          }
+          accessible={true}
+          collapsable={false}
+          focusable={true}
+          onBlur={[Function]}
+          onClick={[Function]}
+          onFocus={[Function]}
+          onResponderGrant={[Function]}
+          onResponderMove={[Function]}
+          onResponderRelease={[Function]}
+          onResponderTerminate={[Function]}
+          onResponderTerminationRequest={[Function]}
+          onStartShouldSetResponder={[Function]}
+        >
+          <Text
+            accessibilityRole="text"
+            className="font-mulish text-small text-orange font-manrope-bold"
+          >
+            출처 보기 →
+          </Text>
+        </View>
+      </View>
+    </View>
+    <View
+      className="h-6"
+    />
+  </View>
+</RCTScrollView>
+`;

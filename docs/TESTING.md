@@ -1581,12 +1581,14 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 **라우팅:**
 
-- [ ] 정상 cityId: 데이터 로드 + 표시
-- [ ] 잘못된 cityId: 404 안내 + 홈 복귀 CTA
+- [x] 정상 cityId: 데이터 로드 + 표시 (screens step 0)
+- [x] 잘못된 cityId: ErrorView + 돌아가기 CTA (screens step 0)
+- [x] 서울 데이터 없음: ErrorView (screens step 0)
 - [ ] cityId 가 'seoul': 자기 비교 차단 (안내)
 
 **데이터 로드:**
 
+- [x] loadAllCities reject: ErrorView (screens step 0)
 - [ ] 캐시 hit: 즉시 표시
 - [ ] 캐시 miss: skeleton → fetch → 표시
 - [ ] fetch 실패: 시드 fallback + inline 배지
@@ -1599,16 +1601,17 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 **총비용 hero:**
 
-- [ ] 서울값 / 도시값 / 배수
+- [x] HeroCard orange mount 검증 (screens step 0)
+- [x] 서울값 / 도시값 / 배수 표시 (screens step 0)
 - [ ] persona=student: 학비 별도 라인 (참고)
 - [ ] persona=worker: 학비 라인 미표시
 - [ ] ❓ 탭: 가정값 시트 열림
 
 **카드 (페르소나별):**
 
-- [ ] persona=student: 5 카드 정확한 순서 (rent/food/transport/tuition/visa)
-- [ ] persona=worker: 5 카드 (rent/food/transport/tax/visa)
-- [ ] persona=unknown: 6 카드 (학비 + 세금 합집합)
+- [x] persona=student: 5 카드 정확한 순서 (rent/food/transport/tuition/visa) (screens step 0)
+- [x] persona=worker: 5 카드 (rent/food/transport/tax/visa) (screens step 0)
+- [x] persona=unknown: 6 카드 (학비 + 세금 합집합) (screens step 0)
 - [ ] 페르소나 mid-session 변경: 카드 즉시 갱신 (스토어 reactive)
 
 **Hot 카드:**
@@ -1622,8 +1625,16 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 **즐겨찾기:**
 
-- [ ] ⭐ 탭: store add/remove + 시각 토글
+- [x] ⭐ 탭: store add/remove + 시각 토글 (screens step 0)
 - [ ] 즐겨찾기 후 뒤로 → 홈: 카드 표시 반영
+
+**TopBar:**
+
+- [x] back 버튼 클릭 시 router.back() 호출 (screens step 0)
+
+**최근 본 도시:**
+
+- [x] 마운트 + 데이터 로드 완료 시 recent.push(cityId) 호출 (screens step 0)
 
 **카드 탭 → 상세:**
 
@@ -1641,6 +1652,10 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 - [ ] 카드 빠른 연타: 첫 탭만 navigation
 - [ ] 카드 width 일관
+
+**스냅샷:**
+
+- [x] vancouver + worker 페르소나 snapshot (screens step 0)
 
 ### 9.24.1 `src/lib/search.ts` (홈 검색)
 
