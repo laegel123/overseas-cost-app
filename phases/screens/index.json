@@ -13,10 +13,10 @@
     {
       "step": 1,
       "name": "detail",
-      "status": "error",
+      "status": "completed",
       "started_at": "2026-05-01T14:24:01+0900",
-      "error_message": "[3회 시도 후 실패] Step did not update status",
-      "failed_at": "2026-05-01T14:24:29+0900"
+      "completed_at": "2026-05-01T15:30:00+0900",
+      "summary": "Detail 화면 — food 외식·식재료 GroceryRow 섹션 + rent/transport/tuition/tax/visa 동일 골격. navy HeroCard + 항목 수 + 출처. ErrorView (잘못된 category/cityId/city). 15 신규 테스트 + 2 snapshot. 페르소나 분기는 v1.x. 하네스 API quota 한도로 메인 세션 직접 작업."
     },
     {
       "step": 2,
