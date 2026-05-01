@@ -150,6 +150,9 @@ export function ComparePair({
         {/* 도시 행 */}
         <View className="flex-row items-center gap-2">
           <Small
+            // design/README.md §3 line 77 — "좌측 라벨 (SEO/VAN ... — 색상 일치)".
+            // 도시 라벨은 막대 색 (orange) 과 일치하도록 hot 여부와 무관하게 항상
+            // orange 고정 (PR #16 review 이슈 4).
             color="orange"
             numberOfLines={1}
             className="w-7 font-manrope-bold"

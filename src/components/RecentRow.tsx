@@ -45,9 +45,10 @@ export function RecentRow({
   const multText = formatMultiplier(mult);
   const multColor = getMultColor(mult, hot);
 
-  const handlePress = () => {
+  // 세로 리스트에서 반복 렌더되므로 콜백 안정화 (PR #16 review 이슈 1).
+  const handlePress = React.useCallback(() => {
     onPress?.(cityId);
-  };
+  }, [onPress, cityId]);
 
   const row = (
     <View

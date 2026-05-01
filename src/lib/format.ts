@@ -89,6 +89,11 @@ export function formatMultiplier(mult: number | '신규'): string {
  *
  * `isHot` / `formatMultiplier` 와 동일하게 잘못된 입력 (NaN / 0 / 음수 / Infinity)
  * 을 silent fallback 없이 차단 — exported 퍼블릭 API 안전성 (PR #16 review 이슈 3).
+ *
+ * 주의: `hot=true` override 도 mult 검증을 우회하지 않는다. `getMultColor(NaN, true)`
+ * 는 'orange' 가 아니라 InvalidMultiplierError 를 throw 한다 — 잘못된 mult 값이
+ * 호출 사이트에 도달했다는 근본 문제를 silent 색상 반환으로 가리지 않기 위함
+ * (CLAUDE.md "에러는 삼키지 않는다" 정책).
  */
 export function getMultColor(
   mult: number | '신규',

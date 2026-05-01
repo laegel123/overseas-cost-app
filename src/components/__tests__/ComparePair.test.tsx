@@ -98,6 +98,15 @@ describe('ComparePair', () => {
       const iconBox = screen.getByTestId('compare-pair-icon-box');
       expect(iconBox.props.className).toContain('bg-light');
     });
+
+    it('mult="신규" + hot=true override → orange-soft 아이콘 (PR #16 review 이슈 3)', () => {
+      renderPair({ mult: '신규', hot: true });
+      const iconBox = screen.getByTestId('compare-pair-icon-box');
+      expect(iconBox.props.className).toContain('bg-orange-soft');
+      const multText = screen.getByTestId('compare-pair-mult');
+      expect(multText.props.children).toBe('신규');
+      expect(multText.props.className).toContain('text-orange');
+    });
   });
 
   describe('막대 폭', () => {
