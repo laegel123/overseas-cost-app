@@ -518,27 +518,27 @@ export function expectComparePair(
 - [ ] 음수 → 통화별 부호 위치 (`-$50` 또는 `($50)`)
 - [ ] NaN → throws
 
-#### `formatMultiplier(mult: number | 'new'): string`
+#### `formatMultiplier(mult: number | '신규'): string`
 
-- [ ] `1.0` → `"1.0×"` (화살표 없음)
-- [ ] `1.04` → `"1.0×"` (반내림)
-- [ ] `1.05` → `"↑1.1×"` (반올림)
-- [ ] `1.5` → `"↑1.5×"`
-- [ ] `1.94` → `"↑1.9×"` (반내림 1자리)
-- [ ] `1.95` → `"↑2.0×"` (반올림 → hot 경계 진입)
-- [ ] `2.0` → `"↑2.0×"` (hot 경계)
-- [ ] `2.01` → `"↑2.0×"` (반내림)
-- [ ] `9.99` → `"↑10.0×"` (반올림)
-- [ ] `10.0` → `"↑10.0×"`
-- [ ] `0.95` → `"↓1.0×"` (반올림)
-- [ ] `0.94` → `"↓0.9×"` (반내림)
-- [ ] `0.5` → `"↓0.5×"`
-- [ ] `0.05` → `"↓0.1×"`
-- [ ] `'new'` → `"신규"`
-- [ ] `0` → throws `InvalidMultiplierError` (배수 0 의미 없음)
-- [ ] 음수 → throws
-- [ ] `NaN` → throws
-- [ ] `Infinity` → throws
+- [x] `1.0` → `"1.0×"` (화살표 없음)
+- [x] `1.04` → `"1.0×"` (반내림)
+- [x] `1.05` → `"↑1.1×"` (반올림)
+- [x] `1.5` → `"↑1.5×"`
+- [x] `1.94` → `"↑1.9×"` (반내림 1자리)
+- [x] `1.95` → `"↑2.0×"` (반올림 → hot 경계 진입)
+- [x] `2.0` → `"↑2.0×"` (hot 경계)
+- [x] `2.01` → `"↑2.0×"` (반내림)
+- [x] `9.99` → `"↑10.0×"` (반올림)
+- [x] `10.0` → `"↑10.0×"`
+- [x] `0.95` → `"↓1.0×"` (반올림)
+- [x] `0.94` → `"↓0.9×"` (반내림)
+- [x] `0.5` → `"↓0.5×"`
+- [x] `0.05` → `"↓0.1×"`
+- [x] `'신규'` → `"신규"`
+- [x] `0` → throws `InvalidMultiplierError` (배수 0 의미 없음)
+- [x] 음수 → throws
+- [x] `NaN` → throws
+- [x] `Infinity` → throws
 
 #### `formatDate(d: Date | string | number): string`
 
@@ -566,18 +566,52 @@ export function expectComparePair(
 - [ ] 30일 전 → `"한 달 전"`
 - [ ] 90일 전 → `"3개월 전"`
 
-#### `isHot(mult: number | 'new'): boolean`
+#### `isHot(mult: number | '신규'): boolean`
 
-- [ ] `1.99` → `false`
-- [ ] `2.0` → `true` (정확히 경계)
-- [ ] `2.01` → `true`
-- [ ] `5.0` → `true`
-- [ ] `1.0` → `false`
-- [ ] `0.5` → `false`
-- [ ] `'new'` → `false` (신규는 hot 아님)
-- [ ] `0` → throws
-- [ ] 음수 → throws
-- [ ] `NaN` → throws
+판정 기준은 표시값 (소수 첫자리 반올림). `formatMultiplier` 와 일관성 보장 (PR #16 review 이슈 1).
+
+- [x] `1.94` → `false` (반올림 1.9, cool)
+- [x] `1.95` → `true` (반올림 2.0, formatMultiplier 와 일관)
+- [x] `1.99` → `true` (반올림 2.0)
+- [x] `2.0` → `true` (hot 경계 정확값)
+- [x] `2.04` → `true` (반올림 2.0)
+- [x] `2.05` → `true` (반올림 2.1)
+- [x] `5.0` → `true`
+- [x] `10.0` → `true`
+- [x] `1.0` → `false`
+- [x] `0.5` → `false`
+- [x] `0.01` → `false` (매우 작은 양수)
+- [x] `'신규'` → `false` (신규는 hot 아님)
+- [x] `0` → throws
+- [x] 음수 → throws
+- [x] `NaN` → throws
+- [x] `Infinity` → throws
+- [x] `-Infinity` → throws
+
+#### `getMultColor(mult: number | '신규', hot: boolean): 'orange' | 'navy' | 'gray-2'`
+
+`ComparePair` / `FavCard` / `RecentRow` 공통 색상 정책. `GroceryRow` 는 디자인 의도상 단순 hot/normal 분기 (gray) 라 본 헬퍼 미사용.
+
+- [x] hot=true + mult=0.5 → `'orange'`
+- [x] hot=true + mult=1.0 → `'orange'`
+- [x] hot=true + mult='신규' → `'orange'` (override 우선)
+- [x] hot=false + '신규' → `'navy'`
+- [x] hot=false + 0.5 → `'gray-2'` (cool)
+- [x] hot=false + 0.94 → `'gray-2'` (반올림 0.9)
+- [x] hot=false + 0.95 → `'gray-2'` (반올림 1.0)
+- [x] hot=false + 1.0 → `'gray-2'` (동일)
+- [x] hot=false + 1.04 → `'gray-2'` (반올림 1.0)
+- [x] hot=false + 1.05 → `'navy'` (반올림 1.1, mid)
+- [x] hot=false + 1.5 → `'navy'`
+- [x] hot=false + 1.94 → `'navy'` (반올림 1.9, hot 미만)
+
+**에러 케이스 — silent fallback 금지 (PR #16 review 이슈 3):**
+
+- [x] mult=0 → throws `InvalidMultiplierError` (hot=true / hot=false 모두)
+- [x] mult=음수 → throws
+- [x] mult=NaN → throws (hot=false 시 silent navy 반환 차단)
+- [x] mult=Infinity → throws
+- [x] mult=-Infinity → throws
 
 #### Snapshot · Property-based
 
@@ -1263,79 +1297,179 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 
 ### 9.17 `src/components/ComparePair.tsx`
 
-**Hot 규칙 (경계값 정확):**
+**Hot 규칙 (경계값 정확) — 표시값 (rounded) 기반:**
 
-- [ ] mult=1.99 → not hot (icon navy, mult navy)
-- [ ] mult=2.0 → **hot** (icon orange-soft + orange, mult orange)
-- [ ] mult=2.01 → hot
-- [ ] mult=10.0 → hot
-- [ ] mult=0.5 → not hot (cool, gray-2)
+- [x] mult=1.94 → not hot (반올림 1.9, icon navy / mult navy)
+- [x] mult=1.95 → **hot** (반올림 2.0, formatMultiplier 와 일관 — PR #16 review 이슈 1)
+- [x] mult=1.99 → **hot** (반올림 2.0)
+- [x] mult=2.0 → **hot** (icon orange-soft + orange, mult orange)
+- [x] mult=2.01 → hot
+- [x] mult=10.0 → hot
+- [x] mult=0.5 → not hot (cool, gray-2)
 
 **Hot prop override:**
 
-- [ ] hot=true 강제 (mult=1.5 라도) → orange
-- [ ] hot=false 강제 (mult=3.0 라도) → navy
-- [ ] hot 미지정 → 자동 판정 (`isHot(mult)`)
+- [x] hot=true 강제 (mult=1.5 라도) → orange
+- [x] hot=false 강제 (mult=3.0 라도) → navy
+- [x] hot 미지정 → 자동 판정 (`isHot(mult)`)
 
 **신규:**
 
-- [ ] mult='신규' → "신규" 표기, navy 색
-- [ ] 신규 시 막대: cyan/light bg 또는 SEO 막대 0%
+- [x] mult='신규' → "신규" 표기, navy 색
+- [x] 신규 시 막대: not hot (bg-light)
 
 **막대 폭:**
 
-- [ ] sw=0.4, cw=1.0 → SEO 40%, CITY 100%
-- [ ] sw=0.0, cw=1.0 → SEO 0% (미표시 또는 1px)
-- [ ] sw=1.0, cw=0.5 → 정상
-- [ ] sw + cw 임의 → 각자 상대 표시
+- [x] sw=0.4, cw=1.0 → SEO 40%, CITY 100%
+- [x] sw=0.0, cw=1.0 → SEO 0% (미표시)
+- [x] sw=1.0, cw=0.5 → 정상
+- [x] sw + cw 범위 벗어남 → clamp + warn
 
 **Icon 매핑:**
 
-- [ ] category=rent → house icon
-- [ ] category=food → fork icon
-- [ ] category=transport → bus icon
-- [ ] category=tuition → graduation icon
-- [ ] category=tax → briefcase icon
-- [ ] category=visa → passport icon
+- [x] category=rent → house icon
+- [x] category=food → fork icon
+- [x] category=transport → bus icon
+- [x] category=tuition → graduation icon
+- [x] category=tax → briefcase icon
+- [x] category=visa → passport icon
 
 **기타:**
 
-- [ ] 라벨 긴 경우: numberOfLines=1, ellipsis
-- [ ] sValue/cValue 긴 경우: 56px 영역 안에 fit
-- [ ] 탭 → onPress(category)
-- [ ] snapshot per variant (hot/normal/신규)
+- [x] 라벨 / 값 렌더링
+- [x] mult 포매팅 (↑/↓ 화살표)
+- [x] 탭 → onPress
+- [x] testID 전파
+- [x] onPress 정의 시 `accessibilityLabel = "${label} 비교 카드"` (PR #16 review 이슈 2)
 
 ### 9.18 `src/components/FavCard.tsx`
 
-- [ ] accent=true: navy bg, white text
-- [ ] accent=false: white bg, navy text, line border
-- [ ] hot mult: `↑2.3×` orange
-- [ ] cool mult: `↓0.8×` gray-2 (또는 dim)
-- [ ] 1.0× (=서울): 회색
-- [ ] sub (영문) 11px opacity 0.7
-- [ ] 국가코드 박스 32×24 (2글자)
-- [ ] 매우 긴 도시명 ("샌프란시스코 베이"): 줄임 또는 wrap (정책)
-- [ ] 탭 → onPress(cityId)
-- [ ] ⭐ 아이콘 표시 (즐겨찾기 카드라)
+**accent variant:**
+
+- [x] accent=true: bg-navy (첫 카드)
+- [x] accent=false: bg-white + border-line (기본)
+- [x] accent 미지정 → false
+
+**Hot 규칙 (경계값) — 표시값 (rounded) 기반:**
+
+- [x] mult=1.94 → not hot (반올림 1.9, navy mult)
+- [x] mult=1.99 → hot (반올림 2.0, orange — PR #16 review 이슈 1)
+- [x] mult=2.0 → hot (orange mult)
+- [x] mult=2.3 → hot
+- [x] mult=0.8 → cool (↓0.8×)
+- [x] mult=1.0 → 동일 (1.0×, gray-2)
+
+**accent + hot 조합:**
+
+- [x] accent=true + hot=true → mult orange
+- [x] accent=true + not hot → mult white
+
+**텍스트:**
+
+- [x] 도시명 / 영문명 / 국가코드 표시
+- [x] 영문명 sub opacity `FAV_CARD_SUB_OPACITY` (0.7) — tokens 참조 (PR #16 review 이슈 2)
+- [x] 국가코드 박스 렌더
+- [x] star 아이콘 렌더
+
+**인터랙션:**
+
+- [x] onPress 정의 → cityId 전달
+- [x] onPress 미정의 → 비-탭
+- [x] onPress 정의 시 `accessibilityLabel = "${cityName} 즐겨찾기 카드"` (PR #16 review 이슈 4)
+
+**기타:**
+
+- [x] testID 전파 (미지정 시 속성 없음)
 
 ### 9.19 `src/components/RecentRow.tsx`
 
-- [ ] hot mult: orange
-- [ ] cool mult: gray-2
-- [ ] 1.0×: 회색
-- [ ] chevron 표시
-- [ ] 마지막 행: bottom border 없음
-- [ ] 탭 → onPress(cityId)
+**Hot 규칙 (경계값) — 표시값 (rounded) 기반:**
+
+- [x] mult=1.94 → not hot (반올림 1.9, navy)
+- [x] mult=1.99 → hot (반올림 2.0, orange — PR #16 review 이슈 1)
+- [x] mult=2.0 → hot (orange)
+- [x] mult=2.3 → hot
+- [x] mult=0.8 → cool (↓0.8×, gray-2)
+- [x] mult=1.0 → 동일 (1.0×, gray-2)
+- [x] mult=0.5 → cool
+
+**isLast border:**
+
+- [x] isLast=false → border-b 표시
+- [x] isLast=true → border-b 없음
+- [x] isLast 미지정 → false
+
+**텍스트:**
+
+- [x] 도시명 / 영문명 / 국가코드 표시
+- [x] 국가코드 박스 36×36 렌더
+- [x] mult 포매팅 (↑/↓ 화살표)
+
+**chevron 색상 (PR #16 review 이슈 5):**
+
+- [x] hot 시 chevron `colors.orange`
+- [x] not hot 시 chevron `colors.gray2`
+
+**인터랙션:**
+
+- [x] onPress 정의 → cityId 전달
+- [x] onPress 미정의 → 비-탭
+- [x] onPress 정의 시 `accessibilityLabel = "${cityName} 최근 본 도시"` (PR #16 review 이슈 4)
+
+**기타:**
+
+- [x] testID 전파 (미지정 시 속성 없음)
 
 ### 9.20 `src/components/GroceryRow.tsx`
 
-- [ ] 정상: light icon bg
-- [ ] hot: orange-soft bg
-- [ ] 이모지 렌더 (🥚 등)
-- [ ] 가격 범위: `"1.2만 → 2.2만"` (서울 → 도시)
-- [ ] mult 색상 (hot=orange, normal=gray)
-- [ ] bottom border (마지막 행 제외)
-- [ ] 매우 긴 품목명: ellipsis
+**Hot 규칙 (경계값) — 표시값 기반:**
+
+- [x] mult=1.94 → not hot (반올림 1.9, bg-light)
+- [x] mult=1.95 → hot (반올림 2.0, bg-orange-soft)
+- [x] mult=1.99 → hot (반올림 2.0)
+- [x] mult=2.0 → hot (bg-orange-soft)
+- [x] mult=2.5 → hot
+- [x] mult=0.5 → not hot (cool)
+- [x] mult=1.0 → not hot
+
+**색상 정책 — design/README.md §4 의도적 차이 (PR #16 review 이슈 3):**
+
+- [x] hot=false 시 `multColor='gray'` (`#BFC8CC`, ComparePair/FavCard/RecentRow 의 `'gray-2'` 와 다름 — 디자인 spec 명시)
+- [x] hot=true 시 `multColor='orange'`
+
+**Hot prop override:**
+
+- [x] hot=true 강제 (mult=1.5) → orange-soft
+- [x] hot=false 강제 (mult=3.0) → bg-light
+- [x] hot 미지정 → 자동 판정
+
+**isLast border:**
+
+- [x] isLast=false → border-b 표시
+- [x] isLast=true → border-b 없음
+- [x] isLast 미지정 → false
+
+**텍스트:**
+
+- [x] 품목명 표시
+- [x] 이모지 표시
+- [x] 가격 범위: "서울 → 도시" 형식
+- [x] 다양한 이모지 렌더 (🥚 등)
+
+**mult 포매팅:**
+
+- [x] mult=1.8 → ↑1.8×
+- [x] mult=0.7 → ↓0.7×
+- [x] mult=1.0 → 1.0×
+
+**이모지 박스:**
+
+- [x] 36×36 (w-9 h-9) 크기
+- [x] rounded-[10px] 라운드
+
+**기타:**
+
+- [x] testID 전파 (미지정 시 속성 없음)
 
 ### 9.20.1 `src/components/ErrorView.tsx` (app-shell phase step 3)
 
