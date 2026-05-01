@@ -11,7 +11,11 @@ import * as React from 'react';
 import { Pressable, View } from 'react-native';
 
 import { formatMultiplier, getMultColor, isHot } from '@/lib';
-import { colors } from '@/theme/tokens';
+import {
+  colors,
+  FAV_CARD_LABEL_OPACITY,
+  FAV_CARD_SUB_OPACITY,
+} from '@/theme/tokens';
 
 import { Icon } from './Icon';
 import { H3, Tiny } from './typography/Text';
@@ -94,7 +98,7 @@ export function FavCard({
       <Tiny
         color={accent ? 'white' : 'gray-2'}
         numberOfLines={1}
-        style={{ opacity: 0.7 }}
+        style={{ opacity: FAV_CARD_SUB_OPACITY }}
         {...(testID !== undefined ? { testID: `${testID}-sub` } : {})}
       >
         {cityNameEn}
@@ -112,7 +116,7 @@ export function FavCard({
         </H3>
         <Tiny
           color={accent ? 'white' : 'gray-2'}
-          style={{ opacity: 0.6 }}
+          style={{ opacity: FAV_CARD_LABEL_OPACITY }}
           numberOfLines={1}
         >
           vs 서울

@@ -90,6 +90,7 @@ export function RecentRow({
           name="chev-right"
           size={16}
           color={hot ? colors.orange : colors.gray2}
+          {...(testID !== undefined ? { testID: `${testID}-chevron` } : {})}
         />
       </View>
     </View>

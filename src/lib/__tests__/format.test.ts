@@ -220,4 +220,30 @@ describe('getMultColor', () => {
       expect(getMultColor(1.94, false)).toBe('navy');
     });
   });
+
+  describe('에러 케이스 — silent fallback 금지 (PR #16 review 이슈 3)', () => {
+    it('0 → throws InvalidMultiplierError (hot=false)', () => {
+      expect(() => getMultColor(0, false)).toThrow(InvalidMultiplierError);
+    });
+
+    it('0 → throws InvalidMultiplierError (hot=true 도 검증 적용)', () => {
+      expect(() => getMultColor(0, true)).toThrow(InvalidMultiplierError);
+    });
+
+    it('음수 → throws', () => {
+      expect(() => getMultColor(-1, false)).toThrow(InvalidMultiplierError);
+    });
+
+    it('NaN → throws (hot=false, silent navy 반환 차단)', () => {
+      expect(() => getMultColor(NaN, false)).toThrow(InvalidMultiplierError);
+    });
+
+    it('Infinity → throws', () => {
+      expect(() => getMultColor(Infinity, false)).toThrow(InvalidMultiplierError);
+    });
+
+    it('-Infinity → throws', () => {
+      expect(() => getMultColor(-Infinity, false)).toThrow(InvalidMultiplierError);
+    });
+  });
 });

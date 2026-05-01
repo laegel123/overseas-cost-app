@@ -121,6 +121,18 @@ export const HERO_SEOUL_BAR_OPACITY = {
 export const HERO_FOOTER_OPACITY = 0.7;
 
 /**
+ * FavCard 의 부제목 (영문 도시명) 투명도 — design/README §2.
+ * 본문 (도시 한글명) 보다 약하게 강조 (0.7). PR #16 review 이슈 2.
+ */
+export const FAV_CARD_SUB_OPACITY = 0.7;
+
+/**
+ * FavCard 의 보조 라벨 ("vs 서울") 투명도 — design/README §2.
+ * 배수 본문보다 더 약하게 강조 (0.6). 부제목보다 더 작은 보조 정보라 한 단계 낮춤.
+ */
+export const FAV_CARD_LABEL_OPACITY = 0.6;
+
+/**
  * RN fontFamily raw 이름 — `useFonts` / `assets/fonts` / tailwind config 의
  * fontFamily alias 와 1:1 일치. NativeWind className 으로 처리할 수 없는
  * inline style override 시 본 상수만 사용 (매직 스트링 방지).

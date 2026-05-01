@@ -605,6 +605,14 @@ export function expectComparePair(
 - [x] hot=false + 1.5 → `'navy'`
 - [x] hot=false + 1.94 → `'navy'` (반올림 1.9, hot 미만)
 
+**에러 케이스 — silent fallback 금지 (PR #16 review 이슈 3):**
+
+- [x] mult=0 → throws `InvalidMultiplierError` (hot=true / hot=false 모두)
+- [x] mult=음수 → throws
+- [x] mult=NaN → throws (hot=false 시 silent navy 반환 차단)
+- [x] mult=Infinity → throws
+- [x] mult=-Infinity → throws
+
 #### Snapshot · Property-based
 
 - [ ] formatKRW: `forall n: integer in [-1e9, 1e9], formatKRW(n) is non-empty string`
@@ -1342,9 +1350,10 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] accent=false: bg-white + border-line (기본)
 - [x] accent 미지정 → false
 
-**Hot 규칙 (경계값):**
+**Hot 규칙 (경계값) — 표시값 (rounded) 기반:**
 
-- [x] mult=1.99 → not hot
+- [x] mult=1.94 → not hot (반올림 1.9, navy mult)
+- [x] mult=1.99 → hot (반올림 2.0, orange — PR #16 review 이슈 1)
 - [x] mult=2.0 → hot (orange mult)
 - [x] mult=2.3 → hot
 - [x] mult=0.8 → cool (↓0.8×)
@@ -1358,7 +1367,7 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 **텍스트:**
 
 - [x] 도시명 / 영문명 / 국가코드 표시
-- [x] 영문명 sub opacity 0.7
+- [x] 영문명 sub opacity `FAV_CARD_SUB_OPACITY` (0.7) — tokens 참조 (PR #16 review 이슈 2)
 - [x] 국가코드 박스 렌더
 - [x] star 아이콘 렌더
 
@@ -1366,6 +1375,7 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 
 - [x] onPress 정의 → cityId 전달
 - [x] onPress 미정의 → 비-탭
+- [x] onPress 정의 시 `accessibilityLabel = "${cityName} 즐겨찾기 카드"` (PR #16 review 이슈 4)
 
 **기타:**
 
@@ -1373,9 +1383,10 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 
 ### 9.19 `src/components/RecentRow.tsx`
 
-**Hot 규칙 (경계값):**
+**Hot 규칙 (경계값) — 표시값 (rounded) 기반:**
 
-- [x] mult=1.99 → not hot (반올림 2.0)
+- [x] mult=1.94 → not hot (반올림 1.9, navy)
+- [x] mult=1.99 → hot (반올림 2.0, orange — PR #16 review 이슈 1)
 - [x] mult=2.0 → hot (orange)
 - [x] mult=2.3 → hot
 - [x] mult=0.8 → cool (↓0.8×, gray-2)
@@ -1394,10 +1405,16 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] 국가코드 박스 36×36 렌더
 - [x] mult 포매팅 (↑/↓ 화살표)
 
+**chevron 색상 (PR #16 review 이슈 5):**
+
+- [x] hot 시 chevron `colors.orange`
+- [x] not hot 시 chevron `colors.gray2`
+
 **인터랙션:**
 
 - [x] onPress 정의 → cityId 전달
 - [x] onPress 미정의 → 비-탭
+- [x] onPress 정의 시 `accessibilityLabel = "${cityName} 최근 본 도시"` (PR #16 review 이슈 4)
 
 **기타:**
 

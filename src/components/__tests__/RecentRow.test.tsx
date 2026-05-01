@@ -1,5 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
+import { colors } from '@/theme/tokens';
+
 import { RecentRow, type RecentRowProps } from '../RecentRow';
 
 const defaultProps: RecentRowProps = {
@@ -16,17 +18,26 @@ function renderRow(overrides: Partial<RecentRowProps> = {}) {
 }
 
 describe('RecentRow', () => {
-  describe('Hot 규칙 (경계값)', () => {
-    it('mult=1.99 → not hot (반올림 2.0 but 원본 < 2.0)', () => {
+  describe('Hot 규칙 (경계값) — 표시값 (rounded) 기반', () => {
+    it('mult=1.94 → not hot (반올림 1.9, navy)', () => {
+      renderRow({ mult: 1.94 });
+      const mult = screen.getByTestId('recent-row-mult');
+      expect(mult.props.children).toBe('↑1.9×');
+      expect(mult.props.className).toContain('text-navy');
+    });
+
+    it('mult=1.99 → hot (반올림 2.0, orange — PR #16 review 이슈 1)', () => {
       renderRow({ mult: 1.99 });
       const mult = screen.getByTestId('recent-row-mult');
       expect(mult.props.children).toBe('↑2.0×');
+      expect(mult.props.className).toContain('text-orange');
     });
 
     it('mult=2.0 → hot (orange)', () => {
       renderRow({ mult: 2.0 });
       const mult = screen.getByTestId('recent-row-mult');
       expect(mult.props.children).toBe('↑2.0×');
+      expect(mult.props.className).toContain('text-orange');
     });
 
     it('mult=2.3 → hot', () => {
@@ -112,6 +123,29 @@ describe('RecentRow', () => {
       render(<RecentRow {...propsWithoutOnPress} />);
       const row = screen.getByTestId('recent-row');
       expect(row.props.accessibilityRole).not.toBe('button');
+    });
+
+    it('onPress 정의 시 accessibilityLabel 에 도시명 포함 (PR #16 review 이슈 4)', () => {
+      renderRow({ onPress: jest.fn(), cityName: '밴쿠버' });
+      const button = screen.getByRole('button');
+      expect(button.props.accessibilityLabel).toBe('밴쿠버 최근 본 도시');
+    });
+  });
+
+  describe('chevron 색상 (PR #16 review 이슈 5)', () => {
+    it('hot 시 chevron orange', () => {
+      renderRow({ mult: 2.5 });
+      const chevron = screen.getByTestId('recent-row-chevron');
+      // Icon outer view 의 첫 자식 = lucide 컴포넌트 (color prop 보유)
+      const lucide = chevron.children[0] as { props: { color: string } };
+      expect(lucide.props.color).toBe(colors.orange);
+    });
+
+    it('not hot 시 chevron gray-2', () => {
+      renderRow({ mult: 1.0 });
+      const chevron = screen.getByTestId('recent-row-chevron');
+      const lucide = chevron.children[0] as { props: { color: string } };
+      expect(lucide.props.color).toBe(colors.gray2);
     });
   });
 

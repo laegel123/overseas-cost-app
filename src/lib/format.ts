@@ -86,11 +86,20 @@ export function formatMultiplier(mult: number | '신규'): string {
  *
  * `GroceryRow` 는 디자인 의도상 cool/mid 구분 없이 단순 `'gray'` 를 사용 — 본
  * 헬퍼 미사용 (design/README.md §4 명시).
+ *
+ * `isHot` / `formatMultiplier` 와 동일하게 잘못된 입력 (NaN / 0 / 음수 / Infinity)
+ * 을 silent fallback 없이 차단 — exported 퍼블릭 API 안전성 (PR #16 review 이슈 3).
  */
 export function getMultColor(
   mult: number | '신규',
   hot: boolean,
 ): 'orange' | 'navy' | 'gray-2' {
+  if (mult !== '신규') {
+    if (typeof mult !== 'number') {
+      throw new InvalidMultiplierError(`getMultColor: invalid multiplier — ${String(mult)}`);
+    }
+    validateMultiplier(mult);
+  }
   if (hot) {
     return 'orange';
   }

@@ -38,17 +38,26 @@ describe('FavCard', () => {
     });
   });
 
-  describe('Hot 규칙 (경계값)', () => {
-    it('mult=1.99 → not hot (navy mult)', () => {
+  describe('Hot 규칙 (경계값) — 표시값 (rounded) 기반', () => {
+    it('mult=1.94 → not hot (반올림 1.9, navy mult)', () => {
+      renderCard({ mult: 1.94 });
+      const mult = screen.getByTestId('fav-card-mult');
+      expect(mult.props.children).toBe('↑1.9×');
+      expect(mult.props.className).toContain('text-navy');
+    });
+
+    it('mult=1.99 → hot (반올림 2.0, orange mult — PR #16 review 이슈 1)', () => {
       renderCard({ mult: 1.99 });
       const mult = screen.getByTestId('fav-card-mult');
       expect(mult.props.children).toBe('↑2.0×');
+      expect(mult.props.className).toContain('text-orange');
     });
 
     it('mult=2.0 → hot (orange mult)', () => {
       renderCard({ mult: 2.0 });
       const mult = screen.getByTestId('fav-card-mult');
       expect(mult.props.children).toBe('↑2.0×');
+      expect(mult.props.className).toContain('text-orange');
     });
 
     it('mult=2.3 → hot (orange mult)', () => {
@@ -128,6 +137,12 @@ describe('FavCard', () => {
       render(<FavCard {...propsWithoutOnPress} />);
       const card = screen.getByTestId('fav-card');
       expect(card.props.accessibilityRole).not.toBe('button');
+    });
+
+    it('onPress 정의 시 accessibilityLabel 에 도시명 포함 (PR #16 review 이슈 4)', () => {
+      renderCard({ onPress: jest.fn(), cityName: '밴쿠버' });
+      const button = screen.getByRole('button');
+      expect(button.props.accessibilityLabel).toBe('밴쿠버 즐겨찾기 카드');
     });
   });
 
