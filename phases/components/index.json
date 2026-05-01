@@ -45,12 +45,16 @@
     {
       "step": 5,
       "name": "compare-pair",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-01T10:37:22+0900",
+      "summary": "ComparePair — Compare 화면 카테고리별 듀얼 바 카드. isHot(mult) 단일 함수로 hot 판정 (CLAUDE.md CRITICAL). 6 category → icon 매핑 (rent→house, food→fork, transport→bus, tuition→graduation, tax→briefcase, visa→passport). hot prop override 지원. formatMultiplier(mult) 신규 — ↑/↓/신규 포매팅. swPct/cwPct clamp [0,1] + dev warn. src/lib/format.ts 신규 (isHot + formatMultiplier). 60 신규 테스트 (총 722). src/components 100/100/100/100.",
+      "completed_at": "2026-05-01T10:47:44+0900"
     },
     {
       "step": 6,
       "name": "rows",
       "status": "pending"
     }
-  ]
+  ],
+  "created_at": "2026-05-01T10:37:22+0900"
 }
