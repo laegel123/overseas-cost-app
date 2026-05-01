@@ -53,7 +53,10 @@
     {
       "step": 6,
       "name": "rows",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-01T10:47:45+0900",
+      "summary": "FavCard + RecentRow + GroceryRow — row variant 3종. FavCard: accent/non-accent variant + hot mult orange. RecentRow: isLast border + chevron. GroceryRow: emoji box + hot override. 모두 isHot(mult) 단일 함수 사용 (CLAUDE.md CRITICAL). 53 신규 테스트 (총 775). src/components 100/100/100/100.",
+      "completed_at": "2026-05-01T10:53:06+0900"
     }
   ],
   "created_at": "2026-05-01T10:37:22+0900"
