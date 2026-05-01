@@ -17,6 +17,8 @@ import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { Small } from '@/components/typography/Text';
 import {
+  computeBarPcts,
+  computeMultiplier,
   convertToKRW,
   fetchExchangeRates,
   formatKRW,
@@ -121,17 +123,6 @@ function getCategoriesForPersona(persona: Persona): CategoryConfig[] {
     return [...base, TAX_CONFIG, VISA_CONFIG];
   }
   return [...base, TUITION_CONFIG, TAX_CONFIG, VISA_CONFIG];
-}
-
-function computeMultiplier(seoulVal: number, cityVal: number): number {
-  if (seoulVal === 0) return cityVal > 0 ? Infinity : 1;
-  return cityVal / seoulVal;
-}
-
-function computeBarPcts(seoulVal: number, cityVal: number): { swPct: number; cwPct: number } {
-  const total = seoulVal + cityVal;
-  if (total === 0) return { swPct: 0.5, cwPct: 0.5 };
-  return { swPct: seoulVal / total, cwPct: cityVal / total };
 }
 
 type CompareData = {
@@ -329,7 +320,7 @@ export default function CompareScreen(): React.ReactElement {
               label={item.label}
               sLabel="서울"
               sValue={formatKRW(item.seoulVal)}
-              cLabel={city.country}
+              cLabel={city.name.ko}
               cValue={formatKRW(item.cityVal)}
               mult={item.mult}
               swPct={item.swPct}
@@ -347,11 +338,13 @@ export default function CompareScreen(): React.ReactElement {
           <Small color="gray-2">
             출처 {sourceCount}개 · 갱신 {lastSync ? formatShortDate(lastSync) : '?'}
           </Small>
+          {/* v1.0 미구현 — onPress 부착은 v1.x 외부 링크 / 모달 결정 후 (PR #17 review 이슈 3) */}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="출처 보기"
+            accessibilityLabel="출처 보기 (준비 중)"
+            disabled
           >
-            <Small color="orange" className="font-manrope-bold">
+            <Small color="gray-2" className="font-manrope-bold">
               출처 보기 →
             </Small>
           </Pressable>

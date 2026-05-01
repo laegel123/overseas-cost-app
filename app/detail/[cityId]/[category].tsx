@@ -20,6 +20,8 @@ import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { MonoLabel, Small, Tiny } from '@/components/typography/Text';
 import {
+  computeBarPcts,
+  computeMultiplier,
   convertToKRW,
   fetchExchangeRates,
   formatKRW,
@@ -261,18 +263,6 @@ function buildSections(
       emptyText: '비자 데이터가 아직 준비되지 않았어요.',
     },
   ];
-}
-
-function computeMultiplier(seoulVal: number, cityVal: number): number | '신규' {
-  if (seoulVal === 0 && cityVal > 0) return '신규';
-  if (seoulVal === 0) return 1;
-  return cityVal / seoulVal;
-}
-
-function computeBarPcts(seoulVal: number, cityVal: number): { swPct: number; cwPct: number } {
-  const total = seoulVal + cityVal;
-  if (total === 0) return { swPct: 0.5, cwPct: 0.5 };
-  return { swPct: seoulVal / total, cwPct: cityVal / total };
 }
 
 type DetailData = {

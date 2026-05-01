@@ -551,12 +551,16 @@ export function expectComparePair(
 - [ ] 매우 과거 (1900-01-01) → 정상
 - [ ] `null`/`undefined` → throws
 
-#### `formatShortDate(d: Date): string` (Compare 헤더 `04-27`)
+#### `formatShortDate(d: Date | string): string` (Compare 헤더 `04-27`)
 
-- [ ] `2026-04-27` → `"04-27"`
-- [ ] `2026-01-01` → `"01-01"`
-- [ ] `2026-12-31` → `"12-31"`
-- [ ] timezone: UTC `"2026-04-27T20:00:00Z"` → KST 변환 후 `"04-28"`
+UTC 기반 (PR #17 review 이슈 6) — `lastSync` 가 UTC ISO 라 사용자 표시도 UTC 통일.
+
+- [x] `"2026-04-27T00:00:00Z"` → `"04-27"` (UTC 자정 직후)
+- [x] `"2026-04-27T23:59:00Z"` → `"04-27"` (UTC 23:59, 로컬 TZ 영향 X)
+- [x] `"2026-04-28T00:00:00Z"` → `"04-28"` (UTC 다음 일자)
+- [x] `Date` 객체도 동일 (UTC 추출)
+- [x] `2026-12-31T15:00:00Z` → `"12-31"` (다른 자릿수)
+- [x] 잘못된 입력 → throws `InvalidNumberError`
 
 #### `formatRelativeDate(d: Date, now: Date): string` (선택 — "3일 전")
 
@@ -612,6 +616,22 @@ export function expectComparePair(
 - [x] mult=NaN → throws (hot=false 시 silent navy 반환 차단)
 - [x] mult=Infinity → throws
 - [x] mult=-Infinity → throws
+
+#### `computeMultiplier(seoulVal: number, cityVal: number): number | '신규'`
+
+PR #17 review 이슈 2 — 이전 compare 화면 로컬 정의가 Infinity 반환해 후속 `formatMultiplier(Infinity)` / `isHot(Infinity)` throw 로 화면 crash. lib 으로 추출 + `'신규'` 반환으로 통일 (compare / detail 공유).
+
+- [x] 정상: `(100, 200)` → `2`, `(200, 100)` → `0.5`, `(150, 150)` → `1`
+- [x] `seoulVal=0 + cityVal>0` → `'신규'` (Infinity silent 차단)
+- [x] `seoulVal=0 + cityVal=0` → `1` (둘 다 0 = 동일)
+- [x] `formatMultiplier` / `isHot` 와 합성 가능 (Infinity throw 회피)
+
+#### `computeBarPcts(seoulVal: number, cityVal: number): { swPct, cwPct }`
+
+- [x] 정상 비율 (`(40, 60)` → `{ 0.4, 0.6 }`)
+- [x] 합 0 → `{ 0.5, 0.5 }`
+- [x] seoul=0, city>0 → `{ 0, 1 }`
+- [x] seoul>0, city=0 → `{ 1, 0 }`
 
 #### Snapshot · Property-based
 
@@ -1644,9 +1664,9 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 **푸터:**
 
-- [ ] 출처 N개 표시
-- [ ] 갱신일 표시
-- [ ] "출처 보기" 탭: 출처 modal
+- [x] 출처 N개 표시
+- [x] 갱신일 표시 (`formatShortDate`)
+- [ ] "출처 보기" 탭 동작 — v1.0 미구현 (Pressable disabled + label "출처 보기 (준비 중)"). v1.x 외부 링크 / 모달 결정 후 구현 (PR #17 review 이슈 3).
 
 **스트레스:**
 

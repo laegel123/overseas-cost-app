@@ -457,7 +457,7 @@ exports[`CompareScreen snapshot vancouver + worker 페르소나 snapshot 1`] = `
                 className="font-mulish text-small text-orange w-7 font-manrope-bold"
                 numberOfLines={1}
               >
-                CA
+                밴쿠버
               </Text>
               <View
                 className="flex-1 h-2 bg-light rounded"
@@ -645,7 +645,7 @@ exports[`CompareScreen snapshot vancouver + worker 페르소나 snapshot 1`] = `
                 className="font-mulish text-small text-orange w-7 font-manrope-bold"
                 numberOfLines={1}
               >
-                CA
+                밴쿠버
               </Text>
               <View
                 className="flex-1 h-2 bg-light rounded"
@@ -861,7 +861,7 @@ exports[`CompareScreen snapshot vancouver + worker 페르소나 snapshot 1`] = `
                 className="font-mulish text-small text-orange w-7 font-manrope-bold"
                 numberOfLines={1}
               >
-                CA
+                밴쿠버
               </Text>
               <View
                 className="flex-1 h-2 bg-light rounded"
@@ -1027,7 +1027,7 @@ exports[`CompareScreen snapshot vancouver + worker 페르소나 snapshot 1`] = `
                 className="font-mulish text-small text-orange w-7 font-manrope-bold"
                 numberOfLines={1}
               >
-                CA
+                밴쿠버
               </Text>
               <View
                 className="flex-1 h-2 bg-light rounded"
@@ -1189,7 +1189,7 @@ exports[`CompareScreen snapshot vancouver + worker 페르소나 snapshot 1`] = `
                 className="font-mulish text-small text-orange w-7 font-manrope-bold"
                 numberOfLines={1}
               >
-                CA
+                밴쿠버
               </Text>
               <View
                 className="flex-1 h-2 bg-light rounded"
@@ -1232,13 +1232,13 @@ exports[`CompareScreen snapshot vancouver + worker 페르소나 snapshot 1`] = `
           04-30
         </Text>
         <View
-          accessibilityLabel="출처 보기"
+          accessibilityLabel="출처 보기 (준비 중)"
           accessibilityRole="button"
           accessibilityState={
             {
               "busy": undefined,
               "checked": undefined,
-              "disabled": undefined,
+              "disabled": true,
               "expanded": undefined,
               "selected": undefined,
             }
@@ -1266,7 +1266,7 @@ exports[`CompareScreen snapshot vancouver + worker 페르소나 snapshot 1`] = `
         >
           <Text
             accessibilityRole="text"
-            className="font-mulish text-small text-orange font-manrope-bold"
+            className="font-mulish text-small text-gray-2 font-manrope-bold"
           >
             출처 보기 →
           </Text>

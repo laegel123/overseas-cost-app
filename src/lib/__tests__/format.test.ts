@@ -1,5 +1,12 @@
 import { InvalidMultiplierError } from '../errors';
-import { formatMultiplier, getMultColor, isHot } from '../format';
+import {
+  computeBarPcts,
+  computeMultiplier,
+  formatMultiplier,
+  formatShortDate,
+  getMultColor,
+  isHot,
+} from '../format';
 
 describe('isHot', () => {
   describe('정상 입력 — 표시값 (rounded) 기반', () => {
@@ -245,5 +252,71 @@ describe('getMultColor', () => {
     it('-Infinity → throws', () => {
       expect(() => getMultColor(-Infinity, false)).toThrow(InvalidMultiplierError);
     });
+  });
+});
+
+describe('computeMultiplier (PR #17 review 이슈 2 — Infinity → 신규)', () => {
+  it('정상 비교: cityVal/seoulVal 반환', () => {
+    expect(computeMultiplier(100, 200)).toBe(2);
+    expect(computeMultiplier(200, 100)).toBe(0.5);
+    expect(computeMultiplier(150, 150)).toBe(1);
+  });
+
+  it('seoulVal=0 + cityVal>0 → "신규" (Infinity silent 차단)', () => {
+    expect(computeMultiplier(0, 100)).toBe('신규');
+    expect(computeMultiplier(0, 1)).toBe('신규');
+  });
+
+  it('seoulVal=0 + cityVal=0 → 1 (둘 다 0 = 동일)', () => {
+    expect(computeMultiplier(0, 0)).toBe(1);
+  });
+
+  it('formatMultiplier / isHot 와 합성 가능 (Infinity throw 회피)', () => {
+    const mult = computeMultiplier(0, 500_000);
+    expect(mult).toBe('신규');
+    // 신규 는 둘 다 정상 처리
+    expect(formatMultiplier(mult)).toBe('신규');
+    expect(isHot(mult)).toBe(false);
+  });
+});
+
+describe('computeBarPcts', () => {
+  it('정상 비율: seoul + city 합 분모', () => {
+    expect(computeBarPcts(40, 60)).toEqual({ swPct: 0.4, cwPct: 0.6 });
+    expect(computeBarPcts(100, 100)).toEqual({ swPct: 0.5, cwPct: 0.5 });
+  });
+
+  it('합 0 → 0.5 / 0.5 (둘 다 0 = 시각 동일)', () => {
+    expect(computeBarPcts(0, 0)).toEqual({ swPct: 0.5, cwPct: 0.5 });
+  });
+
+  it('seoul=0, city>0 → 0 / 1', () => {
+    expect(computeBarPcts(0, 100)).toEqual({ swPct: 0, cwPct: 1 });
+  });
+
+  it('seoul>0, city=0 → 1 / 0', () => {
+    expect(computeBarPcts(100, 0)).toEqual({ swPct: 1, cwPct: 0 });
+  });
+});
+
+describe('formatShortDate (PR #17 review 이슈 6 — UTC 기반)', () => {
+  it('UTC 자정 직후 → 해당 UTC 일자', () => {
+    expect(formatShortDate('2026-04-27T00:00:00Z')).toBe('04-27');
+  });
+
+  it('UTC 23:59 → 해당 UTC 일자 (로컬 TZ 영향 X)', () => {
+    expect(formatShortDate('2026-04-27T23:59:00Z')).toBe('04-27');
+  });
+
+  it('UTC 다음 일자 자정 → 다음 일자', () => {
+    expect(formatShortDate('2026-04-28T00:00:00Z')).toBe('04-28');
+  });
+
+  it('Date 객체도 동일 (UTC 추출)', () => {
+    expect(formatShortDate(new Date('2026-12-31T15:00:00Z'))).toBe('12-31');
+  });
+
+  it('잘못된 입력 → throws', () => {
+    expect(() => formatShortDate('not-a-date')).toThrow();
   });
 });

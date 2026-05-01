@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 
-import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
 
 import {
   loadAllCities as mockLoadAllCities,
@@ -199,6 +199,21 @@ describe('CompareScreen', () => {
       expect(getByTestId('compare-pair-transport')).toBeTruthy();
       expect(getByTestId('compare-pair-tax')).toBeTruthy();
       expect(getByTestId('compare-pair-visa')).toBeTruthy();
+    });
+
+    it('ComparePair cLabel 은 도시명 (한글) — 국가코드 아님 (PR #17 review 이슈 1)', async () => {
+      setupMocks();
+      usePersonaStore.setState({ persona: 'worker', onboarded: true });
+
+      render(<CompareScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // 화면 어디든 도시 한글명 "밴쿠버" 가 노출되어야 한다 (TopBar / HeroCard /
+      // 카테고리 카드). 국가코드 'CA' 는 cLabel 자리에 들어가서는 안 됨.
+      expect(screen.getAllByText('밴쿠버').length).toBeGreaterThan(0);
     });
   });
 
