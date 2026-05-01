@@ -16,12 +16,24 @@ function renderRow(overrides: Partial<GroceryRowProps> = {}) {
 }
 
 describe('GroceryRow', () => {
-  describe('Hot 규칙 (경계값)', () => {
-    it('mult=1.99 → not hot (이모지 박스 bg-light)', () => {
-      renderRow({ mult: 1.99 });
+  describe('Hot 규칙 (경계값) — 표시값 (rounded) 기반', () => {
+    it('mult=1.94 → not hot (반올림 1.9, bg-light)', () => {
+      renderRow({ mult: 1.94 });
       const emojiBox = screen.getByTestId('grocery-row-emoji-box');
       expect(emojiBox.props.className).toContain('bg-light');
       expect(emojiBox.props.className).not.toContain('bg-orange-soft');
+    });
+
+    it('mult=1.95 → hot (반올림 2.0, formatMultiplier 와 일관 — PR #16 review 이슈 1)', () => {
+      renderRow({ mult: 1.95 });
+      const emojiBox = screen.getByTestId('grocery-row-emoji-box');
+      expect(emojiBox.props.className).toContain('bg-orange-soft');
+    });
+
+    it('mult=1.99 → hot (반올림 2.0)', () => {
+      renderRow({ mult: 1.99 });
+      const emojiBox = screen.getByTestId('grocery-row-emoji-box');
+      expect(emojiBox.props.className).toContain('bg-orange-soft');
     });
 
     it('mult=2.0 → hot (이모지 박스 bg-orange-soft)', () => {

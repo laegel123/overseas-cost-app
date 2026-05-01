@@ -45,6 +45,9 @@ export function GroceryRow({
     hot !== undefined ? hot : isHot(mult);
 
   const multText = formatMultiplier(mult);
+  // 디자인 의도 — design/README.md §4 "우측 배수 ... (hot=orange, normal=gray)".
+  // ComparePair / FavCard / RecentRow 의 cool/mid 구분 (gray-2 / navy) 과 다르게
+  // GroceryRow 는 hot 여부 1축 만 표현 — 그래서 lib `getMultColor` 미사용.
   const multColor = effectiveHot ? 'orange' : 'gray';
 
   return (

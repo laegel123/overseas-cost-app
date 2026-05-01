@@ -1,18 +1,30 @@
 import { InvalidMultiplierError } from '../errors';
-import { formatMultiplier, isHot } from '../format';
+import { formatMultiplier, getMultColor, isHot } from '../format';
 
 describe('isHot', () => {
-  describe('정상 입력', () => {
-    it('1.99 → false (경계 미만)', () => {
-      expect(isHot(1.99)).toBe(false);
+  describe('정상 입력 — 표시값 (rounded) 기반', () => {
+    it('1.94 → false (반올림 시 1.9 → cool)', () => {
+      expect(isHot(1.94)).toBe(false);
     });
 
-    it('2.0 → true (정확히 경계)', () => {
+    it('1.95 → true (반올림 시 2.0 → hot, formatMultiplier 와 일관)', () => {
+      expect(isHot(1.95)).toBe(true);
+    });
+
+    it('1.99 → true (반올림 시 2.0 → hot)', () => {
+      expect(isHot(1.99)).toBe(true);
+    });
+
+    it('2.0 → true (hot 경계 정확값)', () => {
       expect(isHot(2.0)).toBe(true);
     });
 
-    it('2.01 → true (경계 초과)', () => {
-      expect(isHot(2.01)).toBe(true);
+    it('2.04 → true (반올림 시 2.0 → hot)', () => {
+      expect(isHot(2.04)).toBe(true);
+    });
+
+    it('2.05 → true (반올림 시 2.1 → hot)', () => {
+      expect(isHot(2.05)).toBe(true);
     });
 
     it('5.0 → true', () => {
@@ -88,8 +100,10 @@ describe('formatMultiplier', () => {
       expect(formatMultiplier(1.94)).toBe('↑1.9×');
     });
 
-    it('1.95 → "↑2.0×" (반올림 → hot 경계)', () => {
+    it('1.95 → "↑2.0×" (반올림 → hot 경계, isHot 도 true)', () => {
       expect(formatMultiplier(1.95)).toBe('↑2.0×');
+      // 표시값 ↔ hot 판정 일관성 (PR #16 review 이슈 1)
+      expect(isHot(1.95)).toBe(true);
     });
 
     it('2.0 → "↑2.0×" (hot 경계)', () => {
@@ -146,6 +160,64 @@ describe('formatMultiplier', () => {
 
     it('Infinity → throws InvalidMultiplierError', () => {
       expect(() => formatMultiplier(Infinity)).toThrow(InvalidMultiplierError);
+    });
+  });
+});
+
+describe('getMultColor', () => {
+  describe('hot=true override → orange (mult 무관)', () => {
+    it('hot=true + mult=0.5 → orange', () => {
+      expect(getMultColor(0.5, true)).toBe('orange');
+    });
+
+    it('hot=true + mult=1.0 → orange', () => {
+      expect(getMultColor(1.0, true)).toBe('orange');
+    });
+
+    it('hot=true + mult="신규" → orange', () => {
+      expect(getMultColor('신규', true)).toBe('orange');
+    });
+  });
+
+  describe("'신규' (hot=false) → navy", () => {
+    it('"신규" → navy', () => {
+      expect(getMultColor('신규', false)).toBe('navy');
+    });
+  });
+
+  describe('표시값 ≤ 1.0 (cool 또는 동일) → gray-2', () => {
+    it('mult=0.5 → gray-2', () => {
+      expect(getMultColor(0.5, false)).toBe('gray-2');
+    });
+
+    it('mult=0.94 → gray-2 (반올림 0.9)', () => {
+      expect(getMultColor(0.94, false)).toBe('gray-2');
+    });
+
+    it('mult=0.95 → gray-2 (반올림 1.0)', () => {
+      expect(getMultColor(0.95, false)).toBe('gray-2');
+    });
+
+    it('mult=1.0 → gray-2', () => {
+      expect(getMultColor(1.0, false)).toBe('gray-2');
+    });
+
+    it('mult=1.04 → gray-2 (반올림 1.0)', () => {
+      expect(getMultColor(1.04, false)).toBe('gray-2');
+    });
+  });
+
+  describe('표시값 > 1.0 (mid) → navy', () => {
+    it('mult=1.05 → navy (반올림 1.1)', () => {
+      expect(getMultColor(1.05, false)).toBe('navy');
+    });
+
+    it('mult=1.5 → navy', () => {
+      expect(getMultColor(1.5, false)).toBe('navy');
+    });
+
+    it('mult=1.94 → navy (반올림 1.9, hot 미만)', () => {
+      expect(getMultColor(1.94, false)).toBe('navy');
     });
   });
 });

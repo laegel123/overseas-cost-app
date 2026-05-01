@@ -20,12 +20,24 @@ function renderPair(overrides: Partial<ComparePairProps> = {}) {
 }
 
 describe('ComparePair', () => {
-  describe('Hot 규칙 (경계값)', () => {
-    it('mult=1.99 → not hot (icon bg-light, mult navy)', () => {
-      renderPair({ mult: 1.99 });
+  describe('Hot 규칙 (경계값) — 표시값 (rounded) 기반', () => {
+    it('mult=1.94 → not hot (반올림 1.9, icon bg-light)', () => {
+      renderPair({ mult: 1.94 });
       const iconBox = screen.getByTestId('compare-pair-icon-box');
       expect(iconBox.props.className).toContain('bg-light');
       expect(iconBox.props.className).not.toContain('bg-orange-soft');
+    });
+
+    it('mult=1.95 → hot (반올림 2.0, formatMultiplier 와 일관 — PR #16 review 이슈 1)', () => {
+      renderPair({ mult: 1.95 });
+      const iconBox = screen.getByTestId('compare-pair-icon-box');
+      expect(iconBox.props.className).toContain('bg-orange-soft');
+    });
+
+    it('mult=1.99 → hot (반올림 2.0)', () => {
+      renderPair({ mult: 1.99 });
+      const iconBox = screen.getByTestId('compare-pair-icon-box');
+      expect(iconBox.props.className).toContain('bg-orange-soft');
     });
 
     it('mult=2.0 → hot (icon bg-orange-soft, mult orange)', () => {
@@ -186,6 +198,12 @@ describe('ComparePair', () => {
       render(<ComparePair {...propsWithoutOnPress} />);
       const card = screen.getByTestId('compare-pair');
       expect(card.props.accessibilityRole).not.toBe('button');
+    });
+
+    it('onPress 정의 시 accessibilityLabel 에 카테고리 라벨 포함 (PR #16 review 이슈 2)', () => {
+      renderPair({ onPress: jest.fn(), label: '월세' });
+      const button = screen.getByRole('button');
+      expect(button.props.accessibilityLabel).toBe('월세 비교 카드');
     });
   });
 

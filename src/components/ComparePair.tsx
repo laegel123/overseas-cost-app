@@ -9,7 +9,7 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 
-import { formatMultiplier, isHot } from '@/lib';
+import { formatMultiplier, getMultColor, isHot } from '@/lib';
 import { colors } from '@/theme/tokens';
 import type { SourceCategory } from '@/types/city';
 
@@ -179,36 +179,15 @@ export function ComparePair({
 
   if (onPress !== undefined) {
     return (
-      <Pressable onPress={onPress} accessibilityRole="button">
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`${label} 비교 카드`}
+      >
         {card}
       </Pressable>
     );
   }
 
   return card;
-}
-
-/**
- * mult 값과 hot 상태에 따른 텍스트 색상 결정.
- * - effectiveHot=true → orange
- * - '신규' → navy
- * - mult=1.0 (동일) → gray-2
- * - mult < 1 (cool) → gray-2
- * - 그 외 → navy
- */
-function getMultColor(
-  mult: number | '신규',
-  effectiveHot: boolean,
-): 'orange' | 'navy' | 'gray-2' {
-  if (effectiveHot) {
-    return 'orange';
-  }
-  if (mult === '신규') {
-    return 'navy';
-  }
-  const rounded = Math.round(mult * 10) / 10;
-  if (rounded <= 1.0) {
-    return 'gray-2';
-  }
-  return 'navy';
 }

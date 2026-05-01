@@ -568,16 +568,42 @@ export function expectComparePair(
 
 #### `isHot(mult: number | '신규'): boolean`
 
-- [x] `1.99` → `false`
-- [x] `2.0` → `true` (정확히 경계)
-- [x] `2.01` → `true`
+판정 기준은 표시값 (소수 첫자리 반올림). `formatMultiplier` 와 일관성 보장 (PR #16 review 이슈 1).
+
+- [x] `1.94` → `false` (반올림 1.9, cool)
+- [x] `1.95` → `true` (반올림 2.0, formatMultiplier 와 일관)
+- [x] `1.99` → `true` (반올림 2.0)
+- [x] `2.0` → `true` (hot 경계 정확값)
+- [x] `2.04` → `true` (반올림 2.0)
+- [x] `2.05` → `true` (반올림 2.1)
 - [x] `5.0` → `true`
+- [x] `10.0` → `true`
 - [x] `1.0` → `false`
 - [x] `0.5` → `false`
+- [x] `0.01` → `false` (매우 작은 양수)
 - [x] `'신규'` → `false` (신규는 hot 아님)
 - [x] `0` → throws
 - [x] 음수 → throws
 - [x] `NaN` → throws
+- [x] `Infinity` → throws
+- [x] `-Infinity` → throws
+
+#### `getMultColor(mult: number | '신규', hot: boolean): 'orange' | 'navy' | 'gray-2'`
+
+`ComparePair` / `FavCard` / `RecentRow` 공통 색상 정책. `GroceryRow` 는 디자인 의도상 단순 hot/normal 분기 (gray) 라 본 헬퍼 미사용.
+
+- [x] hot=true + mult=0.5 → `'orange'`
+- [x] hot=true + mult=1.0 → `'orange'`
+- [x] hot=true + mult='신규' → `'orange'` (override 우선)
+- [x] hot=false + '신규' → `'navy'`
+- [x] hot=false + 0.5 → `'gray-2'` (cool)
+- [x] hot=false + 0.94 → `'gray-2'` (반올림 0.9)
+- [x] hot=false + 0.95 → `'gray-2'` (반올림 1.0)
+- [x] hot=false + 1.0 → `'gray-2'` (동일)
+- [x] hot=false + 1.04 → `'gray-2'` (반올림 1.0)
+- [x] hot=false + 1.05 → `'navy'` (반올림 1.1, mid)
+- [x] hot=false + 1.5 → `'navy'`
+- [x] hot=false + 1.94 → `'navy'` (반올림 1.9, hot 미만)
 
 #### Snapshot · Property-based
 
@@ -1263,9 +1289,11 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 
 ### 9.17 `src/components/ComparePair.tsx`
 
-**Hot 규칙 (경계값 정확):**
+**Hot 규칙 (경계값 정확) — 표시값 (rounded) 기반:**
 
-- [x] mult=1.99 → not hot (icon navy, mult navy)
+- [x] mult=1.94 → not hot (반올림 1.9, icon navy / mult navy)
+- [x] mult=1.95 → **hot** (반올림 2.0, formatMultiplier 와 일관 — PR #16 review 이슈 1)
+- [x] mult=1.99 → **hot** (반올림 2.0)
 - [x] mult=2.0 → **hot** (icon orange-soft + orange, mult orange)
 - [x] mult=2.01 → hot
 - [x] mult=10.0 → hot
@@ -1304,6 +1332,7 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] mult 포매팅 (↑/↓ 화살표)
 - [x] 탭 → onPress
 - [x] testID 전파
+- [x] onPress 정의 시 `accessibilityLabel = "${label} 비교 카드"` (PR #16 review 이슈 2)
 
 ### 9.18 `src/components/FavCard.tsx`
 
@@ -1376,13 +1405,20 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 
 ### 9.20 `src/components/GroceryRow.tsx`
 
-**Hot 규칙 (경계값):**
+**Hot 규칙 (경계값) — 표시값 기반:**
 
-- [x] mult=1.99 → not hot (bg-light)
+- [x] mult=1.94 → not hot (반올림 1.9, bg-light)
+- [x] mult=1.95 → hot (반올림 2.0, bg-orange-soft)
+- [x] mult=1.99 → hot (반올림 2.0)
 - [x] mult=2.0 → hot (bg-orange-soft)
 - [x] mult=2.5 → hot
 - [x] mult=0.5 → not hot (cool)
 - [x] mult=1.0 → not hot
+
+**색상 정책 — design/README.md §4 의도적 차이 (PR #16 review 이슈 3):**
+
+- [x] hot=false 시 `multColor='gray'` (`#BFC8CC`, ComparePair/FavCard/RecentRow 의 `'gray-2'` 와 다름 — 디자인 spec 명시)
+- [x] hot=true 시 `multColor='orange'`
 
 **Hot prop override:**
 

@@ -9,7 +9,7 @@ import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
 
-import { formatMultiplier, isHot } from '@/lib';
+import { formatMultiplier, getMultColor, isHot } from '@/lib';
 import { colors } from '@/theme/tokens';
 
 import { Icon } from './Icon';
@@ -108,22 +108,4 @@ export function RecentRow({
   }
 
   return row;
-}
-
-/**
- * mult 값에 따른 텍스트 색상 결정.
- * - hot (>=2.0) → orange
- * - < 1.0 (cool) → gray-2
- * - 1.0 (동일) → gray-2
- * - 그 외 → navy
- */
-function getMultColor(mult: number, hot: boolean): 'orange' | 'navy' | 'gray-2' {
-  if (hot) {
-    return 'orange';
-  }
-  const rounded = Math.round(mult * 10) / 10;
-  if (rounded <= 1.0) {
-    return 'gray-2';
-  }
-  return 'navy';
 }

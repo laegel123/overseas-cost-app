@@ -21,10 +21,15 @@ function validateMultiplier(mult: number): void {
 
 /**
  * Hot 판정 — CLAUDE.md CRITICAL 단일 함수.
- * 배수 >= HOT_MULTIPLIER_THRESHOLD (2.0) 면 true.
+ * 사용자가 보는 표시값 (`formatMultiplier` 와 동일한 소수 첫자리 반올림) 기준
+ * 으로 판정. 즉 `Math.round(mult * 10) / 10 >= HOT_MULTIPLIER_THRESHOLD (2.0)`.
+ *
+ * raw 값 기준이면 mult=1.95 일 때 "↑2.0×" 텍스트가 hot 색이 아닌 navy 로 표시
+ * 되어 "2.0배인데 왜 hot 이 아니지?" 시각 혼란 발생 — 표시값과 hot 판정의
+ * 일관성을 보장한다 (PR #16 review 이슈 1).
  *
  * @param mult - 배수 (number) 또는 '신규'
- * @returns true if hot (mult >= 2.0), false otherwise
+ * @returns true if rounded(mult, 1) >= 2.0, false otherwise
  * @throws InvalidMultiplierError if mult is 0, negative, NaN, or Infinity
  */
 export function isHot(mult: number | '신규'): boolean {
@@ -35,7 +40,8 @@ export function isHot(mult: number | '신규'): boolean {
     throw new InvalidMultiplierError(`isHot: invalid multiplier — ${String(mult)}`);
   }
   validateMultiplier(mult);
-  return mult >= HOT_MULTIPLIER_THRESHOLD;
+  const rounded = Math.round(mult * 10) / 10;
+  return rounded >= HOT_MULTIPLIER_THRESHOLD;
 }
 
 /**
@@ -68,4 +74,32 @@ export function formatMultiplier(mult: number | '신규'): string {
     return `↓${formatted}×`;
   }
   return `${formatted}×`;
+}
+
+/**
+ * 배수 + hot 상태에 따른 텍스트 색상 — `ComparePair` / `FavCard` / `RecentRow`
+ * 공통 정책. 디자인 spec (design/README.md §2·§3):
+ * - hot → orange (강조)
+ * - '신규' → navy (mid, 비교 불가지만 텍스트는 정보 가치)
+ * - 표시값 ≤ 1.0 (cool 또는 동일) → gray-2 (de-emphasis)
+ * - 그 외 (mid, mult > 1) → navy
+ *
+ * `GroceryRow` 는 디자인 의도상 cool/mid 구분 없이 단순 `'gray'` 를 사용 — 본
+ * 헬퍼 미사용 (design/README.md §4 명시).
+ */
+export function getMultColor(
+  mult: number | '신규',
+  hot: boolean,
+): 'orange' | 'navy' | 'gray-2' {
+  if (hot) {
+    return 'orange';
+  }
+  if (mult === '신규') {
+    return 'navy';
+  }
+  const rounded = Math.round(mult * 10) / 10;
+  if (rounded <= 1.0) {
+    return 'gray-2';
+  }
+  return 'navy';
 }
