@@ -23,6 +23,9 @@ export type { RegionPillProps } from './RegionPill';
 export { HeroCard } from './cards/HeroCard';
 export type { HeroCardProps, HeroCardVariant } from './cards/HeroCard';
 
+export { ComparePair } from './ComparePair';
+export type { ComparePairProps } from './ComparePair';
+
 export { ErrorBoundary } from './ErrorBoundary';
 export { ErrorView } from './ErrorView';
 export type { ErrorViewProps, ErrorViewVariant } from './ErrorView';

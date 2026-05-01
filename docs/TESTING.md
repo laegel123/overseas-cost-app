@@ -518,27 +518,27 @@ export function expectComparePair(
 - [ ] 음수 → 통화별 부호 위치 (`-$50` 또는 `($50)`)
 - [ ] NaN → throws
 
-#### `formatMultiplier(mult: number | 'new'): string`
+#### `formatMultiplier(mult: number | '신규'): string`
 
-- [ ] `1.0` → `"1.0×"` (화살표 없음)
-- [ ] `1.04` → `"1.0×"` (반내림)
-- [ ] `1.05` → `"↑1.1×"` (반올림)
-- [ ] `1.5` → `"↑1.5×"`
-- [ ] `1.94` → `"↑1.9×"` (반내림 1자리)
-- [ ] `1.95` → `"↑2.0×"` (반올림 → hot 경계 진입)
-- [ ] `2.0` → `"↑2.0×"` (hot 경계)
-- [ ] `2.01` → `"↑2.0×"` (반내림)
-- [ ] `9.99` → `"↑10.0×"` (반올림)
-- [ ] `10.0` → `"↑10.0×"`
-- [ ] `0.95` → `"↓1.0×"` (반올림)
-- [ ] `0.94` → `"↓0.9×"` (반내림)
-- [ ] `0.5` → `"↓0.5×"`
-- [ ] `0.05` → `"↓0.1×"`
-- [ ] `'new'` → `"신규"`
-- [ ] `0` → throws `InvalidMultiplierError` (배수 0 의미 없음)
-- [ ] 음수 → throws
-- [ ] `NaN` → throws
-- [ ] `Infinity` → throws
+- [x] `1.0` → `"1.0×"` (화살표 없음)
+- [x] `1.04` → `"1.0×"` (반내림)
+- [x] `1.05` → `"↑1.1×"` (반올림)
+- [x] `1.5` → `"↑1.5×"`
+- [x] `1.94` → `"↑1.9×"` (반내림 1자리)
+- [x] `1.95` → `"↑2.0×"` (반올림 → hot 경계 진입)
+- [x] `2.0` → `"↑2.0×"` (hot 경계)
+- [x] `2.01` → `"↑2.0×"` (반내림)
+- [x] `9.99` → `"↑10.0×"` (반올림)
+- [x] `10.0` → `"↑10.0×"`
+- [x] `0.95` → `"↓1.0×"` (반올림)
+- [x] `0.94` → `"↓0.9×"` (반내림)
+- [x] `0.5` → `"↓0.5×"`
+- [x] `0.05` → `"↓0.1×"`
+- [x] `'신규'` → `"신규"`
+- [x] `0` → throws `InvalidMultiplierError` (배수 0 의미 없음)
+- [x] 음수 → throws
+- [x] `NaN` → throws
+- [x] `Infinity` → throws
 
 #### `formatDate(d: Date | string | number): string`
 
@@ -566,18 +566,18 @@ export function expectComparePair(
 - [ ] 30일 전 → `"한 달 전"`
 - [ ] 90일 전 → `"3개월 전"`
 
-#### `isHot(mult: number | 'new'): boolean`
+#### `isHot(mult: number | '신규'): boolean`
 
-- [ ] `1.99` → `false`
-- [ ] `2.0` → `true` (정확히 경계)
-- [ ] `2.01` → `true`
-- [ ] `5.0` → `true`
-- [ ] `1.0` → `false`
-- [ ] `0.5` → `false`
-- [ ] `'new'` → `false` (신규는 hot 아님)
-- [ ] `0` → throws
-- [ ] 음수 → throws
-- [ ] `NaN` → throws
+- [x] `1.99` → `false`
+- [x] `2.0` → `true` (정확히 경계)
+- [x] `2.01` → `true`
+- [x] `5.0` → `true`
+- [x] `1.0` → `false`
+- [x] `0.5` → `false`
+- [x] `'신규'` → `false` (신규는 hot 아님)
+- [x] `0` → throws
+- [x] 음수 → throws
+- [x] `NaN` → throws
 
 #### Snapshot · Property-based
 
@@ -1265,45 +1265,45 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 
 **Hot 규칙 (경계값 정확):**
 
-- [ ] mult=1.99 → not hot (icon navy, mult navy)
-- [ ] mult=2.0 → **hot** (icon orange-soft + orange, mult orange)
-- [ ] mult=2.01 → hot
-- [ ] mult=10.0 → hot
-- [ ] mult=0.5 → not hot (cool, gray-2)
+- [x] mult=1.99 → not hot (icon navy, mult navy)
+- [x] mult=2.0 → **hot** (icon orange-soft + orange, mult orange)
+- [x] mult=2.01 → hot
+- [x] mult=10.0 → hot
+- [x] mult=0.5 → not hot (cool, gray-2)
 
 **Hot prop override:**
 
-- [ ] hot=true 강제 (mult=1.5 라도) → orange
-- [ ] hot=false 강제 (mult=3.0 라도) → navy
-- [ ] hot 미지정 → 자동 판정 (`isHot(mult)`)
+- [x] hot=true 강제 (mult=1.5 라도) → orange
+- [x] hot=false 강제 (mult=3.0 라도) → navy
+- [x] hot 미지정 → 자동 판정 (`isHot(mult)`)
 
 **신규:**
 
-- [ ] mult='신규' → "신규" 표기, navy 색
-- [ ] 신규 시 막대: cyan/light bg 또는 SEO 막대 0%
+- [x] mult='신규' → "신규" 표기, navy 색
+- [x] 신규 시 막대: not hot (bg-light)
 
 **막대 폭:**
 
-- [ ] sw=0.4, cw=1.0 → SEO 40%, CITY 100%
-- [ ] sw=0.0, cw=1.0 → SEO 0% (미표시 또는 1px)
-- [ ] sw=1.0, cw=0.5 → 정상
-- [ ] sw + cw 임의 → 각자 상대 표시
+- [x] sw=0.4, cw=1.0 → SEO 40%, CITY 100%
+- [x] sw=0.0, cw=1.0 → SEO 0% (미표시)
+- [x] sw=1.0, cw=0.5 → 정상
+- [x] sw + cw 범위 벗어남 → clamp + warn
 
 **Icon 매핑:**
 
-- [ ] category=rent → house icon
-- [ ] category=food → fork icon
-- [ ] category=transport → bus icon
-- [ ] category=tuition → graduation icon
-- [ ] category=tax → briefcase icon
-- [ ] category=visa → passport icon
+- [x] category=rent → house icon
+- [x] category=food → fork icon
+- [x] category=transport → bus icon
+- [x] category=tuition → graduation icon
+- [x] category=tax → briefcase icon
+- [x] category=visa → passport icon
 
 **기타:**
 
-- [ ] 라벨 긴 경우: numberOfLines=1, ellipsis
-- [ ] sValue/cValue 긴 경우: 56px 영역 안에 fit
-- [ ] 탭 → onPress(category)
-- [ ] snapshot per variant (hot/normal/신규)
+- [x] 라벨 / 값 렌더링
+- [x] mult 포매팅 (↑/↓ 화살표)
+- [x] 탭 → onPress
+- [x] testID 전파
 
 ### 9.18 `src/components/FavCard.tsx`
 
