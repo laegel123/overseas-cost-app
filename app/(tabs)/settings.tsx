@@ -1,5 +1,7 @@
 // Placeholder. 실제 구현은 Phase 5 (screens) 에서.
-import { SafeAreaView, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
+
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function SettingsScreen() {
   return (

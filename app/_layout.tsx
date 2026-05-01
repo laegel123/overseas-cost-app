@@ -6,6 +6,8 @@ import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
 import { ErrorBoundary } from '@/components';
 import { bridgeLastSyncFromMeta, usePersonaStore, waitForStoresOrTimeout } from '@/store';
 import { useAppFonts } from '@/theme/fonts';
@@ -84,14 +86,16 @@ export default function RootLayout() {
   }
 
   return (
-    <ErrorBoundary>
-      <StatusBar style="dark" />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.white },
-        }}
-      />
-    </ErrorBoundary>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <StatusBar style="dark" />
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.white },
+          }}
+        />
+      </ErrorBoundary>
+    </SafeAreaProvider>
   );
 }
