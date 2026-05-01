@@ -55,14 +55,27 @@ const RENT_CONFIG: CategoryConfig = {
   },
 };
 
+// 한 달 식비 추정 휴리스틱 (Compare hero 용 — 월 비용 표시).
+// design/README §4 의 "자취 70% + 외식 30% 가정" 가이드라인 단순화 버전:
+//   - 외식: 평일 점심 + 가벼운 카페 = 한 끼 평균가 * 약 20일 (주말 제외 + 일부 일치).
+//   - 식재료: 4 핵심 항목 (우유 1L · 계란 12 · 쌀 1kg · 닭고기 1kg) 의 단가 합 * 4.
+//     주 1회 장보기 * 4주 가정. Detail 의 8 항목 단가 합 (raw 비교) 과는 다른 의미 —
+//     Compare 는 "월 예상", Detail 은 "항목 단가" (PR #17 review 이슈 1·4).
+// v1.x 에서 lib 으로 추출 (compare.ts) + 휴리스틱 정밀화.
+const FOOD_RESTAURANT_DAYS_PER_MONTH = 20;
+const FOOD_GROCERY_TRIPS_PER_MONTH = 4;
+
 const FOOD_CONFIG: CategoryConfig = {
   category: 'food',
   label: '식비',
   getValue: (city, fx) => {
-    const meal = city.food.restaurantMeal * 20;
-    const grocery = city.food.groceries.milk1L + city.food.groceries.eggs12 +
-      city.food.groceries.rice1kg + city.food.groceries.chicken1kg;
-    const total = meal + grocery * 4;
+    const meal = (city.food.restaurantMeal + city.food.cafe) * FOOD_RESTAURANT_DAYS_PER_MONTH;
+    const groceryUnitSum =
+      city.food.groceries.milk1L +
+      city.food.groceries.eggs12 +
+      city.food.groceries.rice1kg +
+      city.food.groceries.chicken1kg;
+    const total = meal + groceryUnitSum * FOOD_GROCERY_TRIPS_PER_MONTH;
     return convertToKRW(total, city.currency, fx);
   },
 };
@@ -210,6 +223,10 @@ export default function CompareScreen(): React.ReactElement {
     }
   }, [cityId, toggleFavorite]);
 
+  // 페르소나가 바뀔 때만 카테고리 배열 재생성 (PR #17 review 이슈 7).
+  // 모든 hook 은 early return 보다 위에 있어야 한다 (rules-of-hooks).
+  const categories = React.useMemo(() => getCategoriesForPersona(persona), [persona]);
+
   if (state.status === 'loading') {
     return (
       <Screen testID="compare-screen-loading">
@@ -237,8 +254,6 @@ export default function CompareScreen(): React.ReactElement {
   const rateDisplay = rate !== undefined ? Math.round(rate) : '?';
   const syncDisplay = lastSync ? formatShortDate(lastSync) : '?';
   const subtitle = `1 ${city.currency} = ${rateDisplay}원 · ${syncDisplay}`;
-
-  const categories = getCategoriesForPersona(persona);
 
   let seoulTotal = 0;
   let cityTotal = 0;

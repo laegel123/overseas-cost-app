@@ -124,6 +124,30 @@ describe('DetailScreen', () => {
       await flush();
       expect(screen.getByTestId('detail-screen-error')).toBeTruthy();
     });
+
+    it('loadAllCities reject → ErrorView', async () => {
+      setupMocks();
+      (mockLoadAllCities as jest.Mock).mockRejectedValue(new Error('network error'));
+      render(<DetailScreen />);
+      await flush();
+      expect(screen.getByTestId('detail-screen-error')).toBeTruthy();
+    });
+
+    it('fetchExchangeRates reject → ErrorView (PR #17 review 이슈 3)', async () => {
+      setupMocks();
+      (mockFetchExchangeRates as jest.Mock).mockRejectedValue(new Error('fx error'));
+      render(<DetailScreen />);
+      await flush();
+      expect(screen.getByTestId('detail-screen-error')).toBeTruthy();
+    });
+
+    it('getLastSync reject → ErrorView', async () => {
+      setupMocks();
+      (mockGetLastSync as jest.Mock).mockRejectedValue(new Error('sync error'));
+      render(<DetailScreen />);
+      await flush();
+      expect(screen.getByTestId('detail-screen-error')).toBeTruthy();
+    });
   });
 
   describe('food 카테고리', () => {
@@ -218,19 +242,30 @@ describe('DetailScreen', () => {
     });
   });
 
-  describe('snapshot', () => {
-    it('food + vancouver', async () => {
+  describe('핵심 contract (TESTING.md §6.3·§6.4 / PR #17 review 이슈 2)', () => {
+    // 거대 트리 snapshot (이전 1226 라인) 대신 contract 단언 — pretty-format
+    // ReactTestInstance fiber cyclic 직렬화 RangeError 회피. 시각 회귀 정밀
+    // 검증은 v2 스크린샷 도구 (ADR-035) 후로 미룸.
+
+    it('food — hero / 외식·식재료 섹션 / 출처 mount', async () => {
       setupMocks({ category: 'food' });
-      const tree = render(<DetailScreen />);
+      render(<DetailScreen />);
       await flush();
-      expect(tree.toJSON()).toMatchSnapshot();
+
+      expect(screen.getByTestId('detail-hero')).toBeTruthy();
+      expect(screen.getByTestId('detail-section-외식')).toBeTruthy();
+      expect(screen.getByTestId('detail-section-식재료')).toBeTruthy();
+      expect(screen.getByTestId('detail-row-restaurantMeal')).toBeTruthy();
+      expect(screen.getByTestId('detail-row-milk1L')).toBeTruthy();
     });
 
-    it('visa + vancouver (다른 골격)', async () => {
+    it('visa — hero / 비자 섹션 (다른 골격)', async () => {
       setupMocks({ category: 'visa' });
-      const tree = render(<DetailScreen />);
+      render(<DetailScreen />);
       await flush();
-      expect(tree.toJSON()).toMatchSnapshot();
+
+      expect(screen.getByTestId('detail-hero')).toBeTruthy();
+      expect(screen.getByTestId('detail-section-비자/정착')).toBeTruthy();
     });
   });
 });

@@ -320,21 +320,62 @@ describe('CompareScreen', () => {
 
       expect(getByTestId('compare-screen-error')).toBeTruthy();
     });
-  });
 
-  describe('snapshot', () => {
-    it('vancouver + worker 페르소나 snapshot', async () => {
+    it('fetchExchangeRates reject → ErrorView (PR #17 review 이슈 3)', async () => {
       setupMocks();
-      usePersonaStore.setState({ persona: 'worker', onboarded: true });
+      (mockFetchExchangeRates as jest.Mock).mockRejectedValue(new Error('fx error'));
 
-      const { toJSON, getByTestId } = render(<CompareScreen />);
+      const { getByTestId } = render(<CompareScreen />);
 
       await act(async () => {
         await flushPromises();
       });
 
-      expect(getByTestId('compare-screen')).toBeTruthy();
-      expect(toJSON()).toMatchSnapshot();
+      expect(getByTestId('compare-screen-error')).toBeTruthy();
+    });
+
+    it('getLastSync reject → ErrorView', async () => {
+      setupMocks();
+      (mockGetLastSync as jest.Mock).mockRejectedValue(new Error('sync error'));
+
+      const { getByTestId } = render(<CompareScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('compare-screen-error')).toBeTruthy();
+    });
+  });
+
+  describe('핵심 contract (TESTING.md §6.3·§6.4 / PR #17 review 이슈 2)', () => {
+    // 거대 트리 snapshot (이전 1281 라인) 대신 contract 단언 — pretty-format
+    // 이 ReactTestInstance fiber 를 cyclic 직렬화 시도해 RangeError 발생하는
+    // 문제도 회피. 시각 회귀 정밀 검증은 v2 시각 회귀 테스트 도구 (스크린샷)
+    // 도입 후로 미룸 (ADR-035).
+
+    it('vancouver + worker — hero / 카테고리 카드 mount + 핵심 텍스트 노출', async () => {
+      setupMocks();
+      usePersonaStore.setState({ persona: 'worker', onboarded: true });
+
+      const { getByTestId } = render(<CompareScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // hero 노드 존재 + variant 확인 (props.testID)
+      expect(getByTestId('compare-hero')).toBeTruthy();
+
+      // 핵심 카테고리 카드 모두 노출 (worker 페르소나 = 5 카드)
+      expect(getByTestId('compare-pair-rent')).toBeTruthy();
+      expect(getByTestId('compare-pair-food')).toBeTruthy();
+      expect(getByTestId('compare-pair-transport')).toBeTruthy();
+      expect(getByTestId('compare-pair-tax')).toBeTruthy();
+      expect(getByTestId('compare-pair-visa')).toBeTruthy();
+
+      // 도시명 노출 — TopBar / hero / 카테고리 카드 어느 곳이든
+      expect(screen.getAllByText('밴쿠버').length).toBeGreaterThan(0);
     });
   });
 });

@@ -174,6 +174,12 @@ function buildSections(
   }
 
   if (category === 'tuition') {
+    // 인덱스 매핑 정책 (PR #17 review 이슈 5):
+    // 도시 entries 가 N 개, 서울 entries 가 M 개 (M < N) 일 때, idx 가 M 이상인
+    // 도시 entry 는 서울 entry[0] 와 비교 — "기준 학교" 와 비교한다는 fallback.
+    // 의미가 약하지만 v1.0 에선 단일 페르소나 화면이라 "비교 가능한 무언가" 를
+    // 제공하는 게 우선. v1.x 에서 학위·학교 수준 매칭 (level: undergrad/graduate)
+    // 으로 정밀화.
     const seoulEntries = seoul.tuition ?? [];
     const cityEntries = city.tuition ?? [];
     const rows: Row[] = cityEntries.flatMap((cEntry, idx) => {
@@ -199,6 +205,11 @@ function buildSections(
   }
 
   if (category === 'tax') {
+    // tuition 과 동일한 인덱스 매핑 정책. 추가로 row name 에 연봉을 표시 — Row.name
+    // 자체가 표현 문자열이라 formatKRW 호출. PR #17 review 이슈 6 의 "data 와 표현
+    // 분리" 권장이지만, Row 가 이미 표현 레이어 (`emoji`, `name`) 라 일관 유지.
+    // 입력 (`cEntry.annualSalary`) 은 데이터 schema 강제 양수 number — formatKRW
+    // 가 throw 할 가능성 ≈ 0 (정상 fixture / 자동화 검증 통과 후 도달).
     const seoulEntries = seoul.tax ?? [];
     const cityEntries = city.tax ?? [];
     const rows: Row[] = cityEntries.flatMap((cEntry, idx) => {
@@ -392,6 +403,13 @@ export default function DetailScreen(): React.ReactElement {
         testID="detail-topbar"
       />
 
+      {/*
+        Detail hero 합계는 본 화면 섹션의 단가(또는 월 환산 entry) 합 — Compare
+        화면의 "월 예상 총비용" 휴리스틱과 의도가 다름 (PR #17 review 이슈 1).
+        예: food 의 Compare 카드 = restaurantMeal*20 + grocery*4 (월 추정);
+        Detail food hero = 외식 2 항목 + 식재료 8 항목 단가 합. 사용자 혼동을
+        피하기 위해 hero footer 에 "항목 단가 합" 으로 명시.
+      */}
       <View className="px-screen-x mt-3">
         <HeroCard
           variant="navy"
@@ -403,7 +421,7 @@ export default function DetailScreen(): React.ReactElement {
           rightValue={formatKRW(cityTotal)}
           swPct={swPct}
           cwPct={cwPct}
-          footer="평균 가정 기준"
+          footer="항목 단가 합"
           testID="detail-hero"
         />
       </View>
