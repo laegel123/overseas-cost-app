@@ -1,4 +1,4 @@
-import { InvalidMultiplierError } from '../errors';
+import { InvalidMultiplierError, InvalidNumberError } from '../errors';
 import {
   computeBarPcts,
   computeMultiplier,
@@ -316,7 +316,7 @@ describe('formatShortDate (PR #17 review 이슈 6 — UTC 기반)', () => {
     expect(formatShortDate(new Date('2026-12-31T15:00:00Z'))).toBe('12-31');
   });
 
-  it('잘못된 입력 → throws', () => {
-    expect(() => formatShortDate('not-a-date')).toThrow();
+  it('잘못된 입력 → throws InvalidNumberError (PR #17 review round 3 이슈 6)', () => {
+    expect(() => formatShortDate('not-a-date')).toThrow(InvalidNumberError);
   });
 });

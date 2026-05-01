@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 
-import { View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -31,6 +31,7 @@ import {
   getLastSync,
   loadAllCities,
 } from '@/lib';
+import { colors } from '@/theme/tokens';
 import type {
   CityCostData,
   ExchangeRates,
@@ -350,7 +351,13 @@ export default function DetailScreen(): React.ReactElement {
   if (state.status === 'loading') {
     return (
       <Screen testID="detail-screen-loading">
-        <View className="flex-1 items-center justify-center" />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator
+            size="large"
+            color={colors.orange}
+            accessibilityLabel="로딩 중"
+          />
+        </View>
       </Screen>
     );
   }

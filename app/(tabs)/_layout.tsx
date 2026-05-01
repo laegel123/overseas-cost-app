@@ -25,13 +25,16 @@ export default function TabsLayout(): React.ReactElement {
   const recentIds = useRecentStore((s) => s.cityIds);
   const favoriteIds = useFavoritesStore((s) => s.cityIds);
 
+  // 탭 반복 누름 시 navigation 스택이 중복 누적되지 않도록 router.navigate 사용
+  // (PR #17 review round 3 이슈 1). expo-router 6 의 navigate 는 이미 동일 라우트
+  // 가 스택 상단이면 no-op + 다른 라우트면 push 와 동일.
   const handleCompareTabPress = React.useCallback(
     (e: TabPressEvent) => {
       e.preventDefault();
 
       const targetId = recentIds[0] ?? favoriteIds[0];
       if (targetId) {
-        router.push(`/compare/${targetId}`);
+        router.navigate(`/compare/${targetId}`);
       } else {
         router.replace('/');
         Alert.alert('알림', '최근 본 도시나 즐겨찾기가 없어요.\n홈에서 도시를 선택해 주세요.');
@@ -46,7 +49,7 @@ export default function TabsLayout(): React.ReactElement {
 
       const targetId = favoriteIds[0];
       if (targetId) {
-        router.push(`/compare/${targetId}`);
+        router.navigate(`/compare/${targetId}`);
       } else {
         router.replace('/');
         Alert.alert('알림', '즐겨찾기가 없어요.\n홈에서 별 아이콘을 눌러 추가해 주세요.');

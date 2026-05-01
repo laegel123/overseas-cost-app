@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 
-import { Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -32,6 +32,7 @@ import {
 import { useFavoritesStore } from '@/store/favorites';
 import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
+import { colors } from '@/theme/tokens';
 import type {
   CityCostData,
   ExchangeRates,
@@ -230,7 +231,13 @@ export default function CompareScreen(): React.ReactElement {
   if (state.status === 'loading') {
     return (
       <Screen testID="compare-screen-loading">
-        <View className="flex-1 items-center justify-center" />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator
+            size="large"
+            color={colors.orange}
+            accessibilityLabel="로딩 중"
+          />
+        </View>
       </Screen>
     );
   }
