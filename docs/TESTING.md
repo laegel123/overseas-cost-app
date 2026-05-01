@@ -1307,35 +1307,116 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 
 ### 9.18 `src/components/FavCard.tsx`
 
-- [ ] accent=true: navy bg, white text
-- [ ] accent=false: white bg, navy text, line border
-- [ ] hot mult: `↑2.3×` orange
-- [ ] cool mult: `↓0.8×` gray-2 (또는 dim)
-- [ ] 1.0× (=서울): 회색
-- [ ] sub (영문) 11px opacity 0.7
-- [ ] 국가코드 박스 32×24 (2글자)
-- [ ] 매우 긴 도시명 ("샌프란시스코 베이"): 줄임 또는 wrap (정책)
-- [ ] 탭 → onPress(cityId)
-- [ ] ⭐ 아이콘 표시 (즐겨찾기 카드라)
+**accent variant:**
+
+- [x] accent=true: bg-navy (첫 카드)
+- [x] accent=false: bg-white + border-line (기본)
+- [x] accent 미지정 → false
+
+**Hot 규칙 (경계값):**
+
+- [x] mult=1.99 → not hot
+- [x] mult=2.0 → hot (orange mult)
+- [x] mult=2.3 → hot
+- [x] mult=0.8 → cool (↓0.8×)
+- [x] mult=1.0 → 동일 (1.0×, gray-2)
+
+**accent + hot 조합:**
+
+- [x] accent=true + hot=true → mult orange
+- [x] accent=true + not hot → mult white
+
+**텍스트:**
+
+- [x] 도시명 / 영문명 / 국가코드 표시
+- [x] 영문명 sub opacity 0.7
+- [x] 국가코드 박스 렌더
+- [x] star 아이콘 렌더
+
+**인터랙션:**
+
+- [x] onPress 정의 → cityId 전달
+- [x] onPress 미정의 → 비-탭
+
+**기타:**
+
+- [x] testID 전파 (미지정 시 속성 없음)
 
 ### 9.19 `src/components/RecentRow.tsx`
 
-- [ ] hot mult: orange
-- [ ] cool mult: gray-2
-- [ ] 1.0×: 회색
-- [ ] chevron 표시
-- [ ] 마지막 행: bottom border 없음
-- [ ] 탭 → onPress(cityId)
+**Hot 규칙 (경계값):**
+
+- [x] mult=1.99 → not hot (반올림 2.0)
+- [x] mult=2.0 → hot (orange)
+- [x] mult=2.3 → hot
+- [x] mult=0.8 → cool (↓0.8×, gray-2)
+- [x] mult=1.0 → 동일 (1.0×, gray-2)
+- [x] mult=0.5 → cool
+
+**isLast border:**
+
+- [x] isLast=false → border-b 표시
+- [x] isLast=true → border-b 없음
+- [x] isLast 미지정 → false
+
+**텍스트:**
+
+- [x] 도시명 / 영문명 / 국가코드 표시
+- [x] 국가코드 박스 36×36 렌더
+- [x] mult 포매팅 (↑/↓ 화살표)
+
+**인터랙션:**
+
+- [x] onPress 정의 → cityId 전달
+- [x] onPress 미정의 → 비-탭
+
+**기타:**
+
+- [x] testID 전파 (미지정 시 속성 없음)
 
 ### 9.20 `src/components/GroceryRow.tsx`
 
-- [ ] 정상: light icon bg
-- [ ] hot: orange-soft bg
-- [ ] 이모지 렌더 (🥚 등)
-- [ ] 가격 범위: `"1.2만 → 2.2만"` (서울 → 도시)
-- [ ] mult 색상 (hot=orange, normal=gray)
-- [ ] bottom border (마지막 행 제외)
-- [ ] 매우 긴 품목명: ellipsis
+**Hot 규칙 (경계값):**
+
+- [x] mult=1.99 → not hot (bg-light)
+- [x] mult=2.0 → hot (bg-orange-soft)
+- [x] mult=2.5 → hot
+- [x] mult=0.5 → not hot (cool)
+- [x] mult=1.0 → not hot
+
+**Hot prop override:**
+
+- [x] hot=true 강제 (mult=1.5) → orange-soft
+- [x] hot=false 강제 (mult=3.0) → bg-light
+- [x] hot 미지정 → 자동 판정
+
+**isLast border:**
+
+- [x] isLast=false → border-b 표시
+- [x] isLast=true → border-b 없음
+- [x] isLast 미지정 → false
+
+**텍스트:**
+
+- [x] 품목명 표시
+- [x] 이모지 표시
+- [x] 가격 범위: "서울 → 도시" 형식
+- [x] 다양한 이모지 렌더 (🥚 등)
+
+**mult 포매팅:**
+
+- [x] mult=1.8 → ↑1.8×
+- [x] mult=0.7 → ↓0.7×
+- [x] mult=1.0 → 1.0×
+
+**이모지 박스:**
+
+- [x] 36×36 (w-9 h-9) 크기
+- [x] rounded-[10px] 라운드
+
+**기타:**
+
+- [x] testID 전파 (미지정 시 속성 없음)
 
 ### 9.20.1 `src/components/ErrorView.tsx` (app-shell phase step 3)
 

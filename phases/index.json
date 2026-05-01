@@ -27,7 +27,8 @@
     },
     {
       "dir": "components",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-05-01T11:15:00+0900"
     }
   ]
 }

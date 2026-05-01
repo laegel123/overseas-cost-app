@@ -26,6 +26,15 @@ export type { HeroCardProps, HeroCardVariant } from './cards/HeroCard';
 export { ComparePair } from './ComparePair';
 export type { ComparePairProps } from './ComparePair';
 
+export { FavCard } from './FavCard';
+export type { FavCardProps } from './FavCard';
+
+export { RecentRow } from './RecentRow';
+export type { RecentRowProps } from './RecentRow';
+
+export { GroceryRow } from './GroceryRow';
+export type { GroceryRowProps } from './GroceryRow';
+
 export { ErrorBoundary } from './ErrorBoundary';
 export { ErrorView } from './ErrorView';
 export type { ErrorViewProps, ErrorViewVariant } from './ErrorView';
