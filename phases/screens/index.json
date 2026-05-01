@@ -1,0 +1,35 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "screens",
+  "steps": [
+    {
+      "step": 0,
+      "name": "compare",
+      "status": "completed",
+      "started_at": "2026-05-01T14:07:48+0900",
+      "completed_at": "2026-05-01T14:24:00+0900",
+      "summary": "Compare 화면 구현 + 4탭 확장 (ADR-041) + formatKRW/formatShortDate 추가 + 테스트 14 케이스 + TESTING.md §9.24 갱신"
+    },
+    {
+      "step": 1,
+      "name": "detail",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "home",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "settings",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "onboarding",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-05-01T14:07:48+0900"
+}
