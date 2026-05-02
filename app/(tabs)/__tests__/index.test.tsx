@@ -6,6 +6,7 @@ import * as React from 'react';
 
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 
+import { jsonByTestId } from '@/__test-utils__/snapshotByTestId';
 import {
   fetchExchangeRates as mockFetchExchangeRates,
   getAllCities as mockGetAllCities,
@@ -350,15 +351,41 @@ describe('HomeScreen', () => {
       expect(getByTestId('home-screen-error')).toBeTruthy();
       expect(getByText('서울 데이터를 찾을 수 없습니다')).toBeTruthy();
     });
+
+    it('다시 시도 버튼 → loading 상태로 전환 후 재로드', async () => {
+      // 첫 호출: cities 없음 → 에러. 두 번째 호출: 정상.
+      let callCount = 0;
+      (mockGetAllCities as jest.Mock).mockImplementation(() => {
+        callCount += 1;
+        return callCount === 1 ? {} : citiesMap;
+      });
+      (mockLoadAllCities as jest.Mock).mockResolvedValue(undefined);
+      (mockFetchExchangeRates as jest.Mock).mockResolvedValue(defaultFx);
+
+      const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('home-screen-error')).toBeTruthy();
+      const retry = getByTestId('home-retry-btn');
+      fireEvent.press(retry);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(queryByTestId('home-screen-error')).toBeNull();
+      expect(getByTestId('home-screen')).toBeTruthy();
+    });
   });
 
   describe('스냅샷', () => {
-    it('즐겨찾기 3건 + 최근 4건 스냅샷', async () => {
+    // TESTING.md §6.6 — 100라인 정책. 화면 전체 트리 대신 핵심 영역만 캡처.
+    it('즐겨찾기 첫 카드 (accent navy) — 회귀 감지', async () => {
       setupMocks();
       useFavoritesStore.setState({ cityIds: ['vancouver', 'tokyo', 'london'] });
-      useRecentStore.setState({
-        cityIds: ['sydney', 'london', 'tokyo', 'vancouver'],
-      });
 
       const tree = render(<HomeScreen />);
 
@@ -366,7 +393,19 @@ describe('HomeScreen', () => {
         await flushPromises();
       });
 
-      expect(tree.toJSON()).toMatchSnapshot();
+      expect(jsonByTestId(tree.toJSON(), 'home-favcard-vancouver')).toMatchSnapshot();
+    });
+
+    it('권역 pill 컨테이너 — 5개 pill 회귀 감지', async () => {
+      setupMocks();
+
+      const tree = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(jsonByTestId(tree.toJSON(), 'home-region-pills')).toMatchSnapshot();
     });
   });
 });

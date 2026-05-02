@@ -1,891 +1,122 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SettingsScreen 스냅샷 worker 페르소나 + 통계 비어있음 1`] = `
-<RCTScrollView
-  className="px-screen-x"
-  contentContainerStyle={
-    {
-      "flexGrow": 1,
-    }
-  }
-  testID="settings-screen"
+exports[`SettingsScreen 스냅샷 persona-card (worker) — 회귀 감지 1`] = `
+<View
+  className="bg-navy rounded-hero-lg p-hero-pad mb-4"
+  testID="persona-card"
 >
-  <View>
+  <View
+    className="flex-row items-center gap-3"
+  >
     <View
-      className="flex-row items-center justify-between pt-2 pb-4"
+      className="w-14 h-14 rounded-hero-icon bg-orange items-center justify-center"
+    >
+      <View
+        accessible={false}
+        importantForAccessibility="no"
+        style={
+          {
+            "height": 28,
+            "width": 28,
+          }
+        }
+        testID="persona-icon"
+      >
+        <svg
+          fill="none"
+          height={28}
+          stroke="#FFFFFF"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+          width={28}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+          />
+          <rect
+            fill="none"
+            height="14"
+            rx="2"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            width="20"
+            x="2"
+            y="6"
+          />
+        </svg>
+      </View>
+    </View>
+    <View
+      className="flex-1"
     >
       <Text
         accessibilityRole="header"
-        className="font-manrope-extrabold text-h1 text-navy"
+        className="font-manrope-bold text-h3 text-white"
+        testID="persona-label"
       >
-        설정
+        취업자
+         모드
       </Text>
-      <View
-        accessible={false}
-        className="w-9 h-9 rounded-icon-sm items-center justify-center bg-light"
-        importantForAccessibility="no"
-        testID="settings-more-btn"
+      <Text
+        accessibilityRole="text"
+        className="font-mulish text-tiny text-white opacity-70"
+        testID="persona-sub"
       >
-        <View
-          accessible={false}
-          importantForAccessibility="no"
-          style={
-            {
-              "height": 22,
-              "width": 22,
-            }
-          }
-        >
-          <svg
-            fill="none"
-            height={22}
-            stroke="#8A98A0"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-            width={22}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              fill="none"
-              r="1"
-              stroke="#8A98A0"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-            />
-            <circle
-              cx="19"
-              cy="12"
-              fill="none"
-              r="1"
-              stroke="#8A98A0"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-            />
-            <circle
-              cx="5"
-              cy="12"
-              fill="none"
-              r="1"
-              stroke="#8A98A0"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-            />
-          </svg>
-        </View>
-      </View>
+        서울에서 출발 · 실수령 중심
+      </Text>
     </View>
     <View
-      className="bg-navy rounded-hero-lg p-hero-pad mb-4"
-      testID="persona-card"
-    >
-      <View
-        className="flex-row items-center gap-3"
-      >
-        <View
-          className="w-14 h-14 rounded-hero-icon bg-orange items-center justify-center"
-        >
-          <View
-            accessible={false}
-            importantForAccessibility="no"
-            style={
-              {
-                "height": 28,
-                "width": 28,
-              }
-            }
-            testID="persona-icon"
-          >
-            <svg
-              fill="none"
-              height={28}
-              stroke="#FFFFFF"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-              width={28}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"
-                fill="none"
-                stroke="#FFFFFF"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-              <rect
-                fill="none"
-                height="14"
-                rx="2"
-                stroke="#FFFFFF"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                width="20"
-                x="2"
-                y="6"
-              />
-            </svg>
-          </View>
-        </View>
-        <View
-          className="flex-1"
-        >
-          <Text
-            accessibilityRole="header"
-            className="font-manrope-bold text-h3 text-white"
-            testID="persona-label"
-          >
-            취업자
-             모드
-          </Text>
-          <Text
-            accessibilityRole="text"
-            className="font-mulish text-tiny text-white opacity-70"
-            testID="persona-sub"
-          >
-            서울에서 출발 · 실수령 중심
-          </Text>
-        </View>
-        <View
-          accessibilityLabel="페르소나 변경"
-          accessibilityRole="button"
-          accessibilityState={
-            {
-              "busy": undefined,
-              "checked": undefined,
-              "disabled": undefined,
-              "expanded": undefined,
-              "selected": undefined,
-            }
-          }
-          accessibilityValue={
-            {
-              "max": undefined,
-              "min": undefined,
-              "now": undefined,
-              "text": undefined,
-            }
-          }
-          accessible={true}
-          className="px-3 py-1.5 rounded-btn bg-white/10 border border-white/20"
-          collapsable={false}
-          focusable={true}
-          onBlur={[Function]}
-          onClick={[Function]}
-          onFocus={[Function]}
-          onResponderGrant={[Function]}
-          onResponderMove={[Function]}
-          onResponderRelease={[Function]}
-          onResponderTerminate={[Function]}
-          onResponderTerminationRequest={[Function]}
-          onStartShouldSetResponder={[Function]}
-          testID="persona-change-btn"
-        >
-          <Text
-            accessibilityRole="text"
-            className="font-mulish text-tiny text-white"
-          >
-            변경
-          </Text>
-        </View>
-      </View>
-    </View>
-    <View
-      className="flex-row gap-2 mb-4"
-      testID="stat-cards"
-    >
-      <View
-        className="flex-1 items-center py-card-pad rounded-card bg-white border border-line"
-        testID="stat-favorites"
-      >
-        <Text
-          accessibilityRole="header"
-          className="font-manrope-extrabold text-h1 text-orange"
-          testID="stat-favorites-value"
-        >
-          0
-        </Text>
-        <Text
-          accessibilityRole="text"
-          className="font-mulish text-tiny text-gray-2"
-        >
-          즐겨찾기
-        </Text>
-      </View>
-      <View
-        className="flex-1 items-center py-card-pad rounded-card bg-white border border-line"
-        testID="stat-recent"
-      >
-        <Text
-          accessibilityRole="header"
-          className="font-manrope-extrabold text-h1 text-orange"
-          testID="stat-recent-value"
-        >
-          0
-        </Text>
-        <Text
-          accessibilityRole="text"
-          className="font-mulish text-tiny text-gray-2"
-        >
-          최근 본
-        </Text>
-      </View>
-      <View
-        className="flex-1 items-center py-card-pad rounded-card bg-white border border-line"
-        testID="stat-cities"
-      >
-        <Text
-          accessibilityRole="header"
-          className="font-manrope-extrabold text-h1 text-orange"
-          testID="stat-cities-value"
-        >
-          0
-        </Text>
-        <Text
-          accessibilityRole="text"
-          className="font-mulish text-tiny text-gray-2"
-        >
-          도시 DB
-        </Text>
-      </View>
-    </View>
-    <View
-      className="rounded-card-lg overflow-hidden bg-white border border-line mb-4"
-    >
-      <View
-        accessibilityLabel="데이터 새로고침"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": false,
-            "expanded": undefined,
-            "selected": undefined,
-          }
+      accessibilityLabel="페르소나 변경"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
         }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
         }
-        accessible={true}
-        className="flex-row items-center px-card-pad py-card-pad gap-3 border-b border-line"
-        collapsable={false}
-        focusable={true}
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        testID="menu-refresh"
-      >
-        <View
-          className="w-9 h-9 rounded-icon-sm items-center justify-center bg-orange-soft"
-        >
-          <View
-            accessible={false}
-            importantForAccessibility="no"
-            style={
-              {
-                "height": 22,
-                "width": 22,
-              }
-            }
-          >
-            <svg
-              fill="none"
-              height={22}
-              stroke="#FC6011"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-              width={22}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
-                fill="none"
-                stroke="#FC6011"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-              <path
-                d="M21 3v5h-5"
-                fill="none"
-                stroke="#FC6011"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-              <path
-                d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
-                fill="none"
-                stroke="#FC6011"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-              <path
-                d="M8 16H3v5"
-                fill="none"
-                stroke="#FC6011"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
-          </View>
-        </View>
-        <View
-          className="flex-1"
-        >
-          <Text
-            accessibilityRole="text"
-            className="font-mulish text-body text-navy"
-            numberOfLines={1}
-          >
-            데이터 새로고침
-          </Text>
-        </View>
-        <Text
-          accessibilityRole="text"
-          className="font-mulish text-tiny text-gray-2"
-          numberOfLines={1}
-        >
-          동기화 전
-        </Text>
-        <View
-          accessible={false}
-          importantForAccessibility="no"
-          style={
-            {
-              "height": 22,
-              "width": 22,
-            }
-          }
-          testID="menu-refresh-chevron"
-        >
-          <svg
-            fill="none"
-            height={22}
-            stroke="#8A98A0"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-            width={22}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="m9 18 6-6-6-6"
-              fill="none"
-              stroke="#8A98A0"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-            />
-          </svg>
-        </View>
-      </View>
-      <View
-        accessibilityLabel="데이터 출처 보기"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": false,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        className="flex-row items-center px-card-pad py-card-pad gap-3 border-b border-line"
-        collapsable={false}
-        focusable={true}
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        testID="menu-sources"
-      >
-        <View
-          className="w-9 h-9 rounded-icon-sm items-center justify-center bg-light"
-        >
-          <View
-            accessible={false}
-            importantForAccessibility="no"
-            style={
-              {
-                "height": 22,
-                "width": 22,
-              }
-            }
-          >
-            <svg
-              fill="none"
-              height={22}
-              stroke="#11263C"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-              width={22}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"
-                fill="none"
-                stroke="#11263C"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
-          </View>
-        </View>
-        <View
-          className="flex-1"
-        >
-          <Text
-            accessibilityRole="text"
-            className="font-mulish text-body text-navy"
-            numberOfLines={1}
-          >
-            데이터 출처 보기
-          </Text>
-        </View>
-        <Text
-          accessibilityRole="text"
-          className="font-mulish text-tiny text-gray-2"
-          numberOfLines={1}
-        >
-          12개
-        </Text>
-        <View
-          accessible={false}
-          importantForAccessibility="no"
-          style={
-            {
-              "height": 22,
-              "width": 22,
-            }
-          }
-          testID="menu-sources-chevron"
-        >
-          <svg
-            fill="none"
-            height={22}
-            stroke="#8A98A0"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-            width={22}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="m9 18 6-6-6-6"
-              fill="none"
-              stroke="#8A98A0"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-            />
-          </svg>
-        </View>
-      </View>
-      <View
-        accessibilityLabel="피드백 보내기"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": false,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        className="flex-row items-center px-card-pad py-card-pad gap-3 border-b border-line"
-        collapsable={false}
-        focusable={true}
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        testID="menu-feedback"
-      >
-        <View
-          className="w-9 h-9 rounded-icon-sm items-center justify-center bg-light"
-        >
-          <View
-            accessible={false}
-            importantForAccessibility="no"
-            style={
-              {
-                "height": 22,
-                "width": 22,
-              }
-            }
-          >
-            <svg
-              fill="none"
-              height={22}
-              stroke="#11263C"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-              width={22}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"
-                fill="none"
-                stroke="#11263C"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-              <rect
-                fill="none"
-                height="16"
-                rx="2"
-                stroke="#11263C"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                width="20"
-                x="2"
-                y="4"
-              />
-            </svg>
-          </View>
-        </View>
-        <View
-          className="flex-1"
-        >
-          <Text
-            accessibilityRole="text"
-            className="font-mulish text-body text-navy"
-            numberOfLines={1}
-          >
-            피드백 보내기
-          </Text>
-        </View>
-        <View
-          accessible={false}
-          importantForAccessibility="no"
-          style={
-            {
-              "height": 22,
-              "width": 22,
-            }
-          }
-          testID="menu-feedback-chevron"
-        >
-          <svg
-            fill="none"
-            height={22}
-            stroke="#8A98A0"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-            width={22}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="m9 18 6-6-6-6"
-              fill="none"
-              stroke="#8A98A0"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-            />
-          </svg>
-        </View>
-      </View>
-      <View
-        accessibilityLabel="개인정보 처리방침"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": false,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        className="flex-row items-center px-card-pad py-card-pad gap-3 border-b border-line"
-        collapsable={false}
-        focusable={true}
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        testID="menu-privacy"
-      >
-        <View
-          className="w-9 h-9 rounded-icon-sm items-center justify-center bg-light"
-        >
-          <View
-            accessible={false}
-            importantForAccessibility="no"
-            style={
-              {
-                "height": 22,
-                "width": 22,
-              }
-            }
-          >
-            <svg
-              fill="none"
-              height={22}
-              stroke="#11263C"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-              width={22}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"
-                fill="none"
-                stroke="#11263C"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
-          </View>
-        </View>
-        <View
-          className="flex-1"
-        >
-          <Text
-            accessibilityRole="text"
-            className="font-mulish text-body text-navy"
-            numberOfLines={1}
-          >
-            개인정보 처리방침
-          </Text>
-        </View>
-        <View
-          accessible={false}
-          importantForAccessibility="no"
-          style={
-            {
-              "height": 22,
-              "width": 22,
-            }
-          }
-          testID="menu-privacy-chevron"
-        >
-          <svg
-            fill="none"
-            height={22}
-            stroke="#8A98A0"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            viewBox="0 0 24 24"
-            width={22}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="m9 18 6-6-6-6"
-              fill="none"
-              stroke="#8A98A0"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-            />
-          </svg>
-        </View>
-      </View>
-      <View
-        accessibilityLabel="앱 정보"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": false,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        className="flex-row items-center px-card-pad py-card-pad gap-3"
-        collapsable={false}
-        focusable={true}
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        testID="menu-app-info"
-      >
-        <View
-          className="w-9 h-9 rounded-icon-sm items-center justify-center bg-light"
-        >
-          <View
-            accessible={false}
-            importantForAccessibility="no"
-            style={
-              {
-                "height": 22,
-                "width": 22,
-              }
-            }
-          >
-            <svg
-              fill="none"
-              height={22}
-              stroke="#8A98A0"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-              width={22}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle
-                cx="12"
-                cy="12"
-                fill="none"
-                r="10"
-                stroke="#8A98A0"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-              <path
-                d="M12 16v-4"
-                fill="none"
-                stroke="#8A98A0"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-              <path
-                d="M12 8h.01"
-                fill="none"
-                stroke="#8A98A0"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
-          </View>
-        </View>
-        <View
-          className="flex-1"
-        >
-          <Text
-            accessibilityRole="text"
-            className="font-mulish text-body text-gray-2"
-            numberOfLines={1}
-          >
-            앱 정보
-          </Text>
-        </View>
-        <Text
-          accessibilityRole="text"
-          className="font-mulish text-tiny text-gray-2"
-          numberOfLines={1}
-        >
-          v1.0.0
-        </Text>
-      </View>
-    </View>
-    <View
-      className="items-center py-4"
+      }
+      accessible={true}
+      className="px-3 py-1.5 rounded-btn bg-white/10 border border-white/20"
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      testID="persona-change-btn"
     >
       <Text
         accessibilityRole="text"
-        className="font-mulish text-tiny text-gray-2"
-        testID="footer-text"
+        className="font-mulish text-tiny text-white"
       >
-        Made with ♥ in Seoul · 2026
+        변경
       </Text>
     </View>
   </View>
-</RCTScrollView>
+</View>
 `;

@@ -13,6 +13,7 @@ import * as React from 'react';
 
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 
+import { jsonByTestId } from '@/__test-utils__/snapshotByTestId';
 import {
   getAllCities as mockGetAllCities,
   refreshCache as mockRefreshCache,
@@ -310,7 +311,8 @@ describe('SettingsScreen', () => {
   });
 
   describe('스냅샷', () => {
-    it('worker 페르소나 + 통계 비어있음', () => {
+    // TESTING.md §6.6 — 100라인 정책. 화면 전체 대신 페르소나 카드 영역만.
+    it('persona-card (worker) — 회귀 감지', () => {
       setupMocks({ cities: {} });
       usePersonaStore.setState({ persona: 'worker', onboarded: true });
       useFavoritesStore.setState({ cityIds: [] });
@@ -319,7 +321,7 @@ describe('SettingsScreen', () => {
 
       const tree = render(<SettingsScreen />);
 
-      expect(tree.toJSON()).toMatchSnapshot();
+      expect(jsonByTestId(tree.toJSON(), 'persona-card')).toMatchSnapshot();
     });
   });
 });

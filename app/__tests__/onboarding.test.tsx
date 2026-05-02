@@ -8,6 +8,8 @@ import * as React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
+import { jsonByTestId } from '@/__test-utils__/snapshotByTestId';
+
 import OnboardingScreen from '../onboarding';
 
 const mockReplace = jest.fn();
@@ -155,10 +157,15 @@ describe('OnboardingScreen', () => {
   });
 
   // ─── 스냅샷 ────────────────────────────────────────────────────────────
+  // TESTING.md §6.6 — 100라인 정책. 화면 전체 대신 카드별 핵심 영역만.
 
-  it('snapshot — 3개 페르소나 카드', () => {
+  it('snapshot — student 카드 (primary)', () => {
     const tree = render(<OnboardingScreen />);
+    expect(jsonByTestId(tree.toJSON(), 'persona-card-student')).toMatchSnapshot();
+  });
 
-    expect(tree.toJSON()).toMatchSnapshot();
+  it('snapshot — unknown 카드 (tertiary, dashed)', () => {
+    const tree = render(<OnboardingScreen />);
+    expect(jsonByTestId(tree.toJSON(), 'persona-card-unknown')).toMatchSnapshot();
   });
 });

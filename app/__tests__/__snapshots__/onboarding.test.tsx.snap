@@ -1,508 +1,247 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
+exports[`OnboardingScreen snapshot — student 카드 (primary) 1`] = `
 <View
-  className="flex-1 px-screen-x-loose"
-  testID="onboarding-screen"
+  accessibilityLabel="유학생 선택"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+  testID="persona-card-student"
 >
   <View
-    className="flex-1 justify-between"
+    className="flex-row items-center gap-3.5 p-4 rounded-card-lg border-[1.5px] border-orange bg-orange-tint"
   >
     <View
-      className="mt-6 gap-3"
+      className="w-11 h-11 rounded-xl items-center justify-center bg-orange"
     >
       <View
-        className="w-14 h-14 rounded-hero-icon bg-orange items-center justify-center"
+        accessible={false}
+        importantForAccessibility="no"
         style={
           {
-            "shadowColor": "#FC6011",
-            "shadowOffset": {
-              "height": 6,
-              "width": 0,
-            },
-            "shadowOpacity": 0.25,
-            "shadowRadius": 16,
+            "height": 22,
+            "width": 22,
           }
         }
       >
-        <View
-          accessible={false}
-          importantForAccessibility="no"
-          style={
-            {
-              "height": 28,
-              "width": 28,
-            }
-          }
+        <svg
+          fill="none"
+          height={22}
+          stroke="#FFFFFF"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+          width={22}
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <svg
+          <path
+            d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"
             fill="none"
-            height={28}
             stroke="#FFFFFF"
             strokeLinecap="round"
             strokeLinejoin="round"
-            strokeWidth={2.2}
-            viewBox="0 0 24 24"
-            width={28}
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle
-              cx="12"
-              cy="12"
-              fill="none"
-              r="10"
-              stroke="#FFFFFF"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2.2}
-            />
-            <path
-              d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2.2}
-            />
-            <path
-              d="M2 12h20"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2.2}
-            />
-          </svg>
-        </View>
+            strokeWidth={2}
+          />
+          <path
+            d="M22 10v6"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+          />
+          <path
+            d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+          />
+        </svg>
       </View>
-      <View
-        className="gap-1"
+    </View>
+    <View
+      className="flex-1 gap-1"
+    >
+      <Text
+        accessibilityRole="header"
+        className="font-manrope-bold text-h3 text-navy"
       >
-        <Text
-          accessibilityRole="header"
-          className="font-manrope-extrabold text-display text-navy"
-        >
-          안녕하세요
-        </Text>
-        <Text
-          accessibilityRole="header"
-          className="font-manrope-extrabold text-display text-orange"
-        >
-          어디로 떠나시나요?
-        </Text>
-      </View>
+        유학생
+      </Text>
       <Text
         accessibilityRole="text"
-        className="font-mulish text-body text-navy max-w-[240px]"
+        className="font-mulish text-tiny text-gray-2"
       >
-        서울 기준으로 해외 도시의 생활비를
-        
+        서울에서 출발 · 학비 중심
+      </Text>
+    </View>
+    <View
+      accessible={false}
+      importantForAccessibility="no"
+      style={
+        {
+          "height": 20,
+          "width": 20,
+        }
+      }
+    >
+      <svg
+        fill="none"
+        height={20}
+        stroke="#FC6011"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        viewBox="0 0 24 24"
+        width={20}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m9 18 6-6-6-6"
+          fill="none"
+          stroke="#FC6011"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+        />
+      </svg>
+    </View>
+  </View>
+</View>
+`;
 
-        본인 페르소나에 맞게 비교해 드려요.
-      </Text>
-    </View>
+exports[`OnboardingScreen snapshot — unknown 카드 (tertiary, dashed) 1`] = `
+<View
+  accessibilityLabel="아직 모름 선택"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+  testID="persona-card-unknown"
+>
+  <View
+    className="flex-row items-center gap-3.5 p-4 rounded-card-lg border border-dashed border-line bg-transparent"
+  >
     <View
-      className="mt-6 gap-2.5"
+      className="flex-1 gap-1"
     >
       <Text
         accessibilityRole="text"
-        className="font-manrope-semibold text-mono-label text-gray-2 mb-1"
+        className="font-mulish text-small text-gray font-manrope-bold"
       >
-        어떤 분이신가요?
+        아직 모름
       </Text>
-      <View
-        accessibilityLabel="유학생 선택"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "transform": [
-              {
-                "scale": 1,
-              },
-            ],
-          }
-        }
-        testID="persona-card-student"
-      >
-        <View
-          className="flex-row items-center gap-3.5 p-4 rounded-card-lg border-[1.5px] border-orange bg-orange-tint"
-        >
-          <View
-            className="w-11 h-11 rounded-xl items-center justify-center bg-orange"
-          >
-            <View
-              accessible={false}
-              importantForAccessibility="no"
-              style={
-                {
-                  "height": 22,
-                  "width": 22,
-                }
-              }
-            >
-              <svg
-                fill="none"
-                height={22}
-                stroke="#FFFFFF"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-                width={22}
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                />
-                <path
-                  d="M22 10v6"
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                />
-                <path
-                  d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"
-                  fill="none"
-                  stroke="#FFFFFF"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                />
-              </svg>
-            </View>
-          </View>
-          <View
-            className="flex-1 gap-1"
-          >
-            <Text
-              accessibilityRole="header"
-              className="font-manrope-bold text-h3 text-navy"
-            >
-              유학생
-            </Text>
-            <Text
-              accessibilityRole="text"
-              className="font-mulish text-tiny text-gray-2"
-            >
-              서울에서 출발 · 학비 중심
-            </Text>
-          </View>
-          <View
-            accessible={false}
-            importantForAccessibility="no"
-            style={
-              {
-                "height": 20,
-                "width": 20,
-              }
-            }
-          >
-            <svg
-              fill="none"
-              height={20}
-              stroke="#FC6011"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-              width={20}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="m9 18 6-6-6-6"
-                fill="none"
-                stroke="#FC6011"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
-          </View>
-        </View>
-      </View>
-      <View
-        accessibilityLabel="취업자 선택"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "transform": [
-              {
-                "scale": 1,
-              },
-            ],
-          }
-        }
-        testID="persona-card-worker"
-      >
-        <View
-          className="flex-row items-center gap-3.5 p-4 rounded-card-lg border border-line bg-white"
-        >
-          <View
-            className="w-11 h-11 rounded-xl items-center justify-center bg-light"
-          >
-            <View
-              accessible={false}
-              importantForAccessibility="no"
-              style={
-                {
-                  "height": 22,
-                  "width": 22,
-                }
-              }
-            >
-              <svg
-                fill="none"
-                height={22}
-                stroke="#11263C"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                viewBox="0 0 24 24"
-                width={22}
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"
-                  fill="none"
-                  stroke="#11263C"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                />
-                <rect
-                  fill="none"
-                  height="14"
-                  rx="2"
-                  stroke="#11263C"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  width="20"
-                  x="2"
-                  y="6"
-                />
-              </svg>
-            </View>
-          </View>
-          <View
-            className="flex-1 gap-1"
-          >
-            <Text
-              accessibilityRole="header"
-              className="font-manrope-bold text-h3 text-navy"
-            >
-              취업자
-            </Text>
-            <Text
-              accessibilityRole="text"
-              className="font-mulish text-tiny text-gray-2"
-            >
-              서울에서 출발 · 실수령 중심
-            </Text>
-          </View>
-          <View
-            accessible={false}
-            importantForAccessibility="no"
-            style={
-              {
-                "height": 20,
-                "width": 20,
-              }
-            }
-          >
-            <svg
-              fill="none"
-              height={20}
-              stroke="#8A98A0"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-              width={20}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="m9 18 6-6-6-6"
-                fill="none"
-                stroke="#8A98A0"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
-          </View>
-        </View>
-      </View>
-      <View
-        accessibilityLabel="아직 모름 선택"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
-        collapsable={false}
-        focusable={true}
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
-        style={
-          {
-            "transform": [
-              {
-                "scale": 1,
-              },
-            ],
-          }
-        }
-        testID="persona-card-unknown"
-      >
-        <View
-          className="flex-row items-center gap-3.5 p-4 rounded-card-lg border border-dashed border-line bg-transparent"
-        >
-          <View
-            className="flex-1 gap-1"
-          >
-            <Text
-              accessibilityRole="text"
-              className="font-mulish text-small text-gray font-manrope-bold"
-            >
-              아직 모름
-            </Text>
-            <Text
-              accessibilityRole="text"
-              className="font-mulish text-tiny text-gray-2"
-            >
-              둘 다 보여드려요
-            </Text>
-          </View>
-          <View
-            accessible={false}
-            importantForAccessibility="no"
-            style={
-              {
-                "height": 18,
-                "width": 18,
-              }
-            }
-          >
-            <svg
-              fill="none"
-              height={18}
-              stroke="#8A98A0"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-              width={18}
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="m9 18 6-6-6-6"
-                fill="none"
-                stroke="#8A98A0"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-              />
-            </svg>
-          </View>
-        </View>
-      </View>
-    </View>
-    <View
-      className="mt-5 mb-4"
-    >
       <Text
         accessibilityRole="text"
-        className="font-mulish text-tiny text-gray-2 text-center"
+        className="font-mulish text-tiny text-gray-2"
       >
-        설정에서 언제든 변경할 수 있어요
+        둘 다 보여드려요
       </Text>
+    </View>
+    <View
+      accessible={false}
+      importantForAccessibility="no"
+      style={
+        {
+          "height": 18,
+          "width": 18,
+        }
+      }
+    >
+      <svg
+        fill="none"
+        height={18}
+        stroke="#8A98A0"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        viewBox="0 0 24 24"
+        width={18}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m9 18 6-6-6-6"
+          fill="none"
+          stroke="#8A98A0"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+        />
+      </svg>
     </View>
   </View>
 </View>

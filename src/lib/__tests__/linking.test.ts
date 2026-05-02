@@ -5,15 +5,15 @@
  * 모듈 자체를 mock 해 wrapper 가 Linking.openURL 로 정확히 위임하는지 검증.
  */
 
+import { Linking } from 'react-native';
+
+import { openURL } from '@/lib/linking';
+
 jest.mock('react-native', () => ({
   Linking: {
     openURL: jest.fn(() => Promise.resolve(true)),
   },
 }));
-
-import { Linking } from 'react-native';
-
-import { openURL } from '@/lib/linking';
 
 const mockOpenURL = Linking.openURL as jest.Mock;
 

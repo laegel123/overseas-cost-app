@@ -57,6 +57,8 @@ function computeCityTotal(city: CityCostData, fx: ExchangeRates): number {
   const rentKRW = convertToKRW(rent, city.currency, fx);
 
   const meal = (city.food.restaurantMeal + city.food.cafe) * FOOD_RESTAURANT_DAYS_PER_MONTH;
+  // groceries 4종 (milk / eggs / rice / chicken) 만 합산. ramen 은 optional 필드라
+  // 의도적으로 제외 — Home 단순화 근사값 (ADR-056). 도시 간 비교 가능 지표만 포함.
   const groceryUnitSum =
     city.food.groceries.milk1L +
     city.food.groceries.eggs12 +
@@ -95,6 +97,8 @@ export default function HomeScreen(): React.ReactElement {
   const [state, setState] = React.useState<HomeState>({ status: 'loading' });
   const [activeRegion, setActiveRegion] = React.useState<Region | 'all'>('all');
 
+  const [reloadKey, setReloadKey] = React.useState(0);
+
   React.useEffect(() => {
     let cancelled = false;
 
@@ -124,6 +128,15 @@ export default function HomeScreen(): React.ReactElement {
     return () => {
       cancelled = true;
     };
+    // lastSync 가 변할 때 외부 caches (cities + fx) 가 갱신된 상태 — load() 재실행으로
+    // state.fx 도 동기화. loadAllCities / fetchExchangeRates 의 in-flight dedup
+    // (ADR-046) 이 초기 마운트 + lastSync 변경 이중 호출을 흡수.
+    // reloadKey 는 에러 상태에서 사용자가 "다시 시도" 누를 때 의도적으로 useEffect 재실행.
+  }, [lastSync, reloadKey]);
+
+  const handleRetry = React.useCallback(() => {
+    setState({ status: 'loading' });
+    setReloadKey((k) => k + 1);
   }, []);
 
   const handleCityPress = React.useCallback(
@@ -218,10 +231,21 @@ export default function HomeScreen(): React.ReactElement {
   if (state.status === 'error') {
     return (
       <Screen testID="home-screen-error">
-        <View className="flex-1 items-center justify-center px-4">
+        <View className="flex-1 items-center justify-center px-4 gap-4">
           <Body color="gray-2" className="text-center">
             {state.message}
           </Body>
+          <Pressable
+            onPress={handleRetry}
+            accessibilityRole="button"
+            accessibilityLabel="다시 시도"
+            className="px-4 py-2 rounded-button bg-orange"
+            testID="home-retry-btn"
+          >
+            <Body color="white" className="font-manrope-bold">
+              다시 시도
+            </Body>
+          </Pressable>
         </View>
       </Screen>
     );
