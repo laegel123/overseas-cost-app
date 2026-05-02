@@ -28,6 +28,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { ExchangeRates } from '@/types/city';
 
+import fxFallbackJson from '../../data/static/fx_fallback.json';
+
 import {
   FxFetchError,
   FxParseError,
@@ -55,6 +57,9 @@ const CURRENCY_RE = /^[A-Z]{3}$/;
  *
  * 값 의미: 1 단위 통화당 KRW 환산값 (예: 1 CAD = 1015 KRW).
  * 본 표는 사용자 노출 데이터가 아닌 "마지막 안전망" — 1차/캐시 모두 실패 시에만 사용.
+ *
+ * v1.1: fx_fallback.json 자동 갱신 도입 (refresh-fx workflow).
+ *       이 const 는 JSON import 실패 시 방어용으로만 사용.
  */
 export const FX_BASELINE_2026Q2: ExchangeRates = {
   KRW: 1,
@@ -68,6 +73,28 @@ export const FX_BASELINE_2026Q2: ExchangeRates = {
   VND: 0.054,
   AED: 376,
 };
+
+/**
+ * fx_fallback.json (빌드 타임 import) 에서 baseline 구축.
+ * JSON import 실패 또는 shape 위반 시 FX_BASELINE_2026Q2 로 fallback.
+ */
+function buildFallbackBaseline(): ExchangeRates {
+  try {
+    const rates = fxFallbackJson?.rates;
+    if (typeof rates !== 'object' || rates === null) {
+      return { ...FX_BASELINE_2026Q2 };
+    }
+    const out: ExchangeRates = { KRW: 1 };
+    for (const [code, val] of Object.entries(rates)) {
+      if (typeof val === 'number' && Number.isFinite(val) && val > 0) {
+        out[code] = val;
+      }
+    }
+    return Object.keys(out).length > 1 ? out : { ...FX_BASELINE_2026Q2 };
+  } catch {
+    return { ...FX_BASELINE_2026Q2 };
+  }
+}
 
 // ─── convertToKRW ──────────────────────────────────────────────────────────
 
@@ -279,8 +306,8 @@ export function fetchExchangeRates(opts?: { bypassCache?: boolean }): Promise<Ex
         // stale 캐시 fallback — lastSync 는 갱신하지 않아 호출자가 staleness 감지 가능
         return cached.rates;
       }
-      // 캐시도 없음 → 마지막 안전망 baseline (사본 반환 — 호출자가 mutate 해도 안전)
-      return { ...FX_BASELINE_2026Q2 };
+      // 캐시도 없음 → 마지막 안전망 baseline (fx_fallback.json → FX_BASELINE_2026Q2)
+      return buildFallbackBaseline();
     }
   })();
 

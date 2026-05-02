@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "baseCurrency": "KRW",
+  "asOf": "2026-04-01",
+  "rates": {
+    "USD": 1380.0,
+    "CAD": 1015.0,
+    "EUR": 1500.0,
+    "GBP": 1750.0,
+    "AUD": 905.0,
+    "JPY": 9.0,
+    "SGD": 1020.0,
+    "VND": 0.054,
+    "AED": 376.0
+  }
+}

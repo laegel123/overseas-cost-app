@@ -2404,11 +2404,41 @@ afterEach(() => {
 
 #### `fx_backup.mjs`
 
-- [ ] ECB Exchange Rates API fetch (XML)
-- [ ] EUR base → KRW 환산
-- [ ] 한국은행 환율 fetch (정적 분기 fallback 갱신)
-- [ ] `data/fx_fallback.json` 갱신
-- [ ] 응답 shape 검증
+**parseEcbXml(xml):**
+
+- [x] 정상 XML 파싱: EUR base rates 추출 (EUR=1 포함)
+- [x] 빈 XML: `{ EUR: 1 }` 만 반환
+- [x] 유효하지 않은 rate 무시 (non-numeric)
+- [x] rate=0 무시
+- [x] 음수 rate 무시
+
+**convertToKrwBase(eurRates):**
+
+- [x] EUR base → KRW base 변환 (1 X = N KRW)
+- [x] KRW 누락 시 throws (cannot convert)
+- [x] KRW=0 시 throws
+- [x] 여러 통화 동시 변환
+- [x] 비정상 rate (NaN, 음수) 필터링
+
+**refresh(opts):**
+
+- [x] ECB fetch 성공 → `data/static/fx_fallback.json` 갱신 (schemaVersion=1, baseCurrency=KRW, asOf, rates)
+- [x] dryRun=true: 파일 미갱신
+- [ ] ECB fetch 실패 → 에러 반환 (retries exhausted) — fetchWithRetry 내부 테스트로 커버
+- [x] ECB 빈 응답 → 에러 반환
+- [x] ECB 응답에 KRW 누락 → 에러 반환
+- [x] 기존 fx_fallback.json 대비 changes 계산 (pctChange 포함)
+- [x] TARGET_CURRENCIES 외 통화 필터링 (XYZ 등 비표준 제외)
+
+**constants:**
+
+- [x] ECB_DAILY_URL = `https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml`
+- [x] TARGET_CURRENCIES 9개 통화 (USD, CAD, EUR, GBP, AUD, JPY, SGD, VND, AED)
+
+**API 키 요구 사항 (코멘트):**
+
+- ECB: 불필요 (공개 XML)
+- 한국은행 ECOS API: 인증키 필요 (https://ecos.bok.or.kr/api) — 본 스크립트 미사용
 
 ### 9-A.11 빌드·검증 스크립트
 
