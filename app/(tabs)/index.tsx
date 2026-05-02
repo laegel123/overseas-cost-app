@@ -30,6 +30,7 @@ import {
 } from '@/lib';
 import { useFavoritesStore } from '@/store/favorites';
 import { useRecentStore } from '@/store/recent';
+import { useSettingsStore } from '@/store/settings';
 import { colors } from '@/theme/tokens';
 import type { CityCostData, ExchangeRates, Region } from '@/types/city';
 
@@ -87,6 +88,9 @@ export default function HomeScreen(): React.ReactElement {
   const router = useRouter();
   const favoriteIds = useFavoritesStore((s) => s.cityIds);
   const recentIds = useRecentStore((s) => s.cityIds);
+  // Settings 새로고침 후 외부 (data.ts citiesInMemory) 가 갱신될 때 cities memo 가
+  // 재계산되도록 lastSync 를 dep 으로 사용 (탭 전환 시 unmount 안 됨).
+  const lastSync = useSettingsStore((s) => s.lastSync);
 
   const [state, setState] = React.useState<HomeState>({ status: 'loading' });
   const [activeRegion, setActiveRegion] = React.useState<Region | 'all'>('all');
@@ -148,9 +152,12 @@ export default function HomeScreen(): React.ReactElement {
     return computeCityTotal(state.seoul, state.fx);
   }, [state]);
 
+  // lastSync 가 변할 때 외부 citiesInMemory 도 갱신된 상태 — getAllCities 재호출.
+  // ESLint 의 exhaustive-deps 는 외부 모듈 상태를 모르므로 lastSync dep 명시 사유 주석.
   const cities = React.useMemo(
     () => (state.status === 'ready' ? getAllCities() : {}),
-    [state.status],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [state.status, lastSync],
   );
 
   const regionCounts = React.useMemo(

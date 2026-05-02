@@ -32,8 +32,8 @@ import { useSettingsStore } from '@/store/settings';
 import { colors } from '@/theme/tokens';
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
-// docs/DATA_SOURCES.md 의 출처 유형 수 (정부 통계 / 공식 교통공사 / 환율 API 등).
-// 출처가 추가될 때 동시 갱신 필요. v1.x 자동 카운트 전환 검토.
+// TODO(v1.x): docs/DATA_SOURCES.md 섹션 수를 빌드 타임에 자동 카운트로 교체.
+// 현재는 수동 동기화 — 출처 추가 시 본 상수 갱신 필수. 누락 위험 추적용 TODO.
 const DATA_SOURCES_COUNT = 12;
 const PRIVACY_POLICY_URL = 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/PRIVACY.md';
 const DATA_SOURCES_URL = 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md';
@@ -98,7 +98,7 @@ export default function SettingsScreen(): React.ReactElement {
     void safeOpenURL(PRIVACY_POLICY_URL, '브라우저를 열 수 없습니다.');
   }, [safeOpenURL]);
 
-  const formatLastSync = (): string => {
+  const formatLastSync = React.useCallback((): string => {
     if (refreshState === 'loading') return '갱신 중...';
     if (refreshState === 'error') return '갱신 실패';
     // 신규 설치 — 한 번도 동기화하지 않음 (번들 시드 사용 중).
@@ -109,7 +109,7 @@ export default function SettingsScreen(): React.ReactElement {
     } catch {
       return '동기화 전';
     }
-  };
+  }, [refreshState, lastSync]);
 
   return (
     <Screen scroll testID="settings-screen">

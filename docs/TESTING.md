@@ -2069,6 +2069,22 @@ screens phase step 4 구현 — 설치 직후 1회 페르소나 선택 화면.
 
 - [x] 3개 페르소나 카드 — 렌더링 회귀 감지 (PR #18 review round 1)
 
+### 9.31 `src/lib/persona.ts` — 페르소나 라벨·아이콘 매핑
+
+screens phase step 3 에 추가된 단일 출처 모듈. Onboarding · Settings 에서 재사용.
+
+- [x] PERSONA_LABEL — 3종 모두 한글 라벨 (`유학생` / `취업자` / `아직 모름`) (PR #18 review round 5)
+- [x] PERSONA_SUB — 3종 모두 비어있지 않은 sub 텍스트 (PR #18 review round 5)
+- [x] PERSONA_ICON — 3종 모두 IconName 키 (`graduation` / `briefcase` / `user`) (PR #18 review round 5)
+- [x] 모든 매핑 객체의 키 일치 — student / worker / unknown 3종 (PR #18 review round 5)
+
+### 9.32 `src/lib/linking.ts` — Linking wrapper
+
+screens phase step 3 에 추가된 thin wrapper. `jest.mock('@/lib/linking')` 으로 단독 mock 가능 (TESTING.md §5 의 react-native Linking 직접 mock 회피).
+
+- [x] openURL 호출 시 Linking.openURL 로 위임 (PR #18 review round 5)
+- [x] mailto: scheme 도 변형 없이 그대로 전달 (PR #18 review round 5)
+
 ---
 
 ## 9-A. 자동화 스크립트 (scripts/refresh/_ + scripts/build/_)
