@@ -2237,32 +2237,32 @@ afterEach(() => {
 
 #### `kr_molit.mjs` (국토부 실거래가)
 
-- [ ] 정상 응답: 서울 25개 자치구 평균 → share/studio/oneBed/twoBed 매핑
-- [ ] 매물 면적 기반 카테고리 매핑 정확 (10㎡ 이하 = share, 11~30㎡ = studio 등)
-- [ ] 응답에 매물 0건 (이상 케이스): errors + 기존값 유지
-- [ ] 자치구별 데이터 일부 결측: 가용 자치구 평균
-- [ ] XML 응답 파싱 (공공데이터포털 일부 XML)
-- [ ] API 키 만료 (200 with error message in body): errors
+- [x] 정상 응답: 서울 25개 자치구 평균 → share/studio/oneBed/twoBed 매핑
+- [x] 매물 면적 기반 카테고리 매핑 정확 (10㎡ 이하 = share, 11~30㎡ = studio 등)
+- [x] 응답에 매물 0건 (이상 케이스): errors + 기존값 유지
+- [x] 자치구별 데이터 일부 결측: 가용 자치구 평균
+- [x] XML 응답 파싱 (공공데이터포털 일부 XML)
+- [x] API 키 만료 (200 with error message in body): errors
 
 #### `kr_kca.mjs` (한국소비자원 참가격)
 
-- [ ] 32개 품목 중 8개 표준 매핑 (milk1L, eggs12, rice1kg, chicken1kg, bread, onion1kg, apple1kg, ramen)
-- [ ] ramen 매핑: "신라면" 키워드 검색 (없으면 일반 라면 평균)
-- [ ] 매핑 누락 품목: errors + 기존값 유지
-- [ ] 가격 단위 처리 (개당·100g당 등)
+- [x] 32개 품목 중 8개 표준 매핑 (milk1L, eggs12, rice1kg, chicken1kg, bread, onion1kg, apple1kg, ramen)
+- [x] ramen 매핑: "신라면" 키워드 검색 (없으면 일반 라면 평균)
+- [x] 매핑 누락 품목: errors + 기존값 유지
+- [x] 가격 단위 처리 (개당·100g당 등)
 
 #### `kr_kosis.mjs` (통계청 외식·교통 CPI)
 
-- [ ] 외식 CPI 추출 → restaurantMeal 변환 (정적 보정계수 적용)
-- [ ] 카페·음료 CPI → cafe 변환
-- [ ] CPI 시계열 응답: 최신 월 사용
-- [ ] 통계 ID 정확
+- [x] 외식 CPI 추출 → restaurantMeal 변환 (정적 보정계수 적용)
+- [x] 카페·음료 CPI → cafe 변환
+- [x] CPI 시계열 응답: 최신 월 사용
+- [x] 통계 ID 정확
 
 #### `kr_seoul_metro.mjs` (서울교통공사)
 
-- [ ] 정기권·1회권·택시 기본요금 fetch
-- [ ] HTML 페이지 fetch + parse (table 또는 JSON-LD)
-- [ ] 페이지 구조 변경 (selector 실패): errors + 기존값 유지
+- [x] 정기권·1회권·택시 기본요금 fetch
+- [x] HTML 페이지 fetch + parse (table 또는 JSON-LD)
+- [x] 페이지 구조 변경 (selector 실패): errors + 기존값 유지
 
 ### 9-A.4 출처별 — 캐나다 (5 scripts)
 
