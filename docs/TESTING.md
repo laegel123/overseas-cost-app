@@ -551,12 +551,16 @@ export function expectComparePair(
 - [ ] 매우 과거 (1900-01-01) → 정상
 - [ ] `null`/`undefined` → throws
 
-#### `formatShortDate(d: Date): string` (Compare 헤더 `04-27`)
+#### `formatShortDate(d: Date | string): string` (Compare 헤더 `04-27`)
 
-- [ ] `2026-04-27` → `"04-27"`
-- [ ] `2026-01-01` → `"01-01"`
-- [ ] `2026-12-31` → `"12-31"`
-- [ ] timezone: UTC `"2026-04-27T20:00:00Z"` → KST 변환 후 `"04-28"`
+UTC 기반 (PR #17 review 이슈 6) — `lastSync` 가 UTC ISO 라 사용자 표시도 UTC 통일.
+
+- [x] `"2026-04-27T00:00:00Z"` → `"04-27"` (UTC 자정 직후)
+- [x] `"2026-04-27T23:59:00Z"` → `"04-27"` (UTC 23:59, 로컬 TZ 영향 X)
+- [x] `"2026-04-28T00:00:00Z"` → `"04-28"` (UTC 다음 일자)
+- [x] `Date` 객체도 동일 (UTC 추출)
+- [x] `2026-12-31T15:00:00Z` → `"12-31"` (다른 자릿수)
+- [x] 잘못된 입력 → throws `InvalidNumberError`
 
 #### `formatRelativeDate(d: Date, now: Date): string` (선택 — "3일 전")
 
@@ -612,6 +616,22 @@ export function expectComparePair(
 - [x] mult=NaN → throws (hot=false 시 silent navy 반환 차단)
 - [x] mult=Infinity → throws
 - [x] mult=-Infinity → throws
+
+#### `computeMultiplier(seoulVal: number, cityVal: number): number | '신규'`
+
+PR #17 review 이슈 2 — 이전 compare 화면 로컬 정의가 Infinity 반환해 후속 `formatMultiplier(Infinity)` / `isHot(Infinity)` throw 로 화면 crash. lib 으로 추출 + `'신규'` 반환으로 통일 (compare / detail 공유).
+
+- [x] 정상: `(100, 200)` → `2`, `(200, 100)` → `0.5`, `(150, 150)` → `1`
+- [x] `seoulVal=0 + cityVal>0` → `'신규'` (Infinity silent 차단)
+- [x] `seoulVal=0 + cityVal=0` → `1` (둘 다 0 = 동일)
+- [x] `formatMultiplier` / `isHot` 와 합성 가능 (Infinity throw 회피)
+
+#### `computeBarPcts(seoulVal: number, cityVal: number): { swPct, cwPct }`
+
+- [x] 정상 비율 (`(40, 60)` → `{ 0.4, 0.6 }`)
+- [x] 합 0 → `{ 0.5, 0.5 }`
+- [x] seoul=0, city>0 → `{ 0, 1 }`
+- [x] seoul>0, city=0 → `{ 1, 0 }`
 
 #### Snapshot · Property-based
 
@@ -1581,12 +1601,14 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 **라우팅:**
 
-- [ ] 정상 cityId: 데이터 로드 + 표시
-- [ ] 잘못된 cityId: 404 안내 + 홈 복귀 CTA
+- [x] 정상 cityId: 데이터 로드 + 표시 (screens step 0)
+- [x] 잘못된 cityId: ErrorView + 돌아가기 CTA (screens step 0)
+- [x] 서울 데이터 없음: ErrorView (screens step 0)
 - [ ] cityId 가 'seoul': 자기 비교 차단 (안내)
 
 **데이터 로드:**
 
+- [x] loadAllCities reject: ErrorView (screens step 0)
 - [ ] 캐시 hit: 즉시 표시
 - [ ] 캐시 miss: skeleton → fetch → 표시
 - [ ] fetch 실패: 시드 fallback + inline 배지
@@ -1599,16 +1621,17 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 **총비용 hero:**
 
-- [ ] 서울값 / 도시값 / 배수
+- [x] HeroCard orange mount 검증 (screens step 0)
+- [x] 서울값 / 도시값 / 배수 표시 (screens step 0)
 - [ ] persona=student: 학비 별도 라인 (참고)
 - [ ] persona=worker: 학비 라인 미표시
 - [ ] ❓ 탭: 가정값 시트 열림
 
 **카드 (페르소나별):**
 
-- [ ] persona=student: 5 카드 정확한 순서 (rent/food/transport/tuition/visa)
-- [ ] persona=worker: 5 카드 (rent/food/transport/tax/visa)
-- [ ] persona=unknown: 6 카드 (학비 + 세금 합집합)
+- [x] persona=student: 5 카드 정확한 순서 (rent/food/transport/tuition/visa) (screens step 0)
+- [x] persona=worker: 5 카드 (rent/food/transport/tax/visa) (screens step 0)
+- [x] persona=unknown: 6 카드 (학비 + 세금 합집합) (screens step 0)
 - [ ] 페르소나 mid-session 변경: 카드 즉시 갱신 (스토어 reactive)
 
 **Hot 카드:**
@@ -1619,11 +1642,20 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 - [ ] mult='신규' 표기
 - [ ] 막대: 서울 0%, 도시 적정 폭
+- [ ] VISA_CONFIG fee 페르소나 분기 — 현재 `studentApplicationFee ?? workApplicationFee` fallback 으로 학생 페르소나가 워크 비자 수수료를 보거나 그 반대 케이스 가능 (v1.x 페르소나 분기 후속 PR 에서 정밀화). PR #17 review round 3 이슈 4.
 
 **즐겨찾기:**
 
-- [ ] ⭐ 탭: store add/remove + 시각 토글
+- [x] ⭐ 탭: store add/remove + 시각 토글 (screens step 0)
 - [ ] 즐겨찾기 후 뒤로 → 홈: 카드 표시 반영
+
+**TopBar:**
+
+- [x] back 버튼 클릭 시 router.back() 호출 (screens step 0)
+
+**최근 본 도시:**
+
+- [x] 마운트 + 데이터 로드 완료 시 recent.push(cityId) 호출 (screens step 0)
 
 **카드 탭 → 상세:**
 
@@ -1633,14 +1665,24 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 **푸터:**
 
-- [ ] 출처 N개 표시
-- [ ] 갱신일 표시
-- [ ] "출처 보기" 탭: 출처 modal
+- [x] 출처 N개 표시
+- [x] 갱신일 표시 (`formatShortDate`)
+- [ ] "출처 보기" 탭 동작 — v1.0 미구현 (Pressable disabled + label "출처 보기 (준비 중)"). v1.x 외부 링크 / 모달 결정 후 구현 (PR #17 review 이슈 3).
 
 **스트레스:**
 
 - [ ] 카드 빠른 연타: 첫 탭만 navigation
 - [ ] 카드 width 일관
+
+**스냅샷 / 시각 회귀:**
+
+- [x] 핵심 contract (hero + 5 카드 mount + 도시명 노출) — worker 페르소나 1 케이스. 전체 트리 snapshot 은 §6.3·§6.4 위반 + ReactTestInstance fiber cyclic 직렬화 RangeError 발생 (PR #17 review 이슈 2) — 정밀 시각 회귀는 v2 스크린샷 도구 (ADR-035).
+
+**에러 분기 (Promise.all 모두 catch):**
+
+- [x] loadAllCities reject → ErrorView (screens step 0)
+- [x] fetchExchangeRates reject → ErrorView (PR #17 review 이슈 3)
+- [x] getLastSync reject → ErrorView (PR #17 review 이슈 3)
 
 ### 9.24.1 `src/lib/search.ts` (홈 검색)
 
@@ -1708,73 +1750,72 @@ ARCHITECTURE.md §페르소나 변경 시 영향 정책 검증.
 
 ### 9.25 `app/detail/[cityId]/[category].tsx` (상세)
 
+screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 동일 골격 + 데이터 있는 항목만 렌더. 페르소나 분기는 v1.x 미루고 raw 카테고리 데이터를 균등 노출.
+
 **food 카테고리 (v1.0 우선):**
 
-- [ ] 네이비 hero: 월 예상 식비 + 가정 명시 ("자취 70% + 외식 30% 가정")
-- [ ] 외식 섹션: 식당, 카페 (2 항목 표시)
-- [ ] 식재료 섹션: 8개 항목 (우유, 계란, 쌀, 닭가슴살, 빵, 양파, 사과, 신라면)
-- [ ] 신라면 hot (2.5×) 검증
-- [ ] 외식 → 식재료 순서
-- [ ] 항목 수 표시 ("2 항목" / "8 항목")
-- [ ] 출처 표시 ("Statistics Canada" 등)
-- [ ] "출처 보기" 링크: 외부 브라우저 열림
+- [x] 네이비 hero: 카테고리 합계 + 푸터 (`항목 단가 합` — Compare 의 `평균 가정 기준` 과 의도 차이 명시, PR #17 review round 3 이슈 2)
+- [x] 외식 섹션: 식당, 카페 (2 항목 표시)
+- [x] 식재료 섹션: 공통 8개 항목 (milk1L/eggs12/rice1kg/chicken1kg/bread/onion1kg/apple1kg/ramen)
+- [ ] 신라면 hot (2.5×) 검증 (v1.x — 데이터 fixture 의존)
+- [x] 외식 → 식재료 순서
+- [x] 항목 수 표시 ("2 항목" / "N 항목")
+- [x] 출처 표시 (primarySource.name)
+- [ ] "출처 보기" 링크: 외부 브라우저 열림 (v1.x)
 
 **rent 카테고리:**
 
-- [ ] navy hero: "월 임차료 (메디안)" 라벨
-- [ ] 페르소나=student 시 좌·우값 share 기준
-- [ ] 페르소나=worker 시 좌·우값 oneBed 기준
-- [ ] 섹션 1 "주거 형태" — 4행 (RentRow): 셰어/원룸/1베드룸/2베드룸 순
-- [ ] 각 행 hot 규칙 정확
-- [ ] 섹션 2 "정착 비용" 보증금 행 (있을 때만)
-- [ ] 보증금 데이터 부재 시 섹션 미표시
+- [x] navy hero: 합계 + 카테고리 라벨
+- [ ] 페르소나=student 시 좌·우값 share 기준 (v1.x — 페르소나 분기 후속 PR)
+- [ ] 페르소나=worker 시 좌·우값 oneBed 기준 (v1.x)
+- [x] 섹션 "주거 형태" — 데이터 있는 행 (share/studio/oneBed/twoBed 순)
+- [x] 각 행 hot 규칙 정확 (`isHot(mult)` 단일 함수)
+- [ ] 섹션 2 "정착 비용" 보증금 행 (v1.x)
+- [x] 보증금 데이터 부재 시 섹션 미표시
 
 **transport 카테고리:**
 
-- [ ] navy hero: "월 교통비 (정기권)"
-- [ ] 섹션 1 "정기권·1회권" 2행: 월정기권 / 1회권
-- [ ] 섹션 2 "택시" 1행: 기본요금
-- [ ] 페르소나=worker 시 섹션 3 "차량 운영" (데이터 있을 때)
-- [ ] 차량 데이터 부재 시 섹션 미표시
+- [x] navy hero: 합계 + 카테고리 라벨
+- [x] "교통 수단" 섹션 — 3 행 (monthlyPass/singleRide/taxiBase)
+- [ ] 페르소나=worker 시 섹션 3 "차량 운영" (v1.x)
 
-**tuition 카테고리 (유학생 전용):**
+**tuition 카테고리:**
 
-- [ ] navy hero: "연간 학비 (국제학생)"
-- [ ] 가운데 배수 "신규" (서울 미존재)
-- [ ] 섹션 1 "주요 대학" — 도시별 3~5개 행 (TuitionRow)
-- [ ] 학교명 + 학위 단계 + 연간 학비 표시
-- [ ] 페르소나=worker 시 진입 시 안내 또는 대체 화면 (정책)
-- [ ] tuition 빈 배열 도시 (호치민·두바이 일부): "데이터 준비 중"
+- [x] navy hero: 합계
+- [x] "학교 (월 환산)" 섹션 — cityEntries 배열 행
+- [x] 학교명 + 월 환산 학비 표시
+- [ ] 페르소나=worker 시 안내 또는 대체 (v1.x)
+- [x] tuition 빈 배열 도시: "데이터 준비 중"
 
-**tax 카테고리 (취업자 전용):**
+**tax 카테고리:**
 
-- [ ] navy hero: "연봉 8만 기준 실수령" (또는 도시별 기본 연봉대)
-- [ ] 섹션 1 "연봉대별 실수령" — 6만/8만/10만 3행 (TaxRow)
-- [ ] 각 행: 현지통화 + KRW 환산 동시 표시
-- [ ] 섹션 2 "세금 구성" (옵션, 데이터 있을 때)
-- [ ] 고지 텍스트 "단신 기준 추정" 노출
-- [ ] 페르소나=student 시 진입 차단 또는 대체 화면
+- [x] navy hero: 합계
+- [x] "월 세금 (대략)" 섹션 — 연봉별 행
+- [x] 각 행: 연봉 + 월 세금 표시
+- [ ] 페르소나=student 시 진입 차단 (v1.x)
 
-**visa 카테고리 (1회성):**
+**visa 카테고리:**
 
-- [ ] navy hero: "정착 1회성 비용"
-- [ ] 가운데 배수 "신규"
-- [ ] 섹션 1 "비자 종류별 신청비" — 학생/워홀/취업/영주 (해당) 행 (VisaRow)
-- [ ] 섹션 2 "정착 부대비용" (건강검진·항공권 등)
-- [ ] 정부 페이지 링크 노출
-- [ ] 데이터 부재 도시: "데이터 준비 중"
+- [x] navy hero: 합계
+- [x] "비자/정착" 섹션 — fee + settlementApprox (있는 것만)
+- [x] 데이터 부재 도시: "데이터 준비 중"
+- [ ] visa row 의 mult `'신규'` 시각 표시 — v1.x (현재 GroceryRow `mult: number` 라 1 로 fallback → "1.0×" 표기. 시각 회귀 발생 — Compare 카드는 "신규" 배지로 정확 표기. 통일하려면 GroceryRow 타입 확장 필요, components phase 산출물 변경 부담으로 후속). PR #17 review round 3 이슈 3.
+- [ ] 정부 페이지 링크 (v1.x)
 
 **잘못된 입력:**
 
-- [ ] 잘못된 category: "찾을 수 없는 카테고리예요" + [돌아가기]
-- [ ] 잘못된 cityId: 동일
-- [ ] 페르소나 mismatch (worker 가 tuition 직접 진입): "이 카테고리는 (유학생) 페르소나에서만 보여요" + 페르소나 변경 CTA
+- [x] 알 수 없는 category → ErrorView + [돌아가기]
+- [x] cityId 누락 → ErrorView
+- [x] 도시 데이터 없음 → ErrorView
+- [ ] 페르소나 mismatch 안내 (v1.x)
 
-**back:**
+**기타:**
 
-- [ ] back 버튼: Compare 로 복귀
-- [ ] iOS swipe-back: 동작
-- [ ] Compare 의 스크롤 위치 보존
+- [x] navy HeroCard mount
+- [x] TopBar mount + 카테고리 라벨 포함 (`{category} · {city.ko}`)
+- [x] back 버튼 → router.back / replace('/')
+- [x] 핵심 contract (hero + 섹션 mount) — food / visa 2 케이스. 전체 트리 snapshot 은 §6.3·§6.4 위반 + ReactTestInstance fiber cyclic 직렬화 RangeError 발생 (PR #17 review 이슈 2) — 정밀 시각 회귀는 v2 스크린샷 도구 (ADR-035).
+- [ ] iOS swipe-back, Compare 스크롤 위치 보존 (수동 e2e — Phase 7)
 
 ### 9.26b `src/lib/errors.ts` — 에러 클래스 카탈로그
 
