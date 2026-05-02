@@ -12,7 +12,7 @@
 
 import * as React from 'react';
 
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 
 // eslint-disable-next-line import/no-named-as-default
 import Constants from 'expo-constants';
@@ -68,17 +68,28 @@ export default function SettingsScreen() {
     }
   };
 
+  const safeOpenURL = async (url: string, failMessage: string) => {
+    try {
+      await openURL(url);
+    } catch {
+      Alert.alert('링크 열기 실패', failMessage);
+    }
+  };
+
   const handleDataSources = () => {
-    openURL(DATA_SOURCES_URL);
+    void safeOpenURL(DATA_SOURCES_URL, '브라우저를 열 수 없습니다.');
   };
 
   const handleFeedback = () => {
     const subject = encodeURIComponent('해외 생활비 비교 앱 피드백');
-    openURL(`mailto:${FEEDBACK_EMAIL}?subject=${subject}`);
+    void safeOpenURL(
+      `mailto:${FEEDBACK_EMAIL}?subject=${subject}`,
+      '이메일 앱을 찾을 수 없습니다.',
+    );
   };
 
   const handlePrivacy = () => {
-    openURL(PRIVACY_POLICY_URL);
+    void safeOpenURL(PRIVACY_POLICY_URL, '브라우저를 열 수 없습니다.');
   };
 
   const formatLastSync = (): string => {
@@ -87,8 +98,8 @@ export default function SettingsScreen() {
     if (lastSync === null) return '방금';
     const date = new Date(lastSync);
     if (Number.isNaN(date.getTime())) return '방금';
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${month}-${day}`;
   };
 

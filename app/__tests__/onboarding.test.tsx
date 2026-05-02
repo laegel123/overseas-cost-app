@@ -128,4 +128,12 @@ describe('OnboardingScreen', () => {
 
     expect(screen.getByLabelText('미선택 선택')).toBeTruthy();
   });
+
+  // ─── 스냅샷 ────────────────────────────────────────────────────────────
+
+  it('snapshot — 3개 페르소나 카드', () => {
+    const tree = render(<OnboardingScreen />);
+
+    expect(tree.toJSON()).toMatchSnapshot();
+  });
 });

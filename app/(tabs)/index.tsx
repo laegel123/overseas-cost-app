@@ -67,13 +67,12 @@ function computeCityTotal(city: CityCostData, fx: ExchangeRates): number {
   return rentKRW + foodKRW + transportKRW;
 }
 
-function computeCityMult(
+function multFromTotals(
   city: CityCostData,
-  seoul: CityCostData,
+  seoulTotal: number,
   fx: ExchangeRates,
 ): number | '신규' {
   const cityTotal = computeCityTotal(city, fx);
-  const seoulTotal = computeCityTotal(seoul, fx);
   return computeMultiplier(seoulTotal, cityTotal);
 }
 
@@ -136,6 +135,11 @@ export default function HomeScreen(): React.ReactElement {
     setActiveRegion(regionId);
   }, []);
 
+  const seoulTotal = React.useMemo(() => {
+    if (state.status !== 'ready') return 0;
+    return computeCityTotal(state.seoul, state.fx);
+  }, [state]);
+
   if (state.status === 'loading') {
     return (
       <Screen testID="home-screen-loading">
@@ -162,7 +166,7 @@ export default function HomeScreen(): React.ReactElement {
     );
   }
 
-  const { seoul, fx } = state;
+  const { fx } = state;
   const cities = getAllCities();
 
   const favoriteCities = favoriteIds
@@ -238,7 +242,7 @@ export default function HomeScreen(): React.ReactElement {
             testID="home-favorites-scroll"
           >
             {favoriteCities.map((city, idx) => {
-              const mult = computeCityMult(city, seoul, fx);
+              const mult = multFromTotals(city, seoulTotal, fx);
               const multNum = typeof mult === 'number' ? mult : 1;
               return (
                 <FavCard
@@ -275,7 +279,7 @@ export default function HomeScreen(): React.ReactElement {
         ) : (
           <View className="gap-2" testID="home-recent-list">
             {recentCities.map((city, idx) => {
-              const mult = computeCityMult(city, seoul, fx);
+              const mult = multFromTotals(city, seoulTotal, fx);
               const multNum = typeof mult === 'number' ? mult : 1;
               return (
                 <RecentRow

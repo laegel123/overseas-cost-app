@@ -36,7 +36,7 @@ function PersonaCard({ persona, variant, onPress }: PersonaCardProps): React.Rea
 
   const cardClassName = [
     'flex-row items-center gap-3.5 p-4 rounded-[18px]',
-    isPrimary && 'border-[1.5px] border-orange bg-orangeTint',
+    isPrimary && 'border-[1.5px] border-orange bg-orange-tint',
     variant === 'secondary' && 'border border-line bg-white',
     isTertiary && 'border border-dashed border-line bg-transparent',
   ]

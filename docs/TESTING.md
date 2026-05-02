@@ -2094,6 +2094,10 @@ screens phase step 4 구현 — 설치 직후 1회 페르소나 선택 화면.
 - [x] worker 카드 accessibilityLabel "취업자 선택" (screens step 4)
 - [x] unknown 카드 accessibilityLabel "미선택 선택" (screens step 4)
 
+**스냅샷:**
+
+- [x] 3개 페르소나 카드 — 렌더링 회귀 감지 (PR #18 review round 1)
+
 ---
 
 ## 9-A. 자동화 스크립트 (scripts/refresh/_ + scripts/build/_)
