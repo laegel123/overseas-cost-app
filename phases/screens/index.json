@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "home",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-02T14:14:09+0900",
+      "completed_at": "2026-05-02T14:23:18+0900",
+      "summary": "Home 화면 — Greeting + Search stub + FavCard 가로 스크롤 + RecentRow 세로 리스트 + RegionPill 5개. 빈 상태 + 에러 처리. 15 신규 테스트 + 1 snapshot. TESTING.md §9.26 갱신."
     },
     {
       "step": 3,
