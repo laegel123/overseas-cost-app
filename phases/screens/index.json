@@ -29,7 +29,10 @@
     {
       "step": 3,
       "name": "settings",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-05-02T14:23:19+0900",
+      "completed_at": "2026-05-02T14:36:33+0900",
+      "summary": "Settings 화면 — Persona card (navy) + 3 Stat cards + 5 MenuRow (데이터 새로고침 hot, 앱 정보 dim) + Footer. Linking wrapper (src/lib/linking.ts) + persona label 단일 출처 (src/lib/persona.ts). 17 신규 테스트 + 1 snapshot. TESTING.md §9.29 갱신."
     },
     {
       "step": 4,
