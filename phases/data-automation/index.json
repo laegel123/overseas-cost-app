@@ -1,0 +1,64 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "data-automation",
+  "steps": [
+    {
+      "step": 0,
+      "name": "step-0",
+      "status": "completed",
+      "started_at": "2026-05-02T21:41:58+0900",
+      "completed_at": "2026-05-02T21:56:42+0900"
+    },
+    {
+      "step": 1,
+      "name": "step-1",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "step-2",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "step-3",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "step-4",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "step-5",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "step-6",
+      "status": "pending"
+    },
+    {
+      "step": 7,
+      "name": "step-7",
+      "status": "pending"
+    },
+    {
+      "step": 8,
+      "name": "step-8",
+      "status": "pending"
+    },
+    {
+      "step": 9,
+      "name": "step-9",
+      "status": "pending"
+    },
+    {
+      "step": 10,
+      "name": "step-10",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-05-02T21:41:58+0900"
+}
