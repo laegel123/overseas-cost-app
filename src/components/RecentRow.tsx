@@ -52,14 +52,14 @@ export function RecentRow({
 
   const row = (
     <View
-      className={`flex-row items-center px-3 py-2.5 rounded-[14px] bg-white ${
+      className={`flex-row items-center px-3 py-2.5 rounded-button bg-white ${
         isLast ? '' : 'border-b border-line'
       }`}
       testID={testID}
     >
       {/* 국가코드 박스 36×36 */}
       <View
-        className="w-9 h-9 items-center justify-center rounded-[10px] bg-light mr-3"
+        className="w-9 h-9 items-center justify-center rounded-btn bg-light mr-3"
         {...(testID !== undefined ? { testID: `${testID}-country-box` } : {})}
       >
         <Small color="navy" className="font-manrope-extrabold" numberOfLines={1}>

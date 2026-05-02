@@ -58,7 +58,7 @@ export default function OnboardingScreen(): React.ReactElement {
           </View>
 
           {/* Description */}
-          <Body className="max-w-[240px]">
+          <Body className="max-w-60">
             서울 기준으로 해외 도시의 생활비를{'\n'}본인 페르소나에 맞게 비교해 드려요.
           </Body>
         </View>
