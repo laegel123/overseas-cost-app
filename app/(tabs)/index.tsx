@@ -206,15 +206,19 @@ export default function HomeScreen(): React.ReactElement {
     [recentIds, cities],
   );
 
+  // status 'ready' 일 때만 fx 가 존재 — discriminated union narrowing.
+  const fx = state.status === 'ready' ? state.fx : null;
+
   // cityId → mult 사전 계산. FavCard / RecentRow 양쪽이 같은 도시를 참조해도 한 번만 계산.
+  // deps: cities (lastSync 변화 흡수) + seoulTotal (state 파생) + fx (state.fx 만 추출).
   const multMap = React.useMemo(() => {
-    if (state.status !== 'ready') return {};
+    if (fx === null) return {};
     return Object.fromEntries(
       Object.values(cities)
         .filter((c) => c.id !== 'seoul')
-        .map((c) => [c.id, multFromTotals(c, seoulTotal, state.fx)]),
+        .map((c) => [c.id, multFromTotals(c, seoulTotal, fx)]),
     );
-  }, [cities, seoulTotal, state]);
+  }, [cities, seoulTotal, fx]);
 
   if (state.status === 'loading') {
     return (
