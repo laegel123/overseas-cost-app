@@ -1,0 +1,248 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OnboardingScreen snapshot — student 카드 (primary) 1`] = `
+<View
+  accessibilityLabel="유학생 선택"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+  testID="persona-card-student"
+>
+  <View
+    className="flex-row items-center gap-3.5 p-4 rounded-card-lg border-1.5 border-orange bg-orange-tint"
+  >
+    <View
+      className="w-11 h-11 rounded-persona-icon items-center justify-center bg-orange"
+    >
+      <View
+        accessible={false}
+        importantForAccessibility="no"
+        style={
+          {
+            "height": 22,
+            "width": 22,
+          }
+        }
+      >
+        <svg
+          fill="none"
+          height={22}
+          stroke="#FFFFFF"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+          width={22}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+          />
+          <path
+            d="M22 10v6"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+          />
+          <path
+            d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+          />
+        </svg>
+      </View>
+    </View>
+    <View
+      className="flex-1 gap-1"
+    >
+      <Text
+        accessibilityRole="header"
+        className="font-manrope-bold text-h3 text-navy"
+      >
+        유학생
+      </Text>
+      <Text
+        accessibilityRole="text"
+        className="font-mulish text-tiny text-gray-2"
+      >
+        서울에서 출발 · 학비 중심
+      </Text>
+    </View>
+    <View
+      accessible={false}
+      importantForAccessibility="no"
+      style={
+        {
+          "height": 20,
+          "width": 20,
+        }
+      }
+    >
+      <svg
+        fill="none"
+        height={20}
+        stroke="#FC6011"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        viewBox="0 0 24 24"
+        width={20}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m9 18 6-6-6-6"
+          fill="none"
+          stroke="#FC6011"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+        />
+      </svg>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`OnboardingScreen snapshot — unknown 카드 (tertiary, dashed) 1`] = `
+<View
+  accessibilityLabel="아직 모름 선택"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+    }
+  }
+  testID="persona-card-unknown"
+>
+  <View
+    className="flex-row items-center gap-3.5 p-4 rounded-card-lg border border-dashed border-line bg-transparent"
+  >
+    <View
+      className="flex-1 gap-1"
+    >
+      <Text
+        accessibilityRole="text"
+        className="font-mulish text-small text-gray font-manrope-bold"
+      >
+        아직 모름
+      </Text>
+      <Text
+        accessibilityRole="text"
+        className="font-mulish text-tiny text-gray-2"
+      >
+        둘 다 보여드려요
+      </Text>
+    </View>
+    <View
+      accessible={false}
+      importantForAccessibility="no"
+      style={
+        {
+          "height": 18,
+          "width": 18,
+        }
+      }
+    >
+      <svg
+        fill="none"
+        height={18}
+        stroke="#8A98A0"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        viewBox="0 0 24 24"
+        width={18}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="m9 18 6-6-6-6"
+          fill="none"
+          stroke="#8A98A0"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+        />
+      </svg>
+    </View>
+  </View>
+</View>
+`;

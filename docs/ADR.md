@@ -897,3 +897,101 @@ zustand persist 는 모든 `setState` (액션 호출 포함) 후 storage 에 자
 - 강제 lint 규칙 (`no-restricted-imports` 로 RN core SafeAreaView 차단) 은 본 ADR 에서 도입 안 함. 회귀 재발 시 추가 검토 — 현재 코드베이스가 모두 정책 준수 상태라 우선순위 낮음.
 
 **관련:** ADR-002 (Expo Managed Workflow + safe-area-context 기본 의존성), ADR-044 (SDK 54 / RN 0.81 / New Arch default), ADR-012 (hifi mock RN 포팅), `src/components/Screen.tsx`, ARCHITECTURE.md §부팅·hydration 순서.
+
+---
+
+### ADR-056: Home 카드 배수는 단순화된 총비용 근사값 (Compare 와 의도적 분리)
+
+**상태:** 채택 (2026-05-02)
+
+**맥락:**
+
+- Compare 화면 (`app/compare/[cityId].tsx`) 의 도시 vs 서울 배수는 카테고리 합산 (`rent + food + transport + tuition + tax + visa`) 으로 계산. `'신규'` 케이스 (서울에 없는 항목) 도 명시.
+- Home 화면 (`app/(tabs)/index.tsx`) 의 FavCard / RecentRow 배수는 `rent.share + food (외식 20일 + 식재료 4종) + transport.monthlyPass` 만 사용. 페르소나·세금·비자비·학비 모두 제외.
+- 동일 도시에 대해 Home 카드 배수와 Compare 화면 배수가 다를 수 있다 (예: 도쿄 — Home 1.4× / Compare student 1.7×). PR #18 review round 3 에서 일관성 우려 제기.
+
+**결정:**
+
+1. **Home 의 배수는 의도적으로 단순화된 근사값.** 페르소나 분기를 적용하지 않으며, 카테고리도 가장 보편적인 3개 (rent / food / transport) 만 사용한다.
+2. 정확한 페르소나 기반 배수는 **Compare 진입 후** 확인하도록 UX 흐름 설계 (Home → 카드 탭 → Compare).
+3. Home 의 `multFromTotals` 는 v1.x 에서도 단순 식을 유지. 페르소나 일치를 원하면 `compare.ts` 헬퍼 추출 후 양쪽 공유 (별도 ADR).
+
+**대안 검토:**
+
+- (A 선택) Home 단순화 + Compare 정밀, ADR 로 명시: Home 의 카드 배수는 "어림 비교" UX 역할. 학비·비자비처럼 페르소나 종속 항목을 카드에 노출하면 의미가 모호해짐. 단순 식이 사용자 멘탈 모델과 일치. 채택.
+- (B) Home 도 페르소나 분기 적용: persona store 의존성 + Compare 와 동일 헬퍼 추출 필요. 카드 단위 정보로는 과도. 거부.
+- (C) Home 배수 표기 자체 제거: design/README §2 의 카드 정보 밀도 의도 (배수 + hot 표시) 와 충돌. 거부.
+
+**결과 / 영향:**
+
+- Home 화면은 빠른 시각적 비교 카드, Compare 화면은 정밀 분석 — 역할 분리 명확화.
+- 배수 차이는 정상이며 버그 아님. 사용자 혼동 발생 시 UI 카피 (예: "어림 비교" 라벨) 추가 검토.
+- v1.x 에서 헬퍼 통합 검토 시 본 ADR 갱신 필요.
+
+**관련:** `app/(tabs)/index.tsx` (`computeCityTotal`, `multFromTotals`), `app/compare/[cityId].tsx`, `docs/PRD.md` §Home, design/README §2.
+
+---
+
+### ADR-057: borderRadius 토큰 분화 — `button` (14px) / `btn` (10px)
+
+**상태:** 채택 (2026-05-02)
+
+**맥락:**
+
+- screens phase step 3 에서 Settings 페르소나 카드의 "변경" 버튼 (semi-transparent capsule on navy background) 이 시각적으로 14px 모서리보다 작게 디자인됐다. design/README §5 의 Settings 카드 내 "small action chip" 패턴.
+- 기존 `button: 14px` 는 검색바·아바타 박스 등 큰 인터랙티브 box 에 사용되며, "변경" 버튼처럼 inline-small chip 에는 과한 라운드.
+- 두 크기가 디자인 의도상 별개 토큰 (capsule vs box) 이라 inline 매직 (`rounded-[10px]`) 으로 처리하면 CRITICAL "디자인 토큰 단일 출처" 위반.
+
+**결정:**
+
+1. `tailwind.config.js` borderRadius 에 `btn: '10px'` 토큰 신규 추가.
+2. 기존 `button: '14px'` 는 큰 인터랙티브 box (search bar, 아바타, 검색 stub 등) 에 유지.
+3. 작은 inline chip 류 (Settings "변경" 버튼, 페르소나 카드 액션) 는 `btn` (10px) 사용.
+4. v1.x 디자인 시스템 정밀화 시 의미 기반 이름 (`chip`, `inline-action` 등) 으로 재네이밍 검토.
+
+**대안 검토:**
+
+- (A 선택) 두 토큰 분리 + 명명: 역할 차이 명확. `button` 은 "박스형", `btn` 은 "인라인 chip". CRITICAL 토큰 단일 출처 유지. 채택.
+- (B) `button` 만 유지 + 시각 차이 무시: 디자인 의도와 어긋나 v1.x 에서 다시 분리 예정. 거부.
+- (C) `rounded-[10px]` 인라인 매직: CRITICAL 위반. 거부.
+- (D) 의미 기반 명명 (`chip-action: 10px`) 으로 즉시 분리: 디자인 시스템 정밀화 (v1.x) 까지 명명 안정 어려움. 본 ADR 단계에선 `btn` 임시 명명 유지, v1.x 재네이밍 메모.
+
+**결과 / 영향:**
+
+- `app/(tabs)/settings.tsx` Persona card "변경" 버튼이 토큰 사용으로 인라인 매직 회피.
+- `button` / `btn` 두 이름이 혼재해 onboarding 시 학습 비용 약간 증가 — 본 ADR 이 의미 명세.
+- v1.x 디자인 시스템 정밀화 단계에서 의미 기반 명명 검토 (별도 ADR).
+
+**관련:** ADR-003 (NativeWind v4), `tailwind.config.js` (borderRadius), design/README §5 (Settings).
+
+---
+
+### ADR-058: PersonaCard 전용 토큰 — `persona-icon` (12px) / `borderWidth 1.5`
+
+**상태:** 채택 (2026-05-02)
+
+**맥락:**
+
+- PR #18 review round 8 에서 `PersonaCard.tsx` 의 인라인 매직 (`rounded-xl` Tailwind 기본 12px, `border-[1.5px]` arbitrary value) 가 CRITICAL 디자인 토큰 단일 출처 규칙 위반으로 지적됨.
+- 44×44 PersonaCard 아이콘 박스의 라운드는 `icon-sm: 10px` 와 `icon-md: 16px` 사이 중간값 (12px) — 기존 토큰으로 정확히 매핑 불가.
+- primary variant 의 1.5px orange ring 은 design/README §1 Onboarding 카드 시각 강조 의도 — 표준 1px (`border`) 또는 2px (`border-2`) 로 대체 시 디자인 의도 손상.
+
+**결정:**
+
+1. `tailwind.config.js` borderRadius 에 `'persona-icon': '12px'` 토큰 신규 추가 (`hero-icon: 18px` 와 명명 패턴 일관 — 컴포넌트별 icon 박스 토큰).
+2. `tailwind.config.js` borderWidth 에 `'1.5': '1.5px'` 토큰 신규 추가 — PersonaCard primary 강조 ring 전용.
+3. PersonaCard 의 `rounded-xl` → `rounded-persona-icon`, `border-[1.5px]` → `border-1.5` 로 교체.
+
+**대안 검토:**
+
+- (A 선택) 두 토큰 신설: 디자인 의도 보존 + CRITICAL 토큰 단일 출처 유지. 두 토큰 모두 컴포넌트 한정 사용이라 generic 명명 회피. 채택.
+- (B) `rounded-icon-md` (16px) 또는 `rounded-icon-sm` (10px) 로 강제 매핑: 시각 차이 발생. 거부.
+- (C) borderWidth `border` (1px) 또는 `border-2` (2px) 로 대체: orange ring 강조 효과 약화. 거부.
+
+**결과 / 영향:**
+
+- PersonaCard 토큰 단일 출처 회복.
+- `persona-icon` 은 PersonaCard 외 사용처 없음 — v1.x 디자인 시스템 정밀화 시 generic `icon-md-sm` 등으로 재네이밍 검토.
+- `borderWidth 1.5` 는 generic 토큰이라 추후 다른 컴포넌트에서도 재사용 가능.
+
+**관련:** ADR-003 (NativeWind v4), ADR-057 (`btn`/`button` 토큰 분화), `tailwind.config.js`, `src/components/PersonaCard.tsx`, design/README §1 (Onboarding).

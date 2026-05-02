@@ -1,0 +1,122 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SettingsScreen 스냅샷 persona-card (worker) — 회귀 감지 1`] = `
+<View
+  className="bg-navy rounded-hero-lg p-hero-pad mb-4"
+  testID="persona-card"
+>
+  <View
+    className="flex-row items-center gap-3"
+  >
+    <View
+      className="w-14 h-14 rounded-hero-icon bg-orange items-center justify-center"
+    >
+      <View
+        accessible={false}
+        importantForAccessibility="no"
+        style={
+          {
+            "height": 28,
+            "width": 28,
+          }
+        }
+        testID="persona-icon"
+      >
+        <svg
+          fill="none"
+          height={28}
+          stroke="#FFFFFF"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+          width={28}
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+          />
+          <rect
+            fill="none"
+            height="14"
+            rx="2"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            width="20"
+            x="2"
+            y="6"
+          />
+        </svg>
+      </View>
+    </View>
+    <View
+      className="flex-1"
+    >
+      <Text
+        accessibilityRole="header"
+        className="font-manrope-bold text-h3 text-white"
+        testID="persona-label"
+      >
+        취업자
+         모드
+      </Text>
+      <Text
+        accessibilityRole="text"
+        className="font-mulish text-tiny text-white opacity-70"
+        testID="persona-sub"
+      >
+        서울에서 출발 · 실수령 중심
+      </Text>
+    </View>
+    <View
+      accessibilityLabel="페르소나 변경"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      className="px-3 py-1.5 rounded-btn bg-white/10 border border-white/20"
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      testID="persona-change-btn"
+    >
+      <Text
+        accessibilityRole="text"
+        className="font-mulish text-tiny text-white"
+      >
+        변경
+      </Text>
+    </View>
+  </View>
+</View>
+`;

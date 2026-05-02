@@ -23,8 +23,8 @@ export type RecentRowProps = {
   cityNameEn: string;
   /** 국가 코드 — 예: "CA" */
   countryCode: string;
-  /** 배수 — 도시 vs 서울 */
-  mult: number;
+  /** 배수 — 도시 vs 서울. '신규' 는 서울에 없는 항목 (예: 비자비). */
+  mult: number | '신규';
   /** 마지막 행 — bottom border 없음 */
   isLast?: boolean;
   onPress?: (cityId: string) => void;
@@ -52,14 +52,14 @@ export function RecentRow({
 
   const row = (
     <View
-      className={`flex-row items-center px-3 py-2.5 rounded-[14px] bg-white ${
+      className={`flex-row items-center px-3 py-2.5 rounded-button bg-white ${
         isLast ? '' : 'border-b border-line'
       }`}
       testID={testID}
     >
       {/* 국가코드 박스 36×36 */}
       <View
-        className="w-9 h-9 items-center justify-center rounded-[10px] bg-light mr-3"
+        className="w-9 h-9 items-center justify-center rounded-btn bg-light mr-3"
         {...(testID !== undefined ? { testID: `${testID}-country-box` } : {})}
       >
         <Small color="navy" className="font-manrope-extrabold" numberOfLines={1}>

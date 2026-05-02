@@ -50,12 +50,21 @@ module.exports = {
       borderRadius: {
         chip: '999px',
         button: '14px',
+        btn: '10px',
         card: '16px',
         'card-lg': '18px',
         hero: '20px',
         'hero-lg': '22px',
         'icon-sm': '10px',
         'icon-md': '16px',
+        // PersonaCard 44×44 icon box 전용 (design/README §1 — Onboarding 카드).
+        // hero-icon (56×56) 과 icon-md (16×16) 사이 중간 사이즈.
+        'persona-icon': '12px',
+        'hero-icon': '18px',
+      },
+      borderWidth: {
+        // PersonaCard primary variant 강조 테두리 (orange ring) 전용.
+        '1.5': '1.5px',
       },
       spacing: {
         'screen-x': '20px',
