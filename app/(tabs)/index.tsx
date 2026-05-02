@@ -147,7 +147,9 @@ export default function HomeScreen(): React.ReactElement {
   );
 
   const handleSettingsPress = React.useCallback(() => {
-    router.push('/settings');
+    // Settings 는 동일 탭 stack 의 화면 — push 대신 navigate 로 탭 전환
+    // (push 사용 시 setting 위에 setting 이 누적되어 뒤로가기 버튼 노출).
+    router.navigate('/settings');
   }, [router]);
 
   // RegionPill 의 onSelect 가 () => void 시그니처라 regionId 를 인자로 받지 못함.

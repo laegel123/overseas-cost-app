@@ -45,10 +45,10 @@ exports[`OnboardingScreen snapshot — student 카드 (primary) 1`] = `
   testID="persona-card-student"
 >
   <View
-    className="flex-row items-center gap-3.5 p-4 rounded-card-lg border-[1.5px] border-orange bg-orange-tint"
+    className="flex-row items-center gap-3.5 p-4 rounded-card-lg border-1.5 border-orange bg-orange-tint"
   >
     <View
-      className="w-11 h-11 rounded-xl items-center justify-center bg-orange"
+      className="w-11 h-11 rounded-persona-icon items-center justify-center bg-orange"
     >
       <View
         accessible={false}

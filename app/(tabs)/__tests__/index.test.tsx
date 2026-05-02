@@ -20,10 +20,12 @@ import { vancouverValid } from '../../../src/__fixtures__/cities/vancouver-valid
 import HomeScreen from '../index';
 
 const mockPush = jest.fn();
+const mockNavigate = jest.fn();
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({
     push: mockPush,
+    navigate: mockNavigate,
   }),
 }));
 
@@ -322,7 +324,7 @@ describe('HomeScreen', () => {
   });
 
   describe('아바타 설정 진입', () => {
-    it('아바타 탭 → /settings push', async () => {
+    it('아바타 탭 → /settings navigate (push 아님 — 탭 stack 누적 회피)', async () => {
       setupMocks();
 
       const { getByTestId } = render(<HomeScreen />);
@@ -334,7 +336,8 @@ describe('HomeScreen', () => {
       const avatar = getByTestId('home-avatar');
       fireEvent.press(avatar);
 
-      expect(mockPush).toHaveBeenCalledWith('/settings');
+      expect(mockNavigate).toHaveBeenCalledWith('/settings');
+      expect(mockPush).not.toHaveBeenCalledWith('/settings');
     });
   });
 

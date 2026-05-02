@@ -38,7 +38,7 @@ export function PersonaCard({
 
   const cardClassName = [
     'flex-row items-center gap-3.5 p-4 rounded-card-lg',
-    isPrimary && 'border-[1.5px] border-orange bg-orange-tint',
+    isPrimary && 'border-1.5 border-orange bg-orange-tint',
     variant === 'secondary' && 'border border-line bg-white',
     isTertiary && 'border border-dashed border-line bg-transparent',
   ]
@@ -47,7 +47,7 @@ export function PersonaCard({
 
   // tertiary variant 는 icon box 자체를 미렌더 (아래 {!isTertiary && ...}).
   const iconBoxClassName = [
-    'w-11 h-11 rounded-xl items-center justify-center',
+    'w-11 h-11 rounded-persona-icon items-center justify-center',
     isPrimary && 'bg-orange',
     variant === 'secondary' && 'bg-light',
   ]

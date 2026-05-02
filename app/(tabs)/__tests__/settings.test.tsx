@@ -117,9 +117,17 @@ describe('SettingsScreen', () => {
   });
 
   describe('변경 버튼', () => {
-    it('탭 → setOnboarded(false) + router.replace(/onboarding)', () => {
+    it('탭 → setOnboarded(false) → router.replace(/onboarding) (순서 보장)', () => {
       setupMocks();
-      const setOnboarded = jest.fn();
+      // 호출 순서 추적 — 순서가 바뀌면 onboarded=true 인 채로 onboarding 진입 시
+      // app-shell 의 redirect 가 다시 (tabs) 로 보내는 무한 루프 위험.
+      const callOrder: string[] = [];
+      const setOnboarded = jest.fn(() => {
+        callOrder.push('setOnboarded');
+      });
+      mockReplace.mockImplementation(() => {
+        callOrder.push('replace');
+      });
       usePersonaStore.setState({ persona: 'student', setOnboarded });
 
       const { getByTestId } = render(<SettingsScreen />);
@@ -128,6 +136,7 @@ describe('SettingsScreen', () => {
 
       expect(setOnboarded).toHaveBeenCalledWith(false);
       expect(mockReplace).toHaveBeenCalledWith('/onboarding');
+      expect(callOrder).toEqual(['setOnboarded', 'replace']);
     });
   });
 

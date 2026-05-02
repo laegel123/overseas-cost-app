@@ -9,11 +9,15 @@
 type RenderJSON = {
   type: string | { displayName?: string };
   props: Record<string, unknown>;
-  children: RenderJSON[] | null;
+  // RNTL toJSON() children 은 텍스트 노드 (string) 도 포함.
+  children: (RenderJSON | string)[] | null;
 };
 
-function find(node: RenderJSON | RenderJSON[] | null, testID: string): RenderJSON | null {
+type Node = RenderJSON | (RenderJSON | string)[] | string | null;
+
+function find(node: Node, testID: string): RenderJSON | null {
   if (node === null) return null;
+  if (typeof node === 'string') return null;
   if (Array.isArray(node)) {
     for (const child of node) {
       const found = find(child, testID);
@@ -21,7 +25,6 @@ function find(node: RenderJSON | RenderJSON[] | null, testID: string): RenderJSO
     }
     return null;
   }
-  if (typeof node !== 'object') return null;
   if (node.props?.['testID'] === testID) return node;
   return find(node.children, testID);
 }
@@ -29,10 +32,7 @@ function find(node: RenderJSON | RenderJSON[] | null, testID: string): RenderJSO
 /**
  * render(...).toJSON() 결과에서 `testID` 노드를 찾아 반환. 못 찾으면 throw.
  */
-export function jsonByTestId(
-  tree: RenderJSON | RenderJSON[] | null,
-  testID: string,
-): RenderJSON {
+export function jsonByTestId(tree: Node, testID: string): RenderJSON {
   const found = find(tree, testID);
   if (!found) {
     throw new Error(`jsonByTestId: testID "${testID}" not found in tree`);
