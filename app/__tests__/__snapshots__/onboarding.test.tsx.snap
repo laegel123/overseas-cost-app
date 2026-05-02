@@ -79,18 +79,21 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
         className="gap-1"
       >
         <Text
-          className="font-manrope-extrabold text-display text-navy leading-tight tracking-tight"
+          accessibilityRole="header"
+          className="font-manrope-extrabold text-display text-navy"
         >
           안녕하세요
         </Text>
         <Text
-          className="font-manrope-extrabold text-display text-orange leading-tight tracking-tight"
+          accessibilityRole="header"
+          className="font-manrope-extrabold text-display text-orange"
         >
           어디로 떠나시나요?
         </Text>
       </View>
       <Text
-        className="font-mulish text-body text-navy leading-relaxed max-w-[240px]"
+        accessibilityRole="text"
+        className="font-mulish text-body text-navy max-w-[240px]"
       >
         서울 기준으로 해외 도시의 생활비를
         
@@ -102,7 +105,8 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
       className="mt-6 gap-2.5"
     >
       <Text
-        className="font-manrope-semibold text-[10px] uppercase tracking-widest text-gray2 mb-1"
+        accessibilityRole="text"
+        className="font-manrope-semibold text-mono-label text-gray-2 mb-1"
       >
         어떤 분이신가요?
       </Text>
@@ -488,7 +492,8 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
       className="mt-5 mb-4"
     >
       <Text
-        className="font-mulish text-tiny text-gray2 text-center"
+        accessibilityRole="text"
+        className="font-mulish text-tiny text-gray-2 text-center"
       >
         설정에서 언제든 변경할 수 있어요
       </Text>

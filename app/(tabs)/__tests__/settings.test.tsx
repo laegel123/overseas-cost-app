@@ -222,6 +222,29 @@ describe('SettingsScreen', () => {
       });
     });
 
+    it('로딩 중 — "갱신 중..." 텍스트 + 버튼 disabled', async () => {
+      let resolveRefresh: ((v: { ok: boolean; lastSync: string }) => void) | undefined;
+      (mockRefreshCache as jest.Mock).mockReturnValue(
+        new Promise<{ ok: boolean; lastSync: string }>((resolve) => {
+          resolveRefresh = resolve;
+        }),
+      );
+
+      const { getByTestId, getByText } = render(<SettingsScreen />);
+      const refreshRow = getByTestId('menu-refresh');
+
+      await act(async () => {
+        fireEvent.press(refreshRow);
+      });
+
+      expect(getByText('갱신 중...')).toBeTruthy();
+      expect(refreshRow.props.accessibilityState).toMatchObject({ disabled: true });
+
+      await act(async () => {
+        resolveRefresh?.({ ok: true, lastSync: new Date().toISOString() });
+      });
+    });
+
     it('실패 → 갱신 실패 텍스트', async () => {
       (mockRefreshCache as jest.Mock).mockResolvedValue({
         ok: false,

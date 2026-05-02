@@ -2053,7 +2053,7 @@ screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
 - [x] 탭 → refreshCache 호출 (screens step 3)
 - [x] 성공 → lastSync 갱신 (screens step 3)
 - [x] 실패 → "갱신 실패" 텍스트 표시 (screens step 3)
-- [ ] 로딩 상태 — "갱신 중..." 텍스트 + 버튼 disabled
+- [x] 로딩 상태 — "갱신 중..." 텍스트 + 버튼 disabled (PR #18 review round 2)
 
 **외부 링크:**
 

@@ -140,6 +140,42 @@ export default function HomeScreen(): React.ReactElement {
     return computeCityTotal(state.seoul, state.fx);
   }, [state]);
 
+  const cities = React.useMemo(
+    () => (state.status === 'ready' ? getAllCities() : {}),
+    [state.status],
+  );
+
+  const regionCounts = React.useMemo(
+    () =>
+      Object.values(cities).reduce(
+        (acc, city) => {
+          if (city.id !== 'seoul') {
+            acc[city.region] = (acc[city.region] ?? 0) + 1;
+            acc['all'] = (acc['all'] ?? 0) + 1;
+          }
+          return acc;
+        },
+        {} as Record<Region | 'all', number>,
+      ),
+    [cities],
+  );
+
+  const favoriteCities = React.useMemo(
+    () =>
+      favoriteIds
+        .map((id) => cities[id])
+        .filter((c): c is CityCostData => c !== undefined && c.id !== 'seoul'),
+    [favoriteIds, cities],
+  );
+
+  const recentCities = React.useMemo(
+    () =>
+      recentIds
+        .map((id) => cities[id])
+        .filter((c): c is CityCostData => c !== undefined && c.id !== 'seoul'),
+    [recentIds, cities],
+  );
+
   if (state.status === 'loading') {
     return (
       <Screen testID="home-screen-loading">
@@ -167,26 +203,6 @@ export default function HomeScreen(): React.ReactElement {
   }
 
   const { fx } = state;
-  const cities = getAllCities();
-
-  const favoriteCities = favoriteIds
-    .map((id) => cities[id])
-    .filter((c): c is CityCostData => c !== undefined && c.id !== 'seoul');
-
-  const recentCities = recentIds
-    .map((id) => cities[id])
-    .filter((c): c is CityCostData => c !== undefined && c.id !== 'seoul');
-
-  const regionCounts = Object.values(cities).reduce(
-    (acc, city) => {
-      if (city.id !== 'seoul') {
-        acc[city.region] = (acc[city.region] ?? 0) + 1;
-        acc['all'] = (acc['all'] ?? 0) + 1;
-      }
-      return acc;
-    },
-    {} as Record<Region | 'all', number>,
-  );
 
   return (
     <Screen scroll testID="home-screen">
@@ -241,23 +257,19 @@ export default function HomeScreen(): React.ReactElement {
             contentContainerStyle={{ gap: 12 }}
             testID="home-favorites-scroll"
           >
-            {favoriteCities.map((city, idx) => {
-              const mult = multFromTotals(city, seoulTotal, fx);
-              const multNum = typeof mult === 'number' ? mult : 1;
-              return (
-                <FavCard
-                  key={city.id}
-                  cityId={city.id}
-                  cityName={city.name.ko}
-                  cityNameEn={city.name.en}
-                  countryCode={city.country}
-                  mult={multNum}
-                  accent={idx === 0}
-                  onPress={handleCityPress}
-                  testID={`home-favcard-${city.id}`}
-                />
-              );
-            })}
+            {favoriteCities.map((city, idx) => (
+              <FavCard
+                key={city.id}
+                cityId={city.id}
+                cityName={city.name.ko}
+                cityNameEn={city.name.en}
+                countryCode={city.country}
+                mult={multFromTotals(city, seoulTotal, fx)}
+                accent={idx === 0}
+                onPress={handleCityPress}
+                testID={`home-favcard-${city.id}`}
+              />
+            ))}
           </ScrollView>
         )}
       </View>
@@ -278,23 +290,19 @@ export default function HomeScreen(): React.ReactElement {
           </View>
         ) : (
           <View className="gap-2" testID="home-recent-list">
-            {recentCities.map((city, idx) => {
-              const mult = multFromTotals(city, seoulTotal, fx);
-              const multNum = typeof mult === 'number' ? mult : 1;
-              return (
-                <RecentRow
-                  key={city.id}
-                  cityId={city.id}
-                  cityName={city.name.ko}
-                  cityNameEn={city.name.en}
-                  countryCode={city.country}
-                  mult={multNum}
-                  isLast={idx === recentCities.length - 1}
-                  onPress={handleCityPress}
-                  testID={`home-recentrow-${city.id}`}
-                />
-              );
-            })}
+            {recentCities.map((city, idx) => (
+              <RecentRow
+                key={city.id}
+                cityId={city.id}
+                cityName={city.name.ko}
+                cityNameEn={city.name.en}
+                countryCode={city.country}
+                mult={multFromTotals(city, seoulTotal, fx)}
+                isLast={idx === recentCities.length - 1}
+                onPress={handleCityPress}
+                testID={`home-recentrow-${city.id}`}
+              />
+            ))}
           </View>
         )}
       </View>

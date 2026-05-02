@@ -400,7 +400,7 @@ exports[`SettingsScreen 스냅샷 worker 페르소나 + 통계 비어있음 1`] 
           className="font-mulish text-tiny text-gray-2"
           numberOfLines={1}
         >
-          방금
+          동기화 전
         </Text>
         <View
           accessible={false}

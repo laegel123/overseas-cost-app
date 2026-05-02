@@ -7,7 +7,7 @@
  * - Menu list: MenuRow 5개 (데이터 새로고침 hot, 앱 정보 dim)
  * - Footer: Made with ♥ in Seoul · 2026
  *
- * 외부 링크는 모두 Linking.openURL 경유. 데이터 새로고침은 refreshCache + refreshFx.
+ * 외부 링크는 모두 Linking.openURL 경유. 데이터 새로고침은 refreshCache (내부에서 refreshFx 포함).
  */
 
 import * as React from 'react';
@@ -32,6 +32,8 @@ import { useSettingsStore } from '@/store/settings';
 import { colors } from '@/theme/tokens';
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
+// docs/DATA_SOURCES.md 의 출처 유형 수 (정부 통계 / 공식 교통공사 / 환율 API 등).
+// 출처가 추가될 때 동시 갱신 필요. v1.x 자동 카운트 전환 검토.
 const DATA_SOURCES_COUNT = 12;
 const PRIVACY_POLICY_URL = 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/PRIVACY.md';
 const DATA_SOURCES_URL = 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md';
@@ -39,7 +41,7 @@ const FEEDBACK_EMAIL = 'laegel1@gmail.com';
 
 type RefreshState = 'idle' | 'loading' | 'error';
 
-export default function SettingsScreen() {
+export default function SettingsScreen(): React.ReactElement {
   const router = useRouter();
   const persona = usePersonaStore((s) => s.persona);
   const setOnboarded = usePersonaStore((s) => s.setOnboarded);
@@ -50,14 +52,14 @@ export default function SettingsScreen() {
 
   const [refreshState, setRefreshState] = React.useState<RefreshState>('idle');
 
-  const citiesCount = Object.keys(getAllCities()).length;
+  const citiesCount = React.useMemo(() => Object.keys(getAllCities()).length, []);
 
-  const handleChangePersona = () => {
+  const handleChangePersona = React.useCallback(() => {
     setOnboarded(false);
     router.replace('/onboarding');
-  };
+  }, [setOnboarded, router]);
 
-  const handleRefresh = async () => {
+  const handleRefresh = React.useCallback(async () => {
     setRefreshState('loading');
     const result = await refreshCache();
     if (result.ok) {
@@ -66,38 +68,39 @@ export default function SettingsScreen() {
     } else {
       setRefreshState('error');
     }
-  };
+  }, [updateLastSync]);
 
-  const safeOpenURL = async (url: string, failMessage: string) => {
+  const safeOpenURL = React.useCallback(async (url: string, failMessage: string) => {
     try {
       await openURL(url);
     } catch {
       Alert.alert('링크 열기 실패', failMessage);
     }
-  };
+  }, []);
 
-  const handleDataSources = () => {
+  const handleDataSources = React.useCallback(() => {
     void safeOpenURL(DATA_SOURCES_URL, '브라우저를 열 수 없습니다.');
-  };
+  }, [safeOpenURL]);
 
-  const handleFeedback = () => {
+  const handleFeedback = React.useCallback(() => {
     const subject = encodeURIComponent('해외 생활비 비교 앱 피드백');
     void safeOpenURL(
       `mailto:${FEEDBACK_EMAIL}?subject=${subject}`,
       '이메일 앱을 찾을 수 없습니다.',
     );
-  };
+  }, [safeOpenURL]);
 
-  const handlePrivacy = () => {
+  const handlePrivacy = React.useCallback(() => {
     void safeOpenURL(PRIVACY_POLICY_URL, '브라우저를 열 수 없습니다.');
-  };
+  }, [safeOpenURL]);
 
   const formatLastSync = (): string => {
     if (refreshState === 'loading') return '갱신 중...';
     if (refreshState === 'error') return '갱신 실패';
-    if (lastSync === null) return '방금';
+    // 신규 설치 — 한 번도 동기화하지 않음 (번들 시드 사용 중).
+    if (lastSync === null) return '동기화 전';
     const date = new Date(lastSync);
-    if (Number.isNaN(date.getTime())) return '방금';
+    if (Number.isNaN(date.getTime())) return '동기화 전';
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${month}-${day}`;

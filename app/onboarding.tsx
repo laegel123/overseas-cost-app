@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
+import { Body, Display, MonoLabel, Tiny } from '@/components/typography/Text';
 import { PERSONA_ICON, PERSONA_LABEL, PERSONA_SUB } from '@/lib/persona';
 import { usePersonaStore } from '@/store';
 import { colors, shadows } from '@/theme/tokens';
@@ -112,25 +113,19 @@ export default function OnboardingScreen(): React.ReactElement {
 
           {/* Greeting */}
           <View className="gap-1">
-            <Text className="font-manrope-extrabold text-display text-navy leading-tight tracking-tight">
-              안녕하세요
-            </Text>
-            <Text className="font-manrope-extrabold text-display text-orange leading-tight tracking-tight">
-              어디로 떠나시나요?
-            </Text>
+            <Display>안녕하세요</Display>
+            <Display color="orange">어디로 떠나시나요?</Display>
           </View>
 
           {/* Description */}
-          <Text className="font-mulish text-body text-navy leading-relaxed max-w-[240px]">
+          <Body className="max-w-[240px]">
             서울 기준으로 해외 도시의 생활비를{'\n'}본인 페르소나에 맞게 비교해 드려요.
-          </Text>
+          </Body>
         </View>
 
         {/* Persona selection */}
         <View className="mt-6 gap-2.5">
-          <Text className="font-manrope-semibold text-[10px] uppercase tracking-widest text-gray2 mb-1">
-            어떤 분이신가요?
-          </Text>
+          <MonoLabel className="mb-1">어떤 분이신가요?</MonoLabel>
 
           <PersonaCard persona="student" variant="primary" onPress={() => handleSelect('student')} />
           <PersonaCard persona="worker" variant="secondary" onPress={() => handleSelect('worker')} />
@@ -139,9 +134,7 @@ export default function OnboardingScreen(): React.ReactElement {
 
         {/* Footer */}
         <View className="mt-5 mb-4">
-          <Text className="font-mulish text-tiny text-gray2 text-center">
-            설정에서 언제든 변경할 수 있어요
-          </Text>
+          <Tiny className="text-center">설정에서 언제든 변경할 수 있어요</Tiny>
         </View>
       </View>
     </Screen>

@@ -23,8 +23,8 @@ export type RecentRowProps = {
   cityNameEn: string;
   /** 국가 코드 — 예: "CA" */
   countryCode: string;
-  /** 배수 — 도시 vs 서울 */
-  mult: number;
+  /** 배수 — 도시 vs 서울. '신규' 는 서울에 없는 항목 (예: 비자비). */
+  mult: number | '신규';
   /** 마지막 행 — bottom border 없음 */
   isLast?: boolean;
   onPress?: (cityId: string) => void;

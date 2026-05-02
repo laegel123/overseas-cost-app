@@ -95,6 +95,9 @@ function resetStores() {
 
 const flushPromises = () => new Promise((r) => setImmediate(r));
 
+// 타이머 역전 패턴 — jest.setup.js 가 fakeTimers 를 전역 기본값으로 설정.
+// 비동기 load() 가 setImmediate flush 에 의존하므로 본 파일에서만 realTimers 사용.
+// afterEach 에서 전역 default(fakeTimers) 로 복원해 다른 파일 누출 방지.
 describe('HomeScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
