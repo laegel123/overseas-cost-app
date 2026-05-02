@@ -22,7 +22,7 @@ import { Icon } from '@/components/Icon';
 import { MenuRow } from '@/components/MenuRow';
 import { Screen } from '@/components/Screen';
 import { H1, H3, Tiny } from '@/components/typography/Text';
-import { getAllCities, refreshCache } from '@/lib';
+import { formatShortDate, getAllCities, refreshCache } from '@/lib';
 import { openURL } from '@/lib/linking';
 import { PERSONA_ICON, PERSONA_LABEL, PERSONA_SUB } from '@/lib/persona';
 import { useFavoritesStore } from '@/store/favorites';
@@ -99,11 +99,12 @@ export default function SettingsScreen(): React.ReactElement {
     if (refreshState === 'error') return '갱신 실패';
     // 신규 설치 — 한 번도 동기화하지 않음 (번들 시드 사용 중).
     if (lastSync === null) return '동기화 전';
-    const date = new Date(lastSync);
-    if (Number.isNaN(date.getTime())) return '동기화 전';
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${month}-${day}`;
+    // formatShortDate 재사용 — UTC 기준 (lastSync 가 UTC ISO 문자열이라 표시도 동일).
+    try {
+      return formatShortDate(lastSync);
+    } catch {
+      return '동기화 전';
+    }
   };
 
   return (

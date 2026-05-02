@@ -63,7 +63,7 @@ exports[`HomeScreen 스냅샷 즐겨찾기 3건 + 최근 4건 스냅샷 1`] = `
         testID="home-avatar"
       >
         <View
-          className="w-10 h-10 rounded-[14px] bg-light items-center justify-center"
+          className="w-10 h-10 rounded-button bg-light items-center justify-center"
         >
           <View
             accessible={false}
@@ -110,7 +110,7 @@ exports[`HomeScreen 스냅샷 즐겨찾기 3건 + 최근 4건 스냅샷 1`] = `
       </View>
     </View>
     <View
-      className="mt-4 flex-row items-center px-3.5 py-3 bg-light rounded-[14px]"
+      className="mt-4 flex-row items-center px-3.5 py-3 bg-light rounded-button"
       testID="home-search-stub"
     >
       <View

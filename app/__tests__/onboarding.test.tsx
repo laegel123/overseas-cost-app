@@ -129,6 +129,31 @@ describe('OnboardingScreen', () => {
     expect(screen.getByLabelText('미선택 선택')).toBeTruthy();
   });
 
+  // ─── 연타 방어 ────────────────────────────────────────────────────────
+
+  it('카드 빠른 연타 → 첫 탭만 실행 (가드)', () => {
+    render(<OnboardingScreen />);
+
+    const card = screen.getByTestId('persona-card-student');
+    fireEvent.press(card);
+    fireEvent.press(card);
+    fireEvent.press(card);
+
+    expect(mockSetPersona).toHaveBeenCalledTimes(1);
+    expect(mockSetOnboarded).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+  });
+
+  it('서로 다른 카드 연타 → 첫 탭만 실행 (가드)', () => {
+    render(<OnboardingScreen />);
+
+    fireEvent.press(screen.getByTestId('persona-card-student'));
+    fireEvent.press(screen.getByTestId('persona-card-worker'));
+
+    expect(mockSetPersona).toHaveBeenCalledTimes(1);
+    expect(mockSetPersona).toHaveBeenCalledWith('student');
+  });
+
   // ─── 스냅샷 ────────────────────────────────────────────────────────────
 
   it('snapshot — 3개 페르소나 카드', () => {

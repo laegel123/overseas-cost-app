@@ -7,13 +7,13 @@
 
 import * as React from 'react';
 
-import { Pressable, Text, View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
-import { Body, Display, MonoLabel, Tiny } from '@/components/typography/Text';
+import { Body, Display, H3, MonoLabel, Small, Tiny } from '@/components/typography/Text';
 import { PERSONA_ICON, PERSONA_LABEL, PERSONA_SUB } from '@/lib/persona';
 import { usePersonaStore } from '@/store';
 import { colors, shadows } from '@/theme/tokens';
@@ -36,7 +36,7 @@ function PersonaCard({ persona, variant, onPress }: PersonaCardProps): React.Rea
   const isTertiary = variant === 'tertiary';
 
   const cardClassName = [
-    'flex-row items-center gap-3.5 p-4 rounded-[18px]',
+    'flex-row items-center gap-3.5 p-4 rounded-card-lg',
     isPrimary && 'border-[1.5px] border-orange bg-orange-tint',
     variant === 'secondary' && 'border border-line bg-white',
     isTertiary && 'border border-dashed border-line bg-transparent',
@@ -55,10 +55,6 @@ function PersonaCard({ persona, variant, onPress }: PersonaCardProps): React.Rea
 
   const iconColor = isPrimary ? colors.white : colors.navy;
   const chevronColor = isPrimary ? colors.orange : colors.gray2;
-  const labelClassName = isTertiary
-    ? 'font-manrope-bold text-[13px] text-gray'
-    : 'font-manrope-bold text-h3 text-navy';
-  const subClassName = 'font-mulish text-tiny text-gray2';
 
   return (
     <Pressable
@@ -75,8 +71,12 @@ function PersonaCard({ persona, variant, onPress }: PersonaCardProps): React.Rea
           </View>
         )}
         <View className="flex-1 gap-1">
-          <Text className={labelClassName}>{label}</Text>
-          <Text className={subClassName}>{sub}</Text>
+          {isTertiary ? (
+            <Small color="gray" className="font-manrope-bold">{label}</Small>
+          ) : (
+            <H3>{label}</H3>
+          )}
+          <Tiny>{sub}</Tiny>
         </View>
         <Icon name="chev-right" size={isTertiary ? 18 : 20} color={chevronColor} />
       </View>
@@ -88,9 +88,14 @@ export default function OnboardingScreen(): React.ReactElement {
   const router = useRouter();
   const setPersona = usePersonaStore((s) => s.setPersona);
   const setOnboarded = usePersonaStore((s) => s.setOnboarded);
+  // 빠른 연타 가드 — 첫 탭만 store/navigate 실행. router.replace 후 unmount 되지만
+  // 첫 동작이 동기 setState 라 같은 tick 안의 두 번째 탭이 navigate 직전 통과 가능.
+  const isNavigatingRef = React.useRef(false);
 
   const handleSelect = React.useCallback(
     (persona: Persona) => {
+      if (isNavigatingRef.current) return;
+      isNavigatingRef.current = true;
       setPersona(persona);
       setOnboarded(true);
       router.replace('/(tabs)');
@@ -105,7 +110,7 @@ export default function OnboardingScreen(): React.ReactElement {
         <View className="mt-6 gap-3">
           {/* Hero icon */}
           <View
-            className="w-14 h-14 rounded-[18px] bg-orange items-center justify-center"
+            className="w-14 h-14 rounded-hero-icon bg-orange items-center justify-center"
             style={shadows.orangeCta}
           >
             <Icon name="globe" size={28} color={colors.white} strokeWidth={2.2} />

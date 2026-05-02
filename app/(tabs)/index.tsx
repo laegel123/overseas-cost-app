@@ -49,6 +49,8 @@ const REGIONS: RegionConfig[] = [
 const FOOD_RESTAURANT_DAYS_PER_MONTH = 20;
 const FOOD_GROCERY_TRIPS_PER_MONTH = 4;
 
+// Home 카드 배수용 단순화된 총비용. 페르소나·세금·비자비·학비 제외.
+// Compare 화면의 페르소나별 정밀 계산과 의도적으로 다름 (ADR-056).
 function computeCityTotal(city: CityCostData, fx: ExchangeRates): number {
   const rent = city.rent.share ?? city.rent.studio ?? city.rent.oneBed ?? 0;
   const rentKRW = convertToKRW(rent, city.currency, fx);
@@ -176,6 +178,16 @@ export default function HomeScreen(): React.ReactElement {
     [recentIds, cities],
   );
 
+  // cityId → mult 사전 계산. FavCard / RecentRow 양쪽이 같은 도시를 참조해도 한 번만 계산.
+  const multMap = React.useMemo(() => {
+    if (state.status !== 'ready') return {};
+    return Object.fromEntries(
+      Object.values(cities)
+        .filter((c) => c.id !== 'seoul')
+        .map((c) => [c.id, multFromTotals(c, seoulTotal, state.fx)]),
+    );
+  }, [cities, seoulTotal, state]);
+
   if (state.status === 'loading') {
     return (
       <Screen testID="home-screen-loading">
@@ -202,8 +214,6 @@ export default function HomeScreen(): React.ReactElement {
     );
   }
 
-  const { fx } = state;
-
   return (
     <Screen scroll testID="home-screen">
       {/* Greeting + Avatar */}
@@ -218,7 +228,7 @@ export default function HomeScreen(): React.ReactElement {
           accessibilityLabel="설정"
           testID="home-avatar"
         >
-          <View className="w-10 h-10 rounded-[14px] bg-light items-center justify-center">
+          <View className="w-10 h-10 rounded-button bg-light items-center justify-center">
             <Icon name="user" size={20} color={colors.gray2} />
           </View>
         </Pressable>
@@ -226,7 +236,7 @@ export default function HomeScreen(): React.ReactElement {
 
       {/* Search bar (v1.0 stub) */}
       <View
-        className="mt-4 flex-row items-center px-3.5 py-3 bg-light rounded-[14px]"
+        className="mt-4 flex-row items-center px-3.5 py-3 bg-light rounded-button"
         testID="home-search-stub"
       >
         <Icon name="search" size={18} color={colors.gray2} />
@@ -264,7 +274,7 @@ export default function HomeScreen(): React.ReactElement {
                 cityName={city.name.ko}
                 cityNameEn={city.name.en}
                 countryCode={city.country}
-                mult={multFromTotals(city, seoulTotal, fx)}
+                mult={multMap[city.id] ?? '신규'}
                 accent={idx === 0}
                 onPress={handleCityPress}
                 testID={`home-favcard-${city.id}`}
@@ -297,7 +307,7 @@ export default function HomeScreen(): React.ReactElement {
                 cityName={city.name.ko}
                 cityNameEn={city.name.en}
                 countryCode={city.country}
-                mult={multFromTotals(city, seoulTotal, fx)}
+                mult={multMap[city.id] ?? '신규'}
                 isLast={idx === recentCities.length - 1}
                 onPress={handleCityPress}
                 testID={`home-recentrow-${city.id}`}

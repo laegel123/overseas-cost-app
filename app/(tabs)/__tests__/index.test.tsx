@@ -233,6 +233,26 @@ describe('HomeScreen', () => {
       expect(getByTestId('home-recentrow-london')).toBeTruthy();
     });
 
+    it('마지막 RecentRow → border-b 미표시 (isLast=true)', async () => {
+      setupMocks();
+      useRecentStore.setState({ cityIds: ['vancouver', 'tokyo', 'london'] });
+
+      const { getByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const lastRow = getByTestId('home-recentrow-london');
+      const middleRow = getByTestId('home-recentrow-tokyo');
+
+      // RecentRow 의 className 은 isLast=true 일 때 border-b 클래스 미포함.
+      const lastClassName = String(lastRow.props.className ?? '');
+      const middleClassName = String(middleRow.props.className ?? '');
+      expect(lastClassName.includes('border-b')).toBe(false);
+      expect(middleClassName.includes('border-b')).toBe(true);
+    });
+
     it('RecentRow 탭 → /compare/{cityId} push', async () => {
       setupMocks();
       useRecentStore.setState({ cityIds: ['tokyo'] });

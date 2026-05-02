@@ -12,7 +12,7 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
       className="mt-6 gap-3"
     >
       <View
-        className="w-14 h-14 rounded-[18px] bg-orange items-center justify-center"
+        className="w-14 h-14 rounded-hero-icon bg-orange items-center justify-center"
         style={
           {
             "shadowColor": "#FC6011",
@@ -154,7 +154,7 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
         testID="persona-card-student"
       >
         <View
-          className="flex-row items-center gap-3.5 p-4 rounded-[18px] border-[1.5px] border-orange bg-orange-tint"
+          className="flex-row items-center gap-3.5 p-4 rounded-card-lg border-[1.5px] border-orange bg-orange-tint"
         >
           <View
             className="w-11 h-11 rounded-xl items-center justify-center bg-orange"
@@ -211,12 +211,14 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
             className="flex-1 gap-1"
           >
             <Text
+              accessibilityRole="header"
               className="font-manrope-bold text-h3 text-navy"
             >
               유학생
             </Text>
             <Text
-              className="font-mulish text-tiny text-gray2"
+              accessibilityRole="text"
+              className="font-mulish text-tiny text-gray-2"
             >
               서울에서 출발 · 학비 중심
             </Text>
@@ -298,7 +300,7 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
         testID="persona-card-worker"
       >
         <View
-          className="flex-row items-center gap-3.5 p-4 rounded-[18px] border border-line bg-white"
+          className="flex-row items-center gap-3.5 p-4 rounded-card-lg border border-line bg-white"
         >
           <View
             className="w-11 h-11 rounded-xl items-center justify-center bg-light"
@@ -351,12 +353,14 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
             className="flex-1 gap-1"
           >
             <Text
+              accessibilityRole="header"
               className="font-manrope-bold text-h3 text-navy"
             >
               취업자
             </Text>
             <Text
-              className="font-mulish text-tiny text-gray2"
+              accessibilityRole="text"
+              className="font-mulish text-tiny text-gray-2"
             >
               서울에서 출발 · 실수령 중심
             </Text>
@@ -438,18 +442,20 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
         testID="persona-card-unknown"
       >
         <View
-          className="flex-row items-center gap-3.5 p-4 rounded-[18px] border border-dashed border-line bg-transparent"
+          className="flex-row items-center gap-3.5 p-4 rounded-card-lg border border-dashed border-line bg-transparent"
         >
           <View
             className="flex-1 gap-1"
           >
             <Text
-              className="font-manrope-bold text-[13px] text-gray"
+              accessibilityRole="text"
+              className="font-mulish text-small text-gray font-manrope-bold"
             >
               미선택
             </Text>
             <Text
-              className="font-mulish text-tiny text-gray2"
+              accessibilityRole="text"
+              className="font-mulish text-tiny text-gray-2"
             >
               둘 다 보여드려요
             </Text>
