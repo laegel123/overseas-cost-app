@@ -2268,23 +2268,23 @@ afterEach(() => {
 
 #### `ca_cmhc.mjs`
 
-- [ ] CMHC Rental Market Survey CSV 파싱
-- [ ] Vancouver/Toronto/Montreal CMA 평균 임대료 추출
-- [ ] # bedrooms 별 매핑 (Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → 별도 추정)
-- [ ] CSV 인코딩 (UTF-8 BOM) 처리
+- [x] StatCan WDS API 응답 파싱 (CMHC 데이터 활용)
+- [x] Vancouver/Toronto/Montreal CMA 평균 임대료 추출
+- [x] # bedrooms 별 매핑 (Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정)
+- [x] 3개 도시 동시 갱신 지원
 
 #### `ca_statcan.mjs` (StatCan WDS API)
 
-- [ ] CPI Vector ID 별 fetch
-- [ ] Vancouver/Toronto/Montreal CMA 데이터
-- [ ] 식재료 8개 매핑 (Vector ID 매핑 표 별도 fixture)
-- [ ] 외식 CPI 매핑
+- [x] CPI Vector ID 별 fetch
+- [x] Vancouver/Toronto/Montreal CMA 데이터
+- [x] 식재료 8개 매핑 (Vector ID 매핑 표 상수 정의)
+- [x] 외식 CPI 매핑 + 정적 fallback
 
 #### `ca_translink.mjs`, `ca_ttc.mjs`, `ca_stm.mjs`
 
-- [ ] 각 공식 fare page HTML fetch + parse
-- [ ] 1-zone monthly pass / single ride / taxi 추출
-- [ ] 페이지 구조 변경 시 graceful fail
+- [x] 각 공식 fare page HTML fetch + parse
+- [x] 1-zone monthly pass / single ride / taxi 추출
+- [x] 페이지 구조 변경 시 정적 fallback (graceful fail)
 
 ### 9-A.5 출처별 — 미국 (4 scripts)
 

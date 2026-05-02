@@ -1,0 +1,57 @@
+{
+  "step": 3,
+  "name": "canada",
+  "status": "completed",
+  "summary": "캐나다 도시 3개(밴쿠버, 토론토, 몬트리올) 데이터 소스 스크립트 5개 생성",
+  "artifacts": {
+    "scripts": [
+      "scripts/refresh/ca_cmhc.mjs",
+      "scripts/refresh/ca_statcan.mjs",
+      "scripts/refresh/ca_translink.mjs",
+      "scripts/refresh/ca_ttc.mjs",
+      "scripts/refresh/ca_stm.mjs"
+    ],
+    "tests": [
+      "scripts/refresh/__tests__/ca_cmhc.test.ts",
+      "scripts/refresh/__tests__/ca_statcan.test.ts",
+      "scripts/refresh/__tests__/ca_translink.test.ts",
+      "scripts/refresh/__tests__/ca_ttc.test.ts",
+      "scripts/refresh/__tests__/ca_stm.test.ts"
+    ],
+    "cityJsons": [
+      "data/cities/vancouver.json",
+      "data/cities/toronto.json",
+      "data/cities/montreal.json"
+    ],
+    "seedUpdates": [
+      "data/seed/all.json"
+    ],
+    "fixtureUpdates": [
+      "src/__fixtures__/cities/seoul-valid.ts",
+      "src/__fixtures__/cities/vancouver-valid.ts"
+    ],
+    "docUpdates": [
+      "docs/TESTING.md"
+    ]
+  },
+  "validation": {
+    "typecheck": "passed",
+    "lint": "passed",
+    "test": "1196 passed, 1 skipped"
+  },
+  "sources": {
+    "rent": "CMHC Rental Market Survey (StatCan WDS API)",
+    "food": "Statistics Canada CPI",
+    "transport": {
+      "vancouver": "TransLink",
+      "toronto": "TTC (Toronto Transit Commission)",
+      "montreal": "STM (Société de transport de Montréal)"
+    }
+  },
+  "notes": [
+    "API 키 불필요 (모든 캐나다 출처는 정부 공개 데이터)",
+    "transit 스크립트는 HTML parse + static fallback 패턴 적용",
+    "StatCan API 실패 시 static fallback으로 자동 전환",
+    "seed/all.json에 vancouver 추가 (fixture 동기화 완료)"
+  ]
+}
