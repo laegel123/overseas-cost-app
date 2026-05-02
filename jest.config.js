@@ -1,12 +1,17 @@
 module.exports = {
   preset: 'jest-expo',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testPathIgnorePatterns: ['/node_modules/', '/.expo/', '/dist/'],
+  testPathIgnorePatterns: ['/node_modules/', '/.expo/', '/dist/', 'scripts/refresh/__tests__/setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     // global.css (NativeWind) 는 metro/babel 에서 처리되며 jest 런타임에서는 빈 객체로 stub.
     '\\.css$': '<rootDir>/__mocks__/styleMock.js',
   },
+  // ESM (.mjs) 스크립트 테스트 지원 (data-automation phase)
+  transform: {
+    '^.+\\.mjs$': 'babel-jest',
+  },
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node', 'mjs'],
   transformIgnorePatterns: [
     'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|nativewind|react-native-css-interop))',
   ],

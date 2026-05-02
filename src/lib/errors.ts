@@ -1,6 +1,6 @@
 /**
  * 결정적 에러 타입 카탈로그.
- * docs/ARCHITECTURE.md §에러 타입 카탈로그 와 1:1 일치 (15개 클래스).
+ * docs/ARCHITECTURE.md §에러 타입 카탈로그 와 1:1 일치 (19개 클래스).
  *
  * 모든 lib 함수는 본 카탈로그의 클래스만 throw 한다.
  * 외부 라이브러리 에러를 잡으면 wrap 후 카탈로그 클래스로 다시 throw.
@@ -82,4 +82,22 @@ export class FavoritesLimitError extends AppError {
 
 export class InvariantError extends AppError {
   readonly code = 'INVARIANT';
+}
+
+// --- data-automation phase 에러 (step 0) ---
+
+export class FetchRetryExhaustedError extends AppError {
+  readonly code = 'FETCH_RETRY_EXHAUSTED';
+}
+
+export class FetchTimeoutError extends AppError {
+  readonly code = 'FETCH_TIMEOUT';
+}
+
+export class MissingApiKeyError extends AppError {
+  readonly code = 'MISSING_API_KEY';
+}
+
+export class InvalidCityIdError extends AppError {
+  readonly code = 'INVALID_CITY_ID';
 }

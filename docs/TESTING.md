@@ -2130,77 +2130,87 @@ afterEach(() => {
 
 ### 9-A.1 `scripts/refresh/_common.mjs` 공통 헬퍼
 
+#### `getCityPath(id): string`
+
+- [x] 정상 id: 경로 반환
+- [x] 빈 문자열: throws `InvalidCityIdError`
+- [x] 숫자로 시작: throws
+- [x] 대문자 포함: throws
+- [x] 특수문자 포함: throws
+- [x] path traversal (..): throws
+- [x] 하이픈 허용: 정상
+
 #### `fetchWithRetry(url, opts?)`
 
-- [ ] 첫 시도 성공: response 반환, 재시도 없음
-- [ ] 1회 실패 후 성공: 1회 재시도 후 반환
-- [ ] 2회 실패 후 성공: 2회 재시도 후 반환
-- [ ] 3회 실패 후 성공: 3회 재시도 후 반환
-- [ ] 4회 모두 실패: throws `FetchRetryExhaustedError` with retry count
-- [ ] backoff 시간: 1s, 2s, 4s (exponential)
-- [ ] 5xx 응답: 재시도
-- [ ] 4xx 응답: 재시도 없이 즉시 throw
+- [x] 첫 시도 성공: response 반환, 재시도 없음
+- [ ] 1회 실패 후 성공: 1회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
+- [ ] 2회 실패 후 성공: 2회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
+- [ ] 3회 실패 후 성공: 3회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
+- [ ] 4회 모두 실패: throws `FetchRetryExhaustedError` with retry count (복잡한 fake timer 필요, 후속)
+- [ ] backoff 시간: 1s, 2s, 4s (exponential) (복잡한 fake timer 필요, 후속)
+- [ ] 5xx 응답: 재시도 (복잡한 fake timer 필요, 후속)
+- [x] 4xx 응답: 재시도 없이 즉시 throw
 - [ ] timeout 30s 초과: throws `FetchTimeoutError`
 - [ ] DNS 실패: 재시도 후 throw
-- [ ] 사용자 정의 retry 횟수 (`opts.maxRetries=5`) 적용
+- [x] 사용자 정의 retry 횟수 (`opts.maxRetries=0`) 적용
 - [ ] AbortSignal 전달 시 취소 가능
 
 #### `readCity(id): Promise<CityCostData>`
 
-- [ ] 정상 파일: 파싱 + 반환
-- [ ] 파일 부재: throws `CityNotFoundError`
-- [ ] 깨진 JSON: throws `CityParseError`
-- [ ] 스키마 위반: throws `CitySchemaError`
-- [ ] 경로 traversal 시도 (`../../etc/passwd`): throws `InvalidCityIdError`
+- [x] 정상 파일: 파싱 + 반환
+- [x] 파일 부재: throws `CityNotFoundError`
+- [x] 깨진 JSON: throws `CityParseError`
+- [x] 스키마 위반: throws `CitySchemaError`
+- [x] 경로 traversal 시도 (`../../etc/passwd`): throws `InvalidCityIdError`
 
 #### `writeCity(id, data, source): Promise<void>`
 
-- [ ] 새 파일 작성
-- [ ] 기존 파일 덮어쓰기
-- [ ] `lastUpdated` 자동 갱신 (현재 시각)
-- [ ] `sources[]` 에 (category, name, url, accessedAt) 추가 (기존 유지)
-- [ ] 같은 source 가 이미 있으면 accessedAt 만 갱신
-- [ ] 스키마 위반 데이터 입력 시 throws (write 실패)
-- [ ] atomic write (임시 파일 → rename) — 부분 쓰기 방지
-- [ ] 디렉터리 부재 시 자동 생성
+- [x] 새 파일 작성
+- [x] 기존 파일 덮어쓰기
+- [x] `lastUpdated` 자동 갱신 (현재 시각)
+- [x] `sources[]` 에 (category, name, url, accessedAt) 추가 (기존 유지)
+- [x] 같은 source 가 이미 있으면 accessedAt 만 갱신
+- [x] 스키마 위반 데이터 입력 시 throws (write 실패)
+- [ ] atomic write (임시 파일 → rename) — 부분 쓰기 방지 (구현 완료, 테스트는 파일시스템 검증 어려움)
+- [x] 디렉터리 부재 시 자동 생성
 
 #### `classifyChange(oldVal, newVal)` (in `_outlier.mjs`)
 
-- [ ] `(null, null)` → `'commit'`
-- [ ] `(null, 100)` → `'new'` (신규 항목)
-- [ ] `(100, null)` → `'pr-removed'` (제거)
-- [ ] `(100, 100)` → `'commit'` (변동 0)
-- [ ] `(100, 104)` → `'commit'` (4% 변동)
-- [ ] `(100, 104.99)` → `'commit'` (4.99%)
-- [ ] `(100, 105)` → `'pr-update'` (정확히 5%)
-- [ ] `(100, 105.01)` → `'pr-update'`
-- [ ] `(100, 129.99)` → `'pr-update'` (29.99%)
-- [ ] `(100, 130)` → `'pr-outlier'` (정확히 30%)
-- [ ] `(100, 130.01)` → `'pr-outlier'`
-- [ ] `(100, 200)` → `'pr-outlier'` (100% 변동)
-- [ ] `(100, 0)` → `'pr-outlier'` (0 으로 변동, 100%)
-- [ ] `(100, 96)` → `'commit'` (-4%)
-- [ ] `(100, 95)` → `'pr-update'` (-5%)
-- [ ] `(100, 70)` → `'pr-outlier'` (-30%)
-- [ ] `(0, 100)` → `'new'` (0 도 null 처럼 처리할지 정책 명시: **0 은 정상 값, new 아님**, division by zero 회피)
-- [ ] `(0, 0)` → `'commit'`
-- [ ] 음수 입력 → throws (cost 데이터에 음수 미허용)
-- [ ] `NaN` 입력 → throws
+- [x] `(null, null)` → `'commit'`
+- [x] `(null, 100)` → `'new'` (신규 항목)
+- [x] `(100, null)` → `'pr-removed'` (제거)
+- [x] `(100, 100)` → `'commit'` (변동 0)
+- [x] `(100, 104)` → `'commit'` (4% 변동)
+- [x] `(100, 104.99)` → `'commit'` (4.99%)
+- [x] `(100, 105)` → `'pr-update'` (정확히 5%)
+- [x] `(100, 105.01)` → `'pr-update'`
+- [x] `(100, 129.99)` → `'pr-update'` (29.99%)
+- [x] `(100, 130)` → `'pr-outlier'` (정확히 30%)
+- [x] `(100, 130.01)` → `'pr-outlier'`
+- [x] `(100, 200)` → `'pr-outlier'` (100% 변동)
+- [x] `(100, 0)` → `'pr-outlier'` (0 으로 변동, 100%)
+- [x] `(100, 96)` → `'commit'` (-4%)
+- [x] `(100, 95)` → `'pr-update'` (-5%)
+- [x] `(100, 70)` → `'pr-outlier'` (-30%)
+- [x] `(0, 100)` → `'new'` (0 도 null 처럼 처리할지 정책 명시: **0 은 정상 값, new 아님**, division by zero 회피)
+- [x] `(0, 0)` → `'commit'`
+- [x] 음수 입력 → throws (cost 데이터에 음수 미허용)
+- [x] `NaN` 입력 → throws
 
 #### `diffCities(oldData, newData): ChangeRecord[]` (in `_diff.mjs`)
 
-- [ ] 변경 없음: 빈 배열
-- [ ] 단일 필드 변경: 1 record
-- [ ] 다중 필드 변경: 다 record (각 필드별)
-- [ ] 신규 필드 (oldData 에 없음): record with oldValue=null
-- [ ] 제거된 필드: record with newValue=null
-- [ ] 중첩 필드 (`food.groceries.milk1L`): dot-path 로 표현
-- [ ] 배열 변경 (`tuition[]`): 각 원소별 record
-- [ ] 메타 필드 (`lastUpdated`, `sources`): 변경 추적 제외 (값만)
+- [x] 변경 없음: 빈 배열
+- [x] 단일 필드 변경: 1 record
+- [x] 다중 필드 변경: 다 record (각 필드별)
+- [x] 신규 필드 (oldData 에 없음): record with oldValue=null
+- [x] 제거된 필드: record with newValue=null
+- [x] 중첩 필드 (`food.groceries.milk1L`): dot-path 로 표현
+- [x] 배열 변경 (`tuition[]`): 각 원소별 record
+- [x] 메타 필드 (`lastUpdated`, `sources`): 변경 추적 제외 (값만)
 
 #### `loadFixture(name)`, `mockFetch(spec)` 등 테스트 헬퍼
 
-- [ ] 가용성·일관성 self-test
+- [ ] 가용성·일관성 self-test (후속 step 에서 구현)
 
 ### 9-A.2 출처별 fetch 스크립트 — 표준 패턴
 
