@@ -399,7 +399,7 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
         </View>
       </View>
       <View
-        accessibilityLabel="미선택 선택"
+        accessibilityLabel="아직 모름 선택"
         accessibilityRole="button"
         accessibilityState={
           {
@@ -451,7 +451,7 @@ exports[`OnboardingScreen snapshot — 3개 페르소나 카드 1`] = `
               accessibilityRole="text"
               className="font-mulish text-small text-gray font-manrope-bold"
             >
-              미선택
+              아직 모름
             </Text>
             <Text
               accessibilityRole="text"

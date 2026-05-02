@@ -21,38 +21,9 @@ exports[`SettingsScreen 스냅샷 worker 페르소나 + 통계 비어있음 1`] 
         설정
       </Text>
       <View
-        accessibilityLabel="더 보기"
-        accessibilityRole="button"
-        accessibilityState={
-          {
-            "busy": undefined,
-            "checked": undefined,
-            "disabled": undefined,
-            "expanded": undefined,
-            "selected": undefined,
-          }
-        }
-        accessibilityValue={
-          {
-            "max": undefined,
-            "min": undefined,
-            "now": undefined,
-            "text": undefined,
-          }
-        }
-        accessible={true}
+        accessible={false}
         className="w-9 h-9 rounded-icon-sm items-center justify-center bg-light"
-        collapsable={false}
-        focusable={true}
-        onBlur={[Function]}
-        onClick={[Function]}
-        onFocus={[Function]}
-        onResponderGrant={[Function]}
-        onResponderMove={[Function]}
-        onResponderRelease={[Function]}
-        onResponderTerminate={[Function]}
-        onResponderTerminationRequest={[Function]}
-        onStartShouldSetResponder={[Function]}
+        importantForAccessibility="no"
         testID="settings-more-btn"
       >
         <View

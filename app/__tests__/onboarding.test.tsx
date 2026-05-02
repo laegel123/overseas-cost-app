@@ -47,7 +47,7 @@ describe('OnboardingScreen', () => {
 
     expect(screen.getByText('유학생')).toBeTruthy();
     expect(screen.getByText('취업자')).toBeTruthy();
-    expect(screen.getByText('미선택')).toBeTruthy();
+    expect(screen.getByText('아직 모름')).toBeTruthy();
   });
 
   it('페르소나 sub 표시 (단일 출처)', () => {
@@ -126,7 +126,7 @@ describe('OnboardingScreen', () => {
   it('unknown 카드 accessibilityLabel', () => {
     render(<OnboardingScreen />);
 
-    expect(screen.getByLabelText('미선택 선택')).toBeTruthy();
+    expect(screen.getByLabelText('아직 모름 선택')).toBeTruthy();
   });
 
   // ─── 연타 방어 ────────────────────────────────────────────────────────

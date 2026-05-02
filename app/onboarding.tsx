@@ -44,11 +44,11 @@ function PersonaCard({ persona, variant, onPress }: PersonaCardProps): React.Rea
     .filter(Boolean)
     .join(' ');
 
+  // tertiary variant 는 icon box 자체를 미렌더 (아래 {!isTertiary && ...}).
   const iconBoxClassName = [
     'w-11 h-11 rounded-xl items-center justify-center',
     isPrimary && 'bg-orange',
     variant === 'secondary' && 'bg-light',
-    isTertiary && 'bg-light',
   ]
     .filter(Boolean)
     .join(' ');

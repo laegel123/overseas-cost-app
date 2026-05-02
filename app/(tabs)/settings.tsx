@@ -52,7 +52,11 @@ export default function SettingsScreen(): React.ReactElement {
 
   const [refreshState, setRefreshState] = React.useState<RefreshState>('idle');
 
-  const citiesCount = React.useMemo(() => Object.keys(getAllCities()).length, []);
+  // refreshCache 성공 시 외부 (data.ts citiesInMemory) 상태가 갱신되며 lastSync 도
+  // 같은 흐름에서 갱신된다. ESLint 의 exhaustive-deps 는 외부 모듈 상태를 모르므로
+  // lastSync 를 dep 으로 명시하고 경고를 의도적으로 무시.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const citiesCount = React.useMemo(() => Object.keys(getAllCities()).length, [lastSync]);
 
   const handleChangePersona = React.useCallback(() => {
     setOnboarded(false);
@@ -112,14 +116,15 @@ export default function SettingsScreen(): React.ReactElement {
       {/* Header */}
       <View className="flex-row items-center justify-between pt-2 pb-4">
         <H1>설정</H1>
-        <Pressable
+        {/* 더 보기 메뉴는 v1.x — 현재는 시각 stub. button role 미부여 (스크린 리더 혼동 방지). */}
+        <View
           className="w-9 h-9 rounded-icon-sm items-center justify-center bg-light"
-          accessibilityRole="button"
-          accessibilityLabel="더 보기"
+          accessible={false}
+          importantForAccessibility="no"
           testID="settings-more-btn"
         >
           <Icon name="more" size={22} color={colors.gray2} />
-        </Pressable>
+        </View>
       </View>
 
       {/* Persona Card */}

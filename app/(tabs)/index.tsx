@@ -133,9 +133,15 @@ export default function HomeScreen(): React.ReactElement {
     router.push('/settings');
   }, [router]);
 
-  const handleRegionPress = React.useCallback((regionId: Region | 'all') => {
-    setActiveRegion(regionId);
-  }, []);
+  // RegionPill 의 onSelect 가 () => void 시그니처라 regionId 를 인자로 받지 못함.
+  // REGIONS 는 정적 배열이므로 region 별 핸들러를 한 번만 생성해 안정화.
+  const regionHandlers = React.useMemo(
+    () =>
+      Object.fromEntries(
+        REGIONS.map((r) => [r.id, () => setActiveRegion(r.id)]),
+      ) as Record<Region | 'all', () => void>,
+    [],
+  );
 
   const seoulTotal = React.useMemo(() => {
     if (state.status !== 'ready') return 0;
@@ -334,7 +340,7 @@ export default function HomeScreen(): React.ReactElement {
               label={region.label}
               count={regionCounts[region.id]}
               active={activeRegion === region.id}
-              onSelect={() => handleRegionPress(region.id)}
+              onSelect={regionHandlers[region.id]}
               testID={`home-region-${region.id}`}
             />
           ))}

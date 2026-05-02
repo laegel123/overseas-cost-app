@@ -11,7 +11,7 @@ import type { Persona } from '@/types/city';
 export const PERSONA_LABEL: Record<Persona, string> = {
   student: '유학생',
   worker: '취업자',
-  unknown: '미선택',
+  unknown: '아직 모름',
 };
 
 export const PERSONA_SUB: Record<Persona, string> = {

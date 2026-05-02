@@ -104,13 +104,13 @@ describe('SettingsScreen', () => {
       expect(getByTestId('persona-sub').props.children).toContain('실수령 중심');
     });
 
-    it('unknown — 미선택 모드', () => {
+    it('unknown — 아직 모름 모드', () => {
       setupMocks();
       usePersonaStore.setState({ persona: 'unknown' });
 
       const { getByTestId } = render(<SettingsScreen />);
 
-      expect(getByTestId('persona-label').props.children).toContain('미선택');
+      expect(getByTestId('persona-label').props.children).toContain('아직 모름');
       expect(getByTestId('persona-sub').props.children).toContain('둘 다');
     });
   });
