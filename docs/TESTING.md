@@ -2025,7 +2025,49 @@ UI_GUIDE.md §에러 메시지 한국어 표준 카탈로그 검증.
 
 ### 9.29 `app/(tabs)/settings.tsx` (설정 — 화면)
 
-(설정 화면의 테스트는 §9.26 에 동일하게 적용. 본 §9.29 는 자동화 인벤토리 시작 위치 표시.)
+screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
+
+**페르소나 표시:**
+
+- [x] student: "유학생 모드" + "서울에서 출발 · 학비 중심" 라벨 (screens step 3)
+- [x] worker: "취업자 모드" + "서울에서 출발 · 실수령 중심" 라벨 (screens step 3)
+- [x] unknown: "미선택 모드" + "둘 다 보여드려요" 라벨 (screens step 3)
+
+**변경 버튼:**
+
+- [x] 탭 → setOnboarded(false) + router.replace('/onboarding') (screens step 3)
+
+**통계 카드:**
+
+- [x] 0건: 즐겨찾기/최근 본/도시 DB 모두 0 표시 (screens step 3)
+- [x] N건: 정확한 카운트 표시 (screens step 3)
+
+**메뉴 리스트:**
+
+- [x] 5개 메뉴 모두 렌더링 (데이터 새로고침/출처/피드백/개인정보/앱 정보) (screens step 3)
+- [x] 앱 정보 rightText = v1.0.0 (expo-constants expoConfig.version) (screens step 3)
+- [x] 출처 rightText = 12개 (screens step 3)
+
+**데이터 새로고침:**
+
+- [x] 탭 → refreshCache 호출 (screens step 3)
+- [x] 성공 → lastSync 갱신 (screens step 3)
+- [x] 실패 → "갱신 실패" 텍스트 표시 (screens step 3)
+- [ ] 로딩 상태 — "갱신 중..." 텍스트 + 버튼 disabled
+
+**외부 링크:**
+
+- [x] 피드백 보내기 → mailto:laegel1@gmail.com 호출 (ADR-021) (screens step 3)
+- [x] 데이터 출처 보기 → GitHub DATA_SOURCES.md URL 호출 (screens step 3)
+- [x] 개인정보 처리방침 → GitHub PRIVACY.md URL 호출 (screens step 3)
+
+**Footer:**
+
+- [x] "Made with ♥ in Seoul · 2026" 텍스트 표시 (screens step 3)
+
+**스냅샷:**
+
+- [x] worker 페르소나 + 통계 비어있음 핵심 contract (screens step 3)
 
 ---
 

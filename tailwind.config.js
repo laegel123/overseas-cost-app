@@ -50,12 +50,14 @@ module.exports = {
       borderRadius: {
         chip: '999px',
         button: '14px',
+        btn: '10px',
         card: '16px',
         'card-lg': '18px',
         hero: '20px',
         'hero-lg': '22px',
         'icon-sm': '10px',
         'icon-md': '16px',
+        'hero-icon': '18px',
       },
       spacing: {
         'screen-x': '20px',
