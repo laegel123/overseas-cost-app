@@ -2069,6 +2069,31 @@ screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
 
 - [x] worker 페르소나 + 통계 비어있음 핵심 contract (screens step 3)
 
+### 9.30 `app/onboarding.tsx` (온보딩 — 페르소나 선택)
+
+screens phase step 4 구현 — 설치 직후 1회 페르소나 선택 화면.
+
+**기본 UI:**
+
+- [x] 3개 페르소나 카드 표시 (student/worker/unknown) (screens step 4)
+- [x] 페르소나 라벨 표시 — 단일 출처 `src/lib/persona.ts` (screens step 4)
+- [x] 페르소나 sub 표시 — 단일 출처 (screens step 4)
+- [x] 인사말 "안녕하세요" + "어디로 떠나시나요?" 표시 (screens step 4)
+- [x] 푸터 "설정에서 언제든 변경할 수 있어요" 표시 (screens step 4)
+- [x] 질문 라벨 "어떤 분이신가요?" 표시 (screens step 4)
+
+**카드 인터랙션:**
+
+- [x] student 탭 → setPersona('student') + setOnboarded(true) + router.replace('/(tabs)') (screens step 4)
+- [x] worker 탭 → setPersona('worker') + setOnboarded(true) + router.replace('/(tabs)') (screens step 4)
+- [x] unknown 탭 → setPersona('unknown') + setOnboarded(true) + router.replace('/(tabs)') (screens step 4)
+
+**접근성:**
+
+- [x] student 카드 accessibilityLabel "유학생 선택" (screens step 4)
+- [x] worker 카드 accessibilityLabel "취업자 선택" (screens step 4)
+- [x] unknown 카드 accessibilityLabel "미선택 선택" (screens step 4)
+
 ---
 
 ## 9-A. 자동화 스크립트 (scripts/refresh/_ + scripts/build/_)
