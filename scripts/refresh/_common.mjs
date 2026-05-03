@@ -62,6 +62,9 @@ const DEFAULT_TIMEOUT_MS = 30000;
 export async function fetchWithRetry(url, opts = {}) {
   const { maxRetries = DEFAULT_MAX_RETRIES, timeoutMs = DEFAULT_TIMEOUT_MS, signal: externalSignal, ...fetchInit } =
     opts;
+  // 에러 메시지에 노출되는 URL 은 항상 마스킹 (undici 가 message 에 원본 URL 포함 가능 — API 키 누출 방어).
+  const safeUrl = redactSecretsInUrl(url);
+  const sanitizeMsg = (msg) => (msg ? redactErrorMessage(String(msg)) : 'unknown error');
 
   let lastError;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -82,7 +85,7 @@ export async function fetchWithRetry(url, opts = {}) {
 
       if (response.status >= 400 && response.status < 500) {
         throw createFetchRetryExhaustedError(
-          `HTTP ${response.status} (client error, no retry)`,
+          `HTTP ${response.status} (client error, no retry) ${safeUrl}`,
           attempt,
         );
       }
@@ -93,9 +96,9 @@ export async function fetchWithRetry(url, opts = {}) {
 
       if (err?.name === 'AbortError') {
         if (externalSignal?.aborted) {
-          throw createFetchTimeoutError('request aborted by caller');
+          throw createFetchTimeoutError(`request aborted by caller ${safeUrl}`);
         }
-        throw createFetchTimeoutError(`request timed out after ${timeoutMs}ms`);
+        throw createFetchTimeoutError(`request timed out after ${timeoutMs}ms ${safeUrl}`);
       }
 
       if (err?.code === 'FETCH_RETRY_EXHAUSTED' || err?.code === 'FETCH_TIMEOUT') {
@@ -112,7 +115,7 @@ export async function fetchWithRetry(url, opts = {}) {
   }
 
   throw createFetchRetryExhaustedError(
-    `fetch failed after ${maxRetries + 1} attempts: ${lastError?.message ?? 'unknown error'}`,
+    `fetch failed after ${maxRetries + 1} attempts: ${sanitizeMsg(lastError?.message)} ${safeUrl}`,
     maxRetries + 1,
   );
 }
@@ -226,11 +229,23 @@ function validateCityData(data, ctxId) {
     }
   }
 
+  // build_data.mjs 와 동일한 검증 — 잘못된 파일 (e.g. seoul.json 에 id: 'tokyo') 차단.
+  if (obj.id !== ctxId) {
+    throw createCitySchemaError(
+      `${ctxId}.id: id field mismatch (expected "${ctxId}", got "${obj.id}")`,
+    );
+  }
+
   if (typeof obj.name !== 'object' || obj.name === null) {
     throw createCitySchemaError(`${ctxId}.name: missing or invalid`);
   }
-  if (typeof obj.name.ko !== 'string' || typeof obj.name.en !== 'string') {
-    throw createCitySchemaError(`${ctxId}.name: ko and en required`);
+  if (
+    typeof obj.name.ko !== 'string' ||
+    obj.name.ko.length === 0 ||
+    typeof obj.name.en !== 'string' ||
+    obj.name.en.length === 0
+  ) {
+    throw createCitySchemaError(`${ctxId}.name: ko and en required (non-empty)`);
   }
 
   for (const section of ['rent', 'food', 'transport']) {
@@ -267,6 +282,16 @@ export function redactSecretsInUrl(url) {
   } catch {
     return url;
   }
+}
+
+/**
+ * 에러 메시지 안에 박혀 있는 URL 의 secret 쿼리도 마스킹.
+ * undici 등이 던지는 에러는 원본 URL 을 그대로 메시지에 포함하므로 별도 처리 필요.
+ * @param {string} message
+ * @returns {string}
+ */
+export function redactErrorMessage(message) {
+  return message.replace(/https?:\/\/[^\s'"]+/g, (m) => redactSecretsInUrl(m));
 }
 
 function combineSignals(signal1, signal2) {

@@ -56,7 +56,9 @@ export function parsePriceData(data) {
   for (const item of itemList) {
     const itemName = item?.goodsName;
     const price = parseFloat(item?.price);
-    const unit = parseFloat(item?.unit) || 1;
+    // unit 은 단위환산 보정값 (예: 500ml → 1L 변환). 0 또는 음수는 1 로 간주 — falsy chain 회피.
+    const parsedUnit = parseFloat(item?.unit);
+    const unit = Number.isFinite(parsedUnit) && parsedUnit > 0 ? parsedUnit : 1;
     const regionName = item?.areaName;
 
     if (regionName !== '서울') continue;

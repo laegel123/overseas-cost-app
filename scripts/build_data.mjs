@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 /**
- * 도시 JSON 파일 빌드 — data/cities/*.json → all.json + seed/all.json
+ * 도시 JSON 파일 빌드 — data/cities/*.json → data/all.json
  *
  * Usage:
  *   node scripts/build_data.mjs
  *
  * 1. data/cities/*.json 21개 수집 (없으면 시드 fallback)
  * 2. 각 파일 스키마 검증
- * 3. data/all.json 생성 (원본)
- * 4. data/seed/all.json 생성 (앱 시드)
- * 5. atomic write (tmp → rename)
+ * 3. data/all.json 생성 (원본 — GitHub raw 로 배포되어 앱이 fetch)
+ * 4. atomic write (tmp → rename)
+ *
+ * ADR-045: data/seed/all.json 은 fixture-based 로 유지 — 본 스크립트가 덮어쓰지 않는다.
+ * 시드는 schema-pass fixture (seoul + vancouver) 만 포함하며 앱 번들에 포함되어
+ * 첫 콜드스타트 + 오프라인 fallback 으로 사용. 실 데이터는 fetch 로 덮어씀.
  */
 
 import { readFile, writeFile, readdir, mkdir, rename, access } from 'node:fs/promises';
@@ -23,10 +26,8 @@ const ROOT = join(__dirname, '..');
 
 const CITIES_DIR = join(ROOT, 'data', 'cities');
 const ALL_JSON_PATH = join(ROOT, 'data', 'all.json');
-const SEED_DIR = join(ROOT, 'data', 'seed');
-const SEED_ALL_JSON_PATH = join(SEED_DIR, 'all.json');
-
-const EXISTING_SEED_PATH = SEED_ALL_JSON_PATH;
+// data/cities 가 비었을 때만 fallback 으로 읽는 fixture seed (ADR-045).
+const FALLBACK_SEED_PATH = join(ROOT, 'data', 'seed', 'all.json');
 
 async function main() {
   console.log('Building data files...');
@@ -65,7 +66,7 @@ async function main() {
     }
     console.log(`Loaded ${cityFiles.length} city files from data/cities/`);
   } else {
-    const seedContent = await readFile(EXISTING_SEED_PATH, 'utf-8');
+    const seedContent = await readFile(FALLBACK_SEED_PATH, 'utf-8');
     const seedData = JSON.parse(seedContent);
 
     if (!seedData.cities || typeof seedData.cities !== 'object') {
@@ -99,9 +100,7 @@ async function main() {
   await atomicWrite(ALL_JSON_PATH, JSON.stringify(allData, null, 2) + '\n');
   console.log(`Written ${ALL_JSON_PATH}`);
 
-  await mkdir(SEED_DIR, { recursive: true });
-  await atomicWrite(SEED_ALL_JSON_PATH, JSON.stringify(allData, null, 2) + '\n');
-  console.log(`Written ${SEED_ALL_JSON_PATH}`);
+  // ADR-045 — seed 는 덮어쓰지 않음. fixture-based 유지.
 
   console.log(`Build complete: ${cityCount} cities`);
 }

@@ -8,11 +8,14 @@
  * API 키: US_BLS_API_KEY 필요.
  *
  * 방법: BLS Region (Northeast / West) 별 평균 소비자 가격 → 도시 food 매핑.
- * - Series APU0000710211: Milk (gallon) → milk1L (÷3.785)
- * - Series APU0000708111: Eggs (dozen) → eggs12
- * - Series APU0000715211: Bread (loaf) → bread
- * - Series APU0000706111: Chicken breast (lb) → chicken1kg (×2.205)
- * - Series APU0000702212: Rice (lb) → rice1kg (×2.205)
+ * 단위: 모든 결과는 USD 단위 (dollars, e.g. 4.25). cents 값으로 저장하지 않음 (ADR-059).
+ *
+ * BLS Series ID (BLS_SERIES 와 동기화 필수):
+ * - APU0000710211: Milk (gallon) → milk1L (÷3.785)
+ * - APU0000708111: Eggs (dozen) → eggs12
+ * - APU0000702111: Bread (lb) → bread
+ * - APU0000706111: Chicken (lb) → chicken1kg (×2.205)
+ * - APU0000701312: Rice (lb) → rice1kg (×2.205)
  */
 
 import { readCity, writeCity, fetchWithRetry, createMissingApiKeyError, createCitySeed} from './_common.mjs';
@@ -74,12 +77,15 @@ export const CITY_CONFIGS = {
   },
 };
 
+// convert(): BLS API 응답 (per gallon / per dozen / per lb) → 우리 단위 (per L / per dozen / per kg).
+// 결과는 USD 단위 (소수점 2자리, 100× 곱하지 않음). ADR-059 단위 정책.
+const round2 = (n) => Math.round(n * 100) / 100;
 export const BLS_SERIES = {
-  milk: { prefix: 'APU', suffix: '710211', unit: 'gallon', convert: (v) => Math.round((v / 3.785) * 100) },
-  eggs12: { prefix: 'APU', suffix: '708111', unit: 'dozen', convert: (v) => Math.round(v * 100) },
-  bread: { prefix: 'APU', suffix: '702111', unit: 'loaf', convert: (v) => Math.round(v * 100) },
-  chicken: { prefix: 'APU', suffix: '706111', unit: 'lb', convert: (v) => Math.round(v * 2.205 * 100) },
-  rice: { prefix: 'APU', suffix: '701312', unit: 'lb', convert: (v) => Math.round(v * 2.205 * 100) },
+  milk: { prefix: 'APU', suffix: '710211', unit: 'gallon', convert: (v) => round2(v / 3.785) },
+  eggs12: { prefix: 'APU', suffix: '708111', unit: 'dozen', convert: (v) => round2(v) },
+  bread: { prefix: 'APU', suffix: '702111', unit: 'lb', convert: (v) => round2(v) },
+  chicken: { prefix: 'APU', suffix: '706111', unit: 'lb', convert: (v) => round2(v * 2.205) },
+  rice: { prefix: 'APU', suffix: '701312', unit: 'lb', convert: (v) => round2(v * 2.205) },
 };
 
 export const SOURCE = {
@@ -151,6 +157,9 @@ export const STATIC_PRICES = {
   },
 };
 
+// 도시별 보정계수 — BLS 가 4 census region (Northeast/Midwest/South/West) 까지만 분리 제공해
+// 도시 단위 데이터 부재. 보정계수는 BLS Regional Variation Studies (2023) 기반 추정. ADR-059.
+// 분기 1회 검토 + 변경 시 ADR 갱신.
 export const CITY_ADJUSTMENT = {
   nyc: 1.15,
   la: 1.05,

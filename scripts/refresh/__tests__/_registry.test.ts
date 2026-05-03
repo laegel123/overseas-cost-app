@@ -70,7 +70,7 @@ describe('CITY_TO_SOURCES', () => {
 
 describe('ALL_CITIES', () => {
   it('21개 도시 (서울 + 20)', () => {
-    expect(ALL_CITIES).toHaveLength(22);
+    expect(ALL_CITIES).toHaveLength(21);
   });
 
   it('서울 포함', () => {
@@ -94,7 +94,6 @@ describe('ALL_CITIES', () => {
       'seattle',
       'boston',
       'london',
-      'manchester',
       'berlin',
       'munich',
       'paris',

@@ -182,7 +182,8 @@ describe('constants', () => {
 
   it('SOURCE 정의', () => {
     expect(SOURCE.category).toBe('rent');
-    expect(SOURCE.name).toBe('CMHC Rental Market Survey');
+    expect(SOURCE.name).toContain('CMHC Rental Market Survey');
+    expect(SOURCE.name).toContain('estimated');
     expect(SOURCE.url).toContain('cmhc');
   });
 });

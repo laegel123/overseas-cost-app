@@ -35,9 +35,8 @@ export const SOURCE_TO_CITIES = {
   us_mbta: ['boston'],
 
   // --- 영국 ---
-  uk_ons: ['london', 'manchester'],
+  uk_ons: ['london'],
   uk_tfl: ['london'],
-  uk_tfgm: ['manchester'],
 
   // --- 독일 ---
   de_destatis: ['berlin', 'munich'],
@@ -84,7 +83,6 @@ export const SOURCE_TO_CITIES = {
     'seattle',
     'boston',
     'london',
-    'manchester',
     'berlin',
     'munich',
     'paris',
@@ -107,7 +105,6 @@ export const SOURCE_TO_CITIES = {
     'seattle',
     'boston',
     'london',
-    'manchester',
     'berlin',
     'munich',
     'paris',
@@ -140,7 +137,7 @@ export const CITY_TO_SOURCES = Object.entries(SOURCE_TO_CITIES).reduce(
 );
 
 /**
- * v1.0 출시 도시 21개 (서울 + 20).
+ * v1.0 출시 도시 21개 (서울 + 20). DATA_SOURCES.md §1~21 와 동기화.
  */
 export const ALL_CITIES = [
   'seoul',
@@ -153,7 +150,6 @@ export const ALL_CITIES = [
   'seattle',
   'boston',
   'london',
-  'manchester',
   'berlin',
   'munich',
   'paris',

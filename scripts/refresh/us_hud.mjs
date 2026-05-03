@@ -62,9 +62,10 @@ export const CITY_CONFIGS = {
   },
 };
 
+// share rent 는 HUD FMR 가 직접 제공 안 함 — studio × 0.65 추정값. ADR-059 마커.
 export const SOURCE = {
   category: 'rent',
-  name: 'HUD Fair Market Rent',
+  name: 'HUD Fair Market Rent (share=studio×0.65 estimated, ADR-059)',
   url: 'https://www.huduser.gov/portal/datasets/fmr.html',
 };
 
