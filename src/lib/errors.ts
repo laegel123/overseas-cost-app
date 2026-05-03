@@ -85,6 +85,12 @@ export class InvariantError extends AppError {
 }
 
 // --- data-automation phase 에러 (step 0) ---
+//
+// 아래 4 클래스는 `scripts/refresh/_common.mjs` 의 plain-Error factory (createFetchRetryExhaustedError 등)
+// 가 던지는 에러의 **타입 카탈로그** 역할. .mjs 스크립트는 직접 `new FetchRetryExhaustedError(...)` 를
+// 사용하지 않고 factory 가 `{ name, code }` 를 수동 부여한 plain Error 를 throw 한다 (ESM/CJS 경계 회피).
+// 앱 레이어 (`src/lib/data.ts` 등) 가 향후 cron 결과를 통신·표시할 때 `instanceof` 체크용으로 사용 예정.
+// 현재 앱 레이어 import 0 곳 — v1.x data-automation 결과 노출 phase 에서 채택.
 
 export class FetchRetryExhaustedError extends AppError {
   readonly code = 'FETCH_RETRY_EXHAUSTED';

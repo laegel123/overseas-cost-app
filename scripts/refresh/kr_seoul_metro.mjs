@@ -15,7 +15,8 @@ import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage
 import { computePctChange } from './_outlier.mjs';
 
 const METRO_FARE_URL = 'https://www.seoulmetro.co.kr/kr/page.do?menuIdx=354';
-const TAXI_FARE_URL = 'https://tago.go.kr/';
+// 서울 택시 기본요금 공식 안내 (서울특별시 교통정보과). HTML 파싱 실패 시 STATIC_FARES.taxiBase fallback.
+const TAXI_FARE_URL = 'https://news.seoul.go.kr/traffic/archives/category/taxi-info';
 
 export const STATIC_FARES = {
   singleRide: 1400,

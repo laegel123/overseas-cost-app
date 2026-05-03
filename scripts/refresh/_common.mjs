@@ -343,7 +343,10 @@ function combineSignals(signal1, signal2) {
  * `validateCityData` 를 통과하지 못한다. 이는 caller (refresh 스크립트) 가
  * `writeCity` 호출 시 양쪽 필드를 채우도록 강제하는 안전망 역할.
  *
- * 외부 호출 금지 — refresh 스크립트 내부에서만 사용.
+ * 정상 흐름: createCitySeed → caller 가 numeric 필드 채움 → writeCity 가 lastUpdated 갱신 +
+ * updateSources 로 sources 추가 → validateCityData 통과 → 파일 저장.
+ *
+ * 외부 호출 금지 — refresh 스크립트 내부에서만 사용 (writeCity 의 updateSources 통과 후에만 valid).
  *
  * @param {{id: string, name: {ko: string, en: string}, country: string, currency: string, region: string}} config
  * @returns {import('../../src/types/city').CityCostData}
