@@ -1,0 +1,56 @@
+{
+  "id": "vancouver",
+  "name": {
+    "ko": "밴쿠버",
+    "en": "Vancouver"
+  },
+  "country": "CA",
+  "currency": "CAD",
+  "region": "na",
+  "lastUpdated": "2026-05-02",
+  "rent": {
+    "share": 1203,
+    "studio": 1850,
+    "oneBed": 2100,
+    "twoBed": 2800
+  },
+  "food": {
+    "restaurantMeal": 22,
+    "cafe": 6,
+    "groceries": {
+      "milk1L": 3.25,
+      "eggs12": 4.5,
+      "rice1kg": 3.8,
+      "chicken1kg": 15,
+      "bread": 3.5,
+      "onion1kg": 2.8,
+      "apple1kg": 4.5,
+      "ramen": 1.5
+    }
+  },
+  "transport": {
+    "monthlyPass": 104,
+    "singleRide": 3.35,
+    "taxiBase": 3.95
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)",
+      "url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market",
+      "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "food",
+      "name": "Statistics Canada CPI (static fallback, ADR-059)",
+      "url": "https://www150.statcan.gc.ca/",
+      "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "transport",
+      "name": "TransLink",
+      "url": "https://www.translink.ca/",
+      "accessedAt": "2026-05-02"
+    }
+  ]
+}

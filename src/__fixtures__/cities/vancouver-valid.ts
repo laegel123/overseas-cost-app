@@ -14,10 +14,10 @@ export const vancouverValid: CityCostData = {
   lastUpdated: '2026-04-01',
   rent: {
     share: 950,
-    studio: 1_800,
-    oneBed: 2_300,
-    twoBed: 3_400,
-    deposit: 1_150,
+    studio: 1800,
+    oneBed: 2300,
+    twoBed: 3400,
+    deposit: 1150,
   },
   food: {
     restaurantMeal: 22,
@@ -39,18 +39,18 @@ export const vancouverValid: CityCostData = {
     taxiBase: 3.5,
   },
   tuition: [
-    { school: 'UBC', level: 'undergrad', annual: 45_000 },
-    { school: 'SFU', level: 'undergrad', annual: 35_000 },
+    { school: 'UBC', level: 'undergrad', annual: 45000 },
+    { school: 'SFU', level: 'undergrad', annual: 35000 },
   ],
   tax: [
-    { annualSalary: 60_000, takeHomePctApprox: 0.74 },
-    { annualSalary: 80_000, takeHomePctApprox: 0.7 },
-    { annualSalary: 100_000, takeHomePctApprox: 0.66 },
+    { annualSalary: 60000, takeHomePctApprox: 0.74 },
+    { annualSalary: 80000, takeHomePctApprox: 0.7 },
+    { annualSalary: 100000, takeHomePctApprox: 0.66 },
   ],
   visa: {
     studentApplicationFee: 150,
     workApplicationFee: 155,
-    settlementApprox: 1_500,
+    settlementApprox: 1500,
   },
   sources: [
     {

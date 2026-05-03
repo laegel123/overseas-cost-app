@@ -2130,77 +2130,87 @@ afterEach(() => {
 
 ### 9-A.1 `scripts/refresh/_common.mjs` 공통 헬퍼
 
+#### `getCityPath(id): string`
+
+- [x] 정상 id: 경로 반환
+- [x] 빈 문자열: throws `InvalidCityIdError`
+- [x] 숫자로 시작: throws
+- [x] 대문자 포함: throws
+- [x] 특수문자 포함: throws
+- [x] path traversal (..): throws
+- [x] 하이픈 허용: 정상
+
 #### `fetchWithRetry(url, opts?)`
 
-- [ ] 첫 시도 성공: response 반환, 재시도 없음
-- [ ] 1회 실패 후 성공: 1회 재시도 후 반환
-- [ ] 2회 실패 후 성공: 2회 재시도 후 반환
-- [ ] 3회 실패 후 성공: 3회 재시도 후 반환
-- [ ] 4회 모두 실패: throws `FetchRetryExhaustedError` with retry count
-- [ ] backoff 시간: 1s, 2s, 4s (exponential)
-- [ ] 5xx 응답: 재시도
-- [ ] 4xx 응답: 재시도 없이 즉시 throw
+- [x] 첫 시도 성공: response 반환, 재시도 없음
+- [ ] 1회 실패 후 성공: 1회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
+- [ ] 2회 실패 후 성공: 2회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
+- [ ] 3회 실패 후 성공: 3회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
+- [ ] 4회 모두 실패: throws `FetchRetryExhaustedError` with retry count (복잡한 fake timer 필요, 후속)
+- [ ] backoff 시간: 1s, 2s, 4s (exponential) (복잡한 fake timer 필요, 후속)
+- [ ] 5xx 응답: 재시도 (복잡한 fake timer 필요, 후속)
+- [x] 4xx 응답: 재시도 없이 즉시 throw
 - [ ] timeout 30s 초과: throws `FetchTimeoutError`
 - [ ] DNS 실패: 재시도 후 throw
-- [ ] 사용자 정의 retry 횟수 (`opts.maxRetries=5`) 적용
+- [x] 사용자 정의 retry 횟수 (`opts.maxRetries=0`) 적용
 - [ ] AbortSignal 전달 시 취소 가능
 
 #### `readCity(id): Promise<CityCostData>`
 
-- [ ] 정상 파일: 파싱 + 반환
-- [ ] 파일 부재: throws `CityNotFoundError`
-- [ ] 깨진 JSON: throws `CityParseError`
-- [ ] 스키마 위반: throws `CitySchemaError`
-- [ ] 경로 traversal 시도 (`../../etc/passwd`): throws `InvalidCityIdError`
+- [x] 정상 파일: 파싱 + 반환
+- [x] 파일 부재: throws `CityNotFoundError`
+- [x] 깨진 JSON: throws `CityParseError`
+- [x] 스키마 위반: throws `CitySchemaError`
+- [x] 경로 traversal 시도 (`../../etc/passwd`): throws `InvalidCityIdError`
 
 #### `writeCity(id, data, source): Promise<void>`
 
-- [ ] 새 파일 작성
-- [ ] 기존 파일 덮어쓰기
-- [ ] `lastUpdated` 자동 갱신 (현재 시각)
-- [ ] `sources[]` 에 (category, name, url, accessedAt) 추가 (기존 유지)
-- [ ] 같은 source 가 이미 있으면 accessedAt 만 갱신
-- [ ] 스키마 위반 데이터 입력 시 throws (write 실패)
-- [ ] atomic write (임시 파일 → rename) — 부분 쓰기 방지
-- [ ] 디렉터리 부재 시 자동 생성
+- [x] 새 파일 작성
+- [x] 기존 파일 덮어쓰기
+- [x] `lastUpdated` 자동 갱신 (현재 시각)
+- [x] `sources[]` 에 (category, name, url, accessedAt) 추가 (기존 유지)
+- [x] 같은 source 가 이미 있으면 accessedAt 만 갱신
+- [x] 스키마 위반 데이터 입력 시 throws (write 실패)
+- [ ] atomic write (임시 파일 → rename) — 부분 쓰기 방지 (구현 완료, 테스트는 파일시스템 검증 어려움)
+- [x] 디렉터리 부재 시 자동 생성
 
 #### `classifyChange(oldVal, newVal)` (in `_outlier.mjs`)
 
-- [ ] `(null, null)` → `'commit'`
-- [ ] `(null, 100)` → `'new'` (신규 항목)
-- [ ] `(100, null)` → `'pr-removed'` (제거)
-- [ ] `(100, 100)` → `'commit'` (변동 0)
-- [ ] `(100, 104)` → `'commit'` (4% 변동)
-- [ ] `(100, 104.99)` → `'commit'` (4.99%)
-- [ ] `(100, 105)` → `'pr-update'` (정확히 5%)
-- [ ] `(100, 105.01)` → `'pr-update'`
-- [ ] `(100, 129.99)` → `'pr-update'` (29.99%)
-- [ ] `(100, 130)` → `'pr-outlier'` (정확히 30%)
-- [ ] `(100, 130.01)` → `'pr-outlier'`
-- [ ] `(100, 200)` → `'pr-outlier'` (100% 변동)
-- [ ] `(100, 0)` → `'pr-outlier'` (0 으로 변동, 100%)
-- [ ] `(100, 96)` → `'commit'` (-4%)
-- [ ] `(100, 95)` → `'pr-update'` (-5%)
-- [ ] `(100, 70)` → `'pr-outlier'` (-30%)
-- [ ] `(0, 100)` → `'new'` (0 도 null 처럼 처리할지 정책 명시: **0 은 정상 값, new 아님**, division by zero 회피)
-- [ ] `(0, 0)` → `'commit'`
-- [ ] 음수 입력 → throws (cost 데이터에 음수 미허용)
-- [ ] `NaN` 입력 → throws
+- [x] `(null, null)` → `'commit'`
+- [x] `(null, 100)` → `'new'` (신규 항목)
+- [x] `(100, null)` → `'pr-removed'` (제거)
+- [x] `(100, 100)` → `'commit'` (변동 0)
+- [x] `(100, 104)` → `'commit'` (4% 변동)
+- [x] `(100, 104.99)` → `'commit'` (4.99%)
+- [x] `(100, 105)` → `'pr-update'` (정확히 5%)
+- [x] `(100, 105.01)` → `'pr-update'`
+- [x] `(100, 129.99)` → `'pr-update'` (29.99%)
+- [x] `(100, 130)` → `'pr-outlier'` (정확히 30%)
+- [x] `(100, 130.01)` → `'pr-outlier'`
+- [x] `(100, 200)` → `'pr-outlier'` (100% 변동)
+- [x] `(100, 0)` → `'pr-outlier'` (0 으로 변동, 100%)
+- [x] `(100, 96)` → `'commit'` (-4%)
+- [x] `(100, 95)` → `'pr-update'` (-5%)
+- [x] `(100, 70)` → `'pr-outlier'` (-30%)
+- [x] `(0, 100)` → `'new'` (0 도 null 처럼 처리할지 정책 명시: **0 은 정상 값, new 아님**, division by zero 회피)
+- [x] `(0, 0)` → `'commit'`
+- [x] 음수 입력 → throws (cost 데이터에 음수 미허용)
+- [x] `NaN` 입력 → throws
 
 #### `diffCities(oldData, newData): ChangeRecord[]` (in `_diff.mjs`)
 
-- [ ] 변경 없음: 빈 배열
-- [ ] 단일 필드 변경: 1 record
-- [ ] 다중 필드 변경: 다 record (각 필드별)
-- [ ] 신규 필드 (oldData 에 없음): record with oldValue=null
-- [ ] 제거된 필드: record with newValue=null
-- [ ] 중첩 필드 (`food.groceries.milk1L`): dot-path 로 표현
-- [ ] 배열 변경 (`tuition[]`): 각 원소별 record
-- [ ] 메타 필드 (`lastUpdated`, `sources`): 변경 추적 제외 (값만)
+- [x] 변경 없음: 빈 배열
+- [x] 단일 필드 변경: 1 record
+- [x] 다중 필드 변경: 다 record (각 필드별)
+- [x] 신규 필드 (oldData 에 없음): record with oldValue=null
+- [x] 제거된 필드: record with newValue=null
+- [x] 중첩 필드 (`food.groceries.milk1L`): dot-path 로 표현
+- [x] 배열 변경 (`tuition[]`): 각 원소별 record
+- [x] 메타 필드 (`lastUpdated`, `sources`): 변경 추적 제외 (값만)
 
 #### `loadFixture(name)`, `mockFetch(spec)` 등 테스트 헬퍼
 
-- [ ] 가용성·일관성 self-test
+- [ ] 가용성·일관성 self-test (후속 step 에서 구현)
 
 ### 9-A.2 출처별 fetch 스크립트 — 표준 패턴
 
@@ -2227,54 +2237,54 @@ afterEach(() => {
 
 #### `kr_molit.mjs` (국토부 실거래가)
 
-- [ ] 정상 응답: 서울 25개 자치구 평균 → share/studio/oneBed/twoBed 매핑
-- [ ] 매물 면적 기반 카테고리 매핑 정확 (10㎡ 이하 = share, 11~30㎡ = studio 등)
-- [ ] 응답에 매물 0건 (이상 케이스): errors + 기존값 유지
-- [ ] 자치구별 데이터 일부 결측: 가용 자치구 평균
-- [ ] XML 응답 파싱 (공공데이터포털 일부 XML)
-- [ ] API 키 만료 (200 with error message in body): errors
+- [x] 정상 응답: 서울 25개 자치구 평균 → share/studio/oneBed/twoBed 매핑
+- [x] 매물 면적 기반 카테고리 매핑 정확 (10㎡ 이하 = share, 11~30㎡ = studio 등)
+- [x] 응답에 매물 0건 (이상 케이스): errors + 기존값 유지
+- [x] 자치구별 데이터 일부 결측: 가용 자치구 평균
+- [x] XML 응답 파싱 (공공데이터포털 일부 XML)
+- [x] API 키 만료 (200 with error message in body): errors
 
 #### `kr_kca.mjs` (한국소비자원 참가격)
 
-- [ ] 32개 품목 중 8개 표준 매핑 (milk1L, eggs12, rice1kg, chicken1kg, bread, onion1kg, apple1kg, ramen)
-- [ ] ramen 매핑: "신라면" 키워드 검색 (없으면 일반 라면 평균)
-- [ ] 매핑 누락 품목: errors + 기존값 유지
-- [ ] 가격 단위 처리 (개당·100g당 등)
+- [x] 32개 품목 중 8개 표준 매핑 (milk1L, eggs12, rice1kg, chicken1kg, bread, onion1kg, apple1kg, ramen)
+- [x] ramen 매핑: "신라면" 키워드 검색 (없으면 일반 라면 평균)
+- [x] 매핑 누락 품목: errors + 기존값 유지
+- [x] 가격 단위 처리 (개당·100g당 등)
 
 #### `kr_kosis.mjs` (통계청 외식·교통 CPI)
 
-- [ ] 외식 CPI 추출 → restaurantMeal 변환 (정적 보정계수 적용)
-- [ ] 카페·음료 CPI → cafe 변환
-- [ ] CPI 시계열 응답: 최신 월 사용
-- [ ] 통계 ID 정확
+- [x] 외식 CPI 추출 → restaurantMeal 변환 (정적 보정계수 적용)
+- [x] 카페·음료 CPI → cafe 변환
+- [x] CPI 시계열 응답: 최신 월 사용
+- [x] 통계 ID 정확
 
 #### `kr_seoul_metro.mjs` (서울교통공사)
 
-- [ ] 정기권·1회권·택시 기본요금 fetch
-- [ ] HTML 페이지 fetch + parse (table 또는 JSON-LD)
-- [ ] 페이지 구조 변경 (selector 실패): errors + 기존값 유지
+- [x] 정기권·1회권·택시 기본요금 fetch
+- [x] HTML 페이지 fetch + parse (table 또는 JSON-LD)
+- [x] 페이지 구조 변경 (selector 실패): errors + 기존값 유지
 
 ### 9-A.4 출처별 — 캐나다 (5 scripts)
 
 #### `ca_cmhc.mjs`
 
-- [ ] CMHC Rental Market Survey CSV 파싱
-- [ ] Vancouver/Toronto/Montreal CMA 평균 임대료 추출
-- [ ] # bedrooms 별 매핑 (Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → 별도 추정)
-- [ ] CSV 인코딩 (UTF-8 BOM) 처리
+- [x] StatCan WDS API 응답 파싱 (CMHC 데이터 활용)
+- [x] Vancouver/Toronto/Montreal CMA 평균 임대료 추출
+- [x] # bedrooms 별 매핑 (Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정)
+- [x] 3개 도시 동시 갱신 지원
 
 #### `ca_statcan.mjs` (StatCan WDS API)
 
-- [ ] CPI Vector ID 별 fetch
-- [ ] Vancouver/Toronto/Montreal CMA 데이터
-- [ ] 식재료 8개 매핑 (Vector ID 매핑 표 별도 fixture)
-- [ ] 외식 CPI 매핑
+- [x] CPI Vector ID 별 fetch
+- [x] Vancouver/Toronto/Montreal CMA 데이터
+- [x] 식재료 8개 매핑 (Vector ID 매핑 표 상수 정의)
+- [x] 외식 CPI 매핑 + 정적 fallback
 
 #### `ca_translink.mjs`, `ca_ttc.mjs`, `ca_stm.mjs`
 
-- [ ] 각 공식 fare page HTML fetch + parse
-- [ ] 1-zone monthly pass / single ride / taxi 추출
-- [ ] 페이지 구조 변경 시 graceful fail
+- [x] 각 공식 fare page HTML fetch + parse
+- [x] 1-zone monthly pass / single ride / taxi 추출
+- [x] 페이지 구조 변경 시 정적 fallback (graceful fail)
 
 ### 9-A.5 출처별 — 미국 (4 scripts)
 
@@ -2394,11 +2404,41 @@ afterEach(() => {
 
 #### `fx_backup.mjs`
 
-- [ ] ECB Exchange Rates API fetch (XML)
-- [ ] EUR base → KRW 환산
-- [ ] 한국은행 환율 fetch (정적 분기 fallback 갱신)
-- [ ] `data/fx_fallback.json` 갱신
-- [ ] 응답 shape 검증
+**parseEcbXml(xml):**
+
+- [x] 정상 XML 파싱: EUR base rates 추출 (EUR=1 포함)
+- [x] 빈 XML: `{ EUR: 1 }` 만 반환
+- [x] 유효하지 않은 rate 무시 (non-numeric)
+- [x] rate=0 무시
+- [x] 음수 rate 무시
+
+**convertToKrwBase(eurRates):**
+
+- [x] EUR base → KRW base 변환 (1 X = N KRW)
+- [x] KRW 누락 시 throws (cannot convert)
+- [x] KRW=0 시 throws
+- [x] 여러 통화 동시 변환
+- [x] 비정상 rate (NaN, 음수) 필터링
+
+**refresh(opts):**
+
+- [x] ECB fetch 성공 → `data/static/fx_fallback.json` 갱신 (schemaVersion=1, baseCurrency=KRW, asOf, rates)
+- [x] dryRun=true: 파일 미갱신
+- [ ] ECB fetch 실패 → 에러 반환 (retries exhausted) — fetchWithRetry 내부 테스트로 커버
+- [x] ECB 빈 응답 → 에러 반환
+- [x] ECB 응답에 KRW 누락 → 에러 반환
+- [x] 기존 fx_fallback.json 대비 changes 계산 (pctChange 포함)
+- [x] TARGET_CURRENCIES 외 통화 필터링 (XYZ 등 비표준 제외)
+
+**constants:**
+
+- [x] ECB_DAILY_URL = `https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml`
+- [x] TARGET_CURRENCIES 9개 통화 (USD, CAD, EUR, GBP, AUD, JPY, SGD, VND, AED)
+
+**API 키 요구 사항 (코멘트):**
+
+- ECB: 불필요 (공개 XML)
+- 한국은행 ECOS API: 인증키 필요 (https://ecos.bok.or.kr/api) — 본 스크립트 미사용
 
 ### 9-A.11 빌드·검증 스크립트
 

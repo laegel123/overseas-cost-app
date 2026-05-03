@@ -1,0 +1,73 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "data-automation",
+  "steps": [
+    {
+      "step": 0,
+      "name": "step-0",
+      "status": "completed",
+      "started_at": "2026-05-02T21:41:58+0900",
+      "completed_at": "2026-05-02T21:56:42+0900"
+    },
+    {
+      "step": 1,
+      "name": "fx",
+      "status": "completed",
+      "started_at": "2026-05-02T21:56:42+0900",
+      "completed_at": "2026-05-02T22:09:03+0900"
+    },
+    {
+      "step": 2,
+      "name": "korea",
+      "status": "completed",
+      "started_at": "2026-05-02T22:09:03+0900",
+      "completed_at": "2026-05-02T22:39:02+0900"
+    },
+    {
+      "step": 3,
+      "name": "canada",
+      "status": "completed",
+      "started_at": "2026-05-02T23:15:00+0900",
+      "completed_at": "2026-05-02T23:06:38+0900"
+    },
+    {
+      "step": 4,
+      "name": "step-4",
+      "status": "error",
+      "started_at": "2026-05-02T23:06:39+0900",
+      "error_message": "[3회 시도 후 실패] Step did not update status",
+      "failed_at": "2026-05-03T01:23:34+0900"
+    },
+    {
+      "step": 5,
+      "name": "step-5",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "step-6",
+      "status": "pending"
+    },
+    {
+      "step": 7,
+      "name": "step-7",
+      "status": "pending"
+    },
+    {
+      "step": 8,
+      "name": "step-8",
+      "status": "pending"
+    },
+    {
+      "step": 9,
+      "name": "step-9",
+      "status": "pending"
+    },
+    {
+      "step": 10,
+      "name": "step-10",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-05-02T21:41:58+0900"
+}

@@ -1,0 +1,56 @@
+{
+  "id": "toronto",
+  "name": {
+    "ko": "토론토",
+    "en": "Toronto"
+  },
+  "country": "CA",
+  "currency": "CAD",
+  "region": "na",
+  "lastUpdated": "2026-05-02",
+  "rent": {
+    "share": 1235,
+    "studio": 1900,
+    "oneBed": 2200,
+    "twoBed": 2900
+  },
+  "food": {
+    "restaurantMeal": 21,
+    "cafe": 5.8,
+    "groceries": {
+      "milk1L": 3.2,
+      "eggs12": 4.4,
+      "rice1kg": 3.6,
+      "chicken1kg": 14.5,
+      "bread": 3.4,
+      "onion1kg": 2.6,
+      "apple1kg": 4.3,
+      "ramen": 1.4
+    }
+  },
+  "transport": {
+    "monthlyPass": 156.3,
+    "singleRide": 3.5,
+    "taxiBase": 4.75
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)",
+      "url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market",
+      "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "food",
+      "name": "Statistics Canada CPI (static fallback, ADR-059)",
+      "url": "https://www150.statcan.gc.ca/",
+      "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "transport",
+      "name": "TTC (Toronto Transit Commission)",
+      "url": "https://www.ttc.ca/",
+      "accessedAt": "2026-05-02"
+    }
+  ]
+}

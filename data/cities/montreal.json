@@ -1,0 +1,56 @@
+{
+  "id": "montreal",
+  "name": {
+    "ko": "몬트리올",
+    "en": "Montreal"
+  },
+  "country": "CA",
+  "currency": "CAD",
+  "region": "na",
+  "lastUpdated": "2026-05-02",
+  "rent": {
+    "share": 1105,
+    "studio": 1700,
+    "oneBed": 1950,
+    "twoBed": 2500
+  },
+  "food": {
+    "restaurantMeal": 19,
+    "cafe": 5.5,
+    "groceries": {
+      "milk1L": 3.1,
+      "eggs12": 4.2,
+      "rice1kg": 3.5,
+      "chicken1kg": 14,
+      "bread": 3.3,
+      "onion1kg": 2.5,
+      "apple1kg": 4,
+      "ramen": 1.3
+    }
+  },
+  "transport": {
+    "monthlyPass": 94,
+    "singleRide": 3.75,
+    "taxiBase": 3.85
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)",
+      "url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market",
+      "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "food",
+      "name": "Statistics Canada CPI (static fallback, ADR-059)",
+      "url": "https://www150.statcan.gc.ca/",
+      "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "transport",
+      "name": "STM (Société de transport de Montréal)",
+      "url": "https://www.stm.info/",
+      "accessedAt": "2026-05-02"
+    }
+  ]
+}

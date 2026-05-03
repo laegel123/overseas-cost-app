@@ -1,0 +1,152 @@
+/**
+ * _outlier.mjs 테스트.
+ * TESTING.md §9-A.1 classifyChange 인벤토리 100% 커버.
+ */
+
+import { classifyChange, computePctChange } from '../_outlier.mjs';
+
+describe('classifyChange', () => {
+  describe('null 처리', () => {
+    it('(null, null) → commit', () => {
+      expect(classifyChange(null, null)).toBe('commit');
+    });
+
+    it('(null, 100) → new (신규 항목)', () => {
+      expect(classifyChange(null, 100)).toBe('new');
+    });
+
+    it('(100, null) → pr-removed (제거)', () => {
+      expect(classifyChange(100, null)).toBe('pr-removed');
+    });
+  });
+
+  describe('변동 없음', () => {
+    it('(100, 100) → commit (변동 0)', () => {
+      expect(classifyChange(100, 100)).toBe('commit');
+    });
+
+    it('(0, 0) → commit', () => {
+      expect(classifyChange(0, 0)).toBe('commit');
+    });
+  });
+
+  describe('< 5% 경계 (commit)', () => {
+    it('(100, 104) → commit (4% 변동)', () => {
+      expect(classifyChange(100, 104)).toBe('commit');
+    });
+
+    it('(100, 104.99) → commit (4.99%)', () => {
+      expect(classifyChange(100, 104.99)).toBe('commit');
+    });
+
+    it('(100, 96) → commit (-4%)', () => {
+      expect(classifyChange(100, 96)).toBe('commit');
+    });
+  });
+
+  describe('5~30% 경계 (pr-update)', () => {
+    it('(100, 105) → pr-update (정확히 5%)', () => {
+      expect(classifyChange(100, 105)).toBe('pr-update');
+    });
+
+    it('(100, 105.01) → pr-update', () => {
+      expect(classifyChange(100, 105.01)).toBe('pr-update');
+    });
+
+    it('(100, 129.99) → pr-update (29.99%)', () => {
+      expect(classifyChange(100, 129.99)).toBe('pr-update');
+    });
+
+    it('(100, 95) → pr-update (-5%)', () => {
+      expect(classifyChange(100, 95)).toBe('pr-update');
+    });
+  });
+
+  describe('≥ 30% 경계 (pr-outlier)', () => {
+    it('(100, 130) → pr-outlier (정확히 30%)', () => {
+      expect(classifyChange(100, 130)).toBe('pr-outlier');
+    });
+
+    it('(100, 130.01) → pr-outlier', () => {
+      expect(classifyChange(100, 130.01)).toBe('pr-outlier');
+    });
+
+    it('(100, 200) → pr-outlier (100% 변동)', () => {
+      expect(classifyChange(100, 200)).toBe('pr-outlier');
+    });
+
+    it('(100, 0) → pr-outlier (0 으로 변동, -100%)', () => {
+      expect(classifyChange(100, 0)).toBe('pr-outlier');
+    });
+
+    it('(100, 70) → pr-outlier (-30%)', () => {
+      expect(classifyChange(100, 70)).toBe('pr-outlier');
+    });
+  });
+
+  describe('0 값 처리', () => {
+    it('(0, 100) → new (0 에서 시작은 new 처리)', () => {
+      expect(classifyChange(0, 100)).toBe('new');
+    });
+  });
+
+  describe('에러 케이스', () => {
+    it('음수 oldVal → throws', () => {
+      expect(() => classifyChange(-1, 100)).toThrow('must be non-negative');
+    });
+
+    it('음수 newVal → throws', () => {
+      expect(() => classifyChange(100, -1)).toThrow('must be non-negative');
+    });
+
+    it('NaN oldVal → throws', () => {
+      expect(() => classifyChange(NaN, 100)).toThrow('must not be NaN');
+    });
+
+    it('NaN newVal → throws', () => {
+      expect(() => classifyChange(100, NaN)).toThrow('must not be NaN');
+    });
+
+    it('Infinity oldVal → throws', () => {
+      expect(() => classifyChange(Infinity, 100)).toThrow('must be finite');
+    });
+
+    it('Infinity newVal → throws', () => {
+      expect(() => classifyChange(100, Infinity)).toThrow('must be finite');
+    });
+  });
+});
+
+describe('computePctChange', () => {
+  it('정상 증가: (100, 150) → 50', () => {
+    expect(computePctChange(100, 150)).toBe(50);
+  });
+
+  it('정상 감소: (100, 80) → -20', () => {
+    expect(computePctChange(100, 80)).toBe(-20);
+  });
+
+  it('변동 없음: (100, 100) → 0', () => {
+    expect(computePctChange(100, 100)).toBe(0);
+  });
+
+  it('null → null: 0', () => {
+    expect(computePctChange(null, null)).toBe(0);
+  });
+
+  it('null → 값: 100 (신규)', () => {
+    expect(computePctChange(null, 100)).toBe(100);
+  });
+
+  it('값 → null: -100 (제거)', () => {
+    expect(computePctChange(100, null)).toBe(-100);
+  });
+
+  it('0 → 값: 100', () => {
+    expect(computePctChange(0, 100)).toBe(100);
+  });
+
+  it('0 → 0: 0', () => {
+    expect(computePctChange(0, 0)).toBe(0);
+  });
+});

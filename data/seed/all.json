@@ -5,30 +5,32 @@
   "cities": {
     "seoul": {
       "id": "seoul",
-      "name": { "ko": "서울", "en": "Seoul" },
+      "name": {
+        "ko": "서울",
+        "en": "Seoul"
+      },
       "country": "KR",
       "currency": "KRW",
       "region": "asia",
-      "lastUpdated": "2026-04-01",
+      "lastUpdated": "2026-05-02",
       "rent": {
-        "share": 500000,
-        "studio": 700000,
-        "oneBed": 900000,
-        "twoBed": 1500000,
-        "deposit": 10000000
+        "share": 350000,
+        "studio": 650000,
+        "oneBed": 1200000,
+        "twoBed": 1800000
       },
       "food": {
-        "restaurantMeal": 9000,
-        "cafe": 5000,
+        "restaurantMeal": 10400,
+        "cafe": 5900,
         "groceries": {
-          "milk1L": 3000,
-          "eggs12": 5500,
-          "rice1kg": 4500,
+          "milk1L": 3200,
+          "eggs12": 2600,
+          "rice1kg": 2750,
           "chicken1kg": 12000,
-          "bread": 4000,
-          "onion1kg": 3500,
+          "bread": 3500,
+          "onion1kg": 2500,
           "apple1kg": 8000,
-          "ramen": 950
+          "ramen": 900
         }
       },
       "transport": {
@@ -39,27 +41,36 @@
       "sources": [
         {
           "category": "rent",
-          "name": "국토교통부 실거래가",
+          "name": "국토교통부 실거래가 공개시스템",
           "url": "https://rt.molit.go.kr/",
-          "accessedAt": "2026-04-01"
+          "accessedAt": "2026-05-02"
         },
         {
           "category": "food",
           "name": "한국소비자원 참가격",
           "url": "https://www.price.go.kr/",
-          "accessedAt": "2026-04-01"
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "food",
+          "name": "통계청 KOSIS 소비자물가지수",
+          "url": "https://kosis.kr/",
+          "accessedAt": "2026-05-02"
         },
         {
           "category": "transport",
           "name": "서울교통공사",
-          "url": "https://www.seoulmetro.co.kr/",
-          "accessedAt": "2026-04-01"
+          "url": "http://www.seoulmetro.co.kr/",
+          "accessedAt": "2026-05-02"
         }
       ]
     },
     "vancouver": {
       "id": "vancouver",
-      "name": { "ko": "밴쿠버", "en": "Vancouver" },
+      "name": {
+        "ko": "밴쿠버",
+        "en": "Vancouver"
+      },
       "country": "CA",
       "currency": "CAD",
       "region": "na",
@@ -91,13 +102,30 @@
         "taxiBase": 3.5
       },
       "tuition": [
-        { "school": "UBC", "level": "undergrad", "annual": 45000 },
-        { "school": "SFU", "level": "undergrad", "annual": 35000 }
+        {
+          "school": "UBC",
+          "level": "undergrad",
+          "annual": 45000
+        },
+        {
+          "school": "SFU",
+          "level": "undergrad",
+          "annual": 35000
+        }
       ],
       "tax": [
-        { "annualSalary": 60000, "takeHomePctApprox": 0.74 },
-        { "annualSalary": 80000, "takeHomePctApprox": 0.7 },
-        { "annualSalary": 100000, "takeHomePctApprox": 0.66 }
+        {
+          "annualSalary": 60000,
+          "takeHomePctApprox": 0.74
+        },
+        {
+          "annualSalary": 80000,
+          "takeHomePctApprox": 0.7
+        },
+        {
+          "annualSalary": 100000,
+          "takeHomePctApprox": 0.66
+        }
       ],
       "visa": {
         "studentApplicationFee": 150,

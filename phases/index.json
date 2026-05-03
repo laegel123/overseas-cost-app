@@ -34,6 +34,12 @@
       "dir": "screens",
       "status": "completed",
       "completed_at": "2026-05-02T14:40:17+0900"
+    },
+    {
+      "dir": "data-automation",
+      "status": "error",
+      "started_at": "2026-05-02T21:41:58+0900",
+      "failed_at": "2026-05-03T01:23:34+0900"
     }
   ]
 }
