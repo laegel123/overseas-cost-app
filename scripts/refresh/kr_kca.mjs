@@ -101,7 +101,8 @@ export function normalizePrice(itemName, price, unit) {
 
   let normalizedPrice = price;
 
-  if (mapping.targetUnit && mapping.unit !== mapping.targetUnit) {
+  // mapping.targetUnit 이 정의된 경우만 단위 환산 — undefined 면 mapping.unit == basePrice 단위.
+  if (mapping.targetUnit !== undefined) {
     normalizedPrice = (price / unit) * mapping.targetUnit;
   }
 

@@ -10,7 +10,7 @@
  * Vector ID: StatCan Table 18-10-0004 (Consumer Price Index, monthly)
  */
 
-import { fetchWithRetry, readCity, writeCity, createCitySeed} from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage} from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const STATCAN_WDS_BASE = 'https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods';
@@ -196,7 +196,7 @@ export default async function refresh(opts = {}) {
         oldData = await readCity(cityId);
       } catch (err) {
         if (err?.code !== 'CITY_NOT_FOUND') {
-          errors.push({ cityId, reason: `Failed to read existing data: ${err?.message}` });
+          errors.push({ cityId, reason: `Failed to read existing data: ${redactErrorMessage(String(err?.message ?? ""))}` });
         }
       }
 
@@ -233,7 +233,7 @@ export default async function refresh(opts = {}) {
           await writeCity(cityId, updatedData, SOURCE);
           updatedCities.push(cityId);
         } catch (err) {
-          errors.push({ cityId, reason: `Write failed: ${err?.message ?? 'unknown'}` });
+          errors.push({ cityId, reason: `Write failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
         }
       } else if (hasChanges) {
         updatedCities.push(cityId);
@@ -272,9 +272,9 @@ export default async function refresh(opts = {}) {
     for (const cityId of targetCities) {
       const staticPrices = STATIC_PRICES[cityId];
       if (staticPrices) {
-        apiErrors.push({ cityId, reason: `StatCan API failed, using static fallback: ${err?.message}` });
+        apiErrors.push({ cityId, reason: `StatCan API failed, using static fallback: ${redactErrorMessage(String(err?.message ?? ""))}` });
       } else {
-        apiErrors.push({ cityId, reason: `StatCan API fetch failed: ${err?.message ?? 'unknown'}` });
+        apiErrors.push({ cityId, reason: `StatCan API fetch failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
       }
     }
 
@@ -324,7 +324,7 @@ export default async function refresh(opts = {}) {
       oldData = await readCity(cityId);
     } catch (err) {
       if (err?.code !== 'CITY_NOT_FOUND') {
-        errors.push({ cityId, reason: `Failed to read existing data: ${err?.message}` });
+        errors.push({ cityId, reason: `Failed to read existing data: ${redactErrorMessage(String(err?.message ?? ""))}` });
       }
     }
 
@@ -363,7 +363,7 @@ export default async function refresh(opts = {}) {
         await writeCity(cityId, updatedData, SOURCE);
         updatedCities.push(cityId);
       } catch (err) {
-        errors.push({ cityId, reason: `Write failed: ${err?.message ?? 'unknown'}` });
+        errors.push({ cityId, reason: `Write failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
       }
     } else if (hasChanges) {
       updatedCities.push(cityId);

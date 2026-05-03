@@ -118,8 +118,10 @@ export default async function refresh(opts = {}) {
 
   const errors = [];
   const allItems = [];
+  // 국토부 실거래가는 통상 1~2개월 지연 공개 — 전달 기준으로 조회.
   const now = new Date();
-  const dealYm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const prev = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const dealYm = `${prev.getFullYear()}${String(prev.getMonth() + 1).padStart(2, '0')}`;
 
   // 25개 자치구 병렬 fetch — concurrency 5 chunks (data.go.kr rate limit 보호 + GitHub Actions 6분 timeout 회피).
   const CONCURRENCY = 5;
@@ -173,7 +175,9 @@ export default async function refresh(opts = {}) {
   };
 
   if (allItems.length === 0) {
-    errors.push({ cityId: 'seoul', reason: 'No rental data found for any district' });
+    // NO_DATA — 1-2개월 지연 공개 특성상 일시적으로 발생 가능. errors 에 기록하되 워크플로우 fail 은 회피
+    // (caller 가 errors[] 만 보고 실패 처리하지 않도록 prefix 로 구분).
+    errors.push({ cityId: 'seoul', reason: 'WARN: No rental data for previous month (MOLIT publication lag, retry next cycle)' });
     return {
       source: 'kr_molit',
       cities: [],

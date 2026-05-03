@@ -10,7 +10,7 @@
  * 방법: HTML fetch + parse (정적 fallback 포함).
  */
 
-import { readCity, writeCity, createCitySeed} from './_common.mjs';
+import { readCity, writeCity, createCitySeed, redactErrorMessage} from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const STM_FARE_URL = 'https://www.stm.info/en/info/fares';
@@ -112,7 +112,7 @@ export default async function refresh(opts = {}) {
     } catch (err) {
       errors.push({
         cityId,
-        reason: `STM fare fetch failed, using static fallback: ${err?.message ?? 'unknown'}`,
+        reason: `STM fare fetch failed, using static fallback: ${redactErrorMessage(String(err?.message ?? "unknown"))}`,
       });
     }
   }
@@ -122,7 +122,7 @@ export default async function refresh(opts = {}) {
     oldData = await readCity(cityId);
   } catch (err) {
     if (err?.code !== 'CITY_NOT_FOUND') {
-      errors.push({ cityId, reason: `Failed to read existing data: ${err?.message}` });
+      errors.push({ cityId, reason: `Failed to read existing data: ${redactErrorMessage(String(err?.message ?? ""))}` });
     }
   }
 
@@ -147,7 +147,7 @@ export default async function refresh(opts = {}) {
     try {
       await writeCity(cityId, updatedData, SOURCE);
     } catch (err) {
-      errors.push({ cityId, reason: `Write failed: ${err?.message ?? 'unknown'}` });
+      errors.push({ cityId, reason: `Write failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
     }
   }
 

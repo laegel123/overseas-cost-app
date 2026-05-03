@@ -11,7 +11,7 @@
  * API 키 불필요 (공개 데이터).
  */
 
-import { fetchWithRetry, readCity, writeCity, createCitySeed} from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage} from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const METRO_FARE_URL = 'https://www.seoulmetro.co.kr/kr/page.do?menuIdx=354';
@@ -134,7 +134,7 @@ export default async function refresh(opts = {}) {
     } catch (err) {
       errors.push({
         cityId: 'seoul',
-        reason: `Metro fare fetch failed, using static fallback: ${err?.message ?? 'unknown'}`,
+        reason: `Metro fare fetch failed, using static fallback: ${redactErrorMessage(String(err?.message ?? "unknown"))}`,
       });
     }
 
@@ -156,7 +156,7 @@ export default async function refresh(opts = {}) {
     } catch (err) {
       errors.push({
         cityId: 'seoul',
-        reason: `Taxi fare fetch failed, using static fallback: ${err?.message ?? 'unknown'}`,
+        reason: `Taxi fare fetch failed, using static fallback: ${redactErrorMessage(String(err?.message ?? "unknown"))}`,
       });
     }
   }
@@ -166,7 +166,7 @@ export default async function refresh(opts = {}) {
     oldData = await readCity('seoul');
   } catch (err) {
     if (err?.code !== 'CITY_NOT_FOUND') {
-      errors.push({ cityId: 'seoul', reason: `Failed to read existing data: ${err?.message}` });
+      errors.push({ cityId: 'seoul', reason: `Failed to read existing data: ${redactErrorMessage(String(err?.message ?? ""))}` });
     }
   }
 
@@ -191,7 +191,7 @@ export default async function refresh(opts = {}) {
     try {
       await writeCity('seoul', updatedData, SOURCE);
     } catch (err) {
-      errors.push({ cityId: 'seoul', reason: `Write failed: ${err?.message ?? 'unknown'}` });
+      errors.push({ cityId: 'seoul', reason: `Write failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
     }
   }
 

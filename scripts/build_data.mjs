@@ -88,6 +88,9 @@ async function main() {
   }
 
   const now = new Date().toISOString();
+  // 빌드 실행 시점 날짜 — 실제 환율 데이터 fetch 일자가 아님.
+  // 클라이언트는 환율 fetch 시점은 currency.ts 의 lastSync 를 사용해야 함.
+  // (필드명 호환성을 위해 유지 — v1.x 에서 builtAt 으로 rename 검토)
   const fxBaseDate = now.slice(0, 10);
 
   /** @type {import('../src/types/city').AllCitiesData} */

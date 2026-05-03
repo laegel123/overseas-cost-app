@@ -11,7 +11,7 @@
  * Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정
  */
 
-import { fetchWithRetry, readCity, writeCity, createCitySeed} from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage} from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const STATCAN_WDS_BASE = 'https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods';
@@ -56,9 +56,10 @@ export const CITY_CONFIGS = {
 };
 
 // share rent 는 CMHC 가 직접 제공 안 함 — studio × 0.65 추정값. ADR-059 마커.
+// 데이터는 StatCan WDS (Table 34-10-0133) 를 통해 게시되는 CMHC RMS 결과를 사용.
 export const SOURCE = {
   category: 'rent',
-  name: 'CMHC Rental Market Survey (share=studio×0.65 estimated, ADR-059)',
+  name: 'CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)',
   url: 'https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market',
 };
 
@@ -144,7 +145,7 @@ export default async function refresh(opts = {}) {
     vectorData = parseStatCanResponse(data);
   } catch (err) {
     for (const cityId of targetCities) {
-      errors.push({ cityId, reason: `StatCan API fetch failed: ${err?.message ?? 'unknown'}` });
+      errors.push({ cityId, reason: `StatCan API fetch failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
     }
     return { source: 'ca_cmhc', cities: [], fields: [], changes: [], errors };
   }
@@ -168,7 +169,7 @@ export default async function refresh(opts = {}) {
       oldData = await readCity(cityId);
     } catch (err) {
       if (err?.code !== 'CITY_NOT_FOUND') {
-        errors.push({ cityId, reason: `Failed to read existing data: ${err?.message}` });
+        errors.push({ cityId, reason: `Failed to read existing data: ${redactErrorMessage(String(err?.message ?? ""))}` });
       }
     }
 
@@ -195,7 +196,7 @@ export default async function refresh(opts = {}) {
         await writeCity(cityId, updatedData, SOURCE);
         updatedCities.push(cityId);
       } catch (err) {
-        errors.push({ cityId, reason: `Write failed: ${err?.message ?? 'unknown'}` });
+        errors.push({ cityId, reason: `Write failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
       }
     } else if (hasChanges) {
       updatedCities.push(cityId);
