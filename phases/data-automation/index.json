@@ -53,8 +53,10 @@
     },
     {
       "step": 7,
-      "name": "step-7",
-      "status": "pending"
+      "name": "au-jp",
+      "status": "completed",
+      "started_at": "2026-05-03T18:06:49+0900",
+      "completed_at": "2026-05-03T18:13:10+0900"
     },
     {
       "step": 8,
