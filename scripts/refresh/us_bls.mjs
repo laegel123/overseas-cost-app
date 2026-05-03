@@ -226,7 +226,8 @@ export function mapToGroceries(blsData, regionCode, adjustment) {
 
     if (value !== undefined) {
       const converted = config.convert(value);
-      const adjusted = Math.round(converted * adjustment);
+      // round2 — USD 단위 (예: $0.36 milk1L) 의 소수점 보존. ADR-059 단위 정책.
+      const adjusted = round2(converted * adjustment);
 
       switch (key) {
         case 'milk':
@@ -383,9 +384,11 @@ export default async function refresh(opts = {}) {
           },
         };
       } else {
+        // staticPrices 부재 시 USD 적정 fallback (ADR-059 단위 정책 — KRW 스케일 입력 금지).
+        // 5개 도시는 모두 STATIC_PRICES 정의되어 도달 불가 — 도시 추가 시 안전망.
         newFood = {
-          restaurantMeal: staticPrices?.restaurantMeal ?? 2000,
-          cafe: staticPrices?.cafe ?? 600,
+          restaurantMeal: staticPrices?.restaurantMeal ?? 20,
+          cafe: staticPrices?.cafe ?? 5,
           groceries: {
             milk1L: blsGroceries.milk1L || staticPrices?.milk1L || 0,
             eggs12: blsGroceries.eggs12 || staticPrices?.eggs12 || 0,

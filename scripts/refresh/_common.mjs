@@ -70,11 +70,17 @@ export async function fetchWithRetry(url, opts = {}) {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    let cleanupSignal = () => {};
 
     try {
-      const signal = externalSignal
-        ? combineSignals(externalSignal, controller.signal)
-        : controller.signal;
+      let signal;
+      if (externalSignal) {
+        const combined = combineSignals(externalSignal, controller.signal);
+        signal = combined.signal;
+        cleanupSignal = combined.cleanup;
+      } else {
+        signal = controller.signal;
+      }
 
       const response = await fetch(url, { ...fetchInit, signal });
       clearTimeout(timeoutId);
@@ -106,6 +112,9 @@ export async function fetchWithRetry(url, opts = {}) {
       }
 
       lastError = err;
+    } finally {
+      // attempt 종료 시 externalSignal 의 listener 정리 (성공 / 5xx / 네트워크 에러 모두).
+      cleanupSignal();
     }
 
     if (attempt < maxRetries) {
@@ -215,7 +224,7 @@ function updateSources(sources, newSource, accessedAt) {
  * @param {string} ctxId
  * @returns {import('../../src/types/city').CityCostData}
  */
-function validateCityData(data, ctxId) {
+export function validateCityData(data, ctxId) {
   if (typeof data !== 'object' || data === null || Array.isArray(data)) {
     throw createCitySchemaError(`city data must be an object: ${ctxId}`);
   }
@@ -294,15 +303,19 @@ export function redactErrorMessage(message) {
   return message.replace(/https?:\/\/[^\s'"]+/g, (m) => redactSecretsInUrl(m));
 }
 
+/**
+ * 두 AbortSignal 중 하나라도 abort 시 새 controller.signal 도 abort.
+ * retry 루프에서 반복 호출되므로 listener 누적을 막기 위해 cleanup 함수도 반환.
+ * @returns {{signal: AbortSignal, cleanup: () => void}}
+ */
 function combineSignals(signal1, signal2) {
   const controller = new AbortController();
 
   if (signal1.aborted || signal2.aborted) {
     controller.abort();
-    return controller.signal;
+    return { signal: controller.signal, cleanup: () => {} };
   }
 
-  // retry 루프에서 반복 호출되므로 abort 후 listener cleanup 필수.
   const abort = () => {
     controller.abort();
     signal1.removeEventListener('abort', abort);
@@ -312,14 +325,27 @@ function combineSignals(signal1, signal2) {
   signal1.addEventListener('abort', abort, { once: true });
   signal2.addEventListener('abort', abort, { once: true });
 
-  return controller.signal;
+  // 호출자 (fetchWithRetry) 가 attempt 종료 시 cleanup 호출 — 성공 path 에서 listener 누적 방지.
+  const cleanup = () => {
+    signal1.removeEventListener('abort', abort);
+    signal2.removeEventListener('abort', abort);
+  };
+
+  return { signal: controller.signal, cleanup };
 }
 
 /**
- * 도시 seed 데이터 생성 (refresh 스크립트 초기화용 — 도시 JSON 파일 부재 시).
- * 모든 숫자 필드는 0 / null 로 초기화. 호출 후 caller 가 실제 값으로 덮어쓰기.
+ * 도시 seed 데이터 생성 — refresh 스크립트 초기화용 (도시 JSON 파일 부재 시).
+ *
+ * **반환된 객체는 의도적으로 invalid 상태**: `lastUpdated: ''` + `sources: []` 가
+ * `validateCityData` 를 통과하지 못한다. 이는 caller (refresh 스크립트) 가
+ * `writeCity` 호출 시 양쪽 필드를 채우도록 강제하는 안전망 역할.
+ *
+ * 외부 호출 금지 — refresh 스크립트 내부에서만 사용.
+ *
  * @param {{id: string, name: {ko: string, en: string}, country: string, currency: string, region: string}} config
  * @returns {import('../../src/types/city').CityCostData}
+ * @internal
  */
 export function createCitySeed(config) {
   return {

@@ -4,7 +4,7 @@
  * 서울교통공사 운임 정보 → seoul.transport 갱신.
  *
  * 출처: 서울교통공사 + 서울 열린데이터광장
- * API: http://openapi.seoul.go.kr:8088/ (일부 운임 정보)
+ * API: https://openapi.seoul.go.kr:8088/ (일부 운임 정보)
  * HTML: 정적 페이지 fetch + parse
  *
  * 방법: 정기권·1회권·택시 기본요금 공식 페이지 fetch + parse
@@ -26,7 +26,7 @@ export const STATIC_FARES = {
 export const SOURCE = {
   category: 'transport',
   name: '서울교통공사',
-  url: 'http://www.seoulmetro.co.kr/',
+  url: 'https://www.seoulmetro.co.kr/',
 };
 
 /**

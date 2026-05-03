@@ -21,6 +21,8 @@ import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
+import { validateCityData } from './refresh/_common.mjs';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
@@ -61,7 +63,7 @@ async function main() {
         throw new Error(`Invalid JSON in ${file}: ${err.message}`);
       }
 
-      validateCity(parsed, id);
+      validateCityData(parsed, id);
       cities[id] = parsed;
     }
     console.log(`Loaded ${cityFiles.length} city files from data/cities/`);
@@ -74,7 +76,7 @@ async function main() {
     }
 
     for (const [id, data] of Object.entries(seedData.cities)) {
-      validateCity(data, id);
+      validateCityData(data, id);
       cities[id] = data;
     }
     console.log(`Loaded ${Object.keys(cities).length} cities from existing seed`);
@@ -114,47 +116,6 @@ async function atomicWrite(filePath, content) {
   const tmpPath = join(tmpdir(), `build-${randomUUID()}.json`);
   await writeFile(tmpPath, content, 'utf-8');
   await rename(tmpPath, filePath);
-}
-
-/**
- * 간이 스키마 검증.
- * @param {unknown} data
- * @param {string} id
- */
-function validateCity(data, id) {
-  if (typeof data !== 'object' || data === null || Array.isArray(data)) {
-    throw new Error(`${id}: city data must be an object`);
-  }
-
-  const obj = data;
-
-  const requiredStrings = ['id', 'country', 'currency', 'region', 'lastUpdated'];
-  for (const key of requiredStrings) {
-    if (typeof obj[key] !== 'string' || obj[key].length === 0) {
-      throw new Error(`${id}.${key}: missing or invalid`);
-    }
-  }
-
-  if (typeof obj.name !== 'object' || obj.name === null) {
-    throw new Error(`${id}.name: missing or invalid`);
-  }
-  if (typeof obj.name.ko !== 'string' || typeof obj.name.en !== 'string') {
-    throw new Error(`${id}.name: ko and en required`);
-  }
-
-  for (const section of ['rent', 'food', 'transport']) {
-    if (typeof obj[section] !== 'object' || obj[section] === null) {
-      throw new Error(`${id}.${section}: missing or invalid`);
-    }
-  }
-
-  if (!Array.isArray(obj.sources) || obj.sources.length === 0) {
-    throw new Error(`${id}.sources: must be non-empty array`);
-  }
-
-  if (obj.id !== id) {
-    throw new Error(`${id}: id field mismatch (expected "${id}", got "${obj.id}")`);
-  }
 }
 
 main().catch((err) => {
