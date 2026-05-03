@@ -124,7 +124,19 @@ export default async function refresh(opts = {}) {
   const startPeriod = `${startYear}01`;
 
   const itemCodes = Object.values(ITEM_CODES).join(',');
-  const url = `${API_BASE}?method=getList&apiKey=${encodeURIComponent(apiKey)}&orgId=${ORG_ID}&tblId=${TABLE_ID}&itmId=${itemCodes}&prdSe=M&startPrdDe=${startPeriod}&endPrdDe=${endPeriod}&format=json&jsonVD=Y`;
+  const params = new URLSearchParams({
+    method: 'getList',
+    apiKey,
+    orgId: ORG_ID,
+    tblId: TABLE_ID,
+    itmId: itemCodes,
+    prdSe: 'M',
+    startPrdDe: startPeriod,
+    endPrdDe: endPeriod,
+    format: 'json',
+    jsonVD: 'Y',
+  });
+  const url = `${API_BASE}?${params}`;
 
   let cpiItems;
   try {

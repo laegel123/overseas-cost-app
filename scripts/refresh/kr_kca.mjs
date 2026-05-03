@@ -141,7 +141,13 @@ export default async function refresh(opts = {}) {
   }
 
   const errors = [];
-  const url = `${API_BASE}?serviceKey=${encodeURIComponent(apiKey)}&numOfRows=100&pageNo=1&type=json`;
+  const params = new URLSearchParams({
+    serviceKey: apiKey,
+    numOfRows: '100',
+    pageNo: '1',
+    type: 'json',
+  });
+  const url = `${API_BASE}?${params}`;
 
   let priceItems;
   try {

@@ -13,6 +13,11 @@
 
 /**
  * oldVal → newVal 변동폭에 따라 분류.
+ *
+ * 사용 시점: step 10 (GitHub Actions 워크플로우 — refresh-*.yml) 에서 RefreshResult.changes 를
+ * 순회하며 각 change.pctChange 를 본 함수로 분류 → commit / pr-update / pr-outlier 결정.
+ * 현재 step 0–3 의 refresh 스크립트 자체는 본 함수를 호출하지 않음 (워크플로우 단계 책임).
+ *
  * @param {number | null} oldVal
  * @param {number | null} newVal
  * @returns {ChangeType}

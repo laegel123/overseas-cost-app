@@ -126,7 +126,13 @@ export default async function refresh(opts = {}) {
   // 25개 자치구 병렬 fetch — concurrency 5 chunks (data.go.kr rate limit 보호 + GitHub Actions 6분 timeout 회피).
   const CONCURRENCY = 5;
   const fetchOne = async (lawd) => {
-    const url = `${API_BASE}?serviceKey=${encodeURIComponent(apiKey)}&LAWD_CD=${lawd}&DEAL_YMD=${dealYm}&numOfRows=1000`;
+    const params = new URLSearchParams({
+      serviceKey: apiKey,
+      LAWD_CD: lawd,
+      DEAL_YMD: dealYm,
+      numOfRows: '1000',
+    });
+    const url = `${API_BASE}?${params}`;
     try {
       const response = await fetchWithRetry(url, { timeoutMs: 20000 });
       const xml = await response.text();

@@ -286,9 +286,10 @@ export default async function refresh(opts = {}) {
     // ?? 100 — vector 응답 부재 시 CPI 기준년도 (= 100) 로 fallback.
     // cpiToPrice(100, base) === base 이므로 staticPrice 가 그대로 사용됨.
     // 주의: 0 으로 변경 금지 (cpiToPrice(0, base) === 0 으로 모든 가격이 0 이 됨).
+    // restaurantMeal / cafe / groceries 5종 — CPI 보정. onion / apple / ramen — CPI 부재로 static.
     const newFood = {
-      restaurantMeal: staticPrices.restaurantMeal,
-      cafe: staticPrices.cafe,
+      restaurantMeal: cpiToPrice(vectorData.get(vectors.restaurantMeal) ?? 100, staticPrices.restaurantMeal),
+      cafe: cpiToPrice(vectorData.get(vectors.cafe) ?? 100, staticPrices.cafe),
       groceries: {
         milk1L: cpiToPrice(vectorData.get(vectors.milk1L) ?? 100, staticPrices.milk1L),
         eggs12: cpiToPrice(vectorData.get(vectors.eggs12) ?? 100, staticPrices.eggs12),
@@ -300,15 +301,6 @@ export default async function refresh(opts = {}) {
         ramen: staticPrices.ramen,
       },
     };
-
-    const restaurantCpi = vectorData.get(vectors.restaurantMeal);
-    const cafeCpi = vectorData.get(vectors.cafe);
-    if (restaurantCpi) {
-      newFood.restaurantMeal = cpiToPrice(restaurantCpi, staticPrices.restaurantMeal);
-    }
-    if (cafeCpi) {
-      newFood.cafe = cpiToPrice(cafeCpi, staticPrices.cafe);
-    }
 
     let oldData;
     try {
