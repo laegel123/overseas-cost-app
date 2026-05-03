@@ -39,8 +39,10 @@
     },
     {
       "step": 5,
-      "name": "step-5",
-      "status": "pending"
+      "name": "uk-de",
+      "status": "completed",
+      "started_at": "2026-05-03T17:50:16+0900",
+      "completed_at": "2026-05-03T18:30:00+0900"
     },
     {
       "step": 6,

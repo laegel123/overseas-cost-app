@@ -2330,25 +2330,43 @@ afterEach(() => {
 
 #### `uk_ons.mjs`
 
-- [ ] ONS Private Rental Market Statistics API (London)
-- [ ] CPI by item (COICOP 코드 매핑)
+- [x] ONS Private Rental Market Statistics API (London)
+- [x] CPI by item (COICOP 코드 매핑)
+- [x] parseOnsValue: 마지막 observation 추출
+- [x] mapToRent: share = studio × 0.65
+- [x] mapToGroceries: CPI 데이터 + static fallback
+- [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 
 #### `uk_tfl.mjs`
 
-- [ ] TfL Unified API (Zone 1-2 monthly/single)
-- [ ] taxiBase 별도 (black cab 정적)
+- [x] TfL Unified API (Zone 1-2 monthly/single)
+- [x] taxiBase 별도 (black cab 정적)
+- [x] checkTflApiStatus: API connectivity 확인
+- [x] getTransportFares: static 값 반환
+- [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 
 ### 9-A.7 출처별 — 유럽 (6 scripts)
 
 #### `de_destatis.mjs`
 
-- [ ] GENESIS API XML 응답 파싱
-- [ ] Berlin / Munich Bundesland 매핑
-- [ ] 임차료 + CPI
+- [x] GENESIS API XML 응답 파싱
+- [x] Berlin / Munich Bundesland 매핑
+- [x] 임차료 + CPI
+- [x] parseGenesisXml: wert 태그 추출 (독일 소수점 콤마 지원)
+- [x] getRentForCity: 도시별 보정계수 적용
+- [x] getGroceriesForCity: 도시별 보정계수 적용
+- [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 
-#### `de_transit.mjs`, `fr_ratp.mjs`, `nl_gvb.mjs`
+#### `de_transit.mjs`
 
-- [ ] BVG / MVV / RATP / GVB 각 fare page fetch + parse
+- [x] BVG (베를린) / MVV (뮌헨) fare page fetch
+- [x] getTransportForCity: 도시별 요금 반환
+- [x] checkBvgFarePage / checkMvvFarePage: connectivity 확인
+- [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
+
+#### `fr_ratp.mjs`, `nl_gvb.mjs`
+
+- [ ] RATP / GVB 각 fare page fetch + parse
 
 #### `fr_insee.mjs`
 
