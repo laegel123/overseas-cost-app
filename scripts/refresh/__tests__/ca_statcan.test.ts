@@ -8,8 +8,8 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 
+import { parseStatCanResponse } from '../_common.mjs';
 import refreshCaStatcan, {
-  parseStatCanResponse,
   cpiToPrice,
   CITY_CONFIGS,
   CPI_VECTORS,

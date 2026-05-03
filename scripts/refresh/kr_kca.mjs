@@ -81,18 +81,21 @@ export function parsePriceData(data) {
 export function normalizePrice(itemName, price, unit) {
   let mapping = ITEM_MAPPING[itemName];
 
+  // 1) 정확 매칭 우선 (위에서 처리). 2) 정확 매칭 실패 시 prefix 매칭 — 부분 문자열 오탐 방지.
+  // (예: '쌀(20kg)' → '쌀' 매칭 OK, but '현미쌀' / '메추리계란' 은 prefix 가 아니라서 매칭 안 됨)
   if (!mapping) {
     for (const [key, m] of Object.entries(ITEM_MAPPING)) {
-      if (itemName.includes(key) && !m.fallback) {
+      if (itemName.startsWith(key) && !m.fallback) {
         mapping = m;
         break;
       }
     }
   }
 
+  // 라면 변종 (X라면) 만 endsWith 매칭. 다른 품목은 startsWith 만 — '메추리계란' / '현미쌀' 등 오탐 차단.
   if (!mapping) {
     const ramenMapping = ITEM_MAPPING['라면'];
-    if (itemName.includes('라면') && ramenMapping) {
+    if (itemName.endsWith('라면') && ramenMapping) {
       mapping = ramenMapping;
     }
   }

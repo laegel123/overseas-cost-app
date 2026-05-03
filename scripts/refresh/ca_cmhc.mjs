@@ -11,7 +11,7 @@
  * Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정
  */
 
-import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage} from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, parseStatCanResponse } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const STATCAN_WDS_BASE = 'https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods';
@@ -63,32 +63,6 @@ export const SOURCE = {
   url: 'https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market',
 };
 
-/**
- * StatCan WDS API 응답 파싱.
- * @param {unknown} data
- * @returns {Map<string, number>}
- */
-export function parseStatCanResponse(data) {
-  const result = new Map();
-
-  if (!Array.isArray(data)) return result;
-
-  for (const item of data) {
-    const vectorId = item?.object?.vectorId?.toString();
-    const dataPoints = item?.object?.vectorDataPoint;
-
-    if (!vectorId || !Array.isArray(dataPoints)) continue;
-
-    const latestPoint = dataPoints[dataPoints.length - 1];
-    const value = parseFloat(latestPoint?.value);
-
-    if (Number.isFinite(value) && value > 0) {
-      result.set(`v${vectorId}`, value);
-    }
-  }
-
-  return result;
-}
 
 /**
  * rent 필드 변환. share 는 studio × 0.65 추정.

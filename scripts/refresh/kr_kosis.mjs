@@ -28,6 +28,8 @@ export const BASE_PRICES = {
   cafe: 5500,
 };
 
+// 향후 운영 데이터 수집 후 보정 가능성을 위한 placeholder. 1.0 = 보정 없음 (현재 = 무영향).
+// 실제 보정 도입 시 ADR-059 에 출처 + 검증 방법 명시.
 const CORRECTION_FACTOR = 1.0;
 
 export const SOURCE = {

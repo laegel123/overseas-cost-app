@@ -282,6 +282,28 @@ function sleep(ms) {
 }
 
 /**
+ * StatCan WDS API 응답 파싱 — `getDataFromVectorsAndLatestNPeriods` 표준 응답.
+ * vectorId → 최신 numeric value Map.
+ * @param {unknown} data
+ * @returns {Map<string, number>} key 형식: `v${vectorId}`
+ */
+export function parseStatCanResponse(data) {
+  const result = new Map();
+  if (!Array.isArray(data)) return result;
+  for (const item of data) {
+    const vectorId = item?.object?.vectorId?.toString();
+    const dataPoints = item?.object?.vectorDataPoint;
+    if (!vectorId || !Array.isArray(dataPoints)) continue;
+    const latestPoint = dataPoints[dataPoints.length - 1];
+    const value = parseFloat(latestPoint?.value);
+    if (Number.isFinite(value) && value > 0) {
+      result.set(`v${vectorId}`, value);
+    }
+  }
+  return result;
+}
+
+/**
  * URL 의 민감한 쿼리 파라미터 (API key 류) 를 마스킹.
  * 로그·에러 메시지에 URL 노출 시 사용. fetch 호출 자체는 원본 URL 사용.
  * @param {string} url

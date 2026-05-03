@@ -131,6 +131,11 @@ function validateCity(data, id) {
     throw new Error(`id: invalid format "${obj.id}"`);
   }
 
+  // 파일명에서 추출한 id 와 data.id 일치 — _common.mjs validateCityData 와 동일 검증.
+  if (obj.id !== id) {
+    throw new Error(`id field mismatch: expected "${id}" (from filename), got "${obj.id}"`);
+  }
+
   if (!/^[A-Z]{2}$/.test(obj.country)) {
     throw new Error(`country: expected ISO 3166-1 alpha-2, got "${obj.country}"`);
   }

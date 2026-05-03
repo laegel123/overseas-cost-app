@@ -86,6 +86,13 @@ async function main() {
   if (cityCount === 0) {
     throw new Error('No city data found');
   }
+  // PRD v1.0 = 21 도시 (서울 + 20). 미만이면 불완전 배포 경고 (CI 가 fail 까지는 아님 — partial PR 허용).
+  const V1_CITY_COUNT = 21;
+  if (cityCount < V1_CITY_COUNT) {
+    console.warn(
+      `WARN: Built ${cityCount} cities, expected ${V1_CITY_COUNT} for v1.0. Incomplete data deployment.`,
+    );
+  }
 
   const now = new Date().toISOString();
   // 빌드 실행 시점 날짜 — 실제 환율 데이터 fetch 일자가 아님.

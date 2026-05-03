@@ -10,7 +10,7 @@
  * Vector ID: StatCan Table 18-10-0004 (Consumer Price Index, monthly)
  */
 
-import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage} from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, parseStatCanResponse } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const STATCAN_WDS_BASE = 'https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods';
@@ -114,39 +114,18 @@ export const SOURCE = {
   url: 'https://www150.statcan.gc.ca/',
 };
 
-/**
- * StatCan WDS API 응답 파싱.
- * @param {unknown} data
- * @returns {Map<string, number>}
- */
-export function parseStatCanResponse(data) {
-  const result = new Map();
-
-  if (!Array.isArray(data)) return result;
-
-  for (const item of data) {
-    const vectorId = item?.object?.vectorId?.toString();
-    const dataPoints = item?.object?.vectorDataPoint;
-
-    if (!vectorId || !Array.isArray(dataPoints)) continue;
-
-    const latestPoint = dataPoints[dataPoints.length - 1];
-    const value = parseFloat(latestPoint?.value);
-
-    if (Number.isFinite(value) && value > 0) {
-      result.set(`v${vectorId}`, value);
-    }
-  }
-
-  return result;
-}
 
 /**
  * CPI 지수 → 실제 가격 (CAD dollars) 변환.
  * CPI 는 base period = 100. 정적 기준가 (CAD dollars) 에 CPI 비율 적용.
  * 소수점 2자리 보존 (ADR-059 단위 정책 — cents 변환 금지).
+ *
+ * ⚠️ basePrice 의 기준년도 == CPI base period 일치 가정. ADR-059 §4 검증 미해소 (round 11):
+ * StatCan Table 18-10-0004 의 base period (2002 vs 2020) 가 STATIC_PRICES 시점과 다르면
+ * 결과가 체계적으로 편향. step 4 재개 시 getSeriesInfoFromVector 로 검증 + STATIC_PRICES 갱신.
+ *
  * @param {number} cpiValue
- * @param {number} basePrice CAD dollars 단위
+ * @param {number} basePrice CAD dollars 단위 (기준년도 평균가)
  * @returns {number} CAD dollars 단위, 소수점 2자리
  */
 export function cpiToPrice(cpiValue, basePrice) {
