@@ -2364,19 +2364,57 @@ afterEach(() => {
 - [x] checkBvgFarePage / checkMvvFarePage: connectivity 확인
 - [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 
-#### `fr_ratp.mjs`, `nl_gvb.mjs`
-
-- [ ] RATP / GVB 각 fare page fetch + parse
-
 #### `fr_insee.mjs`
 
-- [ ] INSEE BDM API
-- [ ] Paris Île-de-France region
+- [x] parseInseeValue: INSEE JSON 응답 파싱 (observations / OBS_VALUE)
+- [x] getRentData: 파리 정적 rent 데이터 반환
+- [x] getGroceriesData: 파리 정적 groceries 데이터 반환
+- [x] checkInseeApiStatus: INSEE API connectivity 확인
+- [x] CITY_CONFIGS: 파리만 포함 (id, name, country, currency, region)
+- [x] SOURCE_RENT / SOURCE_FOOD: insee.fr URL 명시
+- [x] refresh: useStatic=true 시 API 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: API 불가 시 static fallback + errors에 추가
+
+#### `fr_ratp.mjs`
+
+- [x] getTransportData: 파리 정적 transport 데이터 반환 (Navigo, t+ ticket, taxi)
+- [x] checkRatpFarePage: RATP fare page connectivity 확인
+- [x] CITY_CONFIGS: 파리만 포함 (transitOperator=RATP, fareUrl)
+- [x] SOURCE: ratp.fr URL 명시
+- [x] refresh: useStatic=true 시 fetch 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
 
 #### `nl_cbs.mjs`
 
-- [ ] CBS Open Data OData API
-- [ ] Amsterdam 평균
+- [x] parseCbsValue: CBS OData JSON 응답 파싱 (value / d.results / Waarde)
+- [x] getRentData: 암스테르담 정적 rent 데이터 반환
+- [x] getGroceriesData: 암스테르담 정적 groceries 데이터 반환
+- [x] checkCbsApiStatus: CBS API connectivity 확인
+- [x] CITY_CONFIGS: 암스테르담만 포함 (id, name, country, currency, region)
+- [x] SOURCE_RENT / SOURCE_FOOD: cbs.nl URL 명시
+- [x] refresh: useStatic=true 시 API 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: API 불가 시 static fallback + errors에 추가
+
+#### `nl_gvb.mjs`
+
+- [x] getTransportData: 암스테르담 정적 transport 데이터 반환 (GVB 월정액, 1-hour ticket, taxi)
+- [x] checkGvbFarePage: GVB fare page connectivity 확인
+- [x] CITY_CONFIGS: 암스테르담만 포함 (transitOperator=GVB, fareUrl)
+- [x] SOURCE: gvb.nl URL 명시
+- [x] refresh: useStatic=true 시 fetch 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
 
 ### 9-A.8 출처별 — 호주·아시아·UAE (8 scripts)
 

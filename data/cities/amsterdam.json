@@ -1,0 +1,56 @@
+{
+  "id": "amsterdam",
+  "name": {
+    "ko": "암스테르담",
+    "en": "Amsterdam"
+  },
+  "country": "NL",
+  "currency": "EUR",
+  "region": "eu",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 700,
+    "studio": 1200,
+    "oneBed": 1500,
+    "twoBed": 2100
+  },
+  "food": {
+    "restaurantMeal": 18,
+    "cafe": 4.5,
+    "groceries": {
+      "milk1L": 1.15,
+      "eggs12": 3.2,
+      "rice1kg": 2.4,
+      "chicken1kg": 9,
+      "bread": 1.6,
+      "onion1kg": 1.5,
+      "apple1kg": 2.8,
+      "ramen": 0.95
+    }
+  },
+  "transport": {
+    "monthlyPass": 100,
+    "singleRide": 3.4,
+    "taxiBase": 3.19
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "CBS Open Data + static estimates",
+      "url": "https://opendata.cbs.nl/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "CBS CPI + static estimates",
+      "url": "https://opendata.cbs.nl/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "GVB official fares + static estimates",
+      "url": "https://en.gvb.nl/abonnementen",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

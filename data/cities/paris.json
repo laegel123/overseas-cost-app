@@ -1,0 +1,56 @@
+{
+  "id": "paris",
+  "name": {
+    "ko": "파리",
+    "en": "Paris"
+  },
+  "country": "FR",
+  "currency": "EUR",
+  "region": "eu",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 650,
+    "studio": 1050,
+    "oneBed": 1300,
+    "twoBed": 1800
+  },
+  "food": {
+    "restaurantMeal": 15,
+    "cafe": 4,
+    "groceries": {
+      "milk1L": 1.2,
+      "eggs12": 3.5,
+      "rice1kg": 2.3,
+      "chicken1kg": 10,
+      "bread": 1.5,
+      "onion1kg": 1.8,
+      "apple1kg": 3,
+      "ramen": 1
+    }
+  },
+  "transport": {
+    "monthlyPass": 86.4,
+    "singleRide": 2.15,
+    "taxiBase": 4.18
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "INSEE BDM + static estimates",
+      "url": "https://www.insee.fr/fr/statistiques",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "INSEE CPI + static estimates",
+      "url": "https://www.insee.fr/fr/statistiques",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "RATP official fares + static estimates",
+      "url": "https://www.ratp.fr/en/titres-et-tarifs",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}
