@@ -37,8 +37,9 @@
     },
     {
       "dir": "data-automation",
-      "status": "in_progress",
-      "started_at": "2026-05-02T21:41:58+0900"
+      "status": "error",
+      "started_at": "2026-05-02T21:41:58+0900",
+      "failed_at": "2026-05-03T01:23:34+0900"
     }
   ]
 }
