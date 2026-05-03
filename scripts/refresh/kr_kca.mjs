@@ -23,7 +23,18 @@ export const SOURCE = {
 
 /**
  * 품목명 → 우리 스키마 필드 매핑.
- * 참가격 API 품목명은 정확히 일치해야 함.
+ * 참가격 API 품목명은 보통 정확히 일치하지만, prefix 매칭 fallback 도 지원 (normalizePrice 참고).
+ *
+ * @typedef {Object} ItemMapping
+ * @property {string} field - 우리 스키마 필드명 (milk1L 등)
+ * @property {number} unit - API 가 반환하는 가격 기준 단위 (예: 1000ml, 30개 등)
+ * @property {string} baseUnit - 단위 종류 (ml/g/ea)
+ * @property {number} [targetUnit] - 우리 스키마 변환 후 단위. 없으면 unit 그대로
+ * @property {boolean} [fallback] - prefix 매칭 시점에 우선 매칭 제외 (normalizePrice 의 이중 패스 중
+ *   첫 패스에서 skip). 정확 매칭 또는 endsWith 매칭 (라면 변종) 에서만 사용. 예: '라면' 매핑은
+ *   '신라면'(정확매칭) / '진라면'(endsWith) 처럼 별도 패스에서만 사용 — '쌀(라면용)' 등 오탐 방지.
+ *
+ * @type {Record<string, ItemMapping>}
  */
 export const ITEM_MAPPING = {
   '우유': { field: 'milk1L', unit: 1000, baseUnit: 'ml' },

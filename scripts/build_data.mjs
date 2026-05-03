@@ -17,7 +17,6 @@
 
 import { readFile, writeFile, readdir, mkdir, rename, access } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
-import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
@@ -123,7 +122,8 @@ async function main() {
  * @param {string} content
  */
 async function atomicWrite(filePath, content) {
-  const tmpPath = join(tmpdir(), `build-${randomUUID()}.json`);
+  // 동일 디렉터리 내 tmp — cross-device rename (EXDEV) 방어 (refresh/_common.mjs writeCity 동일 패턴).
+  const tmpPath = join(dirname(filePath), `.tmp-build-${randomUUID()}.json`);
   await writeFile(tmpPath, content, 'utf-8');
   await rename(tmpPath, filePath);
 }

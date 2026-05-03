@@ -114,6 +114,14 @@ export const SOURCE = {
   url: 'https://www150.statcan.gc.ca/',
 };
 
+// onion1kg / apple1kg / ramen — StatCan CPI 미제공 항목. ADR-059 §4 static 마커.
+// CPI fetch 전체 실패로 useStatic fallback 진입 시도 동일 출처 사용 (구분: name 의 'static' 키워드).
+export const SOURCE_STATIC = {
+  category: 'food',
+  name: 'Statistics Canada CPI (static fallback, ADR-059)',
+  url: 'https://www150.statcan.gc.ca/',
+};
+
 
 /**
  * CPI 지수 → 실제 가격 (CAD dollars) 변환.
@@ -209,7 +217,8 @@ export default async function refresh(opts = {}) {
         const updatedData = { ...base, food: newFood };
 
         try {
-          await writeCity(cityId, updatedData, SOURCE);
+          // useStatic path — 모든 값이 STATIC_PRICES 에서 옴. SOURCE_STATIC 으로 식별 가능하게.
+          await writeCity(cityId, updatedData, SOURCE_STATIC);
           updatedCities.push(cityId);
         } catch (err) {
           errors.push({ cityId, reason: `Write failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });

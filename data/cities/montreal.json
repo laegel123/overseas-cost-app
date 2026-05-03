@@ -42,7 +42,7 @@
     },
     {
       "category": "food",
-      "name": "Statistics Canada CPI",
+      "name": "Statistics Canada CPI (static fallback, ADR-059)",
       "url": "https://www150.statcan.gc.ca/",
       "accessedAt": "2026-05-02"
     },

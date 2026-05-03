@@ -17,7 +17,6 @@
 
 import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 
 import { fetchWithRetry, redactErrorMessage } from './_common.mjs';
@@ -103,7 +102,8 @@ async function writeFallbackJson(krwRates) {
     rates: filteredRates,
   };
 
-  const tmpPath = join(tmpdir(), `fx-fallback-${randomUUID()}.json`);
+  // 동일 디렉터리 내 tmp — cross-device rename (EXDEV) 방어 (writeCity 동일 패턴).
+  const tmpPath = join(dir, `.tmp-fx-fallback-${randomUUID()}.json`);
   const content = JSON.stringify(data, null, 2) + '\n';
 
   await writeFile(tmpPath, content, 'utf-8');

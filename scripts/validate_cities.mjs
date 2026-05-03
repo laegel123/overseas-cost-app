@@ -45,8 +45,9 @@ async function main() {
         cities.push({ id, data });
       }
     }
-  } catch {
-    // data/cities 없으면 시드 사용
+  } catch (err) {
+    // ENOENT (디렉터리 부재) 만 시드 fallback. EACCES / ENOTDIR 등 실제 에러는 throw.
+    if (err?.code !== 'ENOENT') throw err;
   }
 
   if (cities.length === 0) {

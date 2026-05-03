@@ -5,7 +5,6 @@
 
 import { readFile, writeFile, mkdir, rename, access } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
-import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 
 /**
@@ -184,7 +183,8 @@ export async function writeCity(id, data, source) {
 
   validateCityData(updatedData, id);
 
-  const tmpPath = join(tmpdir(), `city-${randomUUID()}.json`);
+  // 동일 디렉터리 내 tmp 파일 — cross-device rename (EXDEV) 방어. 이름은 .tmp- prefix 로 readdir 필터링.
+  const tmpPath = join(dir, `.tmp-${randomUUID()}.json`);
   const content = JSON.stringify(updatedData, null, 2) + '\n';
 
   await writeFile(tmpPath, content, 'utf-8');
@@ -245,7 +245,11 @@ export function validateCityData(data, ctxId) {
     }
   }
 
-  // build_data.mjs 와 동일한 검증 — 잘못된 파일 (e.g. seoul.json 에 id: 'tokyo') 차단.
+  // build_data.mjs / validate_cities.mjs / getCityPath 와 동일한 id 포맷 검증.
+  if (!/^[a-z][a-z0-9-]*$/.test(obj.id)) {
+    throw createCitySchemaError(`${ctxId}.id: invalid format "${obj.id}"`);
+  }
+  // 잘못된 파일 (e.g. seoul.json 에 id: 'tokyo') 차단.
   if (obj.id !== ctxId) {
     throw createCitySchemaError(
       `${ctxId}.id: id field mismatch (expected "${ctxId}", got "${obj.id}")`,
