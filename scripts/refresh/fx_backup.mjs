@@ -84,8 +84,8 @@ async function writeFallbackJson(krwRates) {
   const dir = dirname(fallbackPath);
   await mkdir(dir, { recursive: true });
 
-  const d = new Date();
-  const asOf = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // UTC — _common.mjs writeCity 와 일관 (GitHub Actions UTC 환경 + KST/UTC 9시간 차이 방지).
+  const asOf = new Date().toISOString().slice(0, 10);
 
   const filteredRates = {};
   for (const code of TARGET_CURRENCIES) {

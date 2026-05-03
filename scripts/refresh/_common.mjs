@@ -89,6 +89,8 @@ export async function fetchWithRetry(url, opts = {}) {
       }
 
       // 429 (Too Many Requests) 는 transient — backoff 로 재시도. 다른 4xx 는 즉시 throw.
+      // TODO(v1.x): Retry-After 헤더 존중 — 현재는 1s/2s/4s 고정 backoff 만 사용.
+      // data.go.kr / StatCan 등 공공 API 는 Retry-After 미제공이라 v1.0 영향 X.
       if (response.status === 429) {
         lastError = new Error(`HTTP 429`);
       } else if (response.status >= 400 && response.status < 500) {

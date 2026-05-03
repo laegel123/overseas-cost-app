@@ -82,7 +82,10 @@ function getLatestCpiByItem(items) {
 
   for (const item of items) {
     const existing = byItem.get(item.itemCode);
-    if (!existing || item.period > existing.period) {
+    // KOSIS period 형식 YYYYMM (예: '202611') — 숫자 비교로 명시 (사전순 의존 회피).
+    const itemPeriodNum = parseInt(item.period, 10);
+    const existingPeriodNum = existing ? parseInt(existing.period, 10) : -Infinity;
+    if (Number.isFinite(itemPeriodNum) && itemPeriodNum > existingPeriodNum) {
       byItem.set(item.itemCode, { cpi: item.cpi, period: item.period });
     }
   }
@@ -128,7 +131,9 @@ export default async function refresh(opts = {}) {
 
     if (!contentType.includes('json')) {
       const text = await response.text();
-      if (text.includes('err') || text.includes('error')) {
+      // KOSIS API 비-JSON 에러 응답 패턴: "<err>...</err>" XML, "ERR_:" 코드, 또는 인증 키워드.
+      // 'err' 단독 substring 매칭은 정상 한국어에 잘못 걸리므로 명시적 패턴만 사용.
+      if (/<err>|ERR_:|UNAUTHORIZED|SERVICE_KEY|APPLICATION_KEY/i.test(text)) {
         errors.push({ cityId: 'seoul', reason: `API error: ${text.slice(0, 200)}` });
         return { source: 'kr_kosis', cities: [], fields: [], changes: [], errors };
       }

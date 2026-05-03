@@ -168,10 +168,9 @@ export default async function refresh(opts = {}) {
   }
 
   const requiredFields = ['milk1L', 'eggs12', 'rice1kg', 'chicken1kg', 'bread'];
-  for (const field of requiredFields) {
-    if (!(field in newGroceries)) {
-      errors.push({ cityId: 'seoul', reason: `Missing required field: ${field}` });
-    }
+  const missingFields = requiredFields.filter((f) => !(f in newGroceries));
+  for (const field of missingFields) {
+    errors.push({ cityId: 'seoul', reason: `Missing required field: ${field}` });
   }
 
   let oldData;
@@ -181,6 +180,12 @@ export default async function refresh(opts = {}) {
     if (err?.code !== 'CITY_NOT_FOUND') {
       errors.push({ cityId: 'seoul', reason: `Failed to read existing data: ${redactErrorMessage(String(err?.message ?? ""))}` });
     }
+  }
+
+  // 신규 도시 (CITY_NOT_FOUND) + 필수 필드 누락 시 write 차단 — createCitySeed 의 0 placeholder 가
+  // 그대로 저장되어 validate_cities 가 차단하는 것을 사전 방지.
+  if (!oldData && missingFields.length > 0) {
+    return { source: 'kr_kca', cities: [], fields: [], changes: [], errors };
   }
 
   const changes = [];
