@@ -129,7 +129,8 @@ describe('writeCity', () => {
     await writeCity('auto-date', { ...VALID_CITY_FIXTURE, id: 'auto-date' } as any, source);
 
     const written = readTempCityFile('auto-date');
-    expect(written.lastUpdated).toBe('2026-04-28');
+    // UTC 기준 — setSystemTime '2026-04-28T00:00:00+09:00' = UTC '2026-04-27T15:00:00Z'.
+    expect(written.lastUpdated).toBe('2026-04-27');
   });
 
   it('sources[] 추가 (새 source)', async () => {
@@ -153,7 +154,7 @@ describe('writeCity', () => {
 
     const written = readTempCityFile('same-source') as any;
     expect(written.sources).toHaveLength(1);
-    expect(written.sources[0].accessedAt).toBe('2026-04-28');
+    expect(written.sources[0].accessedAt).toBe('2026-04-27');
   });
 
   it('스키마 위반 데이터: throws', async () => {

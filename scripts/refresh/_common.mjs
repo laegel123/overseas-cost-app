@@ -83,7 +83,6 @@ export async function fetchWithRetry(url, opts = {}) {
       }
 
       const response = await fetch(url, { ...fetchInit, signal });
-      clearTimeout(timeoutId);
 
       if (response.ok) {
         return response;
@@ -101,8 +100,6 @@ export async function fetchWithRetry(url, opts = {}) {
         lastError = new Error(`HTTP ${response.status}`);
       }
     } catch (err) {
-      clearTimeout(timeoutId);
-
       if (err?.name === 'AbortError') {
         if (externalSignal?.aborted) {
           throw createFetchTimeoutError(`request aborted by caller ${safeUrl}`);
@@ -116,7 +113,8 @@ export async function fetchWithRetry(url, opts = {}) {
 
       lastError = err;
     } finally {
-      // attempt 종료 시 externalSignal 의 listener 정리 (성공 / 5xx / 네트워크 에러 모두).
+      // attempt 종료 시 timeout / externalSignal listener 정리 (성공 / 5xx / 네트워크 에러 모두).
+      clearTimeout(timeoutId);
       cleanupSignal();
     }
 
@@ -174,8 +172,8 @@ export async function writeCity(id, data, source) {
 
   await mkdir(dir, { recursive: true });
 
-  const d = new Date();
-  const now = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  // UTC 기준 — GitHub Actions 가 UTC 로 실행되므로 KST 와 9시간 차이로 인한 날짜 불일치 방지.
+  const now = new Date().toISOString().slice(0, 10);
   const updatedData = {
     ...data,
     lastUpdated: now,
@@ -221,8 +219,12 @@ function updateSources(sources, newSource, accessedAt) {
 }
 
 /**
- * 도시 데이터 스키마 검증 (간이 버전).
- * 실제 validateCity 는 빌드 시 citySchema.ts 에서 직접 사용.
+ * 도시 데이터 스키마 검증 — 구조·필수 필드만 (writeCity 진입 시점).
+ *
+ * 의도: refresh 스크립트가 실제 값을 쓰기 직전 단계 — 일부 필드는 0 / null 가능 (예: 환율 fetch
+ * 실패 fallback 시점). 정확한 양수 검증은 빌드 시 `scripts/validate_cities.mjs` 에서 별도로 수행.
+ * (writeCity = 부분 갱신 허용, validate_cities = 최종 production data 강검증)
+ *
  * @param {unknown} data
  * @param {string} ctxId
  * @returns {import('../../src/types/city').CityCostData}

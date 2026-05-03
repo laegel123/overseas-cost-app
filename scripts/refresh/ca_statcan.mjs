@@ -356,8 +356,8 @@ export default async function refresh(opts = {}) {
     }
 
     if (!opts.dryRun && hasChanges) {
-      const updatedData = oldData ?? createCitySeed(config);
-      updatedData.food = newFood;
+      const base = oldData ?? createCitySeed(config);
+      const updatedData = { ...base, food: newFood };
 
       try {
         await writeCity(cityId, updatedData, SOURCE);

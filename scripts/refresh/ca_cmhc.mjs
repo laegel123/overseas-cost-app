@@ -188,8 +188,8 @@ export default async function refresh(opts = {}) {
     }
 
     if (!opts.dryRun && hasChanges) {
-      const updatedData = oldData ?? createCitySeed(config);
-      updatedData.rent = { ...updatedData.rent, ...newRent };
+      const base = oldData ?? createCitySeed(config);
+      const updatedData = { ...base, rent: { ...base.rent, ...newRent } };
 
       try {
         await writeCity(cityId, updatedData, SOURCE);

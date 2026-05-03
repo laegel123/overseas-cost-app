@@ -142,8 +142,8 @@ export default async function refresh(opts = {}) {
   }
 
   if (!opts.dryRun && changes.length > 0) {
-    const updatedData = oldData ?? createCitySeed({ id: 'vancouver', name: { ko: '밴쿠버', en: 'Vancouver' }, country: 'CA', currency: 'CAD', region: 'na' });
-    updatedData.transport = { ...updatedData.transport, ...newTransport };
+    const base = oldData ?? createCitySeed({ id: 'vancouver', name: { ko: '밴쿠버', en: 'Vancouver' }, country: 'CA', currency: 'CAD', region: 'na' });
+    const updatedData = { ...base, transport: { ...base.transport, ...newTransport } };
 
     try {
       await writeCity(cityId, updatedData, SOURCE);

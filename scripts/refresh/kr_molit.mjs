@@ -10,7 +10,7 @@
  * 면적 기준: share (<= 10㎡), studio (11~30㎡), oneBed (31~50㎡), twoBed (51~80㎡)
  */
 
-import { fetchWithRetry, readCity, writeCity, createMissingApiKeyError, createCitySeed} from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createMissingApiKeyError, createCitySeed, redactErrorMessage} from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const API_BASE = 'https://apis.data.go.kr/1613000/RTMSDataSvcRHRent/getRTMSDataSvcRHRent';
@@ -121,9 +121,10 @@ export default async function refresh(opts = {}) {
   const now = new Date();
   const dealYm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-  for (const lawd of SEOUL_DISTRICT_CODES) {
+  // 25개 자치구 병렬 fetch — concurrency 5 chunks (data.go.kr rate limit 보호 + GitHub Actions 6분 timeout 회피).
+  const CONCURRENCY = 5;
+  const fetchOne = async (lawd) => {
     const url = `${API_BASE}?serviceKey=${encodeURIComponent(apiKey)}&LAWD_CD=${lawd}&DEAL_YMD=${dealYm}&numOfRows=1000`;
-
     try {
       const response = await fetchWithRetry(url, { timeoutMs: 20000 });
       const xml = await response.text();
@@ -131,20 +132,28 @@ export default async function refresh(opts = {}) {
       const result = parseResultCode(xml);
       if (!result.ok) {
         if (result.code === '99' || result.code === 'SERVICE_KEY_IS_NOT_REGISTERED_ERROR') {
-          errors.push({ cityId: 'seoul', reason: `API key invalid or expired: ${result.msg}` });
-          continue;
+          return { items: [], error: { reason: `API key invalid or expired: ${result.msg}` } };
         }
         if (result.code === 'NO_DATA') {
-          continue;
+          return { items: [] };
         }
-        errors.push({ cityId: 'seoul', reason: `API error for ${lawd}: ${result.code} ${result.msg}` });
-        continue;
+        return { items: [], error: { reason: `API error for ${lawd}: ${result.code} ${result.msg}` } };
       }
-
-      const items = parseRentXml(xml);
-      allItems.push(...items);
+      return { items: parseRentXml(xml) };
     } catch (err) {
-      errors.push({ cityId: 'seoul', reason: `Fetch failed for district ${lawd}: ${err?.message ?? 'unknown'}` });
+      return {
+        items: [],
+        error: { reason: `Fetch failed for district ${lawd}: ${redactErrorMessage(String(err?.message ?? 'unknown'))}` },
+      };
+    }
+  };
+
+  for (let i = 0; i < SEOUL_DISTRICT_CODES.length; i += CONCURRENCY) {
+    const chunk = SEOUL_DISTRICT_CODES.slice(i, i + CONCURRENCY);
+    const results = await Promise.all(chunk.map(fetchOne));
+    for (const { items, error } of results) {
+      if (error) errors.push({ cityId: 'seoul', ...error });
+      allItems.push(...items);
     }
   }
 
@@ -179,7 +188,7 @@ export default async function refresh(opts = {}) {
     oldData = await readCity('seoul');
   } catch (err) {
     if (err?.code !== 'CITY_NOT_FOUND') {
-      errors.push({ cityId: 'seoul', reason: `Failed to read existing data: ${err?.message}` });
+      errors.push({ cityId: 'seoul', reason: `Failed to read existing data: ${redactErrorMessage(String(err?.message ?? ""))}` });
     }
   }
 
@@ -199,13 +208,13 @@ export default async function refresh(opts = {}) {
   }
 
   if (!opts.dryRun && changes.length > 0) {
-    const updatedData = oldData ?? createCitySeed({ id: 'seoul', name: { ko: '서울', en: 'Seoul' }, country: 'KR', currency: 'KRW', region: 'asia' });
-    updatedData.rent = { ...updatedData.rent, ...newRent };
+    const base = oldData ?? createCitySeed({ id: 'seoul', name: { ko: '서울', en: 'Seoul' }, country: 'KR', currency: 'KRW', region: 'asia' });
+    const updatedData = { ...base, rent: { ...base.rent, ...newRent } };
 
     try {
       await writeCity('seoul', updatedData, SOURCE);
     } catch (err) {
-      errors.push({ cityId: 'seoul', reason: `Write failed: ${err?.message ?? 'unknown'}` });
+      errors.push({ cityId: 'seoul', reason: `Write failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
     }
   }
 

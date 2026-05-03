@@ -10,7 +10,7 @@
  * 서울 대형마트 평균가 사용.
  */
 
-import { fetchWithRetry, readCity, writeCity, createMissingApiKeyError, createCitySeed} from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createMissingApiKeyError, createCitySeed, redactErrorMessage} from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const API_BASE = 'https://apis.data.go.kr/B553077/api/open/sdsc/priceOfNeccesGoodsService';
@@ -146,7 +146,7 @@ export default async function refresh(opts = {}) {
     const data = await response.json();
     priceItems = parsePriceData(data);
   } catch (err) {
-    errors.push({ cityId: 'seoul', reason: `Fetch failed: ${err?.message ?? 'unknown'}` });
+    errors.push({ cityId: 'seoul', reason: `Fetch failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
     return { source: 'kr_kca', cities: [], fields: [], changes: [], errors };
   }
 
@@ -178,7 +178,7 @@ export default async function refresh(opts = {}) {
     oldData = await readCity('seoul');
   } catch (err) {
     if (err?.code !== 'CITY_NOT_FOUND') {
-      errors.push({ cityId: 'seoul', reason: `Failed to read existing data: ${err?.message}` });
+      errors.push({ cityId: 'seoul', reason: `Failed to read existing data: ${redactErrorMessage(String(err?.message ?? ""))}` });
     }
   }
 
@@ -197,14 +197,17 @@ export default async function refresh(opts = {}) {
   }
 
   if (!opts.dryRun && changes.length > 0) {
-    const updatedData = oldData ?? createCitySeed({ id: 'seoul', name: { ko: '서울', en: 'Seoul' }, country: 'KR', currency: 'KRW', region: 'asia' });
-    updatedData.food = updatedData.food ?? { restaurantMeal: 0, cafe: 0, groceries: {} };
-    updatedData.food.groceries = { ...updatedData.food.groceries, ...newGroceries };
+    const base = oldData ?? createCitySeed({ id: 'seoul', name: { ko: '서울', en: 'Seoul' }, country: 'KR', currency: 'KRW', region: 'asia' });
+    const baseFood = base.food ?? { restaurantMeal: 0, cafe: 0, groceries: {} };
+    const updatedData = {
+      ...base,
+      food: { ...baseFood, groceries: { ...baseFood.groceries, ...newGroceries } },
+    };
 
     try {
       await writeCity('seoul', updatedData, SOURCE);
     } catch (err) {
-      errors.push({ cityId: 'seoul', reason: `Write failed: ${err?.message ?? 'unknown'}` });
+      errors.push({ cityId: 'seoul', reason: `Write failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
     }
   }
 
