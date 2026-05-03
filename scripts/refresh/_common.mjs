@@ -89,14 +89,17 @@ export async function fetchWithRetry(url, opts = {}) {
         return response;
       }
 
-      if (response.status >= 400 && response.status < 500) {
+      // 429 (Too Many Requests) 는 transient — backoff 로 재시도. 다른 4xx 는 즉시 throw.
+      if (response.status === 429) {
+        lastError = new Error(`HTTP 429`);
+      } else if (response.status >= 400 && response.status < 500) {
         throw createFetchRetryExhaustedError(
           `HTTP ${response.status} (client error, no retry) ${safeUrl}`,
           attempt,
         );
+      } else {
+        lastError = new Error(`HTTP ${response.status}`);
       }
-
-      lastError = new Error(`HTTP ${response.status}`);
     } catch (err) {
       clearTimeout(timeoutId);
 

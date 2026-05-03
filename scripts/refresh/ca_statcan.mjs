@@ -142,14 +142,15 @@ export function parseStatCanResponse(data) {
 }
 
 /**
- * CPI 지수 → 실제 가격 (CAD cents) 변환.
- * CPI 는 base period = 100. 정적 기준가에 CPI 비율 적용.
+ * CPI 지수 → 실제 가격 (CAD dollars) 변환.
+ * CPI 는 base period = 100. 정적 기준가 (CAD dollars) 에 CPI 비율 적용.
+ * 소수점 2자리 보존 (ADR-059 단위 정책 — cents 변환 금지).
  * @param {number} cpiValue
- * @param {number} basePrice
- * @returns {number}
+ * @param {number} basePrice CAD dollars 단위
+ * @returns {number} CAD dollars 단위, 소수점 2자리
  */
 export function cpiToPrice(cpiValue, basePrice) {
-  return Math.round((cpiValue / 100) * basePrice);
+  return Math.round((cpiValue / 100) * basePrice * 100) / 100;
 }
 
 /**
@@ -256,15 +257,13 @@ export default async function refresh(opts = {}) {
   let vectorData;
   try {
     const requestBody = JSON.stringify(vectorIds.map((id) => ({ vectorId: id, latestN: 1 })));
-    const response = await fetch(STATCAN_WDS_BASE, {
+    // fetchWithRetry — timeout / 재시도 / URL 마스킹 일관 (다른 refresh 스크립트와 동일).
+    const response = await fetchWithRetry(STATCAN_WDS_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: requestBody,
+      timeoutMs: 15000,
     });
-
-    if (!response.ok) {
-      throw new Error(`StatCan API error: ${response.status}`);
-    }
 
     const data = await response.json();
     vectorData = parseStatCanResponse(data);

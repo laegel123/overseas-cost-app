@@ -123,6 +123,13 @@ export default async function refresh(opts = {}) {
         if (parsed.monthlyPass) {
           newTransport.monthlyPass = parsed.monthlyPass;
         }
+        // 페이지는 응답했지만 파싱이 모두 실패 — 페이지 구조 변경 가능성, 운영 알림 필요.
+        if (parsed.singleRide === undefined && parsed.monthlyPass === undefined) {
+          errors.push({
+            cityId: 'seoul',
+            reason: 'Metro fare HTML parse returned empty — page structure may have changed; using static fallback',
+          });
+        }
       }
     } catch (err) {
       errors.push({
@@ -139,6 +146,11 @@ export default async function refresh(opts = {}) {
         const taxiFare = parseTaxiFareHtml(html);
         if (taxiFare) {
           newTransport.taxiBase = taxiFare;
+        } else {
+          errors.push({
+            cityId: 'seoul',
+            reason: 'Taxi fare HTML parse returned null — page structure may have changed; using static fallback',
+          });
         }
       }
     } catch (err) {

@@ -395,9 +395,9 @@ export default async function refresh(opts = {}) {
             rice1kg: blsGroceries.rice1kg || staticPrices?.rice1kg || 0,
             chicken1kg: blsGroceries.chicken1kg || staticPrices?.chicken1kg || 0,
             bread: blsGroceries.bread || staticPrices?.bread || 0,
-            onion1kg: staticPrices?.onion1kg ?? 260,
-            apple1kg: staticPrices?.apple1kg ?? 480,
-            ramen: staticPrices?.ramen ?? 110,
+            onion1kg: staticPrices?.onion1kg ?? 2.6,
+            apple1kg: staticPrices?.apple1kg ?? 4.8,
+            ramen: staticPrices?.ramen ?? 1.1,
           },
         };
       }

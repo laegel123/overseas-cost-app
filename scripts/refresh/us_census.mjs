@@ -250,6 +250,8 @@ export default async function refresh(opts = {}) {
       }
     }
 
+    // TODO(v1.x): RefreshResult 에 warnings 별도 필드 추가 — 현재는 errors 에 prefix "Cross-validation warning:"
+    // 으로 구분하지만 GitHub Actions 가 errors 를 실패 신호로 해석할 수 있음. severity field 도입 검토.
     if (oldData?.rent) {
       const warnings = crossValidate(oldData.rent, newRent);
       for (const warning of warnings) {

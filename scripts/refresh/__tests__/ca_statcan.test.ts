@@ -85,8 +85,11 @@ describe('cpiToPrice', () => {
     expect(cpiToPrice(90, 500)).toBe(450);
   });
 
-  it('반올림 처리', () => {
-    expect(cpiToPrice(105.5, 300)).toBe(317);
+  it('소수점 2자리 보존 (CAD dollars)', () => {
+    // CPI 105.5 × 기준가 3.00 / 100 = 3.165 → 2자리 반올림 → 3.17 (round half up)
+    expect(cpiToPrice(105.5, 3)).toBe(3.17);
+    // 정수 기준가도 동일 정밀도
+    expect(cpiToPrice(105.5, 300)).toBe(316.5);
   });
 });
 
@@ -136,8 +139,14 @@ describe('constants', () => {
 describe('refresh (integration)', () => {
   let fetchSpy: jest.SpyInstance;
 
+  // fetchWithRetry 의 setTimeout backoff 가 fake timers 에서 hang — real timers 사용 (ca_cmhc 동일 패턴).
   beforeEach(() => {
+    jest.useRealTimers();
     fetchSpy = jest.spyOn(global, 'fetch');
+  });
+
+  afterEach(() => {
+    jest.useFakeTimers();
   });
 
   it('useStatic=true: 정적 데이터 사용', async () => {
