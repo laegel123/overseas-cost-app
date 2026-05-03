@@ -15,8 +15,7 @@ import { readFile, readdir, access } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { classifyChange, computePctChange } from './refresh/_outlier.mjs';
-import { diffCities } from './refresh/_diff.mjs';
+// outlier 알림 (직전 commit 대비) 은 v1.x 에서 별도 phase 로 구현 — 현재는 schema 검증만.
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');

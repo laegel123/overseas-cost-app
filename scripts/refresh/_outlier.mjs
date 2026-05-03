@@ -37,6 +37,7 @@ export function classifyChange(oldVal, newVal) {
     return 'commit';
   }
 
+  // oldVal === 0 → createCitySeed 의 placeholder 0 이 실제 값으로 첫 갱신되는 케이스. 신규로 분류.
   if (oldVal === 0) {
     return 'new';
   }

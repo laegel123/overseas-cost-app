@@ -113,8 +113,14 @@ describe('constants', () => {
 describe('refresh (integration)', () => {
   let fetchSpy: jest.SpyInstance;
 
+  // fetchWithRetry 의 setTimeout backoff 가 fake timers 에서 hang — real timers 사용 (ca_cmhc 동일 패턴).
   beforeEach(() => {
+    jest.useRealTimers();
     fetchSpy = jest.spyOn(global, 'fetch');
+  });
+
+  afterEach(() => {
+    jest.useFakeTimers();
   });
 
   it('useStatic=true: 정적 데이터 사용', async () => {

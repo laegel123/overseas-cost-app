@@ -20,7 +20,7 @@ import { dirname, join, resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 
-import { fetchWithRetry } from './_common.mjs';
+import { fetchWithRetry, redactErrorMessage } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const ECB_DAILY_URL = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
@@ -173,7 +173,7 @@ export default async function refresh(opts = {}) {
       throw new Error(`ECB returned too few currencies: ${rateCount}`);
     }
   } catch (err) {
-    errors.push({ cityId: 'fx', reason: `ECB fetch failed: ${err?.message ?? 'unknown'}` });
+    errors.push({ cityId: 'fx', reason: `ECB fetch failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}` });
     return {
       source: 'fx_backup',
       cities: [],
@@ -187,7 +187,7 @@ export default async function refresh(opts = {}) {
   try {
     krwRates = convertToKrwBase(eurRates);
   } catch (err) {
-    errors.push({ cityId: 'fx', reason: err?.message ?? 'KRW conversion failed' });
+    errors.push({ cityId: 'fx', reason: redactErrorMessage(String(err?.message ?? 'KRW conversion failed')) });
     return {
       source: 'fx_backup',
       cities: [],
@@ -206,7 +206,7 @@ export default async function refresh(opts = {}) {
     try {
       await writeFallbackJson(krwRates);
     } catch (err) {
-      errors.push({ cityId: 'fx', reason: `Write failed: ${err?.message ?? 'unknown'}` });
+      errors.push({ cityId: 'fx', reason: `Write failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}` });
     }
   }
 

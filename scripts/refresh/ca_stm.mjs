@@ -10,7 +10,7 @@
  * 방법: HTML fetch + parse (정적 fallback 포함).
  */
 
-import { readCity, writeCity, createCitySeed, redactErrorMessage} from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const STM_FARE_URL = 'https://www.stm.info/en/info/fares';
@@ -91,22 +91,15 @@ export default async function refresh(opts = {}) {
 
   if (!opts.useStatic) {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
-      const response = await fetch(STM_FARE_URL, { signal: controller.signal });
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const html = await response.text();
-        if (html && html.length > 0) {
-          const parsed = parseFareHtml(html);
-          if (parsed.singleRide) {
-            newTransport.singleRide = parsed.singleRide;
-          }
-          if (parsed.monthlyPass) {
-            newTransport.monthlyPass = parsed.monthlyPass;
-          }
+      const response = await fetchWithRetry(STM_FARE_URL, { timeoutMs: FETCH_TIMEOUT_MS });
+      const html = await response.text();
+      if (html && html.length > 0) {
+        const parsed = parseFareHtml(html);
+        if (parsed.singleRide) {
+          newTransport.singleRide = parsed.singleRide;
+        }
+        if (parsed.monthlyPass) {
+          newTransport.monthlyPass = parsed.monthlyPass;
         }
       }
     } catch (err) {
