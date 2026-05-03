@@ -2290,27 +2290,41 @@ afterEach(() => {
 
 #### `us_hud.mjs`
 
-- [ ] HUD FMR API 응답 파싱
-- [ ] MSA 코드별 매핑 (NYC=35614, LA=31084, SF=41884, Seattle=42644, Boston=14454)
-- [ ] # bedrooms 매핑
+- [x] HUD FMR API 응답 파싱 (`parseHudResponse`)
+- [x] MSA entityId 별 매핑 (NYC, LA, SF, Seattle, Boston — 5 cities)
+- [x] # bedrooms 매핑 (Efficiency → studio, One-Bedroom → oneBed, Two-Bedroom → twoBed)
+- [x] share = studio × 0.65 추정 (ADR-059)
+- [x] `mapToRent` 변환
+- [x] `CITY_CONFIGS` 5개 도시 정의
+- [x] `SOURCE` 정의 (HUD Fair Market Rents)
+- [x] `refresh` 함수: dryRun, cities 옵션
+- [x] RefreshResult 반환 구조
 
 #### `us_census.mjs`
 
-- [ ] ACS B25064 (median rent) fetch
-- [ ] 5-city 처리
-- [ ] year 파라미터 (최신 5-year estimate)
+- [x] ACS B25064 (median rent) fetch
+- [x] 5-city CBSA 코드 매핑 (35620, 31080, 41860, 42660, 14460)
+- [x] `parseCensusResponse` 파싱
+- [x] `US_CENSUS_API_KEY` 환경변수 필수 (MissingApiKeyError)
+- [x] censusMedian 필드로 교차 검증용 저장
 
 #### `us_bls.mjs`
 
-- [ ] BLS API key 로 인증
-- [ ] Series ID 별 fetch (식재료 8개 + 외식)
-- [ ] Region 별 데이터 (Northeast, Midwest, South, West)
-- [ ] 도시별 보정계수 (NY=1.0 vs LA=0.95 등 정적)
+- [x] `US_BLS_API_KEY` 환경변수 필수 (또는 useStatic=true)
+- [x] Series ID 별 fetch (milk, eggs, bread, chicken)
+- [x] Region 별 데이터 (Northeast, West — BLS_SERIES)
+- [x] 도시별 보정계수 ADR-059 (NYC=1.15, SF=1.25, LA=1.05, Seattle=1.00, Boston=1.10)
+- [x] `parseBlsResponse` 응답 파싱
+- [x] `mapToGroceries` + STATIC_GROCERIES/STATIC_FOOD fallback
+- [x] useStatic 옵션으로 API 키 없이 정적 데이터 사용
 
 #### `us_transit.mjs`
 
-- [ ] MTA, LA Metro, SFMTA, King County Metro, MBTA 5개 fare 페이지
-- [ ] 각 도시별 추출 함수
+- [x] MTA, LA Metro, SFMTA, King County Metro, MBTA 5개 fare 페이지
+- [x] `parseFareHtml` HTML 파싱 (singleRide, monthlyPass 패턴 매칭)
+- [x] 각 도시별 staticFares fallback
+- [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
+- [x] 도시별 SOURCE (agency 이름 + fareUrl)
 
 ### 9-A.6 출처별 — 영국 (2 scripts)
 
