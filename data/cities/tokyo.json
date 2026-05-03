@@ -1,0 +1,56 @@
+{
+  "id": "tokyo",
+  "name": {
+    "ko": "도쿄",
+    "en": "Tokyo"
+  },
+  "country": "JP",
+  "currency": "JPY",
+  "region": "asia",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 65000,
+    "studio": 85000,
+    "oneBed": 110000,
+    "twoBed": 160000
+  },
+  "food": {
+    "restaurantMeal": 1200,
+    "cafe": 500,
+    "groceries": {
+      "milk1L": 220,
+      "eggs12": 280,
+      "rice1kg": 450,
+      "chicken1kg": 900,
+      "bread": 180,
+      "onion1kg": 350,
+      "apple1kg": 600,
+      "ramen": 120
+    }
+  },
+  "transport": {
+    "monthlyPass": 10600,
+    "singleRide": 180,
+    "taxiBase": 500
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "e-Stat 住宅・土地統計調査 + static estimates",
+      "url": "https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200522",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "e-Stat 消費者物価指数 + static estimates",
+      "url": "https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200573",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "東京メトロ + 大阪Metro + static estimates",
+      "url": "https://www.tokyometro.jp/en/ticket/",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

@@ -2420,16 +2420,34 @@ afterEach(() => {
 
 #### `au_abs.mjs`, `au_transit.mjs`
 
-- [ ] ABS Residential Property Price Index + CPI
-- [ ] Sydney/Melbourne 분리
-- [ ] 주 단위 → 월 환산 (× 4.33)
-- [ ] Transport NSW + PTV fare
+- [x] ABS Residential Property Price Index + CPI
+- [x] Sydney/Melbourne 분리
+- [x] 주 단위 → 월 환산 (× 4.33)
+- [x] Transport NSW + PTV fare
+- [x] parseAbsValue: 정상/빈/null 응답 파싱
+- [x] weeklyToMonthly: 주간→월간 환산 (× 4.33)
+- [x] mapToRent: 도시별 정적 임대료 매핑
+- [x] mapToGroceries: CPI + static fallback
+- [x] getTransportFares: 도시별 정적 요금
+- [x] refresh: dryRun/useStatic 옵션
+- [x] refresh: 기존 데이터 대비 changes 계산
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: API 불가 시 static fallback + errors에 추가
 
 #### `jp_estat.mjs`, `jp_transit.mjs`
 
-- [ ] e-Stat API (`JP_ESTAT_APP_ID` 필요)
-- [ ] 東京都 23区 + 大阪府 분리
-- [ ] 도쿄메트로 + 大阪Metro fare
+- [x] e-Stat API (`JP_ESTAT_APP_ID` 필요)
+- [x] 東京都 23区 + 大阪府 분리
+- [x] 도쿄메트로 + 大阪Metro fare
+- [x] parseEstatValue: 정상/빈/null 응답 파싱
+- [x] mapToRent: 도시별 정적 임대료 (JPY)
+- [x] mapToGroceries: 정적 식재료 가격
+- [x] getTransportFares: 도시별 정적 요금
+- [x] refresh: dryRun/useStatic 옵션
+- [x] refresh: JP_ESTAT_APP_ID 미설정 시 errors에 추가
+- [x] refresh: 기존 데이터 대비 changes 계산
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: API 불가 시 static fallback + errors에 추가
 
 #### `sg_singstat.mjs`, `sg_lta.mjs`
 
