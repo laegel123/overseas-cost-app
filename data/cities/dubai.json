@@ -1,0 +1,56 @@
+{
+  "id": "dubai",
+  "name": {
+    "ko": "두바이",
+    "en": "Dubai"
+  },
+  "country": "AE",
+  "currency": "AED",
+  "region": "me",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 3000,
+    "studio": 5500,
+    "oneBed": 7500,
+    "twoBed": 11000
+  },
+  "food": {
+    "restaurantMeal": 45,
+    "cafe": 18,
+    "groceries": {
+      "milk1L": 6.5,
+      "eggs12": 14,
+      "rice1kg": 8,
+      "chicken1kg": 25,
+      "bread": 5.5,
+      "onion1kg": 4.5,
+      "apple1kg": 12,
+      "ramen": 4
+    }
+  },
+  "transport": {
+    "monthlyPass": 350,
+    "singleRide": 4,
+    "taxiBase": 12
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "DSC + RERA Rental Index + static estimates",
+      "url": "https://www.dsc.gov.ae/en-us/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "FCSC CPI + static estimates",
+      "url": "https://fcsc.gov.ae/en-us/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "RTA Public Transport Fares + static estimates",
+      "url": "https://www.rta.ae/wps/portal/rta/ae/home/fares-and-payment",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

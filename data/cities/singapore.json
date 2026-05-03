@@ -1,0 +1,56 @@
+{
+  "id": "singapore",
+  "name": {
+    "ko": "싱가포르",
+    "en": "Singapore"
+  },
+  "country": "SG",
+  "currency": "SGD",
+  "region": "asia",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 1200,
+    "studio": 2200,
+    "oneBed": 2800,
+    "twoBed": 3800
+  },
+  "food": {
+    "restaurantMeal": 15,
+    "cafe": 6,
+    "groceries": {
+      "milk1L": 3.8,
+      "eggs12": 4.5,
+      "rice1kg": 3.2,
+      "chicken1kg": 9.5,
+      "bread": 2.8,
+      "onion1kg": 2.5,
+      "apple1kg": 5.8,
+      "ramen": 1.5
+    }
+  },
+  "transport": {
+    "monthlyPass": 128,
+    "singleRide": 1.19,
+    "taxiBase": 4
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "SingStat Rental Index + static estimates",
+      "url": "https://www.singstat.gov.sg/find-data/search-by-theme/industry/real-estate",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "SingStat CPI + hawker centre estimates",
+      "url": "https://www.singstat.gov.sg/find-data/search-by-theme/economy/prices-and-price-indices",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "LTA Public Transport Fares + static estimates",
+      "url": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/fares_payment_methods.html",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

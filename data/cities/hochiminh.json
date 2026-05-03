@@ -1,0 +1,56 @@
+{
+  "id": "hochiminh",
+  "name": {
+    "ko": "호치민",
+    "en": "Ho Chi Minh City"
+  },
+  "country": "VN",
+  "currency": "VND",
+  "region": "asia",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 5000000,
+    "studio": 8000000,
+    "oneBed": 12000000,
+    "twoBed": 18000000
+  },
+  "food": {
+    "restaurantMeal": 80000,
+    "cafe": 45000,
+    "groceries": {
+      "milk1L": 35000,
+      "eggs12": 45000,
+      "rice1kg": 20000,
+      "chicken1kg": 85000,
+      "bread": 25000,
+      "onion1kg": 30000,
+      "apple1kg": 80000,
+      "ramen": 8000
+    }
+  },
+  "transport": {
+    "monthlyPass": 200000,
+    "singleRide": 7000,
+    "taxiBase": 12000
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "GSO estimates (도시 단위 데이터 부재, estimated)",
+      "url": "https://www.gso.gov.vn/en/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "GSO CPI + estimates (도시 단위 데이터 부재, estimated)",
+      "url": "https://www.gso.gov.vn/en/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "Ho Chi Minh City static estimates",
+      "url": "https://hochiminhcity.gov.vn/",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

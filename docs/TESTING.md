@@ -2449,23 +2449,89 @@ afterEach(() => {
 - [x] refresh: 알 수 없는 도시 → errors에 추가
 - [x] refresh: API 불가 시 static fallback + errors에 추가
 
-#### `sg_singstat.mjs`, `sg_lta.mjs`
+#### `sg_singstat.mjs`
 
-- [ ] SingStat TableBuilder API
-- [ ] LTA DataMall fare API
-- [ ] Hawker centre 가격 별도 정적 (CPI Hawker food 카테고리 매핑)
+- [x] parseSingStatValue: 마지막 row value 파싱
+- [x] parseSingStatValue: 빈/null/undefined → null 반환
+- [x] mapToRent: 정적 임대료 (SGD 단위)
+- [x] mapToGroceries: 정적 식재료 가격
+- [x] CITY_CONFIGS: 싱가포르 포함 (id, name, country, currency, region)
+- [x] STATIC_FOOD: hawkerMeal 포함 (hawker centre 정적)
+- [x] SOURCE_RENT / SOURCE_FOOD: singstat.gov.sg URL 명시
+- [x] refresh: useStatic=true 시 API 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: SG_DATA_GOV_KEY 미설정 시 errors에 추가
+
+#### `sg_lta.mjs`
+
+- [x] getTransportFares: 정적 요금 (SGD 단위)
+- [x] checkLtaFarePage: LTA fare page connectivity 확인
+- [x] CITY_CONFIGS: 싱가포르 포함 (transitOperator=LTA, fareUrl)
+- [x] SOURCE: lta.gov.sg URL 명시
+- [x] refresh: useStatic=true 시 fetch 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
 
 #### `vn_gso.mjs`
 
-- [ ] GSO 데이터 (한계 큼) — best-effort fetch
-- [ ] HCMC 단위 데이터 부재 시 "estimated" 마커 + 기존값 유지
-- [ ] errors 에 한계 명시 메시지
+- [x] mapToRent: 정적 임대료 (VND 단위, 큰 수)
+- [x] mapToGroceries: 정적 식재료 가격 (VND 단위)
+- [x] getTransportFares: 정적 요금 (VND 단위)
+- [x] checkGsoStatus: GSO site connectivity 확인
+- [x] CITY_CONFIGS: 호치민 포함 (id=hochiminh, country=VN, currency=VND)
+- [x] SOURCE_RENT / SOURCE_FOOD: "estimated" 마커 포함 (도시 단위 데이터 부재)
+- [x] SOURCE_TRANSPORT: 정적 추정 명시
+- [x] refresh: rent + food + transport 모두 처리
+- [x] refresh: GSO 도시 단위 데이터 부재 경고 errors에 포함
+- [x] refresh: useStatic=true 시 정상 동작
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
 
-#### `ae_fcsc.mjs`, `ae_rta.mjs`
+#### `ae_fcsc.mjs`
 
-- [ ] FCSC + DSC 통합 fetch
-- [ ] AED 통화 처리
-- [ ] RTA 공식 fare page
+- [x] mapToRent: 정적 임대료 (AED 단위)
+- [x] mapToGroceries: 정적 식재료 가격 (AED 단위)
+- [x] checkDscStatus: DSC site connectivity 확인
+- [x] checkFcscStatus: FCSC site connectivity 확인
+- [x] CITY_CONFIGS: 두바이 포함 (id, name, country=AE, currency=AED, region=middleeast)
+- [x] SOURCE_RENT: DSC + RERA 명시
+- [x] SOURCE_FOOD: FCSC 명시
+- [x] refresh: rent + food 처리
+- [x] refresh: useStatic=true 시 정상 동작
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: DSC/FCSC 불가 시 static fallback + errors에 추가
+
+#### `ae_rta.mjs`
+
+- [x] getTransportFares: 정적 요금 (AED 단위)
+- [x] checkRtaFarePage: RTA fare page connectivity 확인
+- [x] CITY_CONFIGS: 두바이 포함 (transitOperator=RTA, fareUrl)
+- [x] SOURCE: rta.ae URL 명시
+- [x] refresh: useStatic=true 시 fetch 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
+
+#### `eu_eurostat.mjs`
+
+- [x] parseEurostatResponse: JSON-stat 응답 → country→value Map
+- [x] parseEurostatResponse: 빈/null/undefined → 빈 Map 반환
+- [x] EU_COUNTRIES: DE/FR/NL 3개국
+- [x] EU_CITIES: 국가별 도시 매핑 (berlin, munich, paris, amsterdam)
+- [x] EUROSTAT_DATASETS: HICP + HPI 정의
+- [x] SOURCE: ec.europa.eu URL 명시, category=fallback
+- [x] refresh: RefreshResult 구조 반환
+- [x] refresh: Eurostat 불가 시 errors에 추가
+- [x] refresh: 정상 응답 시 EU 도시들 포함
+- [x] refresh: 일부 국가 데이터 부재 시 해당 국가만 errors에 추가
 
 ### 9-A.9 출처별 — 학비·비자 (2 scripts)
 
