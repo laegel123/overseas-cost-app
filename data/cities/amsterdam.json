@@ -33,6 +33,16 @@
     "singleRide": 3.4,
     "taxiBase": 3.19
   },
+  "tuition": [
+    { "school": "UvA", "level": "undergrad", "annual": 15000 },
+    { "school": "VU Amsterdam", "level": "undergrad", "annual": 14500 },
+    { "school": "Amsterdam UAS", "level": "undergrad", "annual": 12000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 210,
+    "workApplicationFee": 350,
+    "settlementApprox": 2500
+  },
   "sources": [
     {
       "category": "rent",

@@ -33,6 +33,16 @@
     "singleRide": 3.2,
     "taxiBase": 4
   },
+  "tuition": [
+    { "school": "TU Berlin", "level": "undergrad", "annual": 700 },
+    { "school": "HU Berlin", "level": "undergrad", "annual": 700 },
+    { "school": "FU Berlin", "level": "undergrad", "annual": 700 }
+  ],
+  "visa": {
+    "studentApplicationFee": 75,
+    "workApplicationFee": 100,
+    "settlementApprox": 1500
+  },
   "sources": [
     {
       "category": "rent",

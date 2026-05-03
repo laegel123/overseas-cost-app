@@ -33,6 +33,16 @@
     "singleRide": 3.5,
     "taxiBase": 4.75
   },
+  "tuition": [
+    { "school": "University of Toronto", "level": "undergrad", "annual": 60000 },
+    { "school": "York University", "level": "undergrad", "annual": 35000 },
+    { "school": "Seneca", "level": "language", "annual": 16000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 150,
+    "workApplicationFee": 255,
+    "settlementApprox": 2500
+  },
   "sources": [
     {
       "category": "rent",

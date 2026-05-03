@@ -33,6 +33,16 @@
     "singleRide": 2.8,
     "taxiBase": 3.8
   },
+  "tuition": [
+    { "school": "Imperial College", "level": "undergrad", "annual": 38000 },
+    { "school": "UCL", "level": "undergrad", "annual": 35000 },
+    { "school": "King's College", "level": "undergrad", "annual": 32000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 490,
+    "workApplicationFee": 719,
+    "settlementApprox": 3500
+  },
   "sources": [
     {
       "category": "rent",

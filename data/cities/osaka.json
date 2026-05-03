@@ -33,6 +33,16 @@
     "singleRide": 180,
     "taxiBase": 500
   },
+  "tuition": [
+    { "school": "大阪大学", "level": "undergrad", "annual": 535800 },
+    { "school": "京都大学", "level": "undergrad", "annual": 535800 },
+    { "school": "関西学院大学", "level": "undergrad", "annual": 1200000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 3000,
+    "workApplicationFee": 6000,
+    "settlementApprox": 200000
+  },
   "sources": [
     {
       "category": "rent",

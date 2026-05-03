@@ -33,6 +33,16 @@
     "singleRide": 2.15,
     "taxiBase": 4.18
   },
+  "tuition": [
+    { "school": "Sorbonne Université", "level": "undergrad", "annual": 3800 },
+    { "school": "Sciences Po", "level": "undergrad", "annual": 14500 },
+    { "school": "École Polytechnique", "level": "graduate", "annual": 15000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 99,
+    "workApplicationFee": 225,
+    "settlementApprox": 2000
+  },
   "sources": [
     {
       "category": "rent",

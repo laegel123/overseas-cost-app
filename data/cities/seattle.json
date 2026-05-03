@@ -33,6 +33,15 @@
     "singleRide": 2.75,
     "taxiBase": 2.6
   },
+  "tuition": [
+    { "school": "University of Washington", "level": "undergrad", "annual": 42000 },
+    { "school": "Seattle Central", "level": "language", "annual": 11000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 185,
+    "workApplicationFee": 190,
+    "settlementApprox": 3000
+  },
   "sources": [
     {
       "category": "rent",

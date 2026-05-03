@@ -67,8 +67,10 @@
     },
     {
       "step": 9,
-      "name": "step-9",
-      "status": "pending"
+      "name": "universities-visas",
+      "status": "completed",
+      "started_at": "2026-05-03T18:24:08+0900",
+      "completed_at": "2026-05-03T19:30:00+0900"
     },
     {
       "step": 10,

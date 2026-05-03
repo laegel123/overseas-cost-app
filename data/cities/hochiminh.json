@@ -33,6 +33,16 @@
     "singleRide": 7000,
     "taxiBase": 12000
   },
+  "tuition": [
+    { "school": "VNU-HCMC", "level": "undergrad", "annual": 50000000 },
+    { "school": "RMIT Vietnam", "level": "undergrad", "annual": 350000000 },
+    { "school": "Fulbright", "level": "undergrad", "annual": 450000000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 25,
+    "workApplicationFee": 50,
+    "settlementApprox": 5000000
+  },
   "sources": [
     {
       "category": "rent",

@@ -33,6 +33,16 @@
     "singleRide": 1.75,
     "taxiBase": 4.1
   },
+  "tuition": [
+    { "school": "UCLA", "level": "undergrad", "annual": 45000 },
+    { "school": "USC", "level": "undergrad", "annual": 65000 },
+    { "school": "SMC", "level": "language", "annual": 10000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 185,
+    "workApplicationFee": 190,
+    "settlementApprox": 3000
+  },
   "sources": [
     {
       "category": "rent",

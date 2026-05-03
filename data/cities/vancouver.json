@@ -33,6 +33,16 @@
     "singleRide": 3.35,
     "taxiBase": 3.95
   },
+  "tuition": [
+    { "school": "UBC", "level": "undergrad", "annual": 45000 },
+    { "school": "SFU", "level": "undergrad", "annual": 32000 },
+    { "school": "BCIT", "level": "language", "annual": 18000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 150,
+    "workApplicationFee": 255,
+    "settlementApprox": 2500
+  },
   "sources": [
     {
       "category": "rent",

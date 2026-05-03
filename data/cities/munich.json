@@ -33,6 +33,15 @@
     "singleRide": 3.7,
     "taxiBase": 4.7
   },
+  "tuition": [
+    { "school": "LMU München", "level": "undergrad", "annual": 700 },
+    { "school": "TU München", "level": "undergrad", "annual": 700 }
+  ],
+  "visa": {
+    "studentApplicationFee": 75,
+    "workApplicationFee": 100,
+    "settlementApprox": 1500
+  },
   "sources": [
     {
       "category": "rent",

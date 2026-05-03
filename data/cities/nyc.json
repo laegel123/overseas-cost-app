@@ -33,6 +33,16 @@
     "singleRide": 2.9,
     "taxiBase": 3
   },
+  "tuition": [
+    { "school": "Columbia", "level": "undergrad", "annual": 65000 },
+    { "school": "NYU", "level": "undergrad", "annual": 60000 },
+    { "school": "CUNY", "level": "undergrad", "annual": 18000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 185,
+    "workApplicationFee": 190,
+    "settlementApprox": 3000
+  },
   "sources": [
     {
       "category": "rent",

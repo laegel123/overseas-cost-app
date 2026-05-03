@@ -33,6 +33,16 @@
     "singleRide": 1.19,
     "taxiBase": 4
   },
+  "tuition": [
+    { "school": "NUS", "level": "undergrad", "annual": 35000 },
+    { "school": "NTU", "level": "undergrad", "annual": 33000 },
+    { "school": "SMU", "level": "undergrad", "annual": 38000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 30,
+    "workApplicationFee": 105,
+    "settlementApprox": 1500
+  },
   "sources": [
     {
       "category": "rent",

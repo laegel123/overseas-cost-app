@@ -33,6 +33,16 @@
     "singleRide": 3.8,
     "taxiBase": 3.6
   },
+  "tuition": [
+    { "school": "USyd", "level": "undergrad", "annual": 50000 },
+    { "school": "UNSW", "level": "undergrad", "annual": 48000 },
+    { "school": "Macquarie", "level": "undergrad", "annual": 42000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 710,
+    "workApplicationFee": 450,
+    "settlementApprox": 4000
+  },
   "sources": [
     {
       "category": "rent",

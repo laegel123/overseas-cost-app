@@ -2537,22 +2537,22 @@ afterEach(() => {
 
 #### `universities.mjs`
 
-- [ ] 도시별 대학 매핑 (registry from DATA_SOURCES.md)
-- [ ] 각 대학 공식 international tuition 페이지 fetch
-- [ ] HTML parse — 페이지 구조별 selector (대학별 다른 selector 정적 매핑)
-- [ ] 학비 단위 (per credit vs per year vs per semester) 정규화 → annual
-- [ ] 페이지 구조 변경 시 selector 실패 → errors + 기존값 유지
-- [ ] 학비 페이지 redirect 처리
-- [ ] 다국어 페이지 (영어 default)
-- [ ] 등록비만 있는 대학 (독일·프랑스 일부): annual = 등록비 × 2
+- [x] 도시별 대학 매핑 (registry from DATA_SOURCES.md)
+- [x] 각 대학 공식 international tuition 페이지 fetch
+- [x] HTML parse — 페이지 구조별 selector (대학별 다른 selector 정적 매핑)
+- [x] 학비 단위 (per credit vs per year vs per semester) 정규화 → annual
+- [x] 페이지 구조 변경 시 selector 실패 → errors + 기존값 유지
+- [x] 학비 페이지 redirect 처리
+- [x] 다국어 페이지 (영어 default)
+- [x] 등록비만 있는 대학 (독일·프랑스 일부): annual = 등록비 × 2
 
 #### `visas.mjs`
 
-- [ ] 도시별 비자 페이지 매핑
-- [ ] 정부 페이지 fetch + parse
-- [ ] 통화별 처리 (USD vs CAD vs EUR vs JPY 등)
-- [ ] 정착 비용 추정 (정적 + 비자료)
-- [ ] 페이지 변경 시 graceful fail
+- [x] 도시별 비자 페이지 매핑
+- [x] 정부 페이지 fetch + parse
+- [x] 통화별 처리 (USD vs CAD vs EUR vs JPY 등)
+- [x] 정착 비용 추정 (정적 + 비자료)
+- [x] 페이지 변경 시 graceful fail
 
 ### 9-A.10 출처별 — 환율 백업 (1 script)
 

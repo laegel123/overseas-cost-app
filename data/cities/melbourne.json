@@ -33,6 +33,16 @@
     "singleRide": 4.6,
     "taxiBase": 4.2
   },
+  "tuition": [
+    { "school": "UniMelb", "level": "undergrad", "annual": 52000 },
+    { "school": "Monash", "level": "undergrad", "annual": 48000 },
+    { "school": "RMIT", "level": "undergrad", "annual": 40000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 710,
+    "workApplicationFee": 450,
+    "settlementApprox": 4000
+  },
   "sources": [
     {
       "category": "rent",

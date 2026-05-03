@@ -33,6 +33,16 @@
     "singleRide": 2.4,
     "taxiBase": 2.6
   },
+  "tuition": [
+    { "school": "Harvard", "level": "undergrad", "annual": 57000 },
+    { "school": "MIT", "level": "undergrad", "annual": 58000 },
+    { "school": "BU", "level": "undergrad", "annual": 62000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 185,
+    "workApplicationFee": 190,
+    "settlementApprox": 3000
+  },
   "sources": [
     {
       "category": "rent",

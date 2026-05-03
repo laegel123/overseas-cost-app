@@ -33,6 +33,16 @@
     "singleRide": 3.75,
     "taxiBase": 3.85
   },
+  "tuition": [
+    { "school": "McGill", "level": "undergrad", "annual": 25000 },
+    { "school": "Concordia", "level": "undergrad", "annual": 22000 },
+    { "school": "UdeM", "level": "graduate", "annual": 20000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 150,
+    "workApplicationFee": 255,
+    "settlementApprox": 2500
+  },
   "sources": [
     {
       "category": "rent",

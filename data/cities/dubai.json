@@ -33,6 +33,15 @@
     "singleRide": 4,
     "taxiBase": 12
   },
+  "tuition": [
+    { "school": "AUD", "level": "undergrad", "annual": 80000 },
+    { "school": "Wollongong Dubai", "level": "undergrad", "annual": 65000 }
+  ],
+  "visa": {
+    "studentApplicationFee": 500,
+    "workApplicationFee": 1200,
+    "settlementApprox": 8000
+  },
   "sources": [
     {
       "category": "rent",
