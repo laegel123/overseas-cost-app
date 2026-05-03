@@ -15,7 +15,8 @@
  * - Series APU0000702212: Rice (lb) → rice1kg (×2.205)
  */
 
-import { readCity, writeCity, fetchWithRetry, createMissingApiKeyError } from './_common.mjs';
+import { readCity, writeCity, fetchWithRetry, createMissingApiKeyError, createCitySeed} from './_common.mjs';
+import { computePctChange } from './_outlier.mjs';
 
 const BLS_API_BASE = 'https://api.bls.gov/publicAPI/v2/timeseries/data/';
 
@@ -41,35 +42,35 @@ export const CITY_CONFIGS = {
     name: { ko: '뉴욕', en: 'New York' },
     country: 'US',
     currency: 'USD',
-    region: 'north-america',
+    region: 'na',
   },
   la: {
     id: 'la',
     name: { ko: 'LA', en: 'Los Angeles' },
     country: 'US',
     currency: 'USD',
-    region: 'north-america',
+    region: 'na',
   },
   sf: {
     id: 'sf',
     name: { ko: '샌프란시스코', en: 'San Francisco' },
     country: 'US',
     currency: 'USD',
-    region: 'north-america',
+    region: 'na',
   },
   seattle: {
     id: 'seattle',
     name: { ko: '시애틀', en: 'Seattle' },
     country: 'US',
     currency: 'USD',
-    region: 'north-america',
+    region: 'na',
   },
   boston: {
     id: 'boston',
     name: { ko: '보스턴', en: 'Boston' },
     country: 'US',
     currency: 'USD',
-    region: 'north-america',
+    region: 'na',
   },
 };
 
@@ -89,64 +90,64 @@ export const SOURCE = {
 
 export const STATIC_PRICES = {
   nyc: {
-    milk1L: 145,
-    eggs12: 425,
-    rice1kg: 380,
-    chicken1kg: 1250,
-    bread: 425,
-    onion1kg: 280,
-    apple1kg: 520,
-    ramen: 120,
-    restaurantMeal: 2500,
-    cafe: 650,
+    milk1L: 1.45,
+    eggs12: 4.25,
+    rice1kg: 3.8,
+    chicken1kg: 12.5,
+    bread: 4.25,
+    onion1kg: 2.8,
+    apple1kg: 5.2,
+    ramen: 1.2,
+    restaurantMeal: 25,
+    cafe: 6.5,
   },
   la: {
-    milk1L: 140,
-    eggs12: 400,
-    rice1kg: 350,
-    chicken1kg: 1200,
-    bread: 400,
-    onion1kg: 260,
-    apple1kg: 480,
-    ramen: 110,
-    restaurantMeal: 2200,
-    cafe: 600,
+    milk1L: 1.4,
+    eggs12: 4,
+    rice1kg: 3.5,
+    chicken1kg: 12,
+    bread: 4,
+    onion1kg: 2.6,
+    apple1kg: 4.8,
+    ramen: 1.1,
+    restaurantMeal: 22,
+    cafe: 6,
   },
   sf: {
-    milk1L: 155,
-    eggs12: 450,
-    rice1kg: 390,
-    chicken1kg: 1350,
-    bread: 450,
-    onion1kg: 290,
-    apple1kg: 550,
-    ramen: 130,
-    restaurantMeal: 2800,
-    cafe: 700,
+    milk1L: 1.55,
+    eggs12: 4.5,
+    rice1kg: 3.9,
+    chicken1kg: 13.5,
+    bread: 4.5,
+    onion1kg: 2.9,
+    apple1kg: 5.5,
+    ramen: 1.3,
+    restaurantMeal: 28,
+    cafe: 7,
   },
   seattle: {
-    milk1L: 135,
-    eggs12: 380,
-    rice1kg: 340,
-    chicken1kg: 1150,
-    bread: 380,
-    onion1kg: 250,
-    apple1kg: 460,
-    ramen: 100,
-    restaurantMeal: 2100,
-    cafe: 580,
+    milk1L: 1.35,
+    eggs12: 3.8,
+    rice1kg: 3.4,
+    chicken1kg: 11.5,
+    bread: 3.8,
+    onion1kg: 2.5,
+    apple1kg: 4.6,
+    ramen: 1,
+    restaurantMeal: 21,
+    cafe: 5.8,
   },
   boston: {
-    milk1L: 140,
-    eggs12: 410,
-    rice1kg: 370,
-    chicken1kg: 1220,
-    bread: 410,
-    onion1kg: 270,
-    apple1kg: 500,
-    ramen: 115,
-    restaurantMeal: 2400,
-    cafe: 630,
+    milk1L: 1.4,
+    eggs12: 4.1,
+    rice1kg: 3.7,
+    chicken1kg: 12.2,
+    bread: 4.1,
+    onion1kg: 2.7,
+    apple1kg: 5,
+    ramen: 1.15,
+    restaurantMeal: 24,
+    cafe: 6.3,
   },
 };
 
@@ -407,7 +408,7 @@ export default async function refresh(opts = {}) {
       const oldVal = oldGroceries[field] ?? null;
       if (oldVal !== newVal) {
         fields.push(field);
-        const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+        const pctChange = computePctChange(oldVal, newVal);
         changes.push({ cityId, field: `food.groceries.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
         hasChanges = true;
       }
@@ -418,7 +419,7 @@ export default async function refresh(opts = {}) {
       const newVal = newFood[field];
       if (oldVal !== newVal) {
         fields.push(field);
-        const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+        const pctChange = computePctChange(oldVal, newVal);
         changes.push({ cityId, field: `food.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
         hasChanges = true;
       }
@@ -448,32 +449,3 @@ export default async function refresh(opts = {}) {
   };
 }
 
-/**
- * 도시 seed 데이터 생성 (초기화용).
- * @param {typeof CITY_CONFIGS.nyc} config
- * @returns {import('../../src/types/city').CityCostData}
- */
-function createCitySeed(config) {
-  return {
-    id: config.id,
-    name: config.name,
-    country: config.country,
-    currency: config.currency,
-    region: config.region,
-    lastUpdated: '',
-    rent: { share: null, studio: null, oneBed: null, twoBed: null },
-    food: {
-      restaurantMeal: 0,
-      cafe: 0,
-      groceries: {
-        milk1L: 0,
-        eggs12: 0,
-        rice1kg: 0,
-        chicken1kg: 0,
-        bread: 0,
-      },
-    },
-    transport: { monthlyPass: 0, singleRide: 0, taxiBase: 0 },
-    sources: [],
-  };
-}

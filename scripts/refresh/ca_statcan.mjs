@@ -10,7 +10,8 @@
  * Vector ID: StatCan Table 18-10-0004 (Consumer Price Index, monthly)
  */
 
-import { fetchWithRetry, readCity, writeCity } from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed} from './_common.mjs';
+import { computePctChange } from './_outlier.mjs';
 
 const STATCAN_WDS_BASE = 'https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods';
 
@@ -20,21 +21,21 @@ export const CITY_CONFIGS = {
     name: { ko: '밴쿠버', en: 'Vancouver' },
     country: 'CA',
     currency: 'CAD',
-    region: 'north-america',
+    region: 'na',
   },
   toronto: {
     id: 'toronto',
     name: { ko: '토론토', en: 'Toronto' },
     country: 'CA',
     currency: 'CAD',
-    region: 'north-america',
+    region: 'na',
   },
   montreal: {
     id: 'montreal',
     name: { ko: '몬트리올', en: 'Montreal' },
     country: 'CA',
     currency: 'CAD',
-    region: 'north-america',
+    region: 'na',
   },
 };
 
@@ -70,40 +71,40 @@ export const CPI_VECTORS = {
 
 export const STATIC_PRICES = {
   vancouver: {
-    milk1L: 325,
-    eggs12: 450,
-    rice1kg: 380,
-    chicken1kg: 1500,
-    bread: 350,
-    onion1kg: 280,
-    apple1kg: 450,
-    ramen: 150,
-    restaurantMeal: 2200,
-    cafe: 600,
+    milk1L: 3.25,
+    eggs12: 4.5,
+    rice1kg: 3.8,
+    chicken1kg: 15,
+    bread: 3.5,
+    onion1kg: 2.8,
+    apple1kg: 4.5,
+    ramen: 1.5,
+    restaurantMeal: 22,
+    cafe: 6,
   },
   toronto: {
-    milk1L: 320,
-    eggs12: 440,
-    rice1kg: 360,
-    chicken1kg: 1450,
-    bread: 340,
-    onion1kg: 260,
-    apple1kg: 430,
-    ramen: 140,
-    restaurantMeal: 2100,
-    cafe: 580,
+    milk1L: 3.2,
+    eggs12: 4.4,
+    rice1kg: 3.6,
+    chicken1kg: 14.5,
+    bread: 3.4,
+    onion1kg: 2.6,
+    apple1kg: 4.3,
+    ramen: 1.4,
+    restaurantMeal: 21,
+    cafe: 5.8,
   },
   montreal: {
-    milk1L: 310,
-    eggs12: 420,
-    rice1kg: 350,
-    chicken1kg: 1400,
-    bread: 330,
-    onion1kg: 250,
-    apple1kg: 400,
-    ramen: 130,
-    restaurantMeal: 1900,
-    cafe: 550,
+    milk1L: 3.1,
+    eggs12: 4.2,
+    rice1kg: 3.5,
+    chicken1kg: 14,
+    bread: 3.3,
+    onion1kg: 2.5,
+    apple1kg: 4,
+    ramen: 1.3,
+    restaurantMeal: 19,
+    cafe: 5.5,
   },
 };
 
@@ -206,7 +207,7 @@ export default async function refresh(opts = {}) {
         const oldVal = oldGroceries[field] ?? null;
         if (oldVal !== newVal) {
           fields.push(field);
-          const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+          const pctChange = computePctChange(oldVal, newVal);
           changes.push({ cityId, field: `food.groceries.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
           hasChanges = true;
         }
@@ -217,7 +218,7 @@ export default async function refresh(opts = {}) {
         const newVal = newFood[field];
         if (oldVal !== newVal) {
           fields.push(field);
-          const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+          const pctChange = computePctChange(oldVal, newVal);
           changes.push({ cityId, field: `food.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
           hasChanges = true;
         }
@@ -337,7 +338,7 @@ export default async function refresh(opts = {}) {
 
       if (oldVal !== newVal) {
         fields.push(field);
-        const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+        const pctChange = computePctChange(oldVal, newVal);
         changes.push({ cityId, field: `food.groceries.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
         hasChanges = true;
       }
@@ -349,7 +350,7 @@ export default async function refresh(opts = {}) {
 
       if (oldVal !== newVal) {
         fields.push(field);
-        const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+        const pctChange = computePctChange(oldVal, newVal);
         changes.push({ cityId, field: `food.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
         hasChanges = true;
       }
@@ -379,32 +380,3 @@ export default async function refresh(opts = {}) {
   };
 }
 
-/**
- * 도시 seed 데이터 생성 (초기화용).
- * @param {typeof CITY_CONFIGS.vancouver} config
- * @returns {import('../../src/types/city').CityCostData}
- */
-function createCitySeed(config) {
-  return {
-    id: config.id,
-    name: config.name,
-    country: config.country,
-    currency: config.currency,
-    region: config.region,
-    lastUpdated: '',
-    rent: { share: null, studio: null, oneBed: null, twoBed: null },
-    food: {
-      restaurantMeal: 0,
-      cafe: 0,
-      groceries: {
-        milk1L: 0,
-        eggs12: 0,
-        rice1kg: 0,
-        chicken1kg: 0,
-        bread: 0,
-      },
-    },
-    transport: { monthlyPass: 0, singleRide: 0, taxiBase: 0 },
-    sources: [],
-  };
-}

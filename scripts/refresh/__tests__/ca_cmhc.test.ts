@@ -173,7 +173,7 @@ describe('constants', () => {
       expect(config.name.en).toBeDefined();
       expect(config.country).toBe('CA');
       expect(config.currency).toBe('CAD');
-      expect(config.region).toBe('north-america');
+      expect(config.region).toBe('na');
       expect(config.vectors.bachelor).toBeDefined();
       expect(config.vectors.oneBed).toBeDefined();
       expect(config.vectors.twoBed).toBeDefined();
@@ -190,8 +190,14 @@ describe('constants', () => {
 describe('refresh (integration)', () => {
   let fetchSpy: jest.SpyInstance;
 
+  // fetchWithRetry 의 setTimeout backoff 가 fake timers 에서 hang 하므로 실제 타이머 사용.
   beforeEach(() => {
+    jest.useRealTimers();
     fetchSpy = jest.spyOn(global, 'fetch');
+  });
+
+  afterEach(() => {
+    jest.useFakeTimers();
   });
 
   it('정상 응답: 3개 도시 rent 매핑', async () => {
@@ -266,7 +272,7 @@ describe('refresh (integration)', () => {
       name: { ko: '밴쿠버', en: 'Vancouver' },
       country: 'CA',
       currency: 'CAD',
-      region: 'north-america',
+      region: 'na',
       lastUpdated: '2026-04-01',
       rent: { share: 1000, studio: 1500, oneBed: 1800, twoBed: 2200 },
       food: { restaurantMeal: 2000, cafe: 500, groceries: { milk1L: 300, eggs12: 400, rice1kg: 350, chicken1kg: 1400, bread: 350 } },

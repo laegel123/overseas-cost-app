@@ -47,10 +47,10 @@ const VALID_FARE_HTML = `
 `;
 
 describe('parseFareHtml', () => {
-  it('정상 HTML 파싱: 1회권 + 월정기권', () => {
+  it('정상 HTML 파싱: 1회권 + 월정기권 (CAD 단위)', () => {
     const fares = parseFareHtml(VALID_FARE_HTML);
-    expect(fares.singleRide).toBe(375);
-    expect(fares.monthlyPass).toBe(9400);
+    expect(fares.singleRide).toBe(3.75);
+    expect(fares.monthlyPass).toBe(94);
   });
 
   it('빈 HTML: 빈 객체 반환', () => {
@@ -64,9 +64,9 @@ describe('parseFareHtml', () => {
     const html2 = '<p>Regular fare: $3.75</p>';
     const html3 = '<p>3.50 $ par trajet</p>';
 
-    expect(parseFareHtml(html1).singleRide).toBe(350);
-    expect(parseFareHtml(html2).singleRide).toBe(375);
-    expect(parseFareHtml(html3).singleRide).toBe(350);
+    expect(parseFareHtml(html1).singleRide).toBe(3.5);
+    expect(parseFareHtml(html2).singleRide).toBe(3.75);
+    expect(parseFareHtml(html3).singleRide).toBe(3.5);
   });
 
   it('다양한 월정기권 패턴', () => {
@@ -74,9 +74,9 @@ describe('parseFareHtml', () => {
     const html2 = '<p>OPUS Monthly: $97.00</p>';
     const html3 = '<p>94.00 $ mensuel</p>';
 
-    expect(parseFareHtml(html1).monthlyPass).toBe(9500);
-    expect(parseFareHtml(html2).monthlyPass).toBe(9700);
-    expect(parseFareHtml(html3).monthlyPass).toBe(9400);
+    expect(parseFareHtml(html1).monthlyPass).toBe(95);
+    expect(parseFareHtml(html2).monthlyPass).toBe(97);
+    expect(parseFareHtml(html3).monthlyPass).toBe(94);
   });
 
   it('비정상적인 값 무시 (월정기권 > $200)', () => {
@@ -151,7 +151,7 @@ describe('refresh (integration)', () => {
       name: { ko: '몬트리올', en: 'Montreal' },
       country: 'CA',
       currency: 'CAD',
-      region: 'north-america',
+      region: 'na',
       lastUpdated: '2026-04-01',
       rent: { share: 900, studio: 1400, oneBed: 1700, twoBed: 2100 },
       food: { restaurantMeal: 1900, cafe: 500, groceries: { milk1L: 300, eggs12: 400, rice1kg: 330, chicken1kg: 1380, bread: 320 } },

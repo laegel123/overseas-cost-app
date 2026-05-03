@@ -14,7 +14,6 @@
 import { readFile, readdir, access } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
 
 import { classifyChange, computePctChange } from './refresh/_outlier.mjs';
 import { diffCities } from './refresh/_diff.mjs';

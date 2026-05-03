@@ -47,10 +47,10 @@ const VALID_FARE_HTML = `
 `;
 
 describe('parseFareHtml', () => {
-  it('정상 HTML 파싱: 1회권 + 월정기권', () => {
+  it('정상 HTML 파싱: 1회권 + 월정기권 (CAD 단위)', () => {
     const fares = parseFareHtml(VALID_FARE_HTML);
-    expect(fares.singleRide).toBe(350);
-    expect(fares.monthlyPass).toBe(15630);
+    expect(fares.singleRide).toBe(3.5);
+    expect(fares.monthlyPass).toBe(156.3);
   });
 
   it('빈 HTML: 빈 객체 반환', () => {
@@ -62,15 +62,15 @@ describe('parseFareHtml', () => {
   it('PRESTO 요금 패턴', () => {
     const html = '<p>PRESTO: $3.35</p>';
     const fares = parseFareHtml(html);
-    expect(fares.singleRide).toBe(335);
+    expect(fares.singleRide).toBe(3.35);
   });
 
   it('다양한 월정기권 패턴', () => {
     const html1 = '<p>Monthly Pass: $158.00</p>';
     const html2 = '<p>TTC Monthly: $160.00</p>';
 
-    expect(parseFareHtml(html1).monthlyPass).toBe(15800);
-    expect(parseFareHtml(html2).monthlyPass).toBe(16000);
+    expect(parseFareHtml(html1).monthlyPass).toBe(158);
+    expect(parseFareHtml(html2).monthlyPass).toBe(160);
   });
 
   it('비정상적인 값 무시 (1회권 > $10)', () => {
@@ -145,7 +145,7 @@ describe('refresh (integration)', () => {
       name: { ko: '토론토', en: 'Toronto' },
       country: 'CA',
       currency: 'CAD',
-      region: 'north-america',
+      region: 'na',
       lastUpdated: '2026-04-01',
       rent: { share: 1200, studio: 1800, oneBed: 2200, twoBed: 2800 },
       food: { restaurantMeal: 2100, cafe: 550, groceries: { milk1L: 310, eggs12: 420, rice1kg: 340, chicken1kg: 1420, bread: 340 } },

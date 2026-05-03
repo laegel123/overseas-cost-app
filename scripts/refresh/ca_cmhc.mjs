@@ -11,7 +11,8 @@
  * Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정
  */
 
-import { readCity, writeCity } from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed} from './_common.mjs';
+import { computePctChange } from './_outlier.mjs';
 
 const STATCAN_WDS_BASE = 'https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods';
 
@@ -21,7 +22,7 @@ export const CITY_CONFIGS = {
     name: { ko: '밴쿠버', en: 'Vancouver' },
     country: 'CA',
     currency: 'CAD',
-    region: 'north-america',
+    region: 'na',
     vectors: {
       bachelor: 'v111426660',
       oneBed: 'v111426661',
@@ -33,7 +34,7 @@ export const CITY_CONFIGS = {
     name: { ko: '토론토', en: 'Toronto' },
     country: 'CA',
     currency: 'CAD',
-    region: 'north-america',
+    region: 'na',
     vectors: {
       bachelor: 'v111426717',
       oneBed: 'v111426718',
@@ -45,7 +46,7 @@ export const CITY_CONFIGS = {
     name: { ko: '몬트리올', en: 'Montreal' },
     country: 'CA',
     currency: 'CAD',
-    region: 'north-america',
+    region: 'na',
     vectors: {
       bachelor: 'v111426699',
       oneBed: 'v111426700',
@@ -132,15 +133,11 @@ export default async function refresh(opts = {}) {
   let vectorData;
   try {
     const requestBody = JSON.stringify(vectorIds.map((id) => ({ vectorId: id, latestN: 1 })));
-    const response = await fetch(STATCAN_WDS_BASE, {
+    const response = await fetchWithRetry(STATCAN_WDS_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: requestBody,
     });
-
-    if (!response.ok) {
-      throw new Error(`StatCan API error: ${response.status}`);
-    }
 
     const data = await response.json();
     vectorData = parseStatCanResponse(data);
@@ -183,7 +180,7 @@ export default async function refresh(opts = {}) {
 
       if (oldVal !== newVal && newVal !== null) {
         fields.push(field);
-        const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+        const pctChange = computePctChange(oldVal, newVal);
         changes.push({ cityId, field: `rent.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
         hasChanges = true;
       }
@@ -213,32 +210,3 @@ export default async function refresh(opts = {}) {
   };
 }
 
-/**
- * 도시 seed 데이터 생성 (초기화용).
- * @param {typeof CITY_CONFIGS.vancouver} config
- * @returns {import('../../src/types/city').CityCostData}
- */
-function createCitySeed(config) {
-  return {
-    id: config.id,
-    name: config.name,
-    country: config.country,
-    currency: config.currency,
-    region: config.region,
-    lastUpdated: '',
-    rent: { share: null, studio: null, oneBed: null, twoBed: null },
-    food: {
-      restaurantMeal: 0,
-      cafe: 0,
-      groceries: {
-        milk1L: 0,
-        eggs12: 0,
-        rice1kg: 0,
-        chicken1kg: 0,
-        bread: 0,
-      },
-    },
-    transport: { monthlyPass: 0, singleRide: 0, taxiBase: 0 },
-    sources: [],
-  };
-}

@@ -11,9 +11,10 @@
  * API 키 불필요 (공개 데이터).
  */
 
-import { fetchWithRetry, readCity, writeCity } from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed} from './_common.mjs';
+import { computePctChange } from './_outlier.mjs';
 
-const METRO_FARE_URL = 'http://www.seoulmetro.co.kr/kr/page.do?menuIdx=354';
+const METRO_FARE_URL = 'https://www.seoulmetro.co.kr/kr/page.do?menuIdx=354';
 const TAXI_FARE_URL = 'https://tago.go.kr/';
 
 export const STATIC_FARES = {
@@ -166,13 +167,13 @@ export default async function refresh(opts = {}) {
 
     if (oldVal !== newVal) {
       fields.push(field);
-      const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+      const pctChange = computePctChange(oldVal, newVal);
       changes.push({ cityId: 'seoul', field: `transport.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
     }
   }
 
   if (!opts.dryRun && changes.length > 0) {
-    const updatedData = oldData ?? createSeoulSeed();
+    const updatedData = oldData ?? createCitySeed({ id: 'seoul', name: { ko: '서울', en: 'Seoul' }, country: 'KR', currency: 'KRW', region: 'asia' });
     updatedData.transport = { ...updatedData.transport, ...newTransport };
 
     try {
@@ -191,31 +192,3 @@ export default async function refresh(opts = {}) {
   };
 }
 
-/**
- * Seoul seed 데이터 생성 (초기화용).
- * @returns {import('../../src/types/city').CityCostData}
- */
-function createSeoulSeed() {
-  return {
-    id: 'seoul',
-    name: { ko: '서울', en: 'Seoul' },
-    country: 'KR',
-    currency: 'KRW',
-    region: 'asia',
-    lastUpdated: '',
-    rent: { share: null, studio: null, oneBed: null, twoBed: null },
-    food: {
-      restaurantMeal: 0,
-      cafe: 0,
-      groceries: {
-        milk1L: 0,
-        eggs12: 0,
-        rice1kg: 0,
-        chicken1kg: 0,
-        bread: 0,
-      },
-    },
-    transport: { monthlyPass: 0, singleRide: 0, taxiBase: 0 },
-    sources: [],
-  };
-}

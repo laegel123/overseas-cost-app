@@ -14,7 +14,8 @@
  * - share → studio × 0.65 추정
  */
 
-import { readCity, writeCity, fetchWithRetry } from './_common.mjs';
+import { readCity, writeCity, fetchWithRetry, createCitySeed} from './_common.mjs';
+import { computePctChange } from './_outlier.mjs';
 
 const HUD_FMR_BASE = 'https://www.huduser.gov/hudapi/public/fmr/data';
 
@@ -24,7 +25,7 @@ export const CITY_CONFIGS = {
     name: { ko: '뉴욕', en: 'New York' },
     country: 'US',
     currency: 'USD',
-    region: 'north-america',
+    region: 'na',
     fmrCode: 'METRO35620M35620',
   },
   la: {
@@ -32,7 +33,7 @@ export const CITY_CONFIGS = {
     name: { ko: 'LA', en: 'Los Angeles' },
     country: 'US',
     currency: 'USD',
-    region: 'north-america',
+    region: 'na',
     fmrCode: 'METRO31080M31080',
   },
   sf: {
@@ -40,7 +41,7 @@ export const CITY_CONFIGS = {
     name: { ko: '샌프란시스코', en: 'San Francisco' },
     country: 'US',
     currency: 'USD',
-    region: 'north-america',
+    region: 'na',
     fmrCode: 'METRO41860M41860',
   },
   seattle: {
@@ -48,7 +49,7 @@ export const CITY_CONFIGS = {
     name: { ko: '시애틀', en: 'Seattle' },
     country: 'US',
     currency: 'USD',
-    region: 'north-america',
+    region: 'na',
     fmrCode: 'METRO42660M42660',
   },
   boston: {
@@ -56,7 +57,7 @@ export const CITY_CONFIGS = {
     name: { ko: '보스턴', en: 'Boston' },
     country: 'US',
     currency: 'USD',
-    region: 'north-america',
+    region: 'na',
     fmrCode: 'METRO14460M14460',
   },
 };
@@ -195,7 +196,7 @@ export default async function refresh(opts = {}) {
 
       if (oldVal !== newVal && newVal !== null) {
         fields.push(field);
-        const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+        const pctChange = computePctChange(oldVal, newVal);
         changes.push({ cityId, field: `rent.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
         hasChanges = true;
       }
@@ -225,32 +226,3 @@ export default async function refresh(opts = {}) {
   };
 }
 
-/**
- * 도시 seed 데이터 생성 (초기화용).
- * @param {typeof CITY_CONFIGS.nyc} config
- * @returns {import('../../src/types/city').CityCostData}
- */
-function createCitySeed(config) {
-  return {
-    id: config.id,
-    name: config.name,
-    country: config.country,
-    currency: config.currency,
-    region: config.region,
-    lastUpdated: '',
-    rent: { share: null, studio: null, oneBed: null, twoBed: null },
-    food: {
-      restaurantMeal: 0,
-      cafe: 0,
-      groceries: {
-        milk1L: 0,
-        eggs12: 0,
-        rice1kg: 0,
-        chicken1kg: 0,
-        bread: 0,
-      },
-    },
-    transport: { monthlyPass: 0, singleRide: 0, taxiBase: 0 },
-    sources: [],
-  };
-}

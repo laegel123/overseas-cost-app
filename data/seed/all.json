@@ -1,8 +1,64 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-02T13:38:18.301Z",
-  "fxBaseDate": "2026-05-02",
+  "generatedAt": "2026-05-03T04:45:57.630Z",
+  "fxBaseDate": "2026-05-03",
   "cities": {
+    "montreal": {
+      "id": "montreal",
+      "name": {
+        "ko": "몬트리올",
+        "en": "Montreal"
+      },
+      "country": "CA",
+      "currency": "CAD",
+      "region": "na",
+      "lastUpdated": "2026-05-02",
+      "rent": {
+        "share": 1105,
+        "studio": 1700,
+        "oneBed": 1950,
+        "twoBed": 2500
+      },
+      "food": {
+        "restaurantMeal": 19,
+        "cafe": 5.5,
+        "groceries": {
+          "milk1L": 3.1,
+          "eggs12": 4.2,
+          "rice1kg": 3.5,
+          "chicken1kg": 14,
+          "bread": 3.3,
+          "onion1kg": 2.5,
+          "apple1kg": 4,
+          "ramen": 1.3
+        }
+      },
+      "transport": {
+        "monthlyPass": 94,
+        "singleRide": 3.75,
+        "taxiBase": 3.85
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "CMHC Rental Market Survey",
+          "url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI",
+          "url": "https://www150.statcan.gc.ca/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "transport",
+          "name": "STM (Société de transport de Montréal)",
+          "url": "https://www.stm.info/",
+          "accessedAt": "2026-05-02"
+        }
+      ]
+    },
     "seoul": {
       "id": "seoul",
       "name": {
@@ -65,6 +121,62 @@
         }
       ]
     },
+    "toronto": {
+      "id": "toronto",
+      "name": {
+        "ko": "토론토",
+        "en": "Toronto"
+      },
+      "country": "CA",
+      "currency": "CAD",
+      "region": "na",
+      "lastUpdated": "2026-05-02",
+      "rent": {
+        "share": 1235,
+        "studio": 1900,
+        "oneBed": 2200,
+        "twoBed": 2900
+      },
+      "food": {
+        "restaurantMeal": 21,
+        "cafe": 5.8,
+        "groceries": {
+          "milk1L": 3.2,
+          "eggs12": 4.4,
+          "rice1kg": 3.6,
+          "chicken1kg": 14.5,
+          "bread": 3.4,
+          "onion1kg": 2.6,
+          "apple1kg": 4.3,
+          "ramen": 1.4
+        }
+      },
+      "transport": {
+        "monthlyPass": 156.3,
+        "singleRide": 3.5,
+        "taxiBase": 4.75
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "CMHC Rental Market Survey",
+          "url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI",
+          "url": "https://www150.statcan.gc.ca/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "transport",
+          "name": "TTC (Toronto Transit Commission)",
+          "url": "https://www.ttc.ca/",
+          "accessedAt": "2026-05-02"
+        }
+      ]
+    },
     "vancouver": {
       "id": "vancouver",
       "name": {
@@ -74,83 +186,50 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-04-01",
+      "lastUpdated": "2026-05-02",
       "rent": {
-        "share": 950,
-        "studio": 1800,
-        "oneBed": 2300,
-        "twoBed": 3400,
-        "deposit": 1150
+        "share": 1203,
+        "studio": 1850,
+        "oneBed": 2100,
+        "twoBed": 2800
       },
       "food": {
         "restaurantMeal": 22,
         "cafe": 6,
         "groceries": {
-          "milk1L": 3.4,
-          "eggs12": 7.5,
-          "rice1kg": 4.2,
-          "chicken1kg": 17.5,
-          "bread": 4.5,
-          "onion1kg": 3.0,
-          "apple1kg": 6.0,
-          "ramen": 2.4
+          "milk1L": 3.25,
+          "eggs12": 4.5,
+          "rice1kg": 3.8,
+          "chicken1kg": 15,
+          "bread": 3.5,
+          "onion1kg": 2.8,
+          "apple1kg": 4.5,
+          "ramen": 1.5
         }
       },
       "transport": {
-        "monthlyPass": 105,
-        "singleRide": 3.15,
-        "taxiBase": 3.5
-      },
-      "tuition": [
-        { "school": "UBC", "level": "undergrad", "annual": 45000 },
-        { "school": "SFU", "level": "undergrad", "annual": 35000 }
-      ],
-      "tax": [
-        { "annualSalary": 60000, "takeHomePctApprox": 0.74 },
-        { "annualSalary": 80000, "takeHomePctApprox": 0.7 },
-        { "annualSalary": 100000, "takeHomePctApprox": 0.66 }
-      ],
-      "visa": {
-        "studentApplicationFee": 150,
-        "workApplicationFee": 155,
-        "settlementApprox": 1500
+        "monthlyPass": 104,
+        "singleRide": 3.35,
+        "taxiBase": 3.95
       },
       "sources": [
         {
           "category": "rent",
           "name": "CMHC Rental Market Survey",
-          "url": "https://www03.cmhc-schl.gc.ca/hmip-pimh/en/",
-          "accessedAt": "2026-04-01"
+          "url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market",
+          "accessedAt": "2026-05-02"
         },
         {
           "category": "food",
           "name": "Statistics Canada CPI",
           "url": "https://www150.statcan.gc.ca/",
-          "accessedAt": "2026-04-01"
+          "accessedAt": "2026-05-02"
         },
         {
           "category": "transport",
           "name": "TransLink",
-          "url": "https://www.translink.ca/transit-fares",
-          "accessedAt": "2026-04-01"
-        },
-        {
-          "category": "tuition",
-          "name": "UBC International Tuition",
-          "url": "https://you.ubc.ca/financial-planning/cost/",
-          "accessedAt": "2026-04-01"
-        },
-        {
-          "category": "tax",
-          "name": "Canada Revenue Agency",
-          "url": "https://www.canada.ca/en/revenue-agency.html",
-          "accessedAt": "2026-04-01"
-        },
-        {
-          "category": "visa",
-          "name": "IRCC",
-          "url": "https://www.canada.ca/en/immigration-refugees-citizenship.html",
-          "accessedAt": "2026-04-01"
+          "url": "https://www.translink.ca/",
+          "accessedAt": "2026-05-02"
         }
       ]
     }

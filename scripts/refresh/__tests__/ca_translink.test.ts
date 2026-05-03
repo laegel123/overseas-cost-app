@@ -47,10 +47,10 @@ const VALID_FARE_HTML = `
 `;
 
 describe('parseFareHtml', () => {
-  it('정상 HTML 파싱: 1회권 + 월정기권', () => {
+  it('정상 HTML 파싱: 1회권 + 월정기권 (CAD 단위)', () => {
     const fares = parseFareHtml(VALID_FARE_HTML);
-    expect(fares.singleRide).toBe(335);
-    expect(fares.monthlyPass).toBe(10400);
+    expect(fares.singleRide).toBe(3.35);
+    expect(fares.monthlyPass).toBe(104);
   });
 
   it('빈 HTML: 빈 객체 반환', () => {
@@ -62,7 +62,7 @@ describe('parseFareHtml', () => {
   it('1회권만 있는 경우', () => {
     const html = '<p>Adult Fare: $3.50</p>';
     const fares = parseFareHtml(html);
-    expect(fares.singleRide).toBe(350);
+    expect(fares.singleRide).toBe(3.5);
     expect(fares.monthlyPass).toBeUndefined();
   });
 
@@ -70,7 +70,7 @@ describe('parseFareHtml', () => {
     const html = '<p>Monthly Pass: $110.00</p>';
     const fares = parseFareHtml(html);
     expect(fares.singleRide).toBeUndefined();
-    expect(fares.monthlyPass).toBe(11000);
+    expect(fares.monthlyPass).toBe(110);
   });
 
   it('비정상적인 값 무시 (1회권 > $10)', () => {
@@ -90,9 +90,9 @@ describe('parseFareHtml', () => {
     const html2 = '<p>$3.40 per ride</p>';
     const html3 = '<p>Compass Card Monthly: $105.00</p>';
 
-    expect(parseFareHtml(html1).singleRide).toBe(325);
-    expect(parseFareHtml(html2).singleRide).toBe(340);
-    expect(parseFareHtml(html3).monthlyPass).toBe(10500);
+    expect(parseFareHtml(html1).singleRide).toBe(3.25);
+    expect(parseFareHtml(html2).singleRide).toBe(3.4);
+    expect(parseFareHtml(html3).monthlyPass).toBe(105);
   });
 });
 
@@ -174,7 +174,7 @@ describe('refresh (integration)', () => {
       name: { ko: '밴쿠버', en: 'Vancouver' },
       country: 'CA',
       currency: 'CAD',
-      region: 'north-america',
+      region: 'na',
       lastUpdated: '2026-04-01',
       rent: { share: 1000, studio: 1500, oneBed: 1800, twoBed: 2200 },
       food: { restaurantMeal: 2000, cafe: 500, groceries: { milk1L: 300, eggs12: 400, rice1kg: 350, chicken1kg: 1400, bread: 350 } },

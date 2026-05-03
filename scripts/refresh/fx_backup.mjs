@@ -21,6 +21,7 @@ import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 
 import { fetchWithRetry } from './_common.mjs';
+import { computePctChange } from './_outlier.mjs';
 
 const ECB_DAILY_URL = 'https://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml';
 
@@ -137,12 +138,11 @@ function computeChanges(oldRates, newRates) {
     const newVal = newRates?.[code] ?? null;
 
     if (oldVal === null && newVal !== null) {
-      changes.push({ cityId: 'fx', field: code, oldValue: null, newValue: newVal, pctChange: 1 });
+      changes.push({ cityId: 'fx', field: code, oldValue: null, newValue: newVal, pctChange: computePctChange(null, newVal) });
     } else if (oldVal !== null && newVal === null) {
-      changes.push({ cityId: 'fx', field: code, oldValue: oldVal, newValue: null, pctChange: -1 });
+      changes.push({ cityId: 'fx', field: code, oldValue: oldVal, newValue: null, pctChange: computePctChange(oldVal, null) });
     } else if (oldVal !== null && newVal !== null && oldVal !== newVal) {
-      const pctChange = (newVal - oldVal) / oldVal;
-      changes.push({ cityId: 'fx', field: code, oldValue: oldVal, newValue: newVal, pctChange });
+      changes.push({ cityId: 'fx', field: code, oldValue: oldVal, newValue: newVal, pctChange: computePctChange(oldVal, newVal) });
     }
   }
 

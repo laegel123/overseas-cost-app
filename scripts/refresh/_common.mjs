@@ -54,13 +54,14 @@ const DEFAULT_TIMEOUT_MS = 30000;
 /**
  * exponential backoff retry (1s, 2s, 4s) 로 fetch.
  * 5xx → 재시도, 4xx → 즉시 throw.
+ * `method`, `headers`, `body` 등 표준 RequestInit 옵션 모두 fetch 로 forward.
  * @param {string} url
- * @param {{maxRetries?: number, timeoutMs?: number, signal?: AbortSignal}} [opts]
+ * @param {RequestInit & {maxRetries?: number, timeoutMs?: number}} [opts]
  * @returns {Promise<Response>}
  */
 export async function fetchWithRetry(url, opts = {}) {
-  const maxRetries = opts.maxRetries ?? DEFAULT_MAX_RETRIES;
-  const timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const { maxRetries = DEFAULT_MAX_RETRIES, timeoutMs = DEFAULT_TIMEOUT_MS, signal: externalSignal, ...fetchInit } =
+    opts;
 
   let lastError;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
@@ -68,11 +69,11 @@ export async function fetchWithRetry(url, opts = {}) {
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const signal = opts.signal
-        ? combineSignals(opts.signal, controller.signal)
+      const signal = externalSignal
+        ? combineSignals(externalSignal, controller.signal)
         : controller.signal;
 
-      const response = await fetch(url, { signal });
+      const response = await fetch(url, { ...fetchInit, signal });
       clearTimeout(timeoutId);
 
       if (response.ok) {
@@ -91,7 +92,7 @@ export async function fetchWithRetry(url, opts = {}) {
       clearTimeout(timeoutId);
 
       if (err?.name === 'AbortError') {
-        if (opts.signal?.aborted) {
+        if (externalSignal?.aborted) {
           throw createFetchTimeoutError('request aborted by caller');
         }
         throw createFetchTimeoutError(`request timed out after ${timeoutMs}ms`);
@@ -249,19 +250,75 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/**
+ * URL 의 민감한 쿼리 파라미터 (API key 류) 를 마스킹.
+ * 로그·에러 메시지에 URL 노출 시 사용. fetch 호출 자체는 원본 URL 사용.
+ * @param {string} url
+ * @returns {string} 마스킹된 URL
+ */
+export function redactSecretsInUrl(url) {
+  const SECRET_PARAMS = /^(serviceKey|api_?Key|apikey|key|token|access_?Token|registrationkey)$/i;
+  try {
+    const u = new URL(url);
+    for (const k of [...u.searchParams.keys()]) {
+      if (SECRET_PARAMS.test(k)) u.searchParams.set(k, '***REDACTED***');
+    }
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
 function combineSignals(signal1, signal2) {
   const controller = new AbortController();
-  const abort = () => controller.abort();
 
   if (signal1.aborted || signal2.aborted) {
     controller.abort();
     return controller.signal;
   }
 
-  signal1.addEventListener('abort', abort);
-  signal2.addEventListener('abort', abort);
+  // retry 루프에서 반복 호출되므로 abort 후 listener cleanup 필수.
+  const abort = () => {
+    controller.abort();
+    signal1.removeEventListener('abort', abort);
+    signal2.removeEventListener('abort', abort);
+  };
+
+  signal1.addEventListener('abort', abort, { once: true });
+  signal2.addEventListener('abort', abort, { once: true });
 
   return controller.signal;
+}
+
+/**
+ * 도시 seed 데이터 생성 (refresh 스크립트 초기화용 — 도시 JSON 파일 부재 시).
+ * 모든 숫자 필드는 0 / null 로 초기화. 호출 후 caller 가 실제 값으로 덮어쓰기.
+ * @param {{id: string, name: {ko: string, en: string}, country: string, currency: string, region: string}} config
+ * @returns {import('../../src/types/city').CityCostData}
+ */
+export function createCitySeed(config) {
+  return {
+    id: config.id,
+    name: config.name,
+    country: config.country,
+    currency: config.currency,
+    region: config.region,
+    lastUpdated: '',
+    rent: { share: null, studio: null, oneBed: null, twoBed: null },
+    food: {
+      restaurantMeal: 0,
+      cafe: 0,
+      groceries: {
+        milk1L: 0,
+        eggs12: 0,
+        rice1kg: 0,
+        chicken1kg: 0,
+        bread: 0,
+      },
+    },
+    transport: { monthlyPass: 0, singleRide: 0, taxiBase: 0 },
+    sources: [],
+  };
 }
 
 function createFetchRetryExhaustedError(message, retryCount) {

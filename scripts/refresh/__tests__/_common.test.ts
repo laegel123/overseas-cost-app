@@ -20,6 +20,8 @@ import {
   writeCity,
   getCityPath,
   getDataDir,
+  redactSecretsInUrl,
+  createCitySeed,
 } from '../_common.mjs';
 
 setupTestEnv();
@@ -192,6 +194,28 @@ describe('fetchWithRetry', () => {
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
+  it('method/headers/body 옵션을 fetch 로 forward (POST API 지원)', async () => {
+    const mockFetch = jest.spyOn(global, 'fetch').mockResolvedValueOnce(
+      new Response(JSON.stringify({ ok: true }), { status: 200 })
+    );
+
+    await fetchWithRetry('https://example.com/api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ x: 1 }),
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const [, init] = mockFetch.mock.calls[0]!;
+    expect(init).toMatchObject({
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ x: 1 }),
+    });
+    // signal 은 내부에서 합성되므로 truthy
+    expect((init as RequestInit).signal).toBeDefined();
+  });
+
   it('4xx 응답: 재시도 없이 즉시 throw', async () => {
     jest
       .spyOn(global, 'fetch')
@@ -211,5 +235,47 @@ describe('fetchWithRetry', () => {
     await expect(fetchWithRetry('https://example.com', { maxRetries: 0 })).rejects.toMatchObject({
       code: 'FETCH_RETRY_EXHAUSTED',
     });
+  });
+});
+
+describe('redactSecretsInUrl', () => {
+  it('serviceKey 마스킹', () => {
+    expect(redactSecretsInUrl('https://api.example.com/path?serviceKey=abc123&LAWD=11000')).toBe(
+      'https://api.example.com/path?serviceKey=***REDACTED***&LAWD=11000'
+    );
+  });
+
+  it('apiKey / apikey / api_key 모두 마스킹 (case insensitive)', () => {
+    expect(redactSecretsInUrl('https://x.com/?apikey=AAA')).toContain('***REDACTED***');
+    expect(redactSecretsInUrl('https://x.com/?api_Key=AAA')).toContain('***REDACTED***');
+    expect(redactSecretsInUrl('https://x.com/?ApiKey=AAA')).toContain('***REDACTED***');
+  });
+
+  it('민감하지 않은 파라미터는 유지', () => {
+    expect(redactSecretsInUrl('https://x.com/?LAWD_CD=11680&numOfRows=100')).toBe(
+      'https://x.com/?LAWD_CD=11680&numOfRows=100'
+    );
+  });
+
+  it('잘못된 URL 은 원본 반환', () => {
+    expect(redactSecretsInUrl('not a url')).toBe('not a url');
+  });
+});
+
+describe('createCitySeed', () => {
+  it('config 의 메타 + 0/null 초기 값 반환', () => {
+    const seed = createCitySeed({
+      id: 'seoul',
+      name: { ko: '서울', en: 'Seoul' },
+      country: 'KR',
+      currency: 'KRW',
+      region: 'asia',
+    });
+    expect(seed.id).toBe('seoul');
+    expect(seed.region).toBe('asia');
+    expect(seed.rent.share).toBeNull();
+    expect(seed.food.restaurantMeal).toBe(0);
+    expect(seed.transport.monthlyPass).toBe(0);
+    expect(seed.sources).toEqual([]);
   });
 });

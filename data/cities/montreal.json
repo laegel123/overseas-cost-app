@@ -6,7 +6,7 @@
   },
   "country": "CA",
   "currency": "CAD",
-  "region": "north-america",
+  "region": "na",
   "lastUpdated": "2026-05-02",
   "rent": {
     "share": 1105,
@@ -15,23 +15,23 @@
     "twoBed": 2500
   },
   "food": {
-    "restaurantMeal": 1900,
-    "cafe": 550,
+    "restaurantMeal": 19,
+    "cafe": 5.5,
     "groceries": {
-      "milk1L": 310,
-      "eggs12": 420,
-      "rice1kg": 350,
-      "chicken1kg": 1400,
-      "bread": 330,
-      "onion1kg": 250,
-      "apple1kg": 400,
-      "ramen": 130
+      "milk1L": 3.1,
+      "eggs12": 4.2,
+      "rice1kg": 3.5,
+      "chicken1kg": 14,
+      "bread": 3.3,
+      "onion1kg": 2.5,
+      "apple1kg": 4,
+      "ramen": 1.3
     }
   },
   "transport": {
-    "monthlyPass": 9400,
-    "singleRide": 375,
-    "taxiBase": 385
+    "monthlyPass": 94,
+    "singleRide": 3.75,
+    "taxiBase": 3.85
   },
   "sources": [
     {

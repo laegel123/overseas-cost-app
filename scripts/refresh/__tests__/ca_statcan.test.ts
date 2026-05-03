@@ -190,7 +190,7 @@ describe('refresh (integration)', () => {
       name: { ko: '밴쿠버', en: 'Vancouver' },
       country: 'CA',
       currency: 'CAD',
-      region: 'north-america',
+      region: 'na',
       lastUpdated: '2026-04-01',
       rent: { share: 1000, studio: 1500, oneBed: 1800, twoBed: 2200 },
       food: { restaurantMeal: 1000, cafe: 200, groceries: { milk1L: 100, eggs12: 100, rice1kg: 100, chicken1kg: 100, bread: 100 } },

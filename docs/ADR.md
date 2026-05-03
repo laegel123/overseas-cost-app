@@ -995,3 +995,49 @@ zustand persist 는 모든 `setState` (액션 호출 포함) 후 storage 에 자
 - `borderWidth 1.5` 는 generic 토큰이라 추후 다른 컴포넌트에서도 재사용 가능.
 
 **관련:** ADR-003 (NativeWind v4), ADR-057 (`btn`/`button` 토큰 분화), `tailwind.config.js`, `src/components/PersonaCard.tsx`, design/README §1 (Onboarding).
+
+---
+
+### ADR-059: 데이터 자동화 추정·보정 결정 — `share=studio×0.65` / CPI 기준년도 / BLS 도시 보정 / static fallback
+
+**상태:** 채택 (2026-05-03)
+
+**맥락:**
+
+PR #19 review (data-automation step 0–3) 에서 다음 4 가지 방법론적 결정이 ADR 없이 도입됨이 지적됨. 자동화 출처가 정확히 매핑되지 않는 영역의 추정·보정 정책이 코드에만 기록되면 v1.x 에서 변경 사유 추적 불가.
+
+**결정:**
+
+1. **`share = studio × 0.65` 추정** (ca_cmhc.mjs / us_hud.mjs):
+   - CMHC RMS 와 HUD FMR 둘 다 "shared accommodation / room" 데이터를 직접 제공하지 않음.
+   - 캐나다·미국 도시의 share rent (방 1개) 를 studio (1인 unit) 의 65% 로 추정 — Statistics Canada Survey of Household Spending 의 평균 비율 근사.
+   - 한국 (kr_molit) 은 별도 매핑 사용 (자치구 평균 직접 제공).
+
+2. **CPI → 실가격 변환 기준년도 2020 = 100** (kr_kosis.mjs / us_bls.mjs / 기타 CPI 출처):
+   - 모든 통계청 CPI 가 동일 기준년도 (2020 = 100) 를 사용.
+   - 변환식: `current = base_2020 × (cpi / 100)`. `BASE_PRICES` 는 통계청 발표 2020 평균가 사용.
+   - 기준년도 변경 시 (예: 2025 = 100 으로 전환) 모든 출처 일괄 갱신 + 본 ADR 갱신.
+
+3. **BLS 지역 → 도시별 보정계수** (us_bls.mjs `CITY_ADJUSTMENT`):
+   - BLS 는 4 census region (Northeast / Midwest / South / West) 까지만 분리 제공 — 도시별 데이터 부재.
+   - 도시 ↔ 지역 매핑 후 NYC=1.15 / SF=1.25 / LA=1.05 / Seattle=1.00 / Boston=1.10 보정.
+   - 보정값 출처: BLS Regional Variation Studies (2023 추정치). 분기 1회 검토 + 변경 시 ADR 갱신.
+
+4. **`ca_statcan` 식재료 8종 중 일부 항목 static fallback** (`onion1kg`, `apple1kg`, `ramen` 등):
+   - StatCan CPI 는 식재료 8종 표준 중 5종만 제공 (milk / eggs / rice / chicken / bread).
+   - 나머지 3종은 출처 부재 → static 값 + `sources[].name` 에 "static" 마커.
+   - v1.x 에서 식재료 정밀 데이터 출처 (StatCan Detailed CPI 또는 KOSIS 와 같은 입자도) 발굴 시 ADR 갱신.
+
+**대안 검토:**
+
+- (A 선택) 추정·보정 모두 채택 + ADR 명시: v1.0 출시 가능. 출처 한계 명시적 추적. 채택.
+- (B) share / 외식 / 보정계수 미제공으로 표시: PRD 요구사항 불충족 — 거부.
+- (C) 상업 출처 (Numbeo 등) 보충: CLAUDE.md CRITICAL 위반 — 거부.
+
+**결과 / 영향:**
+
+- v1.0 출시에 필요한 모든 필드가 자동화로 채워짐.
+- 추정·보정 영역은 `sources[]` 마커 + 본 ADR 으로 추적 가능.
+- v1.x 데이터 정밀도 향상 시 보정계수 / static fallback 우선 검토.
+
+**관련:** ADR-032 (자동화 정책), ADR-028 (수동 큐레이션 금지), `docs/AUTOMATION.md` §8 (자동화 한계), `docs/DATA_SOURCES.md` 부록 B, `scripts/refresh/{ca_cmhc,us_hud,kr_kosis,us_bls,ca_statcan}.mjs`.

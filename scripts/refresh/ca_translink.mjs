@@ -10,15 +10,16 @@
  * 방법: HTML fetch + parse (정적 fallback 포함).
  */
 
-import { readCity, writeCity } from './_common.mjs';
+import { readCity, writeCity, createCitySeed} from './_common.mjs';
+import { computePctChange } from './_outlier.mjs';
 
 const TRANSLINK_FARE_URL = 'https://www.translink.ca/transit-fares';
 const FETCH_TIMEOUT_MS = 15000;
 
 export const STATIC_FARES = {
-  singleRide: 335,
-  monthlyPass: 10400,
-  taxiBase: 395,
+  singleRide: 3.35,
+  monthlyPass: 104,
+  taxiBase: 3.95,
 };
 
 export const SOURCE = {
@@ -45,8 +46,9 @@ export function parseFareHtml(html) {
   for (const pattern of singleRidePatterns) {
     const match = pattern.exec(html);
     if (match) {
-      const value = Math.round(parseFloat(match[1]) * 100);
-      if (value > 100 && value < 1000) {
+      const value = parseFloat(match[1]);
+      // 단위 통화 (CAD) 기준 sanity check: 1~10 사이.
+      if (value > 1 && value < 10) {
         fares.singleRide = value;
         break;
       }
@@ -62,8 +64,9 @@ export function parseFareHtml(html) {
   for (const pattern of monthlyPassPatterns) {
     const match = pattern.exec(html);
     if (match) {
-      const value = Math.round(parseFloat(match[1]) * 100);
-      if (value > 5000 && value < 30000) {
+      const value = parseFloat(match[1]);
+      // 단위 통화 (CAD) 기준 sanity check: 50~300 사이.
+      if (value > 50 && value < 300) {
         fares.monthlyPass = value;
         break;
       }
@@ -133,13 +136,13 @@ export default async function refresh(opts = {}) {
 
     if (oldVal !== newVal) {
       fields.push(field);
-      const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+      const pctChange = computePctChange(oldVal, newVal);
       changes.push({ cityId, field: `transport.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
     }
   }
 
   if (!opts.dryRun && changes.length > 0) {
-    const updatedData = oldData ?? createVancouverSeed();
+    const updatedData = oldData ?? createCitySeed({ id: 'vancouver', name: { ko: '밴쿠버', en: 'Vancouver' }, country: 'CA', currency: 'CAD', region: 'na' });
     updatedData.transport = { ...updatedData.transport, ...newTransport };
 
     try {
@@ -158,31 +161,3 @@ export default async function refresh(opts = {}) {
   };
 }
 
-/**
- * Vancouver seed 데이터 생성 (초기화용).
- * @returns {import('../../src/types/city').CityCostData}
- */
-function createVancouverSeed() {
-  return {
-    id: 'vancouver',
-    name: { ko: '밴쿠버', en: 'Vancouver' },
-    country: 'CA',
-    currency: 'CAD',
-    region: 'north-america',
-    lastUpdated: '',
-    rent: { share: null, studio: null, oneBed: null, twoBed: null },
-    food: {
-      restaurantMeal: 0,
-      cafe: 0,
-      groceries: {
-        milk1L: 0,
-        eggs12: 0,
-        rice1kg: 0,
-        chicken1kg: 0,
-        bread: 0,
-      },
-    },
-    transport: { monthlyPass: 0, singleRide: 0, taxiBase: 0 },
-    sources: [],
-  };
-}

@@ -10,7 +10,8 @@
  * CPI 지수를 실제 가격으로 변환 (기준년도 2020 = 100).
  */
 
-import { fetchWithRetry, readCity, writeCity, createMissingApiKeyError } from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createMissingApiKeyError, createCitySeed} from './_common.mjs';
+import { computePctChange } from './_outlier.mjs';
 
 const API_BASE = 'https://kosis.kr/openapi/Param/statisticsParameterData.do';
 
@@ -177,13 +178,13 @@ export default async function refresh(opts = {}) {
 
     if (oldVal !== newVal) {
       fields.push(field);
-      const pctChange = oldVal !== null && oldVal !== 0 ? (newVal - oldVal) / oldVal : oldVal === null ? 1 : 0;
+      const pctChange = computePctChange(oldVal, newVal);
       changes.push({ cityId: 'seoul', field: `food.${field}`, oldValue: oldVal, newValue: newVal, pctChange });
     }
   }
 
   if (!opts.dryRun && changes.length > 0) {
-    const updatedData = oldData ?? createSeoulSeed();
+    const updatedData = oldData ?? createCitySeed({ id: 'seoul', name: { ko: '서울', en: 'Seoul' }, country: 'KR', currency: 'KRW', region: 'asia' });
     updatedData.food = { ...updatedData.food, ...newFood };
 
     try {
@@ -202,31 +203,3 @@ export default async function refresh(opts = {}) {
   };
 }
 
-/**
- * Seoul seed 데이터 생성 (초기화용).
- * @returns {import('../../src/types/city').CityCostData}
- */
-function createSeoulSeed() {
-  return {
-    id: 'seoul',
-    name: { ko: '서울', en: 'Seoul' },
-    country: 'KR',
-    currency: 'KRW',
-    region: 'asia',
-    lastUpdated: '',
-    rent: { share: null, studio: null, oneBed: null, twoBed: null },
-    food: {
-      restaurantMeal: 0,
-      cafe: 0,
-      groceries: {
-        milk1L: 0,
-        eggs12: 0,
-        rice1kg: 0,
-        chicken1kg: 0,
-        bread: 0,
-      },
-    },
-    transport: { monthlyPass: 0, singleRide: 0, taxiBase: 0 },
-    sources: [],
-  };
-}
