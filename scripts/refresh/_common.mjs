@@ -286,7 +286,8 @@ function sleep(ms) {
  * @returns {string} 마스킹된 URL
  */
 export function redactSecretsInUrl(url) {
-  const SECRET_PARAMS = /^(serviceKey|api_?Key|apikey|key|token|access_?Token|registrationkey)$/i;
+  // jp_estat 의 appId, sg_data_gov 의 api_key 등 후속 step 출처도 포함.
+  const SECRET_PARAMS = /^(serviceKey|api_?Key|apikey|key|token|access_?Token|registrationkey|app_?Id|app_?key)$/i;
   try {
     const u = new URL(url);
     for (const k of [...u.searchParams.keys()]) {
@@ -321,16 +322,12 @@ function combineSignals(signal1, signal2) {
     return { signal: controller.signal, cleanup: () => {} };
   }
 
-  const abort = () => {
-    controller.abort();
-    signal1.removeEventListener('abort', abort);
-    signal2.removeEventListener('abort', abort);
-  };
+  // listener 정리는 cleanup 단일 경로 — abort 발화 시에도 호출자 finally 에서 cleanup 이 실행됨.
+  // ({ once: true } 미사용 — 발화·미발화 양쪽 cleanup 통일 + removeEventListener idempotent.)
+  const abort = () => controller.abort();
+  signal1.addEventListener('abort', abort);
+  signal2.addEventListener('abort', abort);
 
-  signal1.addEventListener('abort', abort, { once: true });
-  signal2.addEventListener('abort', abort, { once: true });
-
-  // 호출자 (fetchWithRetry) 가 attempt 종료 시 cleanup 호출 — 성공 path 에서 listener 누적 방지.
   const cleanup = () => {
     signal1.removeEventListener('abort', abort);
     signal2.removeEventListener('abort', abort);

@@ -13,7 +13,8 @@ import { computePctChange } from './_outlier.mjs';
  * @property {number} pctChange
  */
 
-const META_FIELDS = new Set(['lastUpdated', 'sources', 'id']);
+// 식별·메타 필드 — diff 대상에서 명시적 제외. (numeric diff 만 추적)
+const META_FIELDS = new Set(['lastUpdated', 'sources', 'id', 'name', 'country', 'currency', 'region']);
 
 /**
  * 두 도시 데이터 간 변경된 숫자 필드 목록 반환.

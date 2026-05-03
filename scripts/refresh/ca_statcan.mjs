@@ -226,8 +226,8 @@ export default async function refresh(opts = {}) {
       }
 
       if (!opts.dryRun && hasChanges) {
-        const updatedData = oldData ?? createCitySeed(config);
-        updatedData.food = newFood;
+        const base = oldData ?? createCitySeed(config);
+        const updatedData = { ...base, food: newFood };
 
         try {
           await writeCity(cityId, updatedData, SOURCE);
@@ -295,6 +295,9 @@ export default async function refresh(opts = {}) {
       continue;
     }
 
+    // ?? 100 — vector 응답 부재 시 CPI 기준년도 (= 100) 로 fallback.
+    // cpiToPrice(100, base) === base 이므로 staticPrice 가 그대로 사용됨.
+    // 주의: 0 으로 변경 금지 (cpiToPrice(0, base) === 0 으로 모든 가격이 0 이 됨).
     const newFood = {
       restaurantMeal: staticPrices.restaurantMeal,
       cafe: staticPrices.cafe,
