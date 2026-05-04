@@ -14,11 +14,12 @@
  *   - process.env.GITHUB_OUTPUT 가 설정된 경우:
  *       HAS_OUTLIERS=true|false  (≥30% 변동 1건 이상)
  *       HAS_UPDATES=true|false   (5~30% 변동 1건 이상, outlier 와 별개로 집계)
+ *       HAS_NEW=true|false       (HEAD 에 없던 신규 도시 JSON 1건 이상 — 검토 없이 main 직접 push 차단)
  *
  * 종료 코드: 항상 0 (변동폭 자체는 에러가 아님 — schema 위반은 validate_cities.mjs 책임).
  */
 
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { readFile, readdir, appendFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -84,11 +85,17 @@ async function main() {
 
   const hasOutliers = outliers.length > 0;
   const hasUpdates = updates > 0;
+  const hasNew = news > 0;
   const githubOutput = process.env.GITHUB_OUTPUT;
   if (githubOutput) {
     await appendFile(
       githubOutput,
-      `HAS_OUTLIERS=${hasOutliers ? 'true' : 'false'}\nHAS_UPDATES=${hasUpdates ? 'true' : 'false'}\n`,
+      [
+        `HAS_OUTLIERS=${hasOutliers ? 'true' : 'false'}`,
+        `HAS_UPDATES=${hasUpdates ? 'true' : 'false'}`,
+        `HAS_NEW=${hasNew ? 'true' : 'false'}`,
+        '',
+      ].join('\n'),
     );
   }
 }
@@ -105,18 +112,29 @@ async function readJson(filePath) {
 
 /**
  * `git show HEAD:<path>` 로 이전 commit 의 파일 내용 조회. 부재 시 null.
+ *
+ * `execFileSync` 사용 — 셸 우회로 command injection 방어 (defense-in-depth, repoPath 검증과 이중).
+ *
  * @param {string} repoPath
  * @returns {Object | null}
  */
 function readGitHead(repoPath) {
+  let content;
   try {
-    const content = execSync(`git show HEAD:${repoPath}`, {
+    content = execFileSync('git', ['show', `HEAD:${repoPath}`], {
       cwd: ROOT,
       stdio: ['ignore', 'pipe', 'ignore'],
       encoding: 'utf-8',
     });
-    return JSON.parse(content);
   } catch {
+    // HEAD 에 파일이 없는 경우 (신규 도시) — 정상.
+    return null;
+  }
+  try {
+    return JSON.parse(content);
+  } catch (err) {
+    // git show 는 성공했으나 JSON 이 깨진 경우 — silent skip 하면 outlier 감지가 누락되므로 경고.
+    console.warn(`[detect_outliers] HEAD ${repoPath} JSON parse failed: ${err.message}`);
     return null;
   }
 }

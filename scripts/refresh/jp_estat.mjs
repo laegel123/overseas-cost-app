@@ -5,11 +5,11 @@
  *
  * 출처: e-Stat 住宅・土地統計調査 + 消費者物価指数
  * API: https://api.e-stat.go.jp/rest/3.0/app/json/getStatsData
- * 키: JP_ESTAT_APP_ID 환경변수 필요
+ * 키: JP_ESTAT_APP_ID 환경변수 필요 (부재 시 us_bls 와 동일하게 throw — 워크플로우 conditional skip 대상)
  *
- * 방법:
- * - rent: 都道府県別民営賃貸住宅平均賃料
- * - food: 消費者物価指数 (CPI Tokyo/Osaka)
+ * **v1.0 한계**: `fetchEstatData` 호출은 wire up 됐으나 응답 값을 STATIC 보정 multiplier 로 적용하지 않음.
+ * e-Stat 응답의 단위/스케일 (전국 평균 vs 도/현 평균, 천엔/엔 단위 등) 검증이 v1.x 별도 phase 필요.
+ * 현재는 응답이 null 이면 errors 기록, value 이면 info 로그 — 항상 STATIC 그대로 도시 JSON 에 기록.
  */
 
 import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, createMissingApiKeyError } from './_common.mjs';
@@ -95,13 +95,13 @@ export function parseEstatValue(data) {
 }
 
 /**
- * e-Stat API 호출.
+ * e-Stat API 호출. v1.0 에서는 응답 reachability + 단일 numeric 추출까지만 사용 (응답 검증은 v1.x).
  * @param {string} statsDataId
  * @param {string} areaCode
  * @param {string} appId
  * @returns {Promise<number | null>}
  */
-async function fetchEstatData(statsDataId, areaCode, appId) {
+export async function fetchEstatData(statsDataId, areaCode, appId) {
   const url = new URL(ESTAT_API_BASE);
   url.searchParams.set('appId', appId);
   url.searchParams.set('statsDataId', statsDataId);
@@ -161,10 +161,8 @@ export default async function refresh(opts = {}) {
 
   const appId = process.env.JP_ESTAT_APP_ID;
   if (!appId && !opts.useStatic) {
-    errors.push({
-      cityId: 'all',
-      reason: 'JP_ESTAT_APP_ID environment variable not set, using static values',
-    });
+    // us_bls 와 동일 패턴 — 워크플로우 conditional skip 의 의도와 일치 (key 없으면 fail-fast).
+    throw createMissingApiKeyError('JP_ESTAT_APP_ID environment variable is required');
   }
 
   for (const cityId of targetCities) {
@@ -172,6 +170,16 @@ export default async function refresh(opts = {}) {
     if (!config) {
       errors.push({ cityId, reason: `Unknown city: ${cityId}` });
       continue;
+    }
+
+    if (appId && !opts.useStatic) {
+      // v1.0: e-Stat 응답을 sample 로만 수집 (응답 스케일 검증은 v1.x). 도시 JSON 에 반영 안 됨.
+      const rentVal = await fetchEstatData(ESTAT_STATS_ID.rent, config.estatArea, appId);
+      if (rentVal === null) {
+        errors.push({ cityId, reason: `e-Stat rent API returned no data for area ${config.estatArea}; using static` });
+      } else {
+        console.info(`[jp_estat] ${cityId}: e-Stat rent sample=${rentVal} (not wired to STATIC in v1.0)`);
+      }
     }
 
     const newRent = mapToRent(cityId);

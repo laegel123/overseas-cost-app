@@ -66,7 +66,7 @@ jobs:
             변경 내역을 검토해주세요.
 
       - name: Create PR for updates
-        if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES == 'true'
+        if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && (steps.outliers.outputs.HAS_UPDATES == 'true' || steps.outliers.outputs.HAS_NEW == 'true')
         uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
         with:
           commit-message: 'data: daily FX refresh (auto-update)'
@@ -81,9 +81,16 @@ jobs:
             자동 환율 갱신 — 5~30% 변동. AUTOMATION.md §1 정책에 따라 PR 로 검토 후 머지.
 
       - name: Auto commit and push
-        if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES != 'true'
+        if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES != 'true' && steps.outliers.outputs.HAS_NEW != 'true'
         run: |
           git add data/cities/ data/all.json data/seed/all.json
           git diff --staged --quiet || git commit -m "data: daily FX refresh"
-          git pull --rebase origin "$(git rev-parse --abbrev-ref HEAD)"
-          git push
+          # push retry — 다른 카테고리 워크플로우와의 동시 push race 가 발생해도 다음 시도에서 rebase 후 성공.
+          for attempt in 1 2 3; do
+            git pull --rebase origin "$(git rev-parse --abbrev-ref HEAD)" || true
+            if git push; then exit 0; fi
+            echo "::warning::push attempt $attempt failed; retrying..."
+            sleep $((attempt * 5))
+          done
+          echo "::error::push failed after 3 attempts"
+          exit 1

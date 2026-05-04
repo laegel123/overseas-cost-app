@@ -9,6 +9,10 @@
  * 방법:
  * - rent: London median rent by # bedrooms
  * - food: COICOP 코드별 평균가 (milk, eggs, bread 등)
+ *
+ * **TODO(v1.x)**: `ONS_RENT_SERIES` 의 시리즈 ID (`MM23-CZMP` 등) 가 ONS API `/timeseries/{id}/data` 엔드포인트
+ * 에서 실제 조회 가능한지 미검증. ONS Private Rental Market Statistics 데이터는 timeseries 보다 다운로드
+ * 파일 형태가 주력 — useStatic=false 호출이 404/empty 반환 가능. v1.x 에서 실제 ONS endpoint 검증 후 정정.
  */
 
 import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage } from './_common.mjs';

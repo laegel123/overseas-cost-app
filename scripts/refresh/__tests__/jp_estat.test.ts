@@ -244,10 +244,26 @@ describe('refresh (integration)', () => {
     expect(osakaChanges.length).toBeGreaterThan(0);
   }, 30000);
 
-  it('JP_ESTAT_APP_ID 미설정 시 errors에 추가 (useStatic=false)', async () => {
-    const result = await refreshJpEstat({ dryRun: true, useStatic: false });
+  it('JP_ESTAT_APP_ID 미설정 + useStatic=false: throws MissingApiKeyError (us_bls 와 일관)', async () => {
+    await expect(refreshJpEstat({ dryRun: true, useStatic: false })).rejects.toThrow('JP_ESTAT_APP_ID');
+  }, 30000);
 
-    expect(result.errors.some((e: any) => e.reason.includes('JP_ESTAT_APP_ID'))).toBe(true);
+  it('JP_ESTAT_APP_ID 설정 + useStatic=false: fetchEstatData 호출 (v1.0 sample 수집)', async () => {
+    process.env.JP_ESTAT_APP_ID = 'test-app-id';
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify(VALID_ESTAT_RESPONSE), { status: 200 }),
+    );
+    const infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+
+    await refreshJpEstat({ dryRun: true, useStatic: false, cities: ['tokyo'] });
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining('api.e-stat.go.jp'),
+      expect.objectContaining({ headers: expect.objectContaining({ Accept: 'application/json' }) }),
+    );
+    expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('e-Stat rent sample='));
+    fetchSpy.mockRestore();
+    infoSpy.mockRestore();
   }, 30000);
 
   it('기존 데이터 대비 changes 계산', async () => {
