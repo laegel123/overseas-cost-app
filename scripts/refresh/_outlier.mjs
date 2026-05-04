@@ -84,8 +84,10 @@ export function computePctChange(oldVal, newVal) {
  * @returns {Iterable<{path: string, oldVal: number|null, newVal: number|null}>}
  */
 export function* iterNumericFields(oldData, newData) {
-  // rent.deposit 은 v1.0 fetcher 가 채우지 않음 + 도시 JSON 에도 부재 → 추적 목록에서 제외.
-  // 추후 도입 시 본 배열에 'deposit' 추가하면 자동으로 outlier 분류 대상 됨.
+  // tax 섹션 (annualSalary, takeHomePctApprox) 은 의도적으로 추적 제외 — v1.0 fetcher 가 채우지 않고
+  // (data/static/tax_brackets.json 직접 편집), 변동 자체가 정책 결정 (정부 세제 변경) 이라 outlier 알림이
+  // 의미 없음. 추후 자동화 시 본 배열에 추가.
+  // rent.deposit 도 v1.0 fetcher 가 채우지 않음 + 도시 JSON 에도 부재 → 추적 목록에서 제외.
   const sections = [
     { key: 'rent', fields: ['share', 'studio', 'oneBed', 'twoBed'] },
     { key: 'food', fields: ['restaurantMeal', 'cafe'] },

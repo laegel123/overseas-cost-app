@@ -112,7 +112,7 @@ export const UNIVERSITY_REGISTRY = {
     { school: 'Fulbright', level: 'undergrad', url: 'https://fulbright.edu.vn/', staticAnnual: 450000000 },
   ],
   dubai: [
-    { school: 'AUD', level: 'undergrad', url: 'https://www.aud.edu/admissions/tuition-fees/', staticAnnual: 80000 },
+    { school: 'American University in Dubai', level: 'undergrad', url: 'https://www.aud.edu/admissions/tuition-fees/', staticAnnual: 80000 },
     { school: 'Wollongong Dubai', level: 'undergrad', url: 'https://www.uowdubai.ac.ae/', staticAnnual: 65000 },
   ],
 };

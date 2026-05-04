@@ -95,7 +95,12 @@ async function main() {
 
 async function readJson(filePath) {
   const content = await readFile(filePath, 'utf-8');
-  return JSON.parse(content);
+  try {
+    return JSON.parse(content);
+  } catch (err) {
+    // 어느 파일에서 파싱 실패했는지 로그에 남김 — main().catch 가 잡으면 컨텍스트 없이는 진단 어려움.
+    throw new Error(`Failed to parse JSON from ${filePath}: ${err.message}`);
+  }
 }
 
 /**

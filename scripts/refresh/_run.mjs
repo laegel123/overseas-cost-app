@@ -35,6 +35,14 @@ if (!/^[a-z][a-z0-9_]*$/.test(moduleName) || moduleName.startsWith('_')) {
   process.exit(1);
 }
 
+// writeCity 를 호출하지 않는 라이브러리 모듈 — 워크플로우에서 단독 실행 시 데이터 변경 0.
+// 직접 호출 시 의도 명확화 차원에서 fail-fast.
+const LIBRARY_MODULES = new Set(['eu_eurostat']);
+if (LIBRARY_MODULES.has(moduleName)) {
+  console.error(`${moduleName} is a library module (no writeCity) and cannot be run directly.`);
+  process.exit(1);
+}
+
 let mod;
 try {
   mod = await import(`./${moduleName}.mjs`);

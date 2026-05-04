@@ -239,6 +239,9 @@ jobs:
 
 ### 4.4 `refresh-tuition.yml` — 분기 1회
 
+> **v1.0 한계**: `universities.mjs` 는 페이지 reachability 만 확인하고 HTML 파싱은 미구현 — 모든 대학이 항상 `UNIVERSITY_REGISTRY.staticAnnual` 을 반환한다. 결과적으로 `data/cities/*.json` 의 `tuition[].annual` 변동이 발생하지 않으며, `detect_outliers` 의 `outlier`/`update` PR 분기는 본 워크플로우에서 절대 트리거되지 않고 직접 commit (변경 0) 으로 종료된다. 학교별 selector 도입은 v1.x 별도 phase.
+
+
 ```yaml
 name: Refresh Tuition
 on:
@@ -255,6 +258,9 @@ jobs:
 ```
 
 ### 4.5 `refresh-visa.yml` — 분기 1회
+
+> **v1.0 한계**: `visas.mjs` 도 동일 — 정부 비자 페이지 reachability 만 확인하고 HTML 파싱은 미구현 (`VISA_REGISTRY` 의 static 값 항상 반환). `outlier`/`update` PR 분기 트리거 0. 국가별 selector 도입은 v1.x 별도 phase.
+
 
 ```yaml
 name: Refresh Visa
