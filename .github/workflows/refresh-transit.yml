@@ -2,7 +2,7 @@ name: Refresh Transit
 
 on:
   schedule:
-    - cron: '0 18 1 1,4,7,10 *' # 분기 첫 달 1일 18:00 KST (= 09:00 UTC)
+    - cron: '0 18 2 1,4,7,10 *' # 분기 첫 달 2일 18:00 KST (= 09:00 UTC). 1일은 refresh-rent 와 충돌 회피.
   workflow_dispatch:
 
 concurrency:
@@ -98,7 +98,7 @@ jobs:
 
       - name: Create PR for outliers
         if: steps.outliers.outputs.HAS_OUTLIERS == 'true'
-        uses: peter-evans/create-pull-request@v6.1.0
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
         with:
           commit-message: 'data: quarterly transit refresh (outliers)'
           branch: auto/refresh-transit-outlier-${{ github.run_id }}
@@ -115,7 +115,7 @@ jobs:
 
       - name: Create PR for updates
         if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES == 'true'
-        uses: peter-evans/create-pull-request@v6.1.0
+        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6.1.0
         with:
           commit-message: 'data: quarterly transit refresh (auto-update)'
           branch: auto/refresh-transit-update-${{ github.run_id }}
@@ -132,5 +132,6 @@ jobs:
         if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES != 'true'
         run: |
           git add data/cities/ data/all.json data/seed/all.json
+          git pull --rebase origin HEAD
           git diff --staged --quiet || git commit -m "data: quarterly transit refresh"
           git push

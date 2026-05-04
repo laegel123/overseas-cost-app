@@ -40,6 +40,12 @@ async function main() {
 
   for (const file of jsonFiles) {
     const cityId = file.replace('.json', '');
+    // defense-in-depth: readdir 결과를 git show 인자로 그대로 넣지 않음 — 악의적 파일명에 의한
+    // command injection 방어. getCityPath 와 동일한 검증 형식.
+    if (!/^[a-z][a-z0-9-]*$/.test(cityId)) {
+      console.warn(`[detect_outliers] skipping invalid filename: ${file}`);
+      continue;
+    }
     const newData = await readJson(join(CITIES_DIR, file));
     const oldData = readGitHead(`data/cities/${file}`);
 

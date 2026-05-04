@@ -84,8 +84,10 @@ export function computePctChange(oldVal, newVal) {
  * @returns {Iterable<{path: string, oldVal: number|null, newVal: number|null}>}
  */
 export function* iterNumericFields(oldData, newData) {
+  // rent.deposit 은 v1.0 fetcher 가 채우지 않음 + 도시 JSON 에도 부재 → 추적 목록에서 제외.
+  // 추후 도입 시 본 배열에 'deposit' 추가하면 자동으로 outlier 분류 대상 됨.
   const sections = [
-    { key: 'rent', fields: ['share', 'studio', 'oneBed', 'twoBed', 'deposit'] },
+    { key: 'rent', fields: ['share', 'studio', 'oneBed', 'twoBed'] },
     { key: 'food', fields: ['restaurantMeal', 'cafe'] },
     { key: 'transport', fields: ['monthlyPass', 'singleRide', 'taxiBase'] },
   ];

@@ -29,7 +29,7 @@ export type CityCostData = {
     studio: number | null;
     oneBed: number | null;
     twoBed: number | null;
-    deposit?: number; // 보증금 (선택)
+    deposit?: number; // 보증금 (v1.0 known limitation: 어떤 fetcher 도 채우지 않음 — 도시 JSON 21개 모두 부재)
   };
   food: {
     restaurantMeal: number; // 식당 한 끼 평균

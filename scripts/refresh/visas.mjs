@@ -226,8 +226,10 @@ export async function getVisaForCity(cityId, opts = {}) {
   if (result.error) {
     errors.push(result.error);
   }
+  // v1.0: HTML 파싱 미구현 — fetchedFromPage:false 든 true 든 동일 static 값 반환.
+  // 정부 사이트의 봇 차단으로 reachability 가 실패하는 게 정상이라 errors 에 기록하지 않고 info 로그만.
   if (!result.fetchedFromPage) {
-    errors.push(`${countryCode}: page fetch failed, using static value`);
+    console.info(`[visas] ${countryCode}: page unreachable, using static value`);
   }
 
   return { visa: result.visa, errors };
