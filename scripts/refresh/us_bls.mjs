@@ -94,6 +94,19 @@ export const STATIC_GROCERIES = {
 // 1L 가격으로 환산하려면 ½ gallon liter 값으로 나눠야 함 — 미환산 시 가격이 약 1.89× 부풀려짐.
 const HALF_GALLON_LITERS = 1.8927;
 
+// BLS API 가 반환하는 원시 값(보정계수 적용 전)의 plausible 범위. 범위 밖이면 시리즈가 의도와
+// 다르거나 API 응답 이상으로 간주, STATIC fallback 사용 + region-level errors 기록.
+//
+// 배경: 과거 chicken1kg 시리즈가 실제 시장가 ($1.5~2.0/lb) 의 5× 가량인 ~$10/lb 를 반환해
+// 도시 JSON 에 25.3 USD/kg (= $11.5/lb) 의 비현실적 값이 적재된 사례 (PR #20 review).
+// silent fail 금지 정책상 발견 시 errors 에 명시 기록 후 정적 추정치로 대체한다.
+export const BLS_VALUE_RANGES = {
+  milk1L: { min: 1.0, max: 6.0 }, // USD per ½ gallon (1.89 L)
+  eggs12: { min: 1.0, max: 8.0 }, // USD per dozen
+  bread: { min: 1.0, max: 6.0 }, // USD per lb
+  chicken1kg: { min: 1.0, max: 5.0 }, // USD per lb (whole chicken — boneless cuts >$5/lb 는 reject)
+};
+
 export const STATIC_FOOD = {
   restaurantMeal: 18.00,
   cafe: 5.50,
@@ -135,6 +148,34 @@ export function parseBlsResponse(data, seriesIds) {
   }
 
   return result;
+}
+
+/**
+ * BLS 시리즈 응답의 sanity range 검증. 범위 밖 값은 invalid 로 분리 — refresh() 가 errors 에
+ * 기록 후 STATIC fallback. silent fail 금지 정책 (CLAUDE.md) 준수.
+ *
+ * @param {Map<string, number>} blsData parseBlsResponse 결과
+ * @param {{milk1L: string, eggs12: string, bread: string, chicken1kg: string}} seriesIds
+ * @returns {{valid: Map<string, number>, invalid: Array<{field: string, seriesId: string, value: number, range: {min: number, max: number}}>}}
+ */
+export function validateBlsValues(blsData, seriesIds) {
+  const valid = new Map();
+  const invalid = [];
+
+  for (const [field, seriesId] of Object.entries(seriesIds)) {
+    const value = blsData.get(seriesId);
+    if (value === undefined) continue;
+
+    const range = BLS_VALUE_RANGES[field];
+    if (range && (value < range.min || value > range.max)) {
+      invalid.push({ field, seriesId, value, range });
+      continue;
+    }
+
+    valid.set(seriesId, value);
+  }
+
+  return { valid, invalid };
 }
 
 /**
@@ -203,7 +244,15 @@ export default async function refresh(opts = {}) {
           }),
         });
         const data = await response.json();
-        regionData.set(region, parseBlsResponse(data, seriesIds));
+        const parsed = parseBlsResponse(data, seriesIds);
+        const { valid, invalid } = validateBlsValues(parsed, BLS_SERIES[region]);
+        for (const entry of invalid) {
+          errors.push({
+            cityId: `region:${region}`,
+            reason: `BLS ${entry.seriesId} (${entry.field}) value ${entry.value} out of range [${entry.range.min}, ${entry.range.max}]; using static`,
+          });
+        }
+        regionData.set(region, valid);
       } catch (err) {
         errors.push({
           cityId: `region:${region}`,

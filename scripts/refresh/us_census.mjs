@@ -8,7 +8,15 @@
  * API 키: `US_CENSUS_API_KEY` 필요.
  *
  * 방법: B25064 median gross rent by MSA.
- * HUD FMR 과 교차 검증 용도. 단독 rent 소스로는 미사용.
+ *
+ * **결과 필드 — `rent.censusMedian` (cross-validation only)**:
+ *   - HUD FMR(`us_hud.mjs`) 과 비교용 보조 데이터. **compare UI 에는 노출되지 않음**
+ *     (`isCostKey` / `iterNumericFields` 가 추적 X — 비교 카드 항목은 share/studio/oneBed/twoBed 만).
+ *   - `_outlier.mjs::iterNumericFields` 가 의도적으로 추적하지 않음 — outlier PR 트리거 X.
+ *     운영자는 `auto-update` PR 의 diff 에서 censusMedian 가 HUD 결과와 크게 어긋나면 수동 검토.
+ *   - 단독 rent 소스로는 미사용 — `us_hud.mjs` 가 권위, censusMedian 은 sanity check.
+ *
+ * 워크플로우: refresh-rent.yml 에서 us_hud 다음 step 으로 실행 (key 있을 때만).
  */
 
 import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, createMissingApiKeyError } from './_common.mjs';

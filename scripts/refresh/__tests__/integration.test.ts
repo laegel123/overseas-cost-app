@@ -162,6 +162,19 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
+  it('v1.0 useStatic 정책: visas / universities / jp_estat 호출은 --useStatic 동반', () => {
+    // 세 fetcher 는 v1.0 에서 HTML 파싱 / 응답 검증이 미구현이라 fetch 결과를 STATIC 에 적용하지 않음.
+    // 매 워크플로우 실행마다 정부·대학·e-Stat 사이트에 무의미한 HTTP 요청을 보내는 것을 차단.
+    // PR #20 review round 7 (회귀 차단) — v1.x 파싱 도입 시 본 단언을 갱신.
+    const visaYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-visa.yml'), 'utf-8');
+    const tuitionYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-tuition.yml'), 'utf-8');
+    const rentYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-rent.yml'), 'utf-8');
+
+    expect(visaYml).toMatch(/_run\.mjs visas --useStatic/);
+    expect(tuitionYml).toMatch(/_run\.mjs universities --useStatic/);
+    expect(rentYml).toMatch(/_run\.mjs jp_estat --useStatic/);
+  });
+
   it('각 워크플로우의 Auto commit 단계는 git add 범위가 데이터 파일로 한정', () => {
     for (const workflow of REFRESH_WORKFLOWS) {
       const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');

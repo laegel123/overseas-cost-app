@@ -23,7 +23,8 @@ jobs:
     env:
       KR_DATA_API_KEY: ${{ secrets.KR_DATA_API_KEY }}
       US_CENSUS_API_KEY: ${{ secrets.US_CENSUS_API_KEY }}
-      JP_ESTAT_APP_ID: ${{ secrets.JP_ESTAT_APP_ID }}
+      # JP_ESTAT_APP_ID 는 v1.0 에서 사용 안 함 (jp_estat 가 --useStatic 모드).
+      # v1.x 응답 단위 검증 도입 시 다시 wire up.
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -85,14 +86,14 @@ jobs:
       - name: Refresh AU ABS
         run: node scripts/refresh/_run.mjs au_abs
 
-      # Japan - e-Stat
-      - name: Skip jp_estat if API key absent
-        if: env.JP_ESTAT_APP_ID == ''
-        run: echo "::warning::JP_ESTAT_APP_ID not set, skipping jp_estat.mjs"
-
-      - name: Refresh JP e-Stat
-        if: env.JP_ESTAT_APP_ID != ''
-        run: node scripts/refresh/_run.mjs jp_estat
+      # Japan - e-Stat — v1.0 정책상 --useStatic 필수.
+      # v1.0 의 jp_estat.mjs 는 응답 단위/스케일 (천엔 vs 엔, 도/현 vs 전국 평균) 검증이 미완이라
+      # API 호출 결과를 STATIC 보정에 적용하지 않음 — 호출해도 어차피 STATIC 값 그대로 도시 JSON 에
+      # 적재된다. 매 월 e-Stat API 에 무의미한 호출을 보낼 이유가 없어 v1.0 에서는 비활성화.
+      # --useStatic 으로 API 키 없이도 동작하므로 conditional skip 불필요. v1.x 별도 phase 에서
+      # 응답 단위 검증 + --useStatic 제거.
+      - name: Refresh JP e-Stat (useStatic — v1.0)
+        run: node scripts/refresh/_run.mjs jp_estat --useStatic
 
       # Singapore - SingStat (no key required)
       - name: Refresh SG SingStat

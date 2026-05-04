@@ -10,9 +10,11 @@ import * as os from 'node:os';
 
 import refreshUsBls, {
   parseBlsResponse,
+  validateBlsValues,
   mapToGroceries,
   CITY_CONFIGS,
   BLS_SERIES,
+  BLS_VALUE_RANGES,
   STATIC_GROCERIES,
   STATIC_FOOD,
   SOURCE,
@@ -99,6 +101,61 @@ describe('parseBlsResponse', () => {
 
     expect(result.has('APU0100709112')).toBe(true);
     expect(result.has('APU0100708111')).toBe(false);
+  });
+});
+
+describe('validateBlsValues', () => {
+  it('범위 안 값: valid Map 에 포함', () => {
+    const blsData = new Map([
+      ['APU0100709112', 4.5], // milk in range [1.0, 6.0]
+      ['APU0100708111', 3.8], // eggs in range [1.0, 8.0]
+      ['APU0100702111', 3.2], // bread in range [1.0, 6.0]
+      ['APU0100706111', 1.8], // chicken in range [1.0, 5.0]
+    ]);
+    const { valid, invalid } = validateBlsValues(blsData, BLS_SERIES.northeast);
+
+    expect(valid.size).toBe(4);
+    expect(invalid).toHaveLength(0);
+  });
+
+  it('chicken1kg 가 5.0 USD/lb 초과: invalid 분리 + STATIC fallback (PR #20 review 회귀 차단)', () => {
+    // 과거 BLS API 가 ~$10/lb 를 반환해 nyc.json 에 25.3 USD/kg 가 적재된 사례 회귀 차단.
+    const blsData = new Map([
+      ['APU0100706111', 10.0], // chicken out of range
+    ]);
+    const { valid, invalid } = validateBlsValues(blsData, BLS_SERIES.northeast);
+
+    expect(valid.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+    expect(invalid[0]?.field).toBe('chicken1kg');
+    expect(invalid[0]?.value).toBe(10.0);
+    expect(invalid[0]?.range.max).toBe(5.0);
+  });
+
+  it('범위 미만 값도 invalid (음수·0 등 비정상 값)', () => {
+    const blsData = new Map([
+      ['APU0100709112', 0.5], // milk below min
+    ]);
+    const { valid, invalid } = validateBlsValues(blsData, BLS_SERIES.northeast);
+
+    expect(valid.size).toBe(0);
+    expect(invalid).toHaveLength(1);
+    expect(invalid[0]?.field).toBe('milk1L');
+  });
+
+  it('Map 에 없는 시리즈는 valid 에서 제외 (parseBlsResponse 가 이미 걸러냄)', () => {
+    const blsData = new Map();
+    const { valid, invalid } = validateBlsValues(blsData, BLS_SERIES.northeast);
+
+    expect(valid.size).toBe(0);
+    expect(invalid).toHaveLength(0);
+  });
+
+  it('BLS_VALUE_RANGES: 4개 필드 모두 min/max 정의', () => {
+    expect(BLS_VALUE_RANGES.milk1L).toEqual({ min: 1.0, max: 6.0 });
+    expect(BLS_VALUE_RANGES.eggs12).toEqual({ min: 1.0, max: 8.0 });
+    expect(BLS_VALUE_RANGES.bread).toEqual({ min: 1.0, max: 6.0 });
+    expect(BLS_VALUE_RANGES.chicken1kg).toEqual({ min: 1.0, max: 5.0 });
   });
 });
 
@@ -251,6 +308,39 @@ describe('refresh (integration)', () => {
 
     expect(result.errors.some((e: any) => e.cityId.startsWith('region:'))).toBe(true);
     expect(result.changes.length).toBeGreaterThan(0);
+  }, 30000);
+
+  it('chicken1kg 가 sanity 범위 밖: errors 기록 + 결과는 STATIC×보정계수 (PR #20 회귀 차단)', async () => {
+    // BLS API 가 의도와 다른 시리즈를 반환하는 시나리오 — chicken1kg 가 $10/lb 처럼 비정상이면
+    // 원래 코드: 25.3 USD/kg 적재 (= 10 × 2.2 × 1.15). 수정 후: 11.5 USD/kg (= 10 × 1.15, STATIC 사용).
+    const responseWithInvalidChicken = {
+      status: 'REQUEST_SUCCEEDED',
+      Results: {
+        series: [
+          { seriesID: 'APU0100706111', data: [{ value: '10.00' }] }, // out of [1.0, 5.0]
+        ],
+      },
+    };
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => responseWithInvalidChicken,
+    });
+
+    const result = await refreshUsBls({ dryRun: true, cities: ['nyc'] });
+
+    expect(
+      result.errors.some(
+        (e: any) =>
+          e.cityId.startsWith('region:') && e.reason.includes('chicken1kg') && e.reason.includes('out of range'),
+      ),
+    ).toBe(true);
+
+    const chickenChange = result.changes.find((c: any) => c.field === 'food.groceries.chicken1kg');
+    expect(chickenChange).toBeDefined();
+    // STATIC_GROCERIES.chicken1kg(10.00) × adjustment(1.15) = 11.5 — 25.3 의 비정상 값 회귀 차단.
+    expect(chickenChange?.newValue).toBeCloseTo(STATIC_GROCERIES.chicken1kg * 1.15, 2);
+    expect(chickenChange?.newValue).toBeLessThan(20);
   }, 30000);
 
   it('반환 객체 구조: RefreshResult', async () => {

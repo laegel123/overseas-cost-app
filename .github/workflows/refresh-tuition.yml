@@ -29,9 +29,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Universities - fetch from official university pages
-      - name: Refresh Universities
-        run: node scripts/refresh/_run.mjs universities
+      # Universities — v1.0 정책상 --useStatic 필수.
+      # v1.0 의 universities.mjs 는 HTML 파싱이 미구현이라 대학 페이지를 fetch 해도 결과는 항상
+      # `UNIVERSITY_REGISTRY.staticAnnual` 값. 20도시 × 평균 2~3개 대학 = 50개 이상의 대학 사이트에
+      # 매 분기 워크플로우마다 HTTP 요청을 보내는 것은 봇 차단 위험을 키울 뿐 무의미. v1.x 별도
+      # phase 에서 --useStatic 제거 + 학교별 selector 도입 예정.
+      - name: Refresh Universities (useStatic — v1.0)
+        run: node scripts/refresh/_run.mjs universities --useStatic
 
       - name: Build data
         run: node scripts/build_data.mjs

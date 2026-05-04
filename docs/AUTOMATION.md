@@ -210,6 +210,8 @@ jobs:
 
 ### 4.3 `refresh-transit.yml` — 분기 1회
 
+> **호치민(VN) transit 은 본 워크플로우에서 갱신되지 않음 — 의도적**. `vn_gso.mjs` 가 rent + food + transport 통합형이라 같은 도시 파일을 1회 writeCity 로 갱신해야 하므로, 호치민 transport 는 분기 transit 이 아니라 월간 `refresh-rent.yml` 의 `vn_gso` step 에서 함께 갱신된다. 결과적으로 호치민 transport 는 다른 도시(분기)보다 자주 (월) 갱신될 수 있으나 정적 추정치 변동이 거의 없어 실질 영향은 0.
+
 ```yaml
 name: Refresh Transit
 on:

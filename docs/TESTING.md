@@ -2318,6 +2318,10 @@ afterEach(() => {
 - [x] `parseBlsResponse` 응답 파싱
 - [x] `mapToGroceries` + STATIC_GROCERIES/STATIC_FOOD fallback
 - [x] useStatic 옵션으로 API 키 없이 정적 데이터 사용
+- [x] `validateBlsValues` sanity range 검증 (BLS_VALUE_RANGES) — 범위 안 값 valid Map 통과 (PR #20 review round 7)
+- [x] `validateBlsValues` chicken1kg > 5 USD/lb 거부 (과거 ~$10/lb → 25.3 USD/kg 회귀 차단)
+- [x] `validateBlsValues` 음수·0 등 min 미만도 invalid 처리
+- [x] refresh: chicken1kg 범위 밖 응답 시 region-level errors 기록 + STATIC×보정계수 결과
 
 #### `us_transit.mjs`
 
@@ -2670,6 +2674,7 @@ afterEach(() => {
 
 - [x] outlier 라벨 분기 (PR 생성 vs 직접 commit)
 - [x] 환경변수 export (`HAS_OUTLIERS=true`) 정확
+- [x] v1.0 useStatic 정책 — visas / universities / jp_estat 호출은 `--useStatic` 동반 (PR #20 review round 7)
 
 ### 9-A.14 `_registry.mjs` (도시 ↔ 출처 매핑)
 

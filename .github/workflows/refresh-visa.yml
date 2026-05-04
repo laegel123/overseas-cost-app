@@ -29,9 +29,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Visas - fetch from official government pages
-      - name: Refresh Visas
-        run: node scripts/refresh/_run.mjs visas
+      # Visas — v1.0 정책상 --useStatic 필수.
+      # v1.0 의 visas.mjs 는 HTML 파싱이 미구현이라 정부 페이지를 fetch 해도 결과는 항상
+      # `VISA_REGISTRY` 의 static 값. fetch 호출 자체는 11개국 정부 사이트에 매 분기 워크플로우마다
+      # HTTP 요청을 발생시키며 봇 차단 위험이 있어 v1.0 에서는 비활성화. 실제 파싱이 도입되는
+      # v1.x 별도 phase 에서 --useStatic 제거 + 국가별 selector 도입 예정.
+      - name: Refresh Visas (useStatic — v1.0)
+        run: node scripts/refresh/_run.mjs visas --useStatic
 
       - name: Build data
         run: node scripts/build_data.mjs

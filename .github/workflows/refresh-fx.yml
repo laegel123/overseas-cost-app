@@ -1,4 +1,4 @@
-name: Refresh FX (backup)
+name: Refresh FX (daily backup of client-side FX cache)
 
 on:
   schedule:

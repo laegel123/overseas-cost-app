@@ -5,6 +5,12 @@ on:
     - cron: '0 18 2 1,4,7,10 *' # 분기 첫 달 2일 18:00 KST (= 09:00 UTC). 1일은 refresh-rent 와 충돌 회피.
   workflow_dispatch:
 
+# **호치민(VN) transit 은 본 워크플로우에서 갱신되지 않음 — 의도적**.
+# `vn_gso.mjs` 가 rent + food + transport 통합형이라 도시 JSON 한 번 쓰기로 세 카테고리를 함께
+# 갱신한다 (writeCity 연쇄 호출 시 sources 가 덮어써지는 문제 회피, _common.mjs 주석 참조).
+# 따라서 호치민 transport 는 분기 워크플로우(refresh-transit.yml)가 아니라 월간 워크플로우
+# (refresh-rent.yml) 의 `_run.mjs vn_gso` step 에서 갱신된다. AUTOMATION.md §4.3 참조.
+
 concurrency:
   group: data-refresh-transit-${{ github.ref }}
   cancel-in-progress: false

@@ -7,7 +7,7 @@
   "country": "US",
   "currency": "USD",
   "region": "na",
-  "lastUpdated": "2026-05-03",
+  "lastUpdated": "2026-05-04",
   "rent": {
     "share": 1170,
     "studio": 1800,
@@ -18,10 +18,10 @@
     "restaurantMeal": 18.9,
     "cafe": 5.78,
     "groceries": {
-      "milk1L": 4.73,
+      "milk1L": 1.26,
       "eggs12": 4.73,
       "rice1kg": 3.68,
-      "chicken1kg": 23.1,
+      "chicken1kg": 10.5,
       "bread": 3.68,
       "onion1kg": 2.94,
       "apple1kg": 4.41,
@@ -66,7 +66,7 @@
       "category": "food",
       "name": "US BLS CPI + static estimates (ADR-059 adjustment)",
       "url": "https://www.bls.gov/cpi/",
-      "accessedAt": "2026-05-03"
+      "accessedAt": "2026-05-04"
     },
     {
       "category": "transport",

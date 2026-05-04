@@ -70,6 +70,9 @@ jobs:
 
       # 주의: eu_eurostat 는 default export 가 fallback 데이터만 반환하고 writeCity 를 호출하지 않음
       # (각 국가 fetcher 가 import 해서 보조 자료로 사용하는 라이브러리 모듈) — 워크플로우 단독 호출 금지.
+      # _run.mjs 의 LIBRARY_MODULES 가 직접 실행 시 fail-fast 로 차단하지만, 워크플로우 수준에서도
+      # 미래 기여자가 실수로 step 을 추가하지 않도록 본 코멘트로 의도를 명시.
+      # integration.test.ts 가 어떤 워크플로우에도 eu 라이브러리 모듈 호출 라인이 들어오지 않는지 회귀 검증.
 
       - name: Build data
         run: node scripts/build_data.mjs
