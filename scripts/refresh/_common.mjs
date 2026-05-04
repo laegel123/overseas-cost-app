@@ -162,9 +162,15 @@ export async function readCity(id) {
 
 /**
  * 도시 JSON 쓰기 (atomic write).
+ *
+ * `source` 가 배열이면 한 번의 호출로 여러 카테고리 sources 를 누적 갱신.
+ * 동일 파일에 writeCity 를 연쇄 호출하면 두 번째 이후의 호출이 디스크에 저장된
+ * 첫 호출의 sources 를 덮어쓰므로 (in-memory data 만 바라보기 때문),
+ * 단일 호출에서 배열을 넘기는 방식이 vn_gso·ae_fcsc 같은 복수 카테고리 fetcher 의 정답.
+ *
  * @param {string} id
  * @param {import('../../src/types/city').CityCostData} data
- * @param {{category: string, name: string, url: string}} source
+ * @param {{category: string, name: string, url: string} | Array<{category: string, name: string, url: string}>} source
  * @returns {Promise<void>}
  */
 export async function writeCity(id, data, source) {
@@ -175,10 +181,15 @@ export async function writeCity(id, data, source) {
 
   // UTC 기준 — GitHub Actions 가 UTC 로 실행되므로 KST 와 9시간 차이로 인한 날짜 불일치 방지.
   const now = new Date().toISOString().slice(0, 10);
+  const sourceList = Array.isArray(source) ? source : [source];
+  let nextSources = data.sources;
+  for (const s of sourceList) {
+    nextSources = updateSources(nextSources, s, now);
+  }
   const updatedData = {
     ...data,
     lastUpdated: now,
-    sources: updateSources(data.sources, source, now),
+    sources: nextSources,
   };
 
   validateCityData(updatedData, id);

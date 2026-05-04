@@ -2163,13 +2163,14 @@ afterEach(() => {
 - [x] 스키마 위반: throws `CitySchemaError`
 - [x] 경로 traversal 시도 (`../../etc/passwd`): throws `InvalidCityIdError`
 
-#### `writeCity(id, data, source): Promise<void>`
+#### `writeCity(id, data, source | source[]): Promise<void>`
 
 - [x] 새 파일 작성
 - [x] 기존 파일 덮어쓰기
 - [x] `lastUpdated` 자동 갱신 (현재 시각)
 - [x] `sources[]` 에 (category, name, url, accessedAt) 추가 (기존 유지)
 - [x] 같은 source 가 이미 있으면 accessedAt 만 갱신
+- [x] sources 배열 — 한 호출로 여러 카테고리 누적 (vn_gso·ae_fcsc 연쇄 호출 회귀 차단)
 - [x] 스키마 위반 데이터 입력 시 throws (write 실패)
 - [ ] atomic write (임시 파일 → rename) — 부분 쓰기 방지 (구현 완료, 테스트는 파일시스템 검증 어려움)
 - [x] 디렉터리 부재 시 자동 생성
@@ -2614,11 +2615,23 @@ afterEach(() => {
 - [ ] 21개 city 모두 검증
 - [ ] 각 city 의 schema 통과
 - [ ] cross-field consistency (currency vs country)
-- [ ] 직전 분기 대비 ±30% 이상 변동: warn (block 아님)
+- [ ] 직전 분기 대비 ±30% 이상 변동: warn (block 아님) — 분리되어 `detect_outliers.mjs` 가 담당.
 - [ ] sources 배열 비어 있음: throws
 - [ ] lastUpdated 미래 날짜: warn
 - [ ] lastUpdated 1년+ 과거: warn
 - [ ] exit code 0 (성공) / 1 (오류) / 2 (warning only)
+
+#### `scripts/detect_outliers.mjs`
+
+워킹트리 ↔ HEAD 비교 → `_outlier.classifyChange` 호출 → ≥30% 변동 발견 시 `$GITHUB_OUTPUT` 에 `HAS_OUTLIERS=true` 출력. 워크플로우의 outlier PR 분기 트리거.
+
+- [x] `iterNumericFields` — rent / food / transport 평탄화
+- [x] `iterNumericFields` — food.groceries 키 합집합 순회 (old/new 양쪽)
+- [x] `iterNumericFields` — tuition[i].annual 인덱스별 비교, 길이 차이 처리
+- [x] `iterNumericFields` — visa.* 필드 (양쪽 undefined 면 skip)
+- [x] `iterNumericFields` — null 값은 그대로 null 로 yield
+- [ ] CLI 실행: HEAD 부재(첫 commit) 시 outliers=0, exit 0
+- [ ] `GITHUB_OUTPUT` 미설정 환경에서도 stdout summary 만 출력하고 종료
 
 ### 9-A.12 정적 데이터 파일
 

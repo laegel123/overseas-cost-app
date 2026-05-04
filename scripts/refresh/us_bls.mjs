@@ -80,11 +80,19 @@ export const BLS_SERIES = {
 };
 
 export const STATIC_GROCERIES = {
+  milk1L: 1.20,
+  eggs12: 4.50,
   rice1kg: 3.50,
+  chicken1kg: 10.00,
+  bread: 3.50,
   onion1kg: 2.80,
   apple1kg: 4.20,
   ramen: 1.50,
 };
+
+// BLS Series APU0100709112 / APU0400709112 = "Milk, fresh, whole, fortified, per ½ gallon (1.89 L)".
+// 1L 가격으로 환산하려면 ½ gallon liter 값으로 나눠야 함 — 미환산 시 가격이 약 1.89× 부풀려짐.
+const HALF_GALLON_LITERS = 1.8927;
 
 export const STATIC_FOOD = {
   restaurantMeal: 18.00,
@@ -145,11 +153,11 @@ export function mapToGroceries(blsData, seriesIds, adjustmentFactor) {
   const chicken1kg = blsData.get(seriesIds.chicken1kg);
 
   return {
-    milk1L: milk1L ? applyFactor(milk1L) : applyFactor(STATIC_GROCERIES.rice1kg),
-    eggs12: eggs12 ? applyFactor(eggs12) : applyFactor(4.50),
+    milk1L: milk1L ? applyFactor(milk1L / HALF_GALLON_LITERS) : applyFactor(STATIC_GROCERIES.milk1L),
+    eggs12: eggs12 ? applyFactor(eggs12) : applyFactor(STATIC_GROCERIES.eggs12),
     rice1kg: applyFactor(STATIC_GROCERIES.rice1kg),
-    chicken1kg: chicken1kg ? applyFactor(chicken1kg * 2.2) : applyFactor(10.00),
-    bread: bread ? applyFactor(bread) : applyFactor(3.50),
+    chicken1kg: chicken1kg ? applyFactor(chicken1kg * 2.2) : applyFactor(STATIC_GROCERIES.chicken1kg),
+    bread: bread ? applyFactor(bread) : applyFactor(STATIC_GROCERIES.bread),
     onion1kg: applyFactor(STATIC_GROCERIES.onion1kg),
     apple1kg: applyFactor(STATIC_GROCERIES.apple1kg),
     ramen: applyFactor(STATIC_GROCERIES.ramen),

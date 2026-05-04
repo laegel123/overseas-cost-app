@@ -157,6 +157,25 @@ describe('writeCity', () => {
     expect(written.sources[0].accessedAt).toBe('2026-04-27');
   });
 
+  it('sources 배열 — 한 호출로 여러 카테고리 누적 (vn_gso·ae_fcsc 패턴)', async () => {
+    const existingData = { ...VALID_CITY_FIXTURE, id: 'multi-source' };
+    createTempCityFile('multi-source', existingData as any);
+
+    const sources = [
+      { category: 'rent', name: 'Rent Src', url: 'https://rent.example.com' },
+      { category: 'food', name: 'Food Src', url: 'https://food.example.com' },
+      { category: 'transport', name: 'Transit Src', url: 'https://transit.example.com' },
+    ];
+    await writeCity('multi-source', existingData as any, sources);
+
+    const written = readTempCityFile('multi-source') as any;
+    // 기존 1개 + 새 3개 = 4개. 연쇄 writeCity 호출 시 발생하던 누락 버그 회귀 차단.
+    expect(written.sources).toHaveLength(4);
+    expect(written.sources.map((s: any) => s.name)).toEqual(
+      expect.arrayContaining(['Test Source', 'Rent Src', 'Food Src', 'Transit Src']),
+    );
+  });
+
   it('스키마 위반 데이터: throws', async () => {
     const invalidData = { id: 'invalid' };
     const source = { category: 'rent', name: 'Test', url: 'https://example.com' };

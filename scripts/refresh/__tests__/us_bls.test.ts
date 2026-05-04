@@ -103,7 +103,7 @@ describe('parseBlsResponse', () => {
 });
 
 describe('mapToGroceries', () => {
-  it('BLS 데이터 + 보정계수 적용', () => {
+  it('BLS 데이터 + 보정계수 적용 (milk 는 ½ gallon → 1L 환산)', () => {
     const blsData = new Map([
       ['APU0100709112', 4.5],
       ['APU0100708111', 3.8],
@@ -115,19 +115,24 @@ describe('mapToGroceries', () => {
 
     const result = mapToGroceries(blsData, seriesIds, adjustmentFactor);
 
-    expect(result.milk1L).toBeCloseTo(4.5 * 1.15, 1);
+    // BLS APU0100709112 는 ½ gallon (1.8927 L) 단위 — 1L 환산 후 보정.
+    expect(result.milk1L).toBeCloseTo((4.5 / 1.8927) * 1.15, 2);
     expect(result.eggs12).toBeCloseTo(3.8 * 1.15, 1);
     expect(result.bread).toBeCloseTo(3.2 * 1.15, 1);
     expect(result.rice1kg).toBeCloseTo(STATIC_GROCERIES.rice1kg * 1.15, 1);
   });
 
-  it('BLS 데이터 부재: static fallback 사용', () => {
+  it('BLS 데이터 부재: static fallback 사용 (milk 는 milk static 값)', () => {
     const blsData = new Map();
     const seriesIds = BLS_SERIES.northeast;
     const adjustmentFactor = 1.0;
 
     const result = mapToGroceries(blsData, seriesIds, adjustmentFactor);
 
+    expect(result.milk1L).toBe(STATIC_GROCERIES.milk1L);
+    expect(result.eggs12).toBe(STATIC_GROCERIES.eggs12);
+    expect(result.chicken1kg).toBe(STATIC_GROCERIES.chicken1kg);
+    expect(result.bread).toBe(STATIC_GROCERIES.bread);
     expect(result.rice1kg).toBe(STATIC_GROCERIES.rice1kg);
     expect(result.onion1kg).toBe(STATIC_GROCERIES.onion1kg);
     expect(result.apple1kg).toBe(STATIC_GROCERIES.apple1kg);

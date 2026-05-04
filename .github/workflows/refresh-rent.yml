@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: data-refresh-${{ github.ref }}
+  group: data-refresh-rent-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -104,10 +104,11 @@ jobs:
         run: node scripts/build_data.mjs
 
       - name: Validate cities
-        id: validate
-        run: |
-          node scripts/validate_cities.mjs
-          echo "HAS_OUTLIERS=$HAS_OUTLIERS" >> $GITHUB_OUTPUT
+        run: node scripts/validate_cities.mjs
+
+      - name: Detect outliers
+        id: outliers
+        run: node scripts/detect_outliers.mjs
 
       - name: Configure git
         run: |
@@ -115,21 +116,25 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Create PR for outliers
-        if: steps.validate.outputs.HAS_OUTLIERS == 'true'
+        if: steps.outliers.outputs.HAS_OUTLIERS == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           commit-message: 'data: monthly rent refresh (outliers)'
           branch: auto/refresh-rent-${{ github.run_id }}
           title: 'data: monthly rent refresh — review needed'
           labels: outlier
+          add-paths: |
+            data/cities/
+            data/all.json
+            data/seed/all.json
           body: |
             자동 임차료 갱신 중 이상 변동(≥30%) 감지.
 
             변경 내역을 검토해주세요.
 
       - name: Auto commit and push
-        if: steps.validate.outputs.HAS_OUTLIERS != 'true'
+        if: steps.outliers.outputs.HAS_OUTLIERS != 'true'
         run: |
-          git add -A
+          git add data/cities/ data/all.json data/seed/all.json
           git diff --staged --quiet || git commit -m "data: monthly rent refresh"
           git push

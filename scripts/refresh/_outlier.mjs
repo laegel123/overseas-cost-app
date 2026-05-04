@@ -75,6 +75,76 @@ export function computePctChange(oldVal, newVal) {
 }
 
 /**
+ * 도시 JSON 의 비교 가능한 numeric 필드 평탄화 — rent / food / food.groceries / transport /
+ * tuition[].annual / visa.* 까지. detect_outliers.mjs 가 직전 commit 비교 시 사용.
+ *
+ * @param {Object} oldData
+ * @param {Object} newData
+ * @returns {Iterable<{path: string, oldVal: number|null, newVal: number|null}>}
+ */
+export function* iterNumericFields(oldData, newData) {
+  const sections = [
+    { key: 'rent', fields: ['share', 'studio', 'oneBed', 'twoBed', 'deposit'] },
+    { key: 'food', fields: ['restaurantMeal', 'cafe'] },
+    { key: 'transport', fields: ['monthlyPass', 'singleRide', 'taxiBase'] },
+  ];
+
+  for (const { key, fields } of sections) {
+    const oldSection = oldData[key] ?? {};
+    const newSection = newData[key] ?? {};
+    for (const f of fields) {
+      const o = oldSection[f];
+      const n = newSection[f];
+      if (o === undefined && n === undefined) continue;
+      yield {
+        path: `${key}.${f}`,
+        oldVal: typeof o === 'number' ? o : null,
+        newVal: typeof n === 'number' ? n : null,
+      };
+    }
+  }
+
+  const oldGroceries = oldData.food?.groceries ?? {};
+  const newGroceries = newData.food?.groceries ?? {};
+  const groceryKeys = new Set([...Object.keys(oldGroceries), ...Object.keys(newGroceries)]);
+  for (const f of groceryKeys) {
+    const o = oldGroceries[f];
+    const n = newGroceries[f];
+    yield {
+      path: `food.groceries.${f}`,
+      oldVal: typeof o === 'number' ? o : null,
+      newVal: typeof n === 'number' ? n : null,
+    };
+  }
+
+  const oldTuition = Array.isArray(oldData.tuition) ? oldData.tuition : [];
+  const newTuition = Array.isArray(newData.tuition) ? newData.tuition : [];
+  const tuitionLen = Math.max(oldTuition.length, newTuition.length);
+  for (let i = 0; i < tuitionLen; i++) {
+    const o = oldTuition[i]?.annual;
+    const n = newTuition[i]?.annual;
+    yield {
+      path: `tuition[${i}].annual`,
+      oldVal: typeof o === 'number' ? o : null,
+      newVal: typeof n === 'number' ? n : null,
+    };
+  }
+
+  const oldVisa = oldData.visa ?? {};
+  const newVisa = newData.visa ?? {};
+  for (const f of ['studentApplicationFee', 'workApplicationFee', 'settlementApprox']) {
+    const o = oldVisa[f];
+    const n = newVisa[f];
+    if (o === undefined && n === undefined) continue;
+    yield {
+      path: `visa.${f}`,
+      oldVal: typeof o === 'number' ? o : null,
+      newVal: typeof n === 'number' ? n : null,
+    };
+  }
+}
+
+/**
  * @param {unknown} val
  * @param {string} name
  */

@@ -203,12 +203,32 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
-  it('각 워크플로우에 concurrency 설정 존재', () => {
+  it('각 워크플로우에 concurrency 설정 존재 (워크플로우별 고유 group)', () => {
     for (const workflow of REFRESH_WORKFLOWS) {
       const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      // group 은 카테고리별 고유 — fx / prices / rent / transit / tuition / visa 가 같은 ref 에서도 병렬 실행 가능.
+      const category = workflow.replace('refresh-', '').replace('.yml', '');
       expect(content).toContain('concurrency:');
-      expect(content).toContain('group: data-refresh-${{ github.ref }}');
+      expect(content).toContain(`group: data-refresh-${category}-\${{ github.ref }}`);
       expect(content).toContain('cancel-in-progress: false');
+    }
+  });
+
+  it('각 워크플로우에 detect_outliers.mjs 스텝 존재 (HAS_OUTLIERS 출력)', () => {
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      expect(content).toContain('node scripts/detect_outliers.mjs');
+      expect(content).toContain("steps.outliers.outputs.HAS_OUTLIERS == 'true'");
+      expect(content).toContain("steps.outliers.outputs.HAS_OUTLIERS != 'true'");
+    }
+  });
+
+  it('각 워크플로우의 Auto commit 단계는 git add 범위가 데이터 파일로 한정', () => {
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      expect(content).toContain('git add data/cities/ data/all.json data/seed/all.json');
+      // 'git add -A' 가 다시 들어오지 않도록 회귀 차단.
+      expect(content).not.toContain('git add -A');
     }
   });
 
