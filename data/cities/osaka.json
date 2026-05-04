@@ -34,9 +34,21 @@
     "taxiBase": 500
   },
   "tuition": [
-    { "school": "大阪大学", "level": "undergrad", "annual": 535800 },
-    { "school": "京都大学", "level": "undergrad", "annual": 535800 },
-    { "school": "関西学院大学", "level": "undergrad", "annual": 1200000 }
+    {
+      "school": "大阪大学",
+      "level": "undergrad",
+      "annual": 535800
+    },
+    {
+      "school": "京都大学",
+      "level": "undergrad",
+      "annual": 535800
+    },
+    {
+      "school": "関西学院大学",
+      "level": "undergrad",
+      "annual": 1200000
+    }
   ],
   "visa": {
     "studentApplicationFee": 3000,
@@ -60,6 +72,18 @@
       "category": "transport",
       "name": "東京メトロ + 大阪Metro + static estimates",
       "url": "https://www.tokyometro.jp/en/ticket/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]

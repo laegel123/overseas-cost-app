@@ -34,8 +34,16 @@
     "taxiBase": 4.7
   },
   "tuition": [
-    { "school": "LMU München", "level": "undergrad", "annual": 700 },
-    { "school": "TU München", "level": "undergrad", "annual": 700 }
+    {
+      "school": "LMU München",
+      "level": "undergrad",
+      "annual": 700
+    },
+    {
+      "school": "TU München",
+      "level": "undergrad",
+      "annual": 700
+    }
   ],
   "visa": {
     "studentApplicationFee": 75,
@@ -59,6 +67,18 @@
       "category": "transport",
       "name": "MVV official fares + static estimates",
       "url": "https://www.mvv-muenchen.de/en/tickets-fares/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]

@@ -126,44 +126,17 @@ describe('Integration: Full Pipeline Simulation', () => {
     });
   });
 
-  describe('워크플로우 환경변수', () => {
-    it('HAS_OUTLIERS 환경변수 설정 확인', () => {
-      const hasOutlier = classifyChange(100, 150) === 'pr-outlier';
-      const envValue = hasOutlier ? 'true' : 'false';
-
-      expect(envValue).toBe('true');
+  describe('워크플로우 환경변수 분기', () => {
+    it('HAS_OUTLIERS — ≥30% 변동만 true (5~30% 는 HAS_UPDATES 로 별도 집계)', () => {
+      // detect_outliers.mjs 가 두 변수를 분리해 출력 — outlier label PR / auto-update label PR / 직접 commit 3분기.
+      expect(classifyChange(100, 150)).toBe('pr-outlier');
+      expect(classifyChange(100, 115)).toBe('pr-update');
+      expect(classifyChange(100, 102)).toBe('commit');
     });
   });
 
-  describe('에러 복구', () => {
-    it('fetch 실패 후 재시도 가능 (멱등)', async () => {
-      createTempCityFile('seoul', { ...VALID_CITY_FIXTURE, id: 'seoul' });
-
-      const firstRead = fs.readFileSync(
-        path.join(getTestDataDir(), 'seoul.json'),
-        'utf-8'
-      );
-      const secondRead = fs.readFileSync(
-        path.join(getTestDataDir(), 'seoul.json'),
-        'utf-8'
-      );
-
-      expect(firstRead).toBe(secondRead);
-    });
-  });
-
-  describe('동시성', () => {
-    it('같은 파일 동시 쓰기 시도 → 마지막 쓰기 우선', () => {
-      const dataDir = getTestDataDir();
-      const filePath = path.join(dataDir, 'concurrent.json');
-
-      fs.writeFileSync(filePath, JSON.stringify({ version: 1 }));
-      fs.writeFileSync(filePath, JSON.stringify({ version: 2 }));
-
-      const content = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
-      expect(content.version).toBe(2);
-    });
-  });
+  // 'fetchWithRetry 재시도 / atomic write rename' 단위 검증은 `_common.test.ts` 책임.
+  // 본 통합 테스트는 워크플로우 분기 (HAS_OUTLIERS / HAS_UPDATES) 와 도시 갯수만 본다.
 
   describe('PR 생성 분기', () => {
     it('outlier → PR 생성 대상', () => {
@@ -214,12 +187,40 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
-  it('각 워크플로우에 detect_outliers.mjs 스텝 존재 (HAS_OUTLIERS 출력)', () => {
+  it('각 워크플로우에 detect_outliers.mjs 스텝 + outlier/update/commit 3분기 존재', () => {
     for (const workflow of REFRESH_WORKFLOWS) {
       const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
       expect(content).toContain('node scripts/detect_outliers.mjs');
+      // ≥30% (outlier label PR)
       expect(content).toContain("steps.outliers.outputs.HAS_OUTLIERS == 'true'");
-      expect(content).toContain("steps.outliers.outputs.HAS_OUTLIERS != 'true'");
+      // 5~30% (auto-update label PR) — AUTOMATION.md §1 누락 보정.
+      expect(content).toContain("steps.outliers.outputs.HAS_UPDATES == 'true'");
+      // <5% (직접 commit) — outlier 도 아니고 update 도 아닌 경우.
+      expect(content).toContain("steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES != 'true'");
+      expect(content).toContain('labels: outlier');
+      expect(content).toContain('labels: auto-update');
+    }
+  });
+
+  it('peter-evans/create-pull-request 액션은 정확한 minor 버전으로 고정', () => {
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      // 공급망 보안: @v6 은 태그 재지정 위험 → @v6.x.y 로 핀.
+      expect(content).toContain('peter-evans/create-pull-request@v6.1.0');
+      expect(content).not.toMatch(/peter-evans\/create-pull-request@v6$/m);
+    }
+  });
+
+  it('rent + food 통합형 fetcher 는 refresh-rent.yml 한쪽에서만 호출 (중복 실행 차단)', () => {
+    const integrated = ['uk_ons', 'de_destatis', 'fr_insee', 'nl_cbs', 'au_abs', 'jp_estat', 'sg_singstat', 'vn_gso', 'ae_fcsc'];
+    const pricesYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-prices.yml'), 'utf-8');
+    const rentYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-rent.yml'), 'utf-8');
+
+    for (const fetcher of integrated) {
+      const inPrices = pricesYml.includes(`scripts/refresh/${fetcher}.mjs`);
+      const inRent = rentYml.includes(`scripts/refresh/${fetcher}.mjs`);
+      expect(inRent).toBe(true);
+      expect(inPrices).toBe(false);
     }
   });
 

@@ -4,14 +4,16 @@
  *
  * 워크플로우 흐름: refresh-*.mjs 가 워킹트리에 새 데이터 작성 → build_data.mjs →
  * validate_cities.mjs (스키마 검증) → detect_outliers.mjs (변동폭 분류) →
- * outlier 발견 시 GitHub Actions 가 PR 생성, 아니면 직접 commit.
+ * 워크플로우가 outlier / update / commit 중 하나로 분기 (AUTOMATION.md §1).
  *
  * Usage:
  *   node scripts/detect_outliers.mjs
  *
  * 출력:
  *   - 분류 요약 (commit / pr-update / pr-outlier 카운트)
- *   - process.env.GITHUB_OUTPUT 가 설정된 경우 HAS_OUTLIERS=true|false 추가
+ *   - process.env.GITHUB_OUTPUT 가 설정된 경우:
+ *       HAS_OUTLIERS=true|false  (≥30% 변동 1건 이상)
+ *       HAS_UPDATES=true|false   (5~30% 변동 1건 이상, outlier 와 별개로 집계)
  *
  * 종료 코드: 항상 0 (변동폭 자체는 에러가 아님 — schema 위반은 validate_cities.mjs 책임).
  */
@@ -75,9 +77,13 @@ async function main() {
   }
 
   const hasOutliers = outliers.length > 0;
+  const hasUpdates = updates > 0;
   const githubOutput = process.env.GITHUB_OUTPUT;
   if (githubOutput) {
-    await appendFile(githubOutput, `HAS_OUTLIERS=${hasOutliers ? 'true' : 'false'}\n`);
+    await appendFile(
+      githubOutput,
+      `HAS_OUTLIERS=${hasOutliers ? 'true' : 'false'}\nHAS_UPDATES=${hasUpdates ? 'true' : 'false'}\n`,
+    );
   }
 }
 

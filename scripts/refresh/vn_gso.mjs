@@ -133,9 +133,10 @@ export default async function refresh(opts = {}) {
 
   const targetCities = opts.cities ?? Object.keys(CITY_CONFIGS);
 
-  let gsoAvailable = false;
+  // GSO 사이트 가용성 체크 — 실패는 진짜 오류로 errors 에 기록 (silent fail 금지).
+  // "도시 단위 데이터 부재" 자체는 영구적 사실이므로 errors 가 아니라 SOURCE_*.name 의 "estimated" 마커로 표기.
   if (!opts.useStatic) {
-    gsoAvailable = await checkGsoStatus();
+    const gsoAvailable = await checkGsoStatus();
     if (!gsoAvailable) {
       errors.push({
         cityId: 'all',
@@ -143,11 +144,6 @@ export default async function refresh(opts = {}) {
       });
     }
   }
-
-  errors.push({
-    cityId: 'all',
-    reason: 'GSO 도시 단위 데이터 부재 — 정적 추정값 사용 (estimated marker 적용)',
-  });
 
   for (const cityId of targetCities) {
     const config = CITY_CONFIGS[cityId];

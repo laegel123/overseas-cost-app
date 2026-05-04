@@ -34,9 +34,21 @@
     "taxiBase": 4
   },
   "tuition": [
-    { "school": "TU Berlin", "level": "undergrad", "annual": 700 },
-    { "school": "HU Berlin", "level": "undergrad", "annual": 700 },
-    { "school": "FU Berlin", "level": "undergrad", "annual": 700 }
+    {
+      "school": "TU Berlin",
+      "level": "undergrad",
+      "annual": 700
+    },
+    {
+      "school": "HU Berlin",
+      "level": "undergrad",
+      "annual": 700
+    },
+    {
+      "school": "FU Berlin",
+      "level": "undergrad",
+      "annual": 700
+    }
   ],
   "visa": {
     "studentApplicationFee": 75,
@@ -60,6 +72,18 @@
       "category": "transport",
       "name": "BVG official fares + static estimates",
       "url": "https://www.bvg.de/en/tickets-fares",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]

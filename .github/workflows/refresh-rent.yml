@@ -13,6 +13,10 @@ permissions:
   contents: write
   pull-requests: write
 
+# rent-only fetcher + rent/food 통합형 fetcher 모두 호출. 통합형은 monthly 빈도가 적정 — 식료품
+# 가격은 통합형 안에서 함께 갱신되며, 식료품 단독 fetcher (kr_kca/kr_kosis/ca_statcan/us_bls) 는
+# refresh-prices.yml 에서 weekly 로 별도 갱신.
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
@@ -59,6 +63,8 @@ jobs:
         if: env.US_CENSUS_API_KEY != ''
         run: node scripts/refresh/us_census.mjs
 
+      # 통합형 fetcher (rent + food). 이전엔 prices.yml 에도 호출되어 중복 실행됐으나 분리.
+
       # UK - ONS (no key required)
       - name: Refresh UK ONS
         run: node scripts/refresh/uk_ons.mjs
@@ -92,7 +98,7 @@ jobs:
       - name: Refresh SG SingStat
         run: node scripts/refresh/sg_singstat.mjs
 
-      # Vietnam - GSO (no key required)
+      # Vietnam - GSO (rent + food + transport — static estimates)
       - name: Refresh VN GSO
         run: node scripts/refresh/vn_gso.mjs
 
@@ -117,10 +123,10 @@ jobs:
 
       - name: Create PR for outliers
         if: steps.outliers.outputs.HAS_OUTLIERS == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v6.1.0
         with:
           commit-message: 'data: monthly rent refresh (outliers)'
-          branch: auto/refresh-rent-${{ github.run_id }}
+          branch: auto/refresh-rent-outlier-${{ github.run_id }}
           title: 'data: monthly rent refresh — review needed'
           labels: outlier
           add-paths: |
@@ -132,8 +138,23 @@ jobs:
 
             변경 내역을 검토해주세요.
 
+      - name: Create PR for updates
+        if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES == 'true'
+        uses: peter-evans/create-pull-request@v6.1.0
+        with:
+          commit-message: 'data: monthly rent refresh (auto-update)'
+          branch: auto/refresh-rent-update-${{ github.run_id }}
+          title: 'data: monthly rent refresh (5~30% 변동)'
+          labels: auto-update
+          add-paths: |
+            data/cities/
+            data/all.json
+            data/seed/all.json
+          body: |
+            자동 임차료 갱신 — 5~30% 변동. AUTOMATION.md §1 정책에 따라 PR 로 검토 후 머지.
+
       - name: Auto commit and push
-        if: steps.outliers.outputs.HAS_OUTLIERS != 'true'
+        if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES != 'true'
         run: |
           git add data/cities/ data/all.json data/seed/all.json
           git diff --staged --quiet || git commit -m "data: monthly rent refresh"

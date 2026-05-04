@@ -104,7 +104,7 @@ describe('constants', () => {
     expect(london.id).toBe('london');
     expect(london.name.ko).toBe('런던');
     expect(london.name.en).toBe('London');
-    expect(london.country).toBe('UK');
+    expect(london.country).toBe('GB');
     expect(london.currency).toBe('GBP');
     expect(london.region).toBe('eu');
   });
@@ -176,7 +176,7 @@ describe('refresh (integration)', () => {
     const existingData = {
       id: 'london',
       name: { ko: '런던', en: 'London' },
-      country: 'UK',
+      country: 'GB',
       currency: 'GBP',
       region: 'eu',
       lastUpdated: '2026-04-01',

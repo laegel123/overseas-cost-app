@@ -21,7 +21,7 @@ export const CITY_CONFIGS = {
   london: {
     id: 'london',
     name: { ko: '런던', en: 'London' },
-    country: 'UK',
+    country: 'GB',
     currency: 'GBP',
     region: 'eu',
   },

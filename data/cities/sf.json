@@ -34,9 +34,21 @@
     "taxiBase": 3.5
   },
   "tuition": [
-    { "school": "UC Berkeley", "level": "undergrad", "annual": 48000 },
-    { "school": "Stanford", "level": "undergrad", "annual": 60000 },
-    { "school": "CCSF", "level": "language", "annual": 8000 }
+    {
+      "school": "UC Berkeley",
+      "level": "undergrad",
+      "annual": 48000
+    },
+    {
+      "school": "Stanford",
+      "level": "undergrad",
+      "annual": 60000
+    },
+    {
+      "school": "CCSF",
+      "level": "language",
+      "annual": 8000
+    }
   ],
   "visa": {
     "studentApplicationFee": 185,
@@ -60,6 +72,18 @@
       "category": "transport",
       "name": "SFMTA",
       "url": "https://www.sfmta.com/fares",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]

@@ -180,10 +180,13 @@ describe('refresh (integration)', () => {
     expect(transportChanges.length).toBeGreaterThan(0);
   }, 30000);
 
-  it('GSO 도시 단위 데이터 부재 경고 errors에 포함', async () => {
+  it('useStatic 모드: 도시 단위 데이터 부재는 errors 가 아닌 SOURCE_*.name 의 estimated 마커로만 표기 (false positive 방지)', async () => {
     const result = await refreshVnGso({ dryRun: true, useStatic: true });
 
-    expect(result.errors.some((e: any) => e.reason.includes('도시 단위 데이터 부재'))).toBe(true);
+    // "도시 단위 데이터 부재" 는 영구적 사실 — 매 실행 errors 에 기록하면 실제 runtime 오류가 noise 에 묻힘.
+    expect(result.errors.some((e: any) => e.reason.includes('도시 단위 데이터 부재'))).toBe(false);
+    expect(SOURCE_RENT.name).toContain('estimated');
+    expect(SOURCE_FOOD.name).toContain('estimated');
   }, 30000);
 
   it('기존 데이터 대비 changes 계산', async () => {

@@ -1,7 +1,7 @@
 {
   "id": "la",
   "name": {
-    "ko": "LA",
+    "ko": "로스앤젤레스",
     "en": "Los Angeles"
   },
   "country": "US",
@@ -34,9 +34,21 @@
     "taxiBase": 4.1
   },
   "tuition": [
-    { "school": "UCLA", "level": "undergrad", "annual": 45000 },
-    { "school": "USC", "level": "undergrad", "annual": 65000 },
-    { "school": "SMC", "level": "language", "annual": 10000 }
+    {
+      "school": "UCLA",
+      "level": "undergrad",
+      "annual": 45000
+    },
+    {
+      "school": "USC",
+      "level": "undergrad",
+      "annual": 65000
+    },
+    {
+      "school": "SMC",
+      "level": "language",
+      "annual": 10000
+    }
   ],
   "visa": {
     "studentApplicationFee": 185,
@@ -60,6 +72,18 @@
       "category": "transport",
       "name": "LA Metro",
       "url": "https://www.metro.net/riding/fares/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]

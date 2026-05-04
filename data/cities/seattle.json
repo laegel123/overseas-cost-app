@@ -34,8 +34,16 @@
     "taxiBase": 2.6
   },
   "tuition": [
-    { "school": "University of Washington", "level": "undergrad", "annual": 42000 },
-    { "school": "Seattle Central", "level": "language", "annual": 11000 }
+    {
+      "school": "University of Washington",
+      "level": "undergrad",
+      "annual": 42000
+    },
+    {
+      "school": "Seattle Central",
+      "level": "language",
+      "annual": 11000
+    }
   ],
   "visa": {
     "studentApplicationFee": 185,
@@ -59,6 +67,18 @@
       "category": "transport",
       "name": "King County Metro",
       "url": "https://kingcounty.gov/en/dept/metro/fares-and-payment",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]

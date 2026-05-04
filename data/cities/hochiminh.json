@@ -34,9 +34,21 @@
     "taxiBase": 12000
   },
   "tuition": [
-    { "school": "VNU-HCMC", "level": "undergrad", "annual": 50000000 },
-    { "school": "RMIT Vietnam", "level": "undergrad", "annual": 350000000 },
-    { "school": "Fulbright", "level": "undergrad", "annual": 450000000 }
+    {
+      "school": "VNU-HCMC",
+      "level": "undergrad",
+      "annual": 50000000
+    },
+    {
+      "school": "RMIT Vietnam",
+      "level": "undergrad",
+      "annual": 350000000
+    },
+    {
+      "school": "Fulbright",
+      "level": "undergrad",
+      "annual": 450000000
+    }
   ],
   "visa": {
     "studentApplicationFee": 25,
@@ -60,6 +72,18 @@
       "category": "transport",
       "name": "Ho Chi Minh City static estimates",
       "url": "https://hochiminhcity.gov.vn/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]

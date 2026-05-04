@@ -36,7 +36,7 @@ export const CITY_CONFIGS = {
   },
   la: {
     id: 'la',
-    name: { ko: 'LA', en: 'Los Angeles' },
+    name: { ko: '로스앤젤레스', en: 'Los Angeles' },
     country: 'US',
     currency: 'USD',
     region: 'na',

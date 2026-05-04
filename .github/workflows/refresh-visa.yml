@@ -50,10 +50,10 @@ jobs:
 
       - name: Create PR for outliers
         if: steps.outliers.outputs.HAS_OUTLIERS == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v6.1.0
         with:
           commit-message: 'data: quarterly visa refresh (outliers)'
-          branch: auto/refresh-visa-${{ github.run_id }}
+          branch: auto/refresh-visa-outlier-${{ github.run_id }}
           title: 'data: quarterly visa refresh — review needed'
           labels: outlier
           add-paths: |
@@ -65,8 +65,23 @@ jobs:
 
             변경 내역을 검토해주세요.
 
+      - name: Create PR for updates
+        if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES == 'true'
+        uses: peter-evans/create-pull-request@v6.1.0
+        with:
+          commit-message: 'data: quarterly visa refresh (auto-update)'
+          branch: auto/refresh-visa-update-${{ github.run_id }}
+          title: 'data: quarterly visa refresh (5~30% 변동)'
+          labels: auto-update
+          add-paths: |
+            data/cities/
+            data/all.json
+            data/seed/all.json
+          body: |
+            자동 비자비 갱신 — 5~30% 변동. AUTOMATION.md §1 정책에 따라 PR 로 검토 후 머지.
+
       - name: Auto commit and push
-        if: steps.outliers.outputs.HAS_OUTLIERS != 'true'
+        if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES != 'true'
         run: |
           git add data/cities/ data/all.json data/seed/all.json
           git diff --staged --quiet || git commit -m "data: quarterly visa refresh"

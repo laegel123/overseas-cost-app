@@ -4,7 +4,7 @@
     "ko": "런던",
     "en": "London"
   },
-  "country": "UK",
+  "country": "GB",
   "currency": "GBP",
   "region": "eu",
   "lastUpdated": "2026-05-03",
@@ -34,9 +34,21 @@
     "taxiBase": 3.8
   },
   "tuition": [
-    { "school": "Imperial College", "level": "undergrad", "annual": 38000 },
-    { "school": "UCL", "level": "undergrad", "annual": 35000 },
-    { "school": "King's College", "level": "undergrad", "annual": 32000 }
+    {
+      "school": "Imperial College",
+      "level": "undergrad",
+      "annual": 38000
+    },
+    {
+      "school": "UCL",
+      "level": "undergrad",
+      "annual": 35000
+    },
+    {
+      "school": "King's College",
+      "level": "undergrad",
+      "annual": 32000
+    }
   ],
   "visa": {
     "studentApplicationFee": 490,
@@ -60,6 +72,18 @@
       "category": "transport",
       "name": "TfL Unified API + static estimates",
       "url": "https://tfl.gov.uk/fares/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]

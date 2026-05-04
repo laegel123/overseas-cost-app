@@ -34,9 +34,21 @@
     "taxiBase": 2.6
   },
   "tuition": [
-    { "school": "Harvard", "level": "undergrad", "annual": 57000 },
-    { "school": "MIT", "level": "undergrad", "annual": 58000 },
-    { "school": "BU", "level": "undergrad", "annual": 62000 }
+    {
+      "school": "Harvard",
+      "level": "undergrad",
+      "annual": 57000
+    },
+    {
+      "school": "MIT",
+      "level": "undergrad",
+      "annual": 58000
+    },
+    {
+      "school": "BU",
+      "level": "undergrad",
+      "annual": 62000
+    }
   ],
   "visa": {
     "studentApplicationFee": 185,
@@ -60,6 +72,18 @@
       "category": "transport",
       "name": "MBTA",
       "url": "https://www.mbta.com/fares",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]

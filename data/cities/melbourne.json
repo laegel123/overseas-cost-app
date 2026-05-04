@@ -34,9 +34,21 @@
     "taxiBase": 4.2
   },
   "tuition": [
-    { "school": "UniMelb", "level": "undergrad", "annual": 52000 },
-    { "school": "Monash", "level": "undergrad", "annual": 48000 },
-    { "school": "RMIT", "level": "undergrad", "annual": 40000 }
+    {
+      "school": "UniMelb",
+      "level": "undergrad",
+      "annual": 52000
+    },
+    {
+      "school": "Monash",
+      "level": "undergrad",
+      "annual": 48000
+    },
+    {
+      "school": "RMIT",
+      "level": "undergrad",
+      "annual": 40000
+    }
   ],
   "visa": {
     "studentApplicationFee": 710,
@@ -60,6 +72,18 @@
       "category": "transport",
       "name": "Transport NSW + PTV Victoria + static estimates",
       "url": "https://transportnsw.info/tickets-opal/opal/fares",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]

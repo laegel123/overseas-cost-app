@@ -13,13 +13,17 @@ permissions:
   contents: write
   pull-requests: write
 
+# food-only fetcher 만 호출. rent + food 통합형 (uk_ons, de_destatis, fr_insee, nl_cbs,
+# au_abs, jp_estat, sg_singstat, vn_gso, ae_fcsc) 은 refresh-rent.yml 로 이전 — 같은 도시를
+# 두 워크플로우에서 갱신하면 외부 API 가 2배로 호출되고, 첫 워크플로우 commit 후 두 번째 실행 때
+# detect_outliers 가 변동 0 으로 보여 의도치 않은 double refresh 가 추적되지 않는다.
+
 jobs:
   refresh:
     runs-on: ubuntu-latest
     env:
       KR_DATA_API_KEY: ${{ secrets.KR_DATA_API_KEY }}
       US_BLS_API_KEY: ${{ secrets.US_BLS_API_KEY }}
-      JP_ESTAT_APP_ID: ${{ secrets.JP_ESTAT_APP_ID }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -64,48 +68,7 @@ jobs:
         if: env.US_BLS_API_KEY != ''
         run: node scripts/refresh/us_bls.mjs
 
-      # UK - ONS (no key required)
-      - name: Refresh UK ONS
-        run: node scripts/refresh/uk_ons.mjs
-
-      # Germany - Destatis (no key required)
-      - name: Refresh DE Destatis
-        run: node scripts/refresh/de_destatis.mjs
-
-      # France - INSEE (no key required)
-      - name: Refresh FR INSEE
-        run: node scripts/refresh/fr_insee.mjs
-
-      # Netherlands - CBS (no key required)
-      - name: Refresh NL CBS
-        run: node scripts/refresh/nl_cbs.mjs
-
-      # Australia - ABS (no key required)
-      - name: Refresh AU ABS
-        run: node scripts/refresh/au_abs.mjs
-
-      # Japan - e-Stat
-      - name: Skip jp_estat if API key absent
-        if: env.JP_ESTAT_APP_ID == ''
-        run: echo "::warning::JP_ESTAT_APP_ID not set, skipping jp_estat.mjs"
-
-      - name: Refresh JP e-Stat
-        if: env.JP_ESTAT_APP_ID != ''
-        run: node scripts/refresh/jp_estat.mjs
-
-      # Singapore - SingStat (no key required)
-      - name: Refresh SG SingStat
-        run: node scripts/refresh/sg_singstat.mjs
-
-      # Vietnam - GSO (no key required)
-      - name: Refresh VN GSO
-        run: node scripts/refresh/vn_gso.mjs
-
-      # UAE - FCSC (no key required)
-      - name: Refresh AE FCSC
-        run: node scripts/refresh/ae_fcsc.mjs
-
-      # EU Eurostat fallback (no key required)
+      # EU Eurostat fallback — fallback 카테고리, food/rent 무관
       - name: Refresh EU Eurostat
         run: node scripts/refresh/eu_eurostat.mjs
 
@@ -126,10 +89,10 @@ jobs:
 
       - name: Create PR for outliers
         if: steps.outliers.outputs.HAS_OUTLIERS == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v6.1.0
         with:
           commit-message: 'data: weekly prices refresh (outliers)'
-          branch: auto/refresh-prices-${{ github.run_id }}
+          branch: auto/refresh-prices-outlier-${{ github.run_id }}
           title: 'data: weekly prices refresh — review needed'
           labels: outlier
           add-paths: |
@@ -141,8 +104,23 @@ jobs:
 
             변경 내역을 검토해주세요.
 
+      - name: Create PR for updates
+        if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES == 'true'
+        uses: peter-evans/create-pull-request@v6.1.0
+        with:
+          commit-message: 'data: weekly prices refresh (auto-update)'
+          branch: auto/refresh-prices-update-${{ github.run_id }}
+          title: 'data: weekly prices refresh (5~30% 변동)'
+          labels: auto-update
+          add-paths: |
+            data/cities/
+            data/all.json
+            data/seed/all.json
+          body: |
+            자동 가격(식재료·외식) 갱신 — 5~30% 변동. AUTOMATION.md §1 정책에 따라 PR 로 검토 후 머지.
+
       - name: Auto commit and push
-        if: steps.outliers.outputs.HAS_OUTLIERS != 'true'
+        if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES != 'true'
         run: |
           git add data/cities/ data/all.json data/seed/all.json
           git diff --staged --quiet || git commit -m "data: weekly prices refresh"

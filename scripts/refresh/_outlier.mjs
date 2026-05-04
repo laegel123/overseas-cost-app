@@ -14,9 +14,10 @@
 /**
  * oldVal → newVal 변동폭에 따라 분류.
  *
- * 사용 시점: step 10 (GitHub Actions 워크플로우 — refresh-*.yml) 에서 RefreshResult.changes 를
- * 순회하며 각 change.pctChange 를 본 함수로 분류 → commit / pr-update / pr-outlier 결정.
- * 현재 step 0–3 의 refresh 스크립트 자체는 본 함수를 호출하지 않음 (워크플로우 단계 책임).
+ * 사용 시점: `scripts/detect_outliers.mjs` 가 워킹트리 ↔ HEAD 비교 시 본 함수를 호출 →
+ * `HAS_OUTLIERS` (≥30%) / `HAS_UPDATES` (5~30%) 두 GitHub Actions 출력으로 export →
+ * 워크플로우가 outlier PR / auto-update PR / 직접 commit 중 하나로 분기
+ * (AUTOMATION.md §1 의 분류 정책 명세 그대로).
  *
  * @param {number | null} oldVal
  * @param {number | null} newVal
