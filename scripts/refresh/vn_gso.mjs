@@ -86,6 +86,7 @@ export const SOURCE_TRANSPORT = {
 export async function checkGsoStatus() {
   try {
     const response = await fetchWithRetry(GSO_URL, { timeoutMs: 15000 });
+    await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch {
     return false;

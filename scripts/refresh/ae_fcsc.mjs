@@ -74,6 +74,7 @@ export const SOURCE_FOOD = {
 export async function checkDscStatus() {
   try {
     const response = await fetchWithRetry(DSC_URL, { timeoutMs: 10000 });
+    await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch {
     return false;
@@ -87,6 +88,7 @@ export async function checkDscStatus() {
 export async function checkFcscStatus() {
   try {
     const response = await fetchWithRetry(FCSC_URL, { timeoutMs: 10000 });
+    await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch {
     return false;

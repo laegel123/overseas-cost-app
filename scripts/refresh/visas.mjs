@@ -135,7 +135,8 @@ export const CITY_CONFIGS = {
 export const SOURCE = {
   category: 'visa',
   name: 'Government visa fee pages (static estimates)',
-  url: 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md',
+  // HEAD alias — default branch 이름이 변경돼도 깨지지 않음 (main hardcoding dead link 방어).
+  url: 'https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md',
 };
 
 /**
@@ -159,6 +160,8 @@ export async function fetchVisaFees(countryCode) {
 
   try {
     const response = await fetchWithRetry(registry.url, { timeoutMs: 15000, maxRetries: 1 });
+    // reachability check 만 필요 — body 미사용. undici keep-alive 연결 점유 방지.
+    await response.body?.cancel().catch(() => {});
     if (!response.ok) {
       return {
         visa: {

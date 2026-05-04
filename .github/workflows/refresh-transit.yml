@@ -31,55 +31,55 @@ jobs:
 
       # Korea - Seoul Metro (no key required)
       - name: Refresh KR Seoul Metro
-        run: node scripts/refresh/kr_seoul_metro.mjs
+        run: node scripts/refresh/_run.mjs kr_seoul_metro
 
       # Canada - TransLink (no key required)
       - name: Refresh CA TransLink
-        run: node scripts/refresh/ca_translink.mjs
+        run: node scripts/refresh/_run.mjs ca_translink
 
       # Canada - TTC (no key required)
       - name: Refresh CA TTC
-        run: node scripts/refresh/ca_ttc.mjs
+        run: node scripts/refresh/_run.mjs ca_ttc
 
       # Canada - STM (no key required)
       - name: Refresh CA STM
-        run: node scripts/refresh/ca_stm.mjs
+        run: node scripts/refresh/_run.mjs ca_stm
 
       # US - Transit (MTA/LA Metro/SFMTA/King County/MBTA)
       - name: Refresh US Transit
-        run: node scripts/refresh/us_transit.mjs
+        run: node scripts/refresh/_run.mjs us_transit
 
       # UK - TfL (no key required)
       - name: Refresh UK TfL
-        run: node scripts/refresh/uk_tfl.mjs
+        run: node scripts/refresh/_run.mjs uk_tfl
 
       # Germany - Transit (BVG/MVV)
       - name: Refresh DE Transit
-        run: node scripts/refresh/de_transit.mjs
+        run: node scripts/refresh/_run.mjs de_transit
 
       # France - RATP (no key required)
       - name: Refresh FR RATP
-        run: node scripts/refresh/fr_ratp.mjs
+        run: node scripts/refresh/_run.mjs fr_ratp
 
       # Netherlands - GVB (no key required)
       - name: Refresh NL GVB
-        run: node scripts/refresh/nl_gvb.mjs
+        run: node scripts/refresh/_run.mjs nl_gvb
 
       # Australia - Transit (Transport NSW/PTV)
       - name: Refresh AU Transit
-        run: node scripts/refresh/au_transit.mjs
+        run: node scripts/refresh/_run.mjs au_transit
 
       # Japan - Transit (Tokyo Metro/Osaka Metro)
       - name: Refresh JP Transit
-        run: node scripts/refresh/jp_transit.mjs
+        run: node scripts/refresh/_run.mjs jp_transit
 
       # Singapore - LTA (no key required)
       - name: Refresh SG LTA
-        run: node scripts/refresh/sg_lta.mjs
+        run: node scripts/refresh/_run.mjs sg_lta
 
       # UAE - RTA Dubai (no key required)
       - name: Refresh AE RTA
-        run: node scripts/refresh/ae_rta.mjs
+        run: node scripts/refresh/_run.mjs ae_rta
 
       - name: Build data
         run: node scripts/build_data.mjs

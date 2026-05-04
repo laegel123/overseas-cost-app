@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Refresh FX backup fallback
-        run: node scripts/refresh/fx_backup.mjs
+        run: node scripts/refresh/_run.mjs fx_backup
 
       - name: Build data
         run: node scripts/build_data.mjs

@@ -31,7 +31,7 @@ jobs:
 
       # Visas - fetch from official government pages
       - name: Refresh Visas
-        run: node scripts/refresh/visas.mjs
+        run: node scripts/refresh/_run.mjs visas
 
       - name: Build data
         run: node scripts/build_data.mjs

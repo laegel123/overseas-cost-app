@@ -273,8 +273,7 @@ export default async function refresh(opts = {}) {
       };
 
       try {
-        await writeCity(cityId, updatedData, SOURCE_RENT);
-        await writeCity(cityId, { ...updatedData, lastUpdated: base.lastUpdated || '' }, SOURCE_FOOD);
+        await writeCity(cityId, updatedData, [SOURCE_RENT, SOURCE_FOOD]);
         updatedCities.push(cityId);
       } catch (err) {
         errors.push({

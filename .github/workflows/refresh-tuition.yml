@@ -31,7 +31,7 @@ jobs:
 
       # Universities - fetch from official university pages
       - name: Refresh Universities
-        run: node scripts/refresh/universities.mjs
+        run: node scripts/refresh/_run.mjs universities
 
       - name: Build data
         run: node scripts/build_data.mjs

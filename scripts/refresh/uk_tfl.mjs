@@ -60,6 +60,8 @@ export async function checkTflApiStatus() {
   const url = `${TFL_API_BASE}/Line/Mode/tube/Status`;
   try {
     const response = await fetchWithRetry(url, { timeoutMs: 10000 });
+    // body 는 사용 안 함 — undici keep-alive 풀이 연결 점유하지 않도록 명시적으로 cancel.
+    await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch {
     return false;

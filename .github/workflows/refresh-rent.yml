@@ -44,15 +44,15 @@ jobs:
 
       - name: Refresh KR MOLIT
         if: env.KR_DATA_API_KEY != ''
-        run: node scripts/refresh/kr_molit.mjs
+        run: node scripts/refresh/_run.mjs kr_molit
 
       # Canada - CMHC (no key required)
       - name: Refresh CA CMHC
-        run: node scripts/refresh/ca_cmhc.mjs
+        run: node scripts/refresh/_run.mjs ca_cmhc
 
       # US - HUD (no key required)
       - name: Refresh US HUD
-        run: node scripts/refresh/us_hud.mjs
+        run: node scripts/refresh/_run.mjs us_hud
 
       # US - Census
       - name: Skip us_census if API key absent
@@ -61,29 +61,29 @@ jobs:
 
       - name: Refresh US Census
         if: env.US_CENSUS_API_KEY != ''
-        run: node scripts/refresh/us_census.mjs
+        run: node scripts/refresh/_run.mjs us_census
 
       # 통합형 fetcher (rent + food). 이전엔 prices.yml 에도 호출되어 중복 실행됐으나 분리.
 
       # UK - ONS (no key required)
       - name: Refresh UK ONS
-        run: node scripts/refresh/uk_ons.mjs
+        run: node scripts/refresh/_run.mjs uk_ons
 
       # Germany - Destatis (no key required)
       - name: Refresh DE Destatis
-        run: node scripts/refresh/de_destatis.mjs
+        run: node scripts/refresh/_run.mjs de_destatis
 
       # France - INSEE (no key required)
       - name: Refresh FR INSEE
-        run: node scripts/refresh/fr_insee.mjs
+        run: node scripts/refresh/_run.mjs fr_insee
 
       # Netherlands - CBS (no key required)
       - name: Refresh NL CBS
-        run: node scripts/refresh/nl_cbs.mjs
+        run: node scripts/refresh/_run.mjs nl_cbs
 
       # Australia - ABS (no key required)
       - name: Refresh AU ABS
-        run: node scripts/refresh/au_abs.mjs
+        run: node scripts/refresh/_run.mjs au_abs
 
       # Japan - e-Stat
       - name: Skip jp_estat if API key absent
@@ -92,19 +92,19 @@ jobs:
 
       - name: Refresh JP e-Stat
         if: env.JP_ESTAT_APP_ID != ''
-        run: node scripts/refresh/jp_estat.mjs
+        run: node scripts/refresh/_run.mjs jp_estat
 
       # Singapore - SingStat (no key required)
       - name: Refresh SG SingStat
-        run: node scripts/refresh/sg_singstat.mjs
+        run: node scripts/refresh/_run.mjs sg_singstat
 
       # Vietnam - GSO (rent + food + transport — static estimates)
       - name: Refresh VN GSO
-        run: node scripts/refresh/vn_gso.mjs
+        run: node scripts/refresh/_run.mjs vn_gso
 
       # UAE - FCSC (no key required)
       - name: Refresh AE FCSC
-        run: node scripts/refresh/ae_fcsc.mjs
+        run: node scripts/refresh/_run.mjs ae_fcsc
 
       - name: Build data
         run: node scripts/build_data.mjs

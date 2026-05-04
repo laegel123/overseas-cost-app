@@ -217,10 +217,30 @@ describe('Integration: Workflow YAML Validation', () => {
     const rentYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-rent.yml'), 'utf-8');
 
     for (const fetcher of integrated) {
-      const inPrices = pricesYml.includes(`scripts/refresh/${fetcher}.mjs`);
-      const inRent = rentYml.includes(`scripts/refresh/${fetcher}.mjs`);
-      expect(inRent).toBe(true);
-      expect(inPrices).toBe(false);
+      // 워크플로우는 _run.mjs wrapper 로 fetcher 를 호출.
+      const pat = `_run.mjs ${fetcher}`;
+      expect(rentYml.includes(pat)).toBe(true);
+      expect(pricesYml.includes(pat)).toBe(false);
+    }
+  });
+
+  it('refresh 스크립트들은 _run.mjs CLI wrapper 로만 호출 (직접 실행 금지)', () => {
+    // node scripts/refresh/<name>.mjs 직접 호출은 default export 호출 안 함 → 워크플로우 무효.
+    // 모든 fetcher 는 _run.mjs <name> 형태로만 호출돼야 한다.
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      // detect_outliers.mjs / build_data.mjs / validate_cities.mjs 는 _run.mjs 우회 — 별도 CLI 진입점 보유.
+      const directCalls = content.match(/node scripts\/refresh\/(?!_run)\w+\.mjs/g) ?? [];
+      expect(directCalls).toEqual([]);
+      // _run.mjs 자체는 1회 이상 호출 (refresh-fx 처럼 fetcher 1개만 있는 워크플로우 포함).
+      expect(content).toMatch(/node scripts\/refresh\/_run\.mjs \w+/);
+    }
+  });
+
+  it('eu_eurostat 는 어떤 워크플로우에서도 단독 호출되지 않음 (writeCity 미호출 라이브러리)', () => {
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      expect(content).not.toMatch(/_run\.mjs eu_eurostat/);
     }
   });
 

@@ -77,13 +77,13 @@
     {
       "category": "tuition",
       "name": "Official university international tuition pages (static estimates)",
-      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     },
     {
       "category": "visa",
       "name": "Government visa fee pages (static estimates)",
-      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-03"
     }
   ]
