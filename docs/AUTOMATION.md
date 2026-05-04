@@ -433,15 +433,15 @@ PR 자동 생성: `peter-evans/create-pull-request@v6` 액션 사용. 라벨 자
 
 ## 11. 테스트 (TESTING.md 와 연계)
 
-자동화 스크립트도 테스트 인벤토리 §9.30 (신설) 에 추가:
+자동화 스크립트도 테스트 인벤토리 §9-A (신설) 에 추가:
 
-- [ ] 각 `scripts/refresh/*.mjs` 가 표준 인터페이스 (`RefreshResult`) 반환
-- [ ] fetch 실패 → exponential backoff 3회 후 throw
-- [ ] 응답 shape 변경 → 명시적 에러
-- [ ] `classifyChange` 경계값 (0.049, 0.05, 0.299, 0.30, 신규, 제거)
-- [ ] `build_data.mjs` 가 21개 도시 모두 처리
-- [ ] outlier PR 생성 시 라벨 정확
-- [ ] 빈 응답·HTML 응답 처리
+- [x] 각 `scripts/refresh/*.mjs` 가 표준 인터페이스 (`RefreshResult`) 반환
+- [x] fetch 실패 → exponential backoff 3회 후 throw
+- [x] 응답 shape 변경 → 명시적 에러
+- [x] `classifyChange` 경계값 (0.049, 0.05, 0.299, 0.30, 신규, 제거)
+- [x] `build_data.mjs` 가 21개 도시 모두 처리
+- [x] outlier PR 생성 시 라벨 정확
+- [x] 빈 응답·HTML 응답 처리
 
 ## 12. 변경 이력
 

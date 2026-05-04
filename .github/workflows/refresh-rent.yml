@@ -1,0 +1,135 @@
+name: Refresh Rent
+
+on:
+  schedule:
+    - cron: '0 18 1 * *' # 매월 1일 18:00 KST (= 09:00 UTC)
+  workflow_dispatch:
+
+concurrency:
+  group: data-refresh-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      KR_DATA_API_KEY: ${{ secrets.KR_DATA_API_KEY }}
+      US_CENSUS_API_KEY: ${{ secrets.US_CENSUS_API_KEY }}
+      JP_ESTAT_APP_ID: ${{ secrets.JP_ESTAT_APP_ID }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Korea - MOLIT (Ministry of Land)
+      - name: Skip kr_molit if API key absent
+        if: env.KR_DATA_API_KEY == ''
+        run: echo "::warning::KR_DATA_API_KEY not set, skipping kr_molit.mjs"
+
+      - name: Refresh KR MOLIT
+        if: env.KR_DATA_API_KEY != ''
+        run: node scripts/refresh/kr_molit.mjs
+
+      # Canada - CMHC (no key required)
+      - name: Refresh CA CMHC
+        run: node scripts/refresh/ca_cmhc.mjs
+
+      # US - HUD (no key required)
+      - name: Refresh US HUD
+        run: node scripts/refresh/us_hud.mjs
+
+      # US - Census
+      - name: Skip us_census if API key absent
+        if: env.US_CENSUS_API_KEY == ''
+        run: echo "::warning::US_CENSUS_API_KEY not set, skipping us_census.mjs"
+
+      - name: Refresh US Census
+        if: env.US_CENSUS_API_KEY != ''
+        run: node scripts/refresh/us_census.mjs
+
+      # UK - ONS (no key required)
+      - name: Refresh UK ONS
+        run: node scripts/refresh/uk_ons.mjs
+
+      # Germany - Destatis (no key required)
+      - name: Refresh DE Destatis
+        run: node scripts/refresh/de_destatis.mjs
+
+      # France - INSEE (no key required)
+      - name: Refresh FR INSEE
+        run: node scripts/refresh/fr_insee.mjs
+
+      # Netherlands - CBS (no key required)
+      - name: Refresh NL CBS
+        run: node scripts/refresh/nl_cbs.mjs
+
+      # Australia - ABS (no key required)
+      - name: Refresh AU ABS
+        run: node scripts/refresh/au_abs.mjs
+
+      # Japan - e-Stat
+      - name: Skip jp_estat if API key absent
+        if: env.JP_ESTAT_APP_ID == ''
+        run: echo "::warning::JP_ESTAT_APP_ID not set, skipping jp_estat.mjs"
+
+      - name: Refresh JP e-Stat
+        if: env.JP_ESTAT_APP_ID != ''
+        run: node scripts/refresh/jp_estat.mjs
+
+      # Singapore - SingStat (no key required)
+      - name: Refresh SG SingStat
+        run: node scripts/refresh/sg_singstat.mjs
+
+      # Vietnam - GSO (no key required)
+      - name: Refresh VN GSO
+        run: node scripts/refresh/vn_gso.mjs
+
+      # UAE - FCSC (no key required)
+      - name: Refresh AE FCSC
+        run: node scripts/refresh/ae_fcsc.mjs
+
+      - name: Build data
+        run: node scripts/build_data.mjs
+
+      - name: Validate cities
+        id: validate
+        run: |
+          node scripts/validate_cities.mjs
+          echo "HAS_OUTLIERS=$HAS_OUTLIERS" >> $GITHUB_OUTPUT
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create PR for outliers
+        if: steps.validate.outputs.HAS_OUTLIERS == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'data: monthly rent refresh (outliers)'
+          branch: auto/refresh-rent-${{ github.run_id }}
+          title: 'data: monthly rent refresh — review needed'
+          labels: outlier
+          body: |
+            자동 임차료 갱신 중 이상 변동(≥30%) 감지.
+
+            변경 내역을 검토해주세요.
+
+      - name: Auto commit and push
+        if: steps.validate.outputs.HAS_OUTLIERS != 'true'
+        run: |
+          git add -A
+          git diff --staged --quiet || git commit -m "data: monthly rent refresh"
+          git push

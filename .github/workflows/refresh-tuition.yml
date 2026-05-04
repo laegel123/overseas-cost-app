@@ -1,0 +1,68 @@
+name: Refresh Tuition
+
+on:
+  schedule:
+    - cron: '0 18 15 1,4,7,10 *' # 분기 첫 달 15일 18:00 KST (= 09:00 UTC)
+  workflow_dispatch:
+
+concurrency:
+  group: data-refresh-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Universities - fetch from official university pages
+      - name: Refresh Universities
+        run: node scripts/refresh/universities.mjs
+
+      - name: Build data
+        run: node scripts/build_data.mjs
+
+      - name: Validate cities
+        id: validate
+        run: |
+          node scripts/validate_cities.mjs
+          echo "HAS_OUTLIERS=$HAS_OUTLIERS" >> $GITHUB_OUTPUT
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create PR for outliers
+        if: steps.validate.outputs.HAS_OUTLIERS == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'data: quarterly tuition refresh (outliers)'
+          branch: auto/refresh-tuition-${{ github.run_id }}
+          title: 'data: quarterly tuition refresh — review needed'
+          labels: outlier
+          body: |
+            자동 학비 갱신 중 이상 변동(≥30%) 감지.
+
+            변경 내역을 검토해주세요.
+
+      - name: Auto commit and push
+        if: steps.validate.outputs.HAS_OUTLIERS != 'true'
+        run: |
+          git add -A
+          git diff --staged --quiet || git commit -m "data: quarterly tuition refresh"
+          git push

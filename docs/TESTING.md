@@ -2647,16 +2647,16 @@ afterEach(() => {
 
 #### `actionlint` 실행
 
-- [ ] `.github/workflows/refresh-fx.yml` syntax valid
-- [ ] `refresh-prices.yml`, `refresh-rent.yml`, `refresh-transit.yml`, `refresh-tuition.yml`, `refresh-visa.yml` 모두 valid
-- [ ] cron schedule 표현 정확 (`0 18 * * 1` 등)
-- [ ] secrets 참조 (`${{ secrets.KR_DATA_API_KEY }}`) 모두 존재 (deny-list 없음)
-- [ ] `peter-evans/create-pull-request@v6` 액션 사용 정확
+- [x] `.github/workflows/refresh-fx.yml` syntax valid
+- [x] `refresh-prices.yml`, `refresh-rent.yml`, `refresh-transit.yml`, `refresh-tuition.yml`, `refresh-visa.yml` 모두 valid
+- [x] cron schedule 표현 정확 (`0 18 * * 1` 등)
+- [x] secrets 참조 (`${{ secrets.KR_DATA_API_KEY }}`) 모두 존재 (deny-list 없음)
+- [x] `peter-evans/create-pull-request@v6` 액션 사용 정확
 
 #### Workflow logic 단위 테스트
 
-- [ ] outlier 라벨 분기 (PR 생성 vs 직접 commit)
-- [ ] 환경변수 export (`HAS_OUTLIERS=true`) 정확
+- [x] outlier 라벨 분기 (PR 생성 vs 직접 commit)
+- [x] 환경변수 export (`HAS_OUTLIERS=true`) 정확
 
 ### 9-A.14 `_registry.mjs` (도시 ↔ 출처 매핑)
 
@@ -2671,11 +2671,11 @@ DATA_SOURCES.md 부록 A 의 코드화. registry 가 사실상 단일 출처.
 
 #### 풀 파이프라인 시뮬레이션
 
-- [ ] 모든 fetch mock → refresh-prices 워크플로우 시뮬레이션 → cities/\*.json 갱신 → all.json 빌드 → 결과 비교
-- [ ] 일부 source 실패 → 다른 source 영향 없음 + 워크플로우 partial success
-- [ ] 모든 source 실패 → 워크플로우 fail (exit code 1)
-- [ ] outlier 발생 → PR 생성 (mock peter-evans action) + 라벨 정확
-- [ ] PR 안 만들어지는 케이스 (변동 <5%) → 직접 commit
+- [x] 모든 fetch mock → refresh-prices 워크플로우 시뮬레이션 → cities/\*.json 갱신 → all.json 빌드 → 결과 비교
+- [x] 일부 source 실패 → 다른 source 영향 없음 + 워크플로우 partial success
+- [x] 모든 source 실패 → 워크플로우 fail (exit code 1)
+- [x] outlier 발생 → PR 생성 (mock peter-evans action) + 라벨 정확
+- [x] PR 안 만들어지는 케이스 (변동 <5%) → 직접 commit
 
 #### 실제 API smoke test (선택, manual)
 
@@ -2699,8 +2699,8 @@ DATA_SOURCES.md 부록 A 의 코드화. registry 가 사실상 단일 출처.
 
 ### 9-A.18 멱등성·idempotency
 
-- [ ] 동일 시각에 같은 워크플로우 두 번 실행: 결과 동일 (changes 빈 배열)
-- [ ] cities/\*.json 변경 없음 → all.json 변경 없음 → git commit no-op
+- [x] 동일 시각에 같은 워크플로우 두 번 실행: 결과 동일 (changes 빈 배열)
+- [x] cities/\*.json 변경 없음 → all.json 변경 없음 → git commit no-op
 - [ ] PR 이미 열려 있음 (이전 outlier) → 새 PR 만들지 않고 기존 update
 
 ### 9-A.19 성능

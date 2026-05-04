@@ -37,9 +37,9 @@
     },
     {
       "dir": "data-automation",
-      "status": "error",
+      "status": "completed",
       "started_at": "2026-05-02T21:41:58+0900",
-      "failed_at": "2026-05-03T01:23:34+0900"
+      "completed_at": "2026-05-04T15:30:00+0900"
     }
   ]
 }
