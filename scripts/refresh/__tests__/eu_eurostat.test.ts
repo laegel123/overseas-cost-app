@@ -73,8 +73,11 @@ describe('constants', () => {
     expect(EUROSTAT_DATASETS.rent).toBeDefined();
   });
 
-  it('SOURCE: Eurostat 명시', () => {
-    expect(SOURCE.category).toBe('fallback');
+  it('SOURCE: Eurostat 명시 + validCategories 정합 (PR #20 review round 23)', () => {
+    // validate_cities.mjs::validCategories = ['rent','food','transport','tuition','tax','visa']
+    // wire-up 시 writeCity → validate 순서로 흐르므로 category 가 위 리스트에 포함되어야 함.
+    const VALID_CATEGORIES = ['rent', 'food', 'transport', 'tuition', 'tax', 'visa'];
+    expect(VALID_CATEGORIES).toContain(SOURCE.category);
     expect(SOURCE.name).toContain('Eurostat');
     expect(SOURCE.url).toContain('ec.europa.eu');
   });

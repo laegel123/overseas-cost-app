@@ -4,7 +4,7 @@
  * US Census ACS (American Community Survey) → 5개 미국 도시 rent 교차 검증용.
  *
  * 출처: US Census Bureau ACS 5-Year Estimates
- * API: https://api.census.gov/data/2022/acs/acs5
+ * API: https://api.census.gov/data/{ACS_YEAR}/acs/acs5 (현재 ACS_YEAR=2024)
  * API 키: `US_CENSUS_API_KEY` 필요.
  *
  * 방법: B25064 median gross rent by MSA.
@@ -22,10 +22,10 @@
 import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, createMissingApiKeyError } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
-// ACS 5-Year Estimates 는 매년 12월에 직전 연도 dataset 이 공개된다 (예: 2023 dataset → 2024-12 공개).
+// ACS 5-Year Estimates 는 매년 12월에 직전 연도 dataset 이 공개된다 (예: 2024 dataset → 2025-12 공개).
 // 본 상수는 운영자가 매년 1회 수동 갱신해야 한다 — Census API 가 미래 연도에 대해 redirect 가 아니라
 // 4xx 를 반환하므로 자동 fallback 은 위험. CHANGELOG/AUTOMATION.md 의 "연 1회 ACS_YEAR 갱신" 항목 참조.
-const ACS_YEAR = 2023;
+const ACS_YEAR = 2024;
 const CENSUS_API_BASE = `https://api.census.gov/data/${ACS_YEAR}/acs/acs5`;
 
 export const CITY_CONFIGS = {
@@ -110,7 +110,7 @@ export default async function refresh(opts = {}) {
   const fields = [];
   const updatedCities = [];
 
-  // ACS 5-Year Estimates 는 매년 12월에 직전 연도 dataset 이 공개됨 (예: 2024 dataset → 2024-12 공개).
+  // ACS 5-Year Estimates 는 매년 12월에 직전 연도 dataset 이 공개됨 (예: 2024 dataset → 2025-12 공개).
   // 즉 현재 연도 기준 N-1 년 dataset 가 최신 — currentYear - ACS_YEAR > 2 이면 운영자가 수동 갱신
   // 누락한 stale 상태 (PR #20 review round 12 + 15).
   // 표면화 채널: console.warn (워크플로우 로그) + errors[] (RefreshResult 에 포함되어 PR body 에

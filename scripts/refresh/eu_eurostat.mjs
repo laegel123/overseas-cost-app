@@ -39,8 +39,12 @@ export const EUROSTAT_DATASETS = {
   rent: 'prc_hpi_a',
 };
 
+// PR #20 review round 23 — `validate_cities.mjs::validCategories` 는 ['rent','food','transport','tuition','tax','visa'].
+// 본 모듈은 v1.x 에서 de_destatis / fr_insee / nl_cbs 의 rent fallback 으로 wire-up 될 예정이므로
+// 'rent' 로 통일. 추후 HICP (소비자물가) 를 food fallback 으로도 쓸 경우, 호출 측이 카테고리별
+// 별도 SOURCE 객체로 분리해 writeCity 에 넘긴다 (vn_gso 가 SOURCE_RENT/FOOD/TRANSPORT 분리한 패턴).
 export const SOURCE = {
-  category: 'fallback',
+  category: 'rent',
   name: 'Eurostat HICP + HPI (EU fallback)',
   url: 'https://ec.europa.eu/eurostat/data/database',
 };

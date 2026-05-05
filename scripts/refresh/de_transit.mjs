@@ -72,6 +72,8 @@ export function getTransportForCity(cityId) {
 export async function checkBvgFarePage() {
   try {
     const response = await fetchWithRetry('https://www.bvg.de/en/tickets-fares', { timeoutMs: 10000 });
+    // reachability check 만 필요 — body 미사용. undici keep-alive 연결 점유 방지 (PR #20 review round 23).
+    await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch {
     return false;
@@ -85,6 +87,8 @@ export async function checkBvgFarePage() {
 export async function checkMvvFarePage() {
   try {
     const response = await fetchWithRetry('https://www.mvv-muenchen.de/en/tickets-fares/', { timeoutMs: 10000 });
+    // reachability check 만 필요 — body 미사용. undici keep-alive 연결 점유 방지 (PR #20 review round 23).
+    await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch {
     return false;

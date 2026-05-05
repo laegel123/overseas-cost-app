@@ -2554,7 +2554,7 @@ afterEach(() => {
 - [x] EU_COUNTRIES: DE/FR/NL 3개국
 - [x] EU_CITIES: 국가별 도시 매핑 (berlin, munich, paris, amsterdam)
 - [x] EUROSTAT_DATASETS: HICP + HPI 정의
-- [x] SOURCE: ec.europa.eu URL 명시, category=fallback
+- [x] SOURCE: ec.europa.eu URL 명시, category 가 validate_cities.mjs::validCategories 에 포함 (PR #20 review round 23)
 - [x] refresh: RefreshResult 구조 반환
 - [x] refresh: Eurostat 불가 시 errors에 추가
 - [x] refresh: 정상 응답 시 EU 도시들 포함
