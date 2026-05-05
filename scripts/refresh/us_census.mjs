@@ -112,12 +112,14 @@ export default async function refresh(opts = {}) {
 
   // ACS 5-Year Estimates 는 매년 12월에 직전 연도 dataset 이 공개됨 (예: 2024 dataset → 2024-12 공개).
   // 즉 현재 연도 기준 N-1 년 dataset 가 최신 — currentYear - ACS_YEAR > 2 이면 운영자가 수동 갱신
-  // 누락한 stale 상태 (PR #20 review round 12).
+  // 누락한 stale 상태 (PR #20 review round 12 + 15).
+  // 표면화 채널: console.warn (워크플로우 로그) + errors[] (RefreshResult 에 포함되어 PR body 에
+  // 노출). 두 채널 모두 적용해 운영자가 stale 상태를 놓치지 않게 한다.
   const currentYear = new Date().getUTCFullYear();
   if (currentYear - ACS_YEAR > 2) {
-    console.warn(
-      `::warning::ACS_YEAR(${ACS_YEAR}) is stale — Census ACS 5-Year ${currentYear - 1} dataset 이 공개돼 있을 가능성. us_census.mjs 의 ACS_YEAR 상수 갱신 필요 (AUTOMATION.md §10).`,
-    );
+    const reason = `ACS_YEAR(${ACS_YEAR}) is stale — Census ACS 5-Year ${currentYear - 1} dataset 이 공개돼 있을 가능성. us_census.mjs 의 ACS_YEAR 상수 갱신 필요 (AUTOMATION.md §10).`;
+    console.warn(`::warning::${reason}`);
+    errors.push({ cityId: 'all', reason });
   }
 
   const apiKey = process.env.US_CENSUS_API_KEY;

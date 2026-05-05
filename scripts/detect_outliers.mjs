@@ -54,7 +54,15 @@ async function main() {
       console.warn(`[detect_outliers] skipping invalid filename: ${file}`);
       continue;
     }
-    const newData = await readJson(join(CITIES_DIR, file));
+    // 단일 파일 JSON 파싱 실패 시 graceful skip — 깨진 파일 1개로 전체 outlier 감지 중단되지
+    // 않도록 (PR #20 review round 15). 스키마 위반은 validate_cities.mjs 가 fail-fast 책임.
+    let newData;
+    try {
+      newData = await readJson(join(CITIES_DIR, file));
+    } catch (err) {
+      console.warn(`[detect_outliers] ${file} JSON parse failed: ${err?.message ?? 'unknown'} — skipping outlier detection for this file`);
+      continue;
+    }
     const oldData = readGitHead(`data/cities/${file}`);
 
     if (!oldData) {
@@ -126,6 +134,11 @@ async function readJson(filePath) {
  * `git show HEAD:<path>` 로 이전 commit 의 파일 내용 조회. 부재 시 null.
  *
  * `execFileSync` 사용 — 셸 우회로 command injection 방어 (defense-in-depth, repoPath 검증과 이중).
+ *
+ * **shallow clone 호환 (PR #20 review round 15)**: GitHub Actions 의 `actions/checkout` 기본
+ * `fetch-depth: 1` 은 HEAD commit 만 가져오는데, `git show HEAD:<path>` 는 HEAD 만 필요하므로
+ * shallow clone 에서도 정상 동작한다. 만약 미래에 분기 비교 (예: HEAD~1) 가 필요해지면
+ * checkout step 의 `fetch-depth` 를 0 또는 필요한 수치로 늘려야 한다.
  *
  * @param {string} repoPath
  * @returns {Object | null}

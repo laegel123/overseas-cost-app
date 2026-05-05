@@ -182,8 +182,10 @@ export default async function refresh(opts = {}) {
   const targetCities = opts.cities ?? Object.keys(CITY_CONFIGS);
 
   const apiKey = process.env.SG_DATA_GOV_KEY;
-  let apiAvailable = false;
 
+  // v1.0: useStatic=false 라도 mapToRent / mapToGroceries 는 항상 STATIC 을 반환 (헤더 주석 참조).
+  // checkSingStatStatus 호출은 reachability 로깅 목적만 — apiAvailable 분기에 wire 되지 않음.
+  // v1.x 응답 단위 검증 후 본 분기에서 STATIC 대체 (PR #20 review round 15).
   if (!opts.useStatic) {
     if (!apiKey) {
       errors.push({
@@ -191,13 +193,15 @@ export default async function refresh(opts = {}) {
         reason: 'SG_DATA_GOV_KEY environment variable not set, using static values',
       });
     } else {
-      apiAvailable = await checkSingStatStatus();
+      const apiAvailable = await checkSingStatStatus();
       if (!apiAvailable) {
         errors.push({
           cityId: 'all',
           reason: 'SingStat API unavailable, using static values',
         });
       }
+      // v1.0 의도: apiAvailable 결과를 의도적으로 사용하지 않음 — 헤더 주석의 v1.0 한계 참조.
+      void apiAvailable;
     }
   }
 
