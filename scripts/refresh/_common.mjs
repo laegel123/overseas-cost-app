@@ -387,6 +387,14 @@ function combineSignals(signal1, signal2) {
  *
  * 외부 호출 금지 — refresh 스크립트 내부에서만 사용 (writeCity 의 updateSources 통과 후에만 valid).
  *
+ * **placeholder 정책 (PR #20 review round 17)**:
+ *  - `rent.*` 는 `null` — `iterNumericFields` 가 null 을 명시적으로 지원하고 fetcher 들이
+ *    "데이터 부재" 와 "값 0" 을 구분해야 하기 때문 (예: us_hud 가 share 를 censusMedian 만
+ *    있고 직접값 부재 시 null 유지).
+ *  - `food.*` / `transport.*` 는 `0` — schema 가 양수 number 만 허용 (null 미허용) 이라 0 으로
+ *    초기화. fetcher 후속 갱신 시 `classifyChange(0, value)` 가 'new' 를 반환해 PR 검토 강제
+ *    (`detect_outliers::HAS_NEW`, _outlier.mjs:47).
+ *
  * @param {{id: string, name: {ko: string, en: string}, country: string, currency: string, region: string}} config
  * @returns {import('../../src/types/city').CityCostData}
  * @internal
