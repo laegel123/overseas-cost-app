@@ -222,6 +222,12 @@ export function mapToGroceries(blsData, seriesIds, adjustmentFactor) {
     // 항상 static 추정치 사용. onion1kg / apple1kg / ramen 도 동일 사유로 static 전용.
     rice1kg: applyFactor(STATIC_GROCERIES.rice1kg),
     chicken1kg: chicken1kg ? applyFactor(chicken1kg * LB_PER_KG) : applyFactor(STATIC_GROCERIES.chicken1kg),
+    // **단위 의도 (PR #20 review round 16)**: BLS APU0x00702111 = "Bread, white, pan, per lb" 의
+    // 원시값을 lb→kg 변환 없이 그대로 사용. 미국 슈퍼마켓의 표준 식빵 한 덩어리가 약 1lb (454g) 라
+    // "bread" 필드를 "한 덩어리 (loaf) 가격" 으로 해석하면 단위가 일관 — 서울 3500 KRW (약 500g 식빵
+    // 한 덩어리 기준) 와도 비교 가능. milk1L (½ gal → L), chicken1kg (lb → kg) 처럼 변환 안 하는
+    // 이유는 "1kg 빵" 이 한국·미국 모두 비현실적 단위라서. ADR-059 §4 의 "BLS APU 단위 보존" 항목
+    // 참조. v1.x 에서 단위 표기 명시화 (`breadPerLoaf` 필드명 등) 검토.
     bread: bread ? applyFactor(bread) : applyFactor(STATIC_GROCERIES.bread),
     onion1kg: applyFactor(STATIC_GROCERIES.onion1kg),
     apple1kg: applyFactor(STATIC_GROCERIES.apple1kg),

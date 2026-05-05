@@ -85,13 +85,21 @@ export const SOURCE_FOOD = {
 };
 
 /**
- * SingStat API 상태 체크.
+ * SingStat API 상태 체크 — reachability 만 확인.
+ *
+ * **v1.0 한계 (PR #20 review round 16)**: 본 함수의 반환값은 `refresh()` 내에서 errors 기록 +
+ * 가용성 로깅 목적으로만 사용되며, **STATIC vs API 분기에 wire up 되지 않는다**. 즉 `apiAvailable`
+ * 가 `true` 여도 도시 JSON 에는 항상 STATIC_RENT / STATIC_GROCERIES 가 적재된다 (헤더 주석 참조).
+ * v1.x 응답 단위 검증 후 실제 분기에 연결.
+ *
  * @returns {Promise<boolean>}
  */
 export async function checkSingStatStatus() {
   const url = `${SINGSTAT_API_BASE}/${SINGSTAT_TABLE_IDS.rentalIndex}`;
   try {
     const response = await fetchWithRetry(url, { timeoutMs: 10000 });
+    // reachability check 만 필요 — body 미사용. undici keep-alive 연결 점유 방지.
+    await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch {
     return false;

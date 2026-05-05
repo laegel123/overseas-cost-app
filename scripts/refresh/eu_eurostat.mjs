@@ -118,10 +118,22 @@ async function fetchHicpData(countries) {
  * 이 스크립트는 파일을 직접 갱신하지 않고, fallback 데이터만 반환.
  * 각 국가 스크립트에서 필요시 호출.
  *
+ * **Defense-in-depth (PR #20 review round 16)**: `_run.mjs` 의 LIBRARY_MODULES 가 단독 실행을
+ * 1차 차단하지만, 본 함수가 RefreshResult 구조를 반환하기 때문에 LIBRARY_MODULES 갱신 누락 시
+ * `_run.mjs` 가 "updated N cities" 라는 잘못된 로그를 출력해 운영자에게 혼란을 줄 수 있다.
+ * 본 entry guard 가 process.argv[1] (CLI runner 경로) 을 보고 직접 실행 케이스를 추가 방어.
+ *
  * @param {{dryRun?: boolean, countries?: string[]}} [opts]
  * @returns {Promise<RefreshResult>}
  */
 export default async function refresh(opts = {}) {
+  const runner = process.argv[1] ?? '';
+  if (runner.endsWith('_run.mjs')) {
+    throw new Error(
+      'eu_eurostat is a library module — must be imported by a country-specific fetcher (de_destatis / fr_insee / nl_cbs), not invoked via _run.mjs. v1.x: actual wire-up.',
+    );
+  }
+
   const errors = [];
   const changes = [];
   const fields = [];

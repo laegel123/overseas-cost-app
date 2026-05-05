@@ -155,6 +155,19 @@ describe('refresh (integration)', () => {
     expect(result.cities).toContain('amsterdam');
   }, 30000);
 
+  it('_run.mjs 진입점 감지 시 throw — defense-in-depth (PR #20 review round 16)', async () => {
+    // LIBRARY_MODULES 갱신 누락 시 _run.mjs 가 default export 를 호출하면 "updated N cities"
+    // 잘못된 로그가 찍히는 회귀 차단. process.argv[1] 을 _run.mjs 로 가장.
+    const originalArgv = process.argv[1] ?? '';
+    process.argv[1] = '/path/to/scripts/refresh/_run.mjs';
+
+    try {
+      await expect(refreshEuEurostat({})).rejects.toThrow('library module');
+    } finally {
+      process.argv[1] = originalArgv;
+    }
+  });
+
   it('일부 국가 데이터 부재 시 해당 국가만 errors에 추가', async () => {
     fetchSpy.mockResolvedValue({
       ok: true,
