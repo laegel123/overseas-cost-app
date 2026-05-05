@@ -233,6 +233,11 @@ export default async function refresh(opts = {}) {
     const oldTuition = oldData?.tuition ?? [];
     let hasChanges = false;
 
+    // **TODO (v1.x — `--useStatic` 제거 전 필수 수정, PR #20 review round 14)**:
+    //   현재 인덱스 기반 비교는 `UNIVERSITY_REGISTRY` 의 학교 순서가 고정이라 안전하지만, v1.x 에서
+    //   실제 HTML 파싱이 도입되면 학교 응답 순서가 바뀌었을 때 데이터 변경 없이도 모든 항목이
+    //   `pr-update` 로 잘못 감지된다. 학교 이름 (`oldEntry.school`) key 기반 Map 비교로 전환 필요.
+    //   `_outlier.mjs::iterNumericFields` 의 tuition 비교도 동일한 패턴으로 함께 갱신.
     for (let i = 0; i < tuition.length; i++) {
       const oldEntry = oldTuition[i];
       const newEntry = tuition[i];

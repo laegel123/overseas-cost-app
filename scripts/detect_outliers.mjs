@@ -40,7 +40,11 @@ async function main() {
   const outliers = [];
   let updates = 0;
   let commits = 0;
-  let news = 0;
+  // 두 카운터 분리 — `news` 가 단일 변수일 때 신규 도시 파일 (파일 단위 +1) 과 기존 도시의
+  // placeholder(0)→실제값 첫 갱신 (필드 단위 +n) 이 합산돼 로그 출력 단위가 혼란스러웠음
+  // (PR #20 review round 14). HAS_NEW 의 boolean 결과는 둘 중 하나만 0 보다 크면 true 로 동일.
+  let newFiles = 0;
+  let newFields = 0;
 
   for (const file of jsonFiles) {
     const cityId = file.replace('.json', '');
@@ -54,7 +58,7 @@ async function main() {
     const oldData = readGitHead(`data/cities/${file}`);
 
     if (!oldData) {
-      news += 1;
+      newFiles += 1;
       continue;
     }
 
@@ -71,7 +75,7 @@ async function main() {
       } else if (change === 'commit') {
         commits += 1;
       } else if (change === 'new') {
-        news += 1;
+        newFields += 1;
       }
     }
   }
@@ -81,7 +85,8 @@ async function main() {
   console.log(`  commit (변동 <5%): ${commits}`);
   console.log(`  pr-update (5~30%): ${updates}`);
   console.log(`  pr-outlier (≥30%): ${outliers.length}`);
-  console.log(`  new / removed: ${news}`);
+  console.log(`  new files (HEAD 미존재 도시): ${newFiles}`);
+  console.log(`  new fields (placeholder→실제값 첫 갱신): ${newFields}`);
 
   if (outliers.length > 0) {
     console.log(`\nOutliers (≥30%):`);
@@ -92,7 +97,7 @@ async function main() {
 
   const hasOutliers = outliers.length > 0;
   const hasUpdates = updates > 0;
-  const hasNew = news > 0;
+  const hasNew = newFiles > 0 || newFields > 0;
   const githubOutput = process.env.GITHUB_OUTPUT;
   if (githubOutput) {
     await appendFile(

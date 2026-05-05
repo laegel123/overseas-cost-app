@@ -254,17 +254,23 @@ export default async function refresh(opts = {}) {
   const regionData = new Map();
 
   if (!opts.useStatic && apiKey) {
+    // 연도 경계 race 회피 — 두 번 호출 시 0:00:00 KST 1월 1일에 startyear > endyear 가능 (PR #20
+    // review round 14). 본 변수로 한 번 평가.
+    const currentYear = new Date().getUTCFullYear();
     for (const region of ['northeast', 'west']) {
       const seriesIds = Object.values(BLS_SERIES[region]);
       try {
+        // **보안 주의**: `registrationkey` 가 POST body 에 포함되므로 본 request body 를 로그에 dump
+        // 하면 API 키가 노출된다. `fetchWithRetry::redactSecretsInUrl` 은 URL 만 마스킹 — body 미적용.
+        // 디버깅 시 `console.log(JSON.stringify(...))` 추가 금지 (PR #20 review round 14).
         const response = await fetchWithRetry(BLS_API_BASE, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             seriesid: seriesIds,
             registrationkey: apiKey,
-            startyear: new Date().getFullYear() - 1,
-            endyear: new Date().getFullYear(),
+            startyear: currentYear - 1,
+            endyear: currentYear,
           }),
         });
         const data = await response.json();
