@@ -339,6 +339,28 @@ export function redactSecretsInUrl(url) {
 }
 
 /**
+ * JSON POST body 의 민감한 키 (registrationkey 등) 를 마스킹 (PR #20 review round 18).
+ *
+ * `redactSecretsInUrl` 은 URL query 만 다루므로 `us_bls.mjs` 처럼 POST body 에 API 키를 보내는
+ * fetcher 가 디버깅 중 body 를 로깅하면 키가 노출된다. 본 헬퍼로 안전한 로깅 가능 — 단,
+ * `fetchWithRetry` 가 자동 적용하지 않으므로 caller 가 명시적으로 호출해야 한다 (의도된 호출만
+ * 마스킹 적용, 무의식적 body 출력 방지에 의존하지 않음).
+ *
+ * 키 이름 정규식 매칭 — JSON 구조 파싱은 안 함 (depth 제한 없는 객체 안전 보장 어려움).
+ *
+ * @param {string} body JSON 직렬화된 문자열
+ * @returns {string} 마스킹된 body 문자열
+ */
+export function redactSecretsInBody(body) {
+  // SECRET_KEYS 는 redactSecretsInUrl 의 SECRET_PARAMS 와 동일 단어를 키 이름으로 가정.
+  // JSON 의 key:value 쌍 ("key": "value") 매칭 — value 는 모든 quote 문자 허용.
+  return body.replace(
+    /"(serviceKey|api_?Key|apikey|key|token|access_?Token|registrationkey|app_?Id|app_?key)"\s*:\s*"[^"]*"/gi,
+    '"$1":"***REDACTED***"',
+  );
+}
+
+/**
  * 에러 메시지 안에 박혀 있는 URL 의 secret 쿼리도 마스킹.
  * undici 등이 던지는 에러는 원본 URL 을 그대로 메시지에 포함하므로 별도 처리 필요.
  * @param {string} message

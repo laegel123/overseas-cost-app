@@ -2143,17 +2143,23 @@ afterEach(() => {
 #### `fetchWithRetry(url, opts?)`
 
 - [x] 첫 시도 성공: response 반환, 재시도 없음
-- [ ] 1회 실패 후 성공: 1회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
-- [ ] 2회 실패 후 성공: 2회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
-- [ ] 3회 실패 후 성공: 3회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
-- [ ] 4회 모두 실패: throws `FetchRetryExhaustedError` with retry count (복잡한 fake timer 필요, 후속)
-- [ ] backoff 시간: 1s, 2s, 4s (exponential) (복잡한 fake timer 필요, 후속)
-- [ ] 5xx 응답: 재시도 (복잡한 fake timer 필요, 후속)
+- [x] 5xx 후 성공: 재시도 후 반환 (PR #20 review round 18)
+- [x] 5xx 응답: 재시도 트리거 (PR #20 review round 18)
+- [x] 429 (rate limit): 5xx 와 동일하게 재시도 (PR #20 review round 18)
+- [x] 네트워크 에러 모두 실패: maxRetries+1 회 호출 후 throws `FetchRetryExhaustedError` (PR #20 review round 18)
 - [x] 4xx 응답: 재시도 없이 즉시 throw
-- [ ] timeout 30s 초과: throws `FetchTimeoutError`
-- [ ] DNS 실패: 재시도 후 throw
 - [x] 사용자 정의 retry 횟수 (`opts.maxRetries=0`) 적용
-- [ ] AbortSignal 전달 시 취소 가능
+- [x] method/headers/body 옵션 forward (POST API 지원)
+- [ ] timeout 30s 초과: throws `FetchTimeoutError` (실 타이머 의존, manual)
+- [ ] backoff 1s/2s/4s 정밀 측정 (실 타이머 의존, manual)
+- [ ] AbortSignal 전달 시 취소 가능 (manual)
+
+#### `redactSecretsInBody(body)` (PR #20 review round 18)
+
+- [x] `registrationkey` 마스킹 (us_bls POST body 패턴)
+- [x] `apiKey` / `apikey` / `api_key` 모두 마스킹 (case insensitive)
+- [x] `appId` / `token` / `serviceKey` 등 다른 fetcher 키 패턴
+- [x] 민감하지 않은 키 (`seriesid`, `startyear` 등) 는 유지
 
 #### `readCity(id): Promise<CityCostData>`
 
@@ -2291,6 +2297,8 @@ afterEach(() => {
 - [x] Vancouver/Toronto/Montreal CMA 데이터
 - [x] 식재료 8개 매핑 (Vector ID 매핑 표 상수 정의)
 - [x] 외식 CPI 매핑 + 정적 fallback
+- [x] `isCpiBasePeriodSuspect` — CPI ≥ 145 시 base period mismatch 감지 (PR #20 review round 18, ADR-059 §5)
+- [x] `CPI_SANITY_MAX = 145` 상수 — 2020=100 기준 정상 상한 + 마진
 
 #### `ca_translink.mjs`, `ca_ttc.mjs`, `ca_stm.mjs`
 

@@ -11,6 +11,8 @@ import * as os from 'node:os';
 import { parseStatCanResponse } from '../_common.mjs';
 import refreshCaStatcan, {
   cpiToPrice,
+  isCpiBasePeriodSuspect,
+  CPI_SANITY_MAX,
   CITY_CONFIGS,
   CPI_VECTORS,
   STATIC_PRICES,
@@ -90,6 +92,32 @@ describe('cpiToPrice', () => {
     expect(cpiToPrice(105.5, 3)).toBe(3.17);
     // 정수 기준가도 동일 정밀도
     expect(cpiToPrice(105.5, 300)).toBe(316.5);
+  });
+});
+
+describe('isCpiBasePeriodSuspect', () => {
+  // PR #20 review round 18 — ADR-059 §5 base period mismatch 감지.
+  it('CPI 145 미만: 정상 (2020=100 기준)', () => {
+    expect(isCpiBasePeriodSuspect(100)).toBe(false);
+    expect(isCpiBasePeriodSuspect(110)).toBe(false);
+    expect(isCpiBasePeriodSuspect(125)).toBe(false);
+    expect(isCpiBasePeriodSuspect(144.99)).toBe(false);
+  });
+
+  it('CPI 145 이상: 의심 (2002=100 기준 가능성)', () => {
+    expect(isCpiBasePeriodSuspect(145)).toBe(true);
+    expect(isCpiBasePeriodSuspect(160)).toBe(true);
+    expect(isCpiBasePeriodSuspect(200)).toBe(true);
+  });
+
+  it('비정상 입력: false (NaN / Infinity / null 불통과)', () => {
+    expect(isCpiBasePeriodSuspect(NaN)).toBe(false);
+    expect(isCpiBasePeriodSuspect(Infinity)).toBe(false);
+    expect(isCpiBasePeriodSuspect(-1)).toBe(false);
+  });
+
+  it('CPI_SANITY_MAX = 145 (2020=100 기준 정상 상한 + 마진)', () => {
+    expect(CPI_SANITY_MAX).toBe(145);
   });
 });
 

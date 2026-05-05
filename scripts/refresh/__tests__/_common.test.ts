@@ -21,6 +21,7 @@ import {
   getCityPath,
   getDataDir,
   redactSecretsInUrl,
+  redactSecretsInBody,
   createCitySeed,
 } from '../_common.mjs';
 
@@ -256,6 +257,46 @@ describe('fetchWithRetry', () => {
       code: 'FETCH_RETRY_EXHAUSTED',
     });
   });
+
+  // PR #20 review round 18 — 재시도/backoff 로직 회귀 테스트.
+  it('5xx 응답 후 성공: 재시도 동작 (attempts 카운트)', async () => {
+    let attempt = 0;
+    jest.spyOn(global, 'fetch').mockImplementation(async () => {
+      attempt += 1;
+      if (attempt < 3) return new Response('temporary', { status: 503 });
+      return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    });
+
+    const result = await fetchWithRetry('https://example.com', { maxRetries: 3 });
+    expect(result.ok).toBe(true);
+    expect(attempt).toBe(3);
+  }, 30000);
+
+  it('429 (Rate limit) 도 5xx 와 동일하게 재시도 (transient)', async () => {
+    let attempt = 0;
+    jest.spyOn(global, 'fetch').mockImplementation(async () => {
+      attempt += 1;
+      if (attempt < 2) return new Response('rate limited', { status: 429 });
+      return new Response('ok', { status: 200 });
+    });
+
+    await fetchWithRetry('https://example.com', { maxRetries: 3 });
+    expect(attempt).toBe(2);
+  }, 30000);
+
+  it('네트워크 에러 → 모든 시도 실패 시 maxRetries+1 회 호출', async () => {
+    let attempt = 0;
+    jest.spyOn(global, 'fetch').mockImplementation(async () => {
+      attempt += 1;
+      throw new Error('Network down');
+    });
+
+    await expect(
+      fetchWithRetry('https://example.com', { maxRetries: 2 }),
+    ).rejects.toMatchObject({ code: 'FETCH_RETRY_EXHAUSTED' });
+    // maxRetries=2 → 3회 시도 (initial + 2 retries).
+    expect(attempt).toBe(3);
+  }, 30000);
 });
 
 describe('redactSecretsInUrl', () => {
@@ -279,6 +320,33 @@ describe('redactSecretsInUrl', () => {
 
   it('잘못된 URL 은 원본 반환', () => {
     expect(redactSecretsInUrl('not a url')).toBe('not a url');
+  });
+});
+
+describe('redactSecretsInBody', () => {
+  // PR #20 review round 18 — POST body 의 API 키 마스킹.
+  it('registrationkey 마스킹 (us_bls 패턴)', () => {
+    const body = JSON.stringify({ seriesid: ['APU0100709112'], registrationkey: 'secret-key-123', startyear: 2025 });
+    expect(redactSecretsInBody(body)).toContain('"registrationkey":"***REDACTED***"');
+    expect(redactSecretsInBody(body)).not.toContain('secret-key-123');
+    expect(redactSecretsInBody(body)).toContain('"seriesid"');
+  });
+
+  it('apiKey / apikey / api_key 모두 마스킹 (case insensitive)', () => {
+    expect(redactSecretsInBody('{"apikey":"AAA"}')).toContain('***REDACTED***');
+    expect(redactSecretsInBody('{"api_Key":"AAA"}')).toContain('***REDACTED***');
+    expect(redactSecretsInBody('{"ApiKey":"AAA"}')).toContain('***REDACTED***');
+  });
+
+  it('appId / token / serviceKey 마스킹 (다른 fetcher 패턴)', () => {
+    expect(redactSecretsInBody('{"appId":"X"}')).toContain('***REDACTED***');
+    expect(redactSecretsInBody('{"token":"Y"}')).toContain('***REDACTED***');
+    expect(redactSecretsInBody('{"serviceKey":"Z"}')).toContain('***REDACTED***');
+  });
+
+  it('민감하지 않은 키는 유지', () => {
+    const body = '{"seriesid":["A","B"],"startyear":2025,"endyear":2026}';
+    expect(redactSecretsInBody(body)).toBe(body);
   });
 });
 

@@ -128,7 +128,7 @@ export const SOURCE_STATIC = {
  * CPI 는 base period = 100. 정적 기준가 (CAD dollars) 에 CPI 비율 적용.
  * 소수점 2자리 보존 (ADR-059 단위 정책 — cents 변환 금지).
  *
- * ⚠️ basePrice 의 기준년도 == CPI base period 일치 가정. ADR-059 §4 검증 미해소 (round 11):
+ * ⚠️ basePrice 의 기준년도 == CPI base period 일치 가정. ADR-059 §5 검증 미해소 (round 11):
  * StatCan Table 18-10-0004 의 base period (2002 vs 2020) 가 STATIC_PRICES 시점과 다르면
  * 결과가 체계적으로 편향. step 4 재개 시 getSeriesInfoFromVector 로 검증 + STATIC_PRICES 갱신.
  *
@@ -138,6 +138,21 @@ export const SOURCE_STATIC = {
  */
 export function cpiToPrice(cpiValue, basePrice) {
   return Math.round((cpiValue / 100) * basePrice * 100) / 100;
+}
+
+// CPI sanity 임계값 — 2020 = 100 기준이면 현재 CPI 가 약 105~125 범위. 145 이상은 거의 확실히
+// 2002 = 100 기준 dataset 일 가능성이 높아 STATIC_PRICES (2024~2026 시장가 기준) 와 base period
+// 불일치를 의미한다. PR #20 review round 18 — 운영자가 ADR-059 §5 검증 누락한 채로 cron 갱신
+// 진입 시 잘못된 데이터가 적재되는 것을 표면화.
+export const CPI_SANITY_MAX = 145;
+
+/**
+ * StatCan CPI 응답 sanity check — 2020=100 기준 가정 위반 여부 검출.
+ * @param {number} cpiValue
+ * @returns {boolean} true 이면 의심스러운 (base period mismatch 가능) 값
+ */
+export function isCpiBasePeriodSuspect(cpiValue) {
+  return Number.isFinite(cpiValue) && cpiValue >= CPI_SANITY_MAX;
 }
 
 /**
@@ -255,6 +270,17 @@ export default async function refresh(opts = {}) {
 
     const data = await response.json();
     vectorData = parseStatCanResponse(data);
+
+    // CPI base period mismatch 감지 — 2020=100 기준 가정 위반 시 ADR-059 §5 항목 표면화.
+    // PR #20 review round 18: 검증 미해소 상태로 cron 갱신 진입하면 결과가 ~45% 부풀려진다.
+    for (const [vector, cpiValue] of vectorData.entries()) {
+      if (isCpiBasePeriodSuspect(cpiValue)) {
+        const reason = `CPI vector ${vector} value ${cpiValue} >= ${CPI_SANITY_MAX} — StatCan base period 가 2020=100 이 아닐 가능성 (ADR-059 §5 미해소). STATIC_PRICES 적용 결과가 ~45% 부풀려질 수 있음. getSeriesInfoFromVector 로 referencePeriod 검증 필요.`;
+        console.warn(`::warning::${reason}`);
+        errors.push({ cityId: 'all', reason });
+        break; // 한 vector 만 의심돼도 동일 원인 — 중복 errors 회피.
+      }
+    }
   } catch (err) {
     const apiErrors = [];
     for (const cityId of targetCities) {
