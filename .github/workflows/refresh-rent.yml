@@ -23,6 +23,7 @@ jobs:
     env:
       KR_DATA_API_KEY: ${{ secrets.KR_DATA_API_KEY }}
       US_CENSUS_API_KEY: ${{ secrets.US_CENSUS_API_KEY }}
+      SG_DATA_GOV_KEY: ${{ secrets.SG_DATA_GOV_KEY }}
       # JP_ESTAT_APP_ID 는 v1.0 에서 사용 안 함 (jp_estat 가 --useStatic 모드).
       # v1.x 응답 단위 검증 도입 시 다시 wire up.
     steps:
@@ -95,7 +96,13 @@ jobs:
       - name: Refresh JP e-Stat (useStatic — v1.0)
         run: node scripts/refresh/_run.mjs jp_estat --useStatic
 
-      # Singapore - SingStat (no key required)
+      # Singapore - SingStat. data.gov.sg dataset 일부가 SG_DATA_GOV_KEY 를 요구하므로
+      # 키 부재 시 sg_singstat 가 errors 에 'SG_DATA_GOV_KEY not set' 을 기록 + static 사용.
+      # 다른 fetcher 의 conditional skip 패턴과 일관 — 키 없을 때 명시적 warning.
+      - name: Skip sg_singstat warning if API key absent
+        if: env.SG_DATA_GOV_KEY == ''
+        run: echo "::warning::SG_DATA_GOV_KEY not set, sg_singstat will use static values"
+
       - name: Refresh SG SingStat
         run: node scripts/refresh/_run.mjs sg_singstat
 
@@ -161,6 +168,8 @@ jobs:
           git diff --staged --quiet || git commit -m "data: monthly rent refresh"
           # push retry — 다른 카테고리 워크플로우와의 동시 push race 가 발생해도 다음 시도에서 rebase 후 성공.
           for attempt in 1 2 3; do
+            # 이전 attempt 의 rebase 가 충돌로 in-progress 상태로 남아 있으면 다음 시도가 즉시 실패하므로 정리.
+            git rebase --abort 2>/dev/null || true
             git pull --rebase origin "$(git rev-parse --abbrev-ref HEAD)" || echo "::warning::rebase attempt $attempt failed (continuing to push)"
             if git push; then exit 0; fi
             echo "::warning::push attempt $attempt failed; retrying..."

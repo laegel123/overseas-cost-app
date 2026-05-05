@@ -2511,7 +2511,7 @@ afterEach(() => {
 - [x] mapToGroceries: 정적 식재료 가격 (AED 단위)
 - [x] checkDscStatus: DSC site connectivity 확인
 - [x] checkFcscStatus: FCSC site connectivity 확인
-- [x] CITY_CONFIGS: 두바이 포함 (id, name, country=AE, currency=AED, region=middleeast)
+- [x] CITY_CONFIGS: 두바이 포함 (id, name, country=AE, currency=AED, region=me)
 - [x] SOURCE_RENT: DSC + RERA 명시
 - [x] SOURCE_FOOD: FCSC 명시
 - [x] refresh: rent + food 처리
@@ -2551,21 +2551,25 @@ afterEach(() => {
 #### `universities.mjs`
 
 - [x] 도시별 대학 매핑 (registry from DATA_SOURCES.md)
-- [x] 각 대학 공식 international tuition 페이지 fetch
-- [x] HTML parse — 페이지 구조별 selector (대학별 다른 selector 정적 매핑)
-- [x] 학비 단위 (per credit vs per year vs per semester) 정규화 → annual
-- [x] 페이지 구조 변경 시 selector 실패 → errors + 기존값 유지
-- [x] 학비 페이지 redirect 처리
-- [x] 다국어 페이지 (영어 default)
-- [x] 등록비만 있는 대학 (독일·프랑스 일부): annual = 등록비 × 2
+- [x] 각 대학 공식 international tuition 페이지 fetch (reachability check 만)
+- [x] `staticAnnual` 항상 반환 — fetch 실패 시 graceful fallback
+- [x] 워크플로우에서 `--useStatic` 강제 (refresh-tuition.yml, PR #20 review round 7)
+- [ ] HTML parse — 페이지 구조별 selector (v1.x — 미구현, 현재 all-static)
+- [ ] 학비 단위 (per credit vs per year vs per semester) 정규화 → annual (v1.x — 미구현)
+- [ ] 페이지 구조 변경 시 selector 실패 → errors + 기존값 유지 (v1.x — selector 미도입)
+- [ ] 학비 페이지 redirect 처리 (v1.x — 미구현)
+- [ ] 다국어 페이지 (영어 default) (v1.x — 미구현)
+- [ ] 등록비만 있는 대학 (독일·프랑스 일부): annual = 등록비 × 2 (v1.x — 미구현)
 
 #### `visas.mjs`
 
-- [x] 도시별 비자 페이지 매핑
-- [x] 정부 페이지 fetch + parse
-- [x] 통화별 처리 (USD vs CAD vs EUR vs JPY 등)
-- [x] 정착 비용 추정 (정적 + 비자료)
-- [x] 페이지 변경 시 graceful fail
+- [x] 도시별 비자 페이지 매핑 (`VISA_REGISTRY`)
+- [x] 정부 페이지 reachability check (HTML 파싱 미구현, static 항상 반환)
+- [x] 정착 비용 추정 (정적 + 비자료) — VISA_REGISTRY.settlementApprox
+- [x] 페이지 변경 시 graceful fail — fetchedFromPage:false 면 console.info, errors 미추가
+- [x] 워크플로우에서 `--useStatic` 강제 (refresh-visa.yml, PR #20 review round 7)
+- [ ] 정부 페이지 fetch + parse (v1.x — HTML 파싱 미구현, 현재 all-static)
+- [ ] 통화별 처리 (USD vs CAD vs EUR vs JPY 등) — registry 단위 매핑 (v1.x — 동적 파싱 미구현)
 
 ### 9-A.10 출처별 — 환율 백업 (1 script)
 
@@ -2670,13 +2674,15 @@ afterEach(() => {
 
 ### 9-A.13 워크플로우 YAML 검증
 
-#### `actionlint` 실행
+#### `actionlint` 실행 — **수동 검증 (CI 미설치)**
 
-- [x] `.github/workflows/refresh-fx.yml` syntax valid
-- [x] `refresh-prices.yml`, `refresh-rent.yml`, `refresh-transit.yml`, `refresh-tuition.yml`, `refresh-visa.yml` 모두 valid
-- [x] cron schedule 표현 정확 (`0 18 * * 1` 등)
+actionlint 가 CI 워크플로우로 자동화되어 있지 않다 — 본 항목들은 운영자가 로컬에서 brew/standalone 으로 1회 검증하고 통과한 결과. 회귀 자동 차단 안 됨, v1.x 별도 phase 에서 actionlint job 추가 검토.
+
+- [ ] `.github/workflows/refresh-fx.yml` syntax valid (수동 검증 통과, CI 회귀 안 됨)
+- [ ] `refresh-prices.yml`, `refresh-rent.yml`, `refresh-transit.yml`, `refresh-tuition.yml`, `refresh-visa.yml` 모두 valid (수동 검증)
+- [x] cron schedule 표현 정확 (`0 18 * * 1` 등) — `integration.test.ts` 가 검증
 - [x] secrets 참조 (`${{ secrets.KR_DATA_API_KEY }}`) 모두 존재 (deny-list 없음)
-- [x] `peter-evans/create-pull-request@v6` 액션 사용 정확
+- [x] `peter-evans/create-pull-request@v6` 액션 사용 정확 — `integration.test.ts` 가 SHA pin 검증
 
 #### Workflow logic 단위 테스트
 
@@ -2684,6 +2690,8 @@ afterEach(() => {
 - [x] 환경변수 export (`HAS_OUTLIERS=true`) 정확
 - [x] v1.0 useStatic 정책 — visas / universities / jp_estat 호출은 `--useStatic` 동반 (PR #20 review round 7)
 - [x] push retry 의 `git pull --rebase` 실패는 `::warning` 으로 노출, silent `|| true` 금지 (PR #20 review round 8)
+- [x] push retry 루프 시작에 `git rebase --abort` 가 있어 in-progress 상태 정리 (PR #20 review round 9)
+- [x] `refresh-rent.yml` 의 `env:` 에 `SG_DATA_GOV_KEY` 가 wired (sg_singstat 동작 보장, PR #20 review round 9)
 
 ### 9-A.14 `_registry.mjs` (도시 ↔ 출처 매핑)
 

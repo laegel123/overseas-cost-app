@@ -194,6 +194,20 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
+  it('push retry 루프 시작에 git rebase --abort 로 in-progress rebase 정리 (PR #20 review round 9)', () => {
+    // rebase 충돌로 in-progress 상태가 남으면 다음 attempt 의 git pull --rebase 가 즉시 실패하므로 정리.
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      expect(content).toContain('git rebase --abort 2>/dev/null || true');
+    }
+  });
+
+  it('refresh-rent.yml env 에 SG_DATA_GOV_KEY 가 wired (sg_singstat 동작 보장, PR #20 review round 9)', () => {
+    // 누락 시 sg_singstat 가 항상 errors+static 으로 떨어져 SingStat API 가 실질적 미동작.
+    const rentYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-rent.yml'), 'utf-8');
+    expect(rentYml).toMatch(/SG_DATA_GOV_KEY:\s*\$\{\{\s*secrets\.SG_DATA_GOV_KEY\s*\}\}/);
+  });
+
   it('각 워크플로우에 permissions 설정 존재', () => {
     for (const workflow of REFRESH_WORKFLOWS) {
       const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');

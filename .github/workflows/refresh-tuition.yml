@@ -91,6 +91,8 @@ jobs:
           git diff --staged --quiet || git commit -m "data: quarterly tuition refresh"
           # push retry — 다른 카테고리 워크플로우와의 동시 push race 가 발생해도 다음 시도에서 rebase 후 성공.
           for attempt in 1 2 3; do
+            # 이전 attempt 의 rebase 가 충돌로 in-progress 상태로 남아 있으면 다음 시도가 즉시 실패하므로 정리.
+            git rebase --abort 2>/dev/null || true
             git pull --rebase origin "$(git rev-parse --abbrev-ref HEAD)" || echo "::warning::rebase attempt $attempt failed (continuing to push)"
             if git push; then exit 0; fi
             echo "::warning::push attempt $attempt failed; retrying..."
