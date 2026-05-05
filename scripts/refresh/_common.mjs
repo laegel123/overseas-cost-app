@@ -38,12 +38,27 @@ export function getCityPath(id) {
 }
 
 /**
- * @typedef {Object} RefreshResult
+ * @typedef {Object} RefreshChange 단일 numeric 필드 변경 — fetcher 가 produce.
+ * @property {string} cityId
+ * @property {string} field 점 표기 경로 (e.g. 'rent.studio', 'food.groceries.milk1L', 'tuition[0].annual')
+ * @property {number | null} oldValue
+ * @property {number | null} newValue
+ * @property {number} pctChange 변동률 (0.05 = 5%, computePctChange 결과)
+ */
+
+/**
+ * @typedef {Object} RefreshError 단일 도시·이유 에러 — silent fail 금지 정책상 모든 실패가 여기로.
+ * @property {string} cityId
+ * @property {string} reason
+ */
+
+/**
+ * @typedef {Object} RefreshResult 모든 fetcher 의 default export 반환 타입.
  * @property {string} source
  * @property {string[]} cities
  * @property {string[]} fields
- * @property {Array<{cityId: string, field: string, oldValue: number|null, newValue: number|null, pctChange: number}>} changes
- * @property {Array<{cityId: string, reason: string}>} errors
+ * @property {RefreshChange[]} changes
+ * @property {RefreshError[]} errors
  */
 
 const BACKOFF_BASE_MS = 1000;

@@ -2,8 +2,6 @@
  * au_abs.mjs 테스트.
  * TESTING.md §9-A.8 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -20,6 +18,7 @@ import refreshAuAbs, {
   SOURCE_RENT,
   SOURCE_FOOD,
 } from '../au_abs.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -219,8 +218,8 @@ describe('refresh (integration)', () => {
   it('시드니/멜버른 모두 처리', async () => {
     const result = await refreshAuAbs({ dryRun: true, useStatic: true });
 
-    const sydneyChanges = result.changes.filter((c: any) => c.cityId === 'sydney');
-    const melbourneChanges = result.changes.filter((c: any) => c.cityId === 'melbourne');
+    const sydneyChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'sydney');
+    const melbourneChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'melbourne');
 
     expect(sydneyChanges.length).toBeGreaterThan(0);
     expect(melbourneChanges.length).toBeGreaterThan(0);
@@ -247,7 +246,7 @@ describe('refresh (integration)', () => {
     const result = await refreshAuAbs({ dryRun: true, useStatic: true, cities: ['sydney'] });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const rentChange = result.changes.find((c: any) => c.field.startsWith('rent.'));
+    const rentChange = result.changes.find((c: RefreshChange) => c.field.startsWith('rent.'));
     expect(rentChange).toBeDefined();
     expect(typeof rentChange?.pctChange).toBe('number');
   }, 30000);
@@ -255,6 +254,6 @@ describe('refresh (integration)', () => {
   it('알 수 없는 도시: errors에 추가', async () => {
     const result = await refreshAuAbs({ dryRun: true, useStatic: true, cities: ['unknown-city'] });
 
-    expect(result.errors.some((e: any) => e.cityId === 'unknown-city')).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 });

@@ -119,7 +119,7 @@ jobs:
             data/all.json
             data/seed/all.json
           body: |
-            자동 가격(식재료·외식) 갱신 — 5~30% 변동. AUTOMATION.md §1 정책에 따라 PR 로 검토 후 머지.
+            자동 가격(식재료·외식) 갱신 — 5~30% 변동 또는 데이터 소실(pr-removed) / 신규 항목(HAS_NEW). AUTOMATION.md §1 정책에 따라 PR 로 검토 후 머지.
 
       - name: Auto commit and push
         if: steps.outliers.outputs.HAS_OUTLIERS != 'true' && steps.outliers.outputs.HAS_UPDATES != 'true' && steps.outliers.outputs.HAS_NEW != 'true'

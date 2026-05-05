@@ -2,8 +2,6 @@
  * us_bls.mjs 테스트.
  * TESTING.md §9-A.3 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -19,6 +17,7 @@ import refreshUsBls, {
   STATIC_FOOD,
   SOURCE,
 } from '../us_bls.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let originalApiKey: string | undefined;
@@ -306,7 +305,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshUsBls({ dryRun: true, cities: ['nyc'] });
 
-    expect(result.errors.some((e: any) => e.cityId.startsWith('region:'))).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId.startsWith('region:'))).toBe(true);
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 
@@ -331,12 +330,12 @@ describe('refresh (integration)', () => {
 
     expect(
       result.errors.some(
-        (e: any) =>
+        (e: RefreshError) =>
           e.cityId.startsWith('region:') && e.reason.includes('chicken1kg') && e.reason.includes('out of range'),
       ),
     ).toBe(true);
 
-    const chickenChange = result.changes.find((c: any) => c.field === 'food.groceries.chicken1kg');
+    const chickenChange = result.changes.find((c: RefreshChange) => c.field === 'food.groceries.chicken1kg');
     expect(chickenChange).toBeDefined();
     // STATIC_GROCERIES.chicken1kg(10.00) × adjustment(1.15) = 11.5 — 25.3 의 비정상 값 회귀 차단.
     expect(chickenChange?.newValue).toBeCloseTo(STATIC_GROCERIES.chicken1kg * 1.15, 2);

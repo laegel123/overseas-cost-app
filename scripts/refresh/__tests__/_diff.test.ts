@@ -3,10 +3,13 @@
  * TESTING.md §9-A.1 diffCities 인벤토리.
  */
 
-/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { diffCities } from '../_diff.mjs';
+import type { CityCostData, Region, TuitionLevel, SourceCategory } from '../../../src/types/city';
 
-const baseCity: any = {
+type DiffEntry = { field: string; oldValue: number | null; newValue: number | null };
+
+const baseCity: CityCostData = {
   id: 'test',
   name: { ko: '테스트', en: 'Test' },
   country: 'KR',
@@ -53,7 +56,7 @@ describe('diffCities', () => {
     const result = diffCities(baseCity, newCity);
 
     expect(result).toHaveLength(2);
-    expect(result.map((r: any) => r.field).sort()).toEqual(['rent.oneBed', 'rent.twoBed']);
+    expect(result.map((r: DiffEntry) => r.field).sort()).toEqual(['rent.oneBed', 'rent.twoBed']);
   });
 
   it('중첩 필드 (food.groceries.milk1L): dot-path 표현', () => {
@@ -83,7 +86,7 @@ describe('diffCities', () => {
     };
     const result = diffCities(oldCity, newCity);
 
-    const oneBedChange = result.find((r: any) => r.field === 'rent.oneBed');
+    const oneBedChange = result.find((r: DiffEntry) => r.field === 'rent.oneBed');
     expect(oneBedChange).toBeDefined();
     expect(oneBedChange!.oldValue).toBe(null);
     expect(oneBedChange!.newValue).toBe(900000);
@@ -96,25 +99,25 @@ describe('diffCities', () => {
     };
     const result = diffCities(baseCity, newCity);
 
-    const oneBedChange = result.find((r: any) => r.field === 'rent.oneBed');
+    const oneBedChange = result.find((r: DiffEntry) => r.field === 'rent.oneBed');
     expect(oneBedChange).toBeDefined();
     expect(oneBedChange!.oldValue).toBe(900000);
     expect(oneBedChange!.newValue).toBe(null);
   });
 
   it('배열 변경 (tuition[]): 각 원소별 record', () => {
-    const oldCity = {
+    const oldCity: CityCostData = {
       ...baseCity,
       tuition: [
-        { school: 'UBC', level: 'undergrad', annual: 45000 },
-        { school: 'SFU', level: 'undergrad', annual: 35000 },
+        { school: 'UBC', level: 'undergrad' satisfies TuitionLevel, annual: 45000 },
+        { school: 'SFU', level: 'undergrad' satisfies TuitionLevel, annual: 35000 },
       ],
     };
-    const newCity = {
+    const newCity: CityCostData = {
       ...baseCity,
       tuition: [
-        { school: 'UBC', level: 'undergrad', annual: 48000 },
-        { school: 'SFU', level: 'undergrad', annual: 35000 },
+        { school: 'UBC', level: 'undergrad' satisfies TuitionLevel, annual: 48000 },
+        { school: 'SFU', level: 'undergrad' satisfies TuitionLevel, annual: 35000 },
       ],
     };
     const result = diffCities(oldCity, newCity);
@@ -126,11 +129,11 @@ describe('diffCities', () => {
   });
 
   it('메타 필드 (lastUpdated, sources): 변경 추적 제외', () => {
-    const newCity = {
+    const newCity: CityCostData = {
       ...baseCity,
       lastUpdated: '2026-05-01',
       sources: [
-        { category: 'rent', name: 'Updated', url: 'https://new.com', accessedAt: '2026-05-01' },
+        { category: 'rent' satisfies SourceCategory, name: 'Updated', url: 'https://new.com', accessedAt: '2026-05-01' },
       ],
     };
     const result = diffCities(baseCity, newCity);
@@ -165,7 +168,7 @@ describe('diffCities', () => {
     const result = diffCities(baseCity, newCity);
 
     expect(result).toHaveLength(3);
-    expect(result.map((r: any) => r.field).sort()).toEqual([
+    expect(result.map((r: DiffEntry) => r.field).sort()).toEqual([
       'food.restaurantMeal',
       'rent.oneBed',
       'transport.monthlyPass',

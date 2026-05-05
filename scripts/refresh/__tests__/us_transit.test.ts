@@ -2,8 +2,6 @@
  * us_transit.mjs 테스트.
  * TESTING.md §9-A.3 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -13,6 +11,7 @@ import refreshUsTransit, {
   CITY_CONFIGS,
   SOURCE,
 } from '../us_transit.mjs';
+import type { RefreshChange } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -195,7 +194,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshUsTransit({ dryRun: true, cities: ['nyc'] });
 
-    const singleRideChange = result.changes.find((c: any) => c.field === 'transport.singleRide');
+    const singleRideChange = result.changes.find((c: RefreshChange) => c.field === 'transport.singleRide');
     expect(singleRideChange?.newValue).toBe(CITY_CONFIGS.nyc.staticFares.singleRide);
   }, 30000);
 
@@ -231,7 +230,7 @@ describe('refresh (integration)', () => {
     const result = await refreshUsTransit({ dryRun: true, useStatic: true, cities: ['nyc'] });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const monthlyChange = result.changes.find((c: any) => c.field === 'transport.monthlyPass');
+    const monthlyChange = result.changes.find((c: RefreshChange) => c.field === 'transport.monthlyPass');
     expect(monthlyChange).toBeDefined();
     expect(typeof monthlyChange?.pctChange).toBe('number');
   }, 30000);

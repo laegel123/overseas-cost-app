@@ -2,8 +2,6 @@
  * ca_stm.mjs 테스트.
  * TESTING.md §9-A.4 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -13,6 +11,7 @@ import refreshCaStm, {
   STATIC_FARES,
   SOURCE,
 } from '../ca_stm.mjs';
+import type { RefreshChange } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -172,7 +171,7 @@ describe('refresh (integration)', () => {
     const result = await refreshCaStm({ dryRun: true, useStatic: true });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const monthlyChange = result.changes.find((c: any) => c.field === 'transport.monthlyPass');
+    const monthlyChange = result.changes.find((c: RefreshChange) => c.field === 'transport.monthlyPass');
     expect(monthlyChange).toBeDefined();
     expect(typeof monthlyChange?.pctChange).toBe('number');
   }, 30000);

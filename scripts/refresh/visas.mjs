@@ -132,7 +132,7 @@ export const SOURCE = {
  * 일관된 갱신 경로 확보가 목적.
  *
  * @param {string} countryCode
- * @returns {Promise<{visa: Object, fetchedFromPage: boolean, error?: string}>}
+ * @returns {Promise<{visa: {studentApplicationFee: number, workApplicationFee: number, settlementApprox: number} | null, fetchedFromPage: boolean, error?: string}>}
  */
 export async function fetchVisaFees(countryCode) {
   const registry = VISA_REGISTRY[countryCode];
@@ -181,7 +181,7 @@ export async function fetchVisaFees(countryCode) {
  * 도시별 visa 객체 생성
  * @param {string} cityId
  * @param {{useStatic?: boolean}} [opts]
- * @returns {Promise<{visa: Object|null, errors: string[]}>}
+ * @returns {Promise<{visa: {studentApplicationFee: number, workApplicationFee: number, settlementApprox: number} | null, errors: string[]}>}
  */
 export async function getVisaForCity(cityId, opts = {}) {
   const countryCode = CITY_TO_COUNTRY[cityId];

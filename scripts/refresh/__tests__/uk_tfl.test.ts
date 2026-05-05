@@ -2,8 +2,6 @@
  * uk_tfl.mjs 테스트.
  * TESTING.md §9-A.6 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -15,6 +13,7 @@ import refreshUkTfl, {
   STATIC_TRANSPORT,
   SOURCE,
 } from '../uk_tfl.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -154,7 +153,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshUkTfl({ dryRun: true });
 
-    expect(result.errors.some((e: any) => e.reason.includes('unavailable'))).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.reason.includes('unavailable'))).toBe(true);
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 
@@ -193,7 +192,7 @@ describe('refresh (integration)', () => {
     const result = await refreshUkTfl({ dryRun: true, useStatic: true });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const transportChange = result.changes.find((c: any) => c.field.startsWith('transport.'));
+    const transportChange = result.changes.find((c: RefreshChange) => c.field.startsWith('transport.'));
     expect(transportChange).toBeDefined();
     expect(typeof transportChange?.pctChange).toBe('number');
   }, 30000);
@@ -201,6 +200,6 @@ describe('refresh (integration)', () => {
   it('알 수 없는 도시: errors에 추가', async () => {
     const result = await refreshUkTfl({ dryRun: true, useStatic: true, cities: ['unknown-city'] });
 
-    expect(result.errors.some((e: any) => e.cityId === 'unknown-city')).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 });

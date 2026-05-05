@@ -4,9 +4,8 @@
  *  로직이 _outlier.mjs 에 있어 직접 테스트.)
  * TESTING.md §9-A.11 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { iterNumericFields } from '../refresh/_outlier.mjs';
+import type { NumericField } from '../refresh/__tests__/_test-types';
 
 describe('iterNumericFields', () => {
   it('rent / food / transport top-level numeric 필드 평탄화', () => {
@@ -22,7 +21,7 @@ describe('iterNumericFields', () => {
     };
 
     const fields = [...iterNumericFields(oldData, newData)];
-    const shareEntry = fields.find((f: any) => f.path === 'rent.share');
+    const shareEntry = fields.find((f: NumericField) => f.path === 'rent.share');
 
     expect(shareEntry).toBeDefined();
     expect(shareEntry?.oldVal).toBe(100);
@@ -43,8 +42,8 @@ describe('iterNumericFields', () => {
 
     const fields = [...iterNumericFields(oldData, newData)];
     const groceryPaths = fields
-      .filter((f: any) => f.path.startsWith('food.groceries.'))
-      .map((f: any) => f.path);
+      .filter((f: NumericField) => f.path.startsWith('food.groceries.'))
+      .map((f: NumericField) => f.path);
 
     expect(groceryPaths).toEqual(
       expect.arrayContaining(['food.groceries.milk1L', 'food.groceries.eggs12', 'food.groceries.rice1kg']),
@@ -73,7 +72,7 @@ describe('iterNumericFields', () => {
     };
 
     const fields = [...iterNumericFields(oldData, newData)];
-    const tuitionPaths = fields.filter((f: any) => f.path.startsWith('tuition['));
+    const tuitionPaths = fields.filter((f: NumericField) => f.path.startsWith('tuition['));
 
     expect(tuitionPaths).toEqual(
       expect.arrayContaining([
@@ -98,7 +97,7 @@ describe('iterNumericFields', () => {
     };
 
     const fields = [...iterNumericFields(oldData, newData)];
-    const visaPaths = fields.filter((f: any) => f.path.startsWith('visa.'));
+    const visaPaths = fields.filter((f: NumericField) => f.path.startsWith('visa.'));
 
     expect(visaPaths).toEqual(
       expect.arrayContaining([
@@ -121,7 +120,7 @@ describe('iterNumericFields', () => {
     };
 
     const fields = [...iterNumericFields(oldData, newData)];
-    const shareEntry = fields.find((f: any) => f.path === 'rent.share');
+    const shareEntry = fields.find((f: NumericField) => f.path === 'rent.share');
 
     expect(shareEntry?.oldVal).toBeNull();
     expect(shareEntry?.newVal).toBe(100);
@@ -140,8 +139,8 @@ describe('iterNumericFields', () => {
     };
 
     const fields = [...iterNumericFields(oldData, newData)];
-    const visaPaths = fields.filter((f: any) => f.path.startsWith('visa.'));
-    const tuitionPaths = fields.filter((f: any) => f.path.startsWith('tuition['));
+    const visaPaths = fields.filter((f: NumericField) => f.path.startsWith('visa.'));
+    const tuitionPaths = fields.filter((f: NumericField) => f.path.startsWith('tuition['));
 
     expect(visaPaths).toEqual([]);
     expect(tuitionPaths).toEqual([]);

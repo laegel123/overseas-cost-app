@@ -2,8 +2,6 @@
  * vn_gso.mjs 테스트.
  * TESTING.md §9-A.8 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -22,6 +20,7 @@ import refreshVnGso, {
   SOURCE_FOOD,
   SOURCE_TRANSPORT,
 } from '../vn_gso.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -168,12 +167,12 @@ describe('refresh (integration)', () => {
   it('호치민 처리 (rent + food + transport)', async () => {
     const result = await refreshVnGso({ dryRun: true, useStatic: true });
 
-    const hcmChanges = result.changes.filter((c: any) => c.cityId === 'hochiminh');
+    const hcmChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'hochiminh');
     expect(hcmChanges.length).toBeGreaterThan(0);
 
-    const rentChanges = hcmChanges.filter((c: any) => c.field.startsWith('rent.'));
-    const foodChanges = hcmChanges.filter((c: any) => c.field.startsWith('food.'));
-    const transportChanges = hcmChanges.filter((c: any) => c.field.startsWith('transport.'));
+    const rentChanges = hcmChanges.filter((c: RefreshChange) => c.field.startsWith('rent.'));
+    const foodChanges = hcmChanges.filter((c: RefreshChange) => c.field.startsWith('food.'));
+    const transportChanges = hcmChanges.filter((c: RefreshChange) => c.field.startsWith('transport.'));
 
     expect(rentChanges.length).toBeGreaterThan(0);
     expect(foodChanges.length).toBeGreaterThan(0);
@@ -184,7 +183,7 @@ describe('refresh (integration)', () => {
     const result = await refreshVnGso({ dryRun: true, useStatic: true });
 
     // "도시 단위 데이터 부재" 는 영구적 사실 — 매 실행 errors 에 기록하면 실제 runtime 오류가 noise 에 묻힘.
-    expect(result.errors.some((e: any) => e.reason.includes('도시 단위 데이터 부재'))).toBe(false);
+    expect(result.errors.some((e: RefreshError) => e.reason.includes('도시 단위 데이터 부재'))).toBe(false);
     expect(SOURCE_RENT.name).toContain('estimated');
     expect(SOURCE_FOOD.name).toContain('estimated');
   }, 30000);
@@ -210,7 +209,7 @@ describe('refresh (integration)', () => {
     const result = await refreshVnGso({ dryRun: true, useStatic: true, cities: ['hochiminh'] });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const rentChange = result.changes.find((c: any) => c.field.startsWith('rent.'));
+    const rentChange = result.changes.find((c: RefreshChange) => c.field.startsWith('rent.'));
     expect(rentChange).toBeDefined();
     expect(typeof rentChange?.pctChange).toBe('number');
   }, 30000);
@@ -218,6 +217,6 @@ describe('refresh (integration)', () => {
   it('알 수 없는 도시: errors에 추가', async () => {
     const result = await refreshVnGso({ dryRun: true, useStatic: true, cities: ['unknown-city'] });
 
-    expect(result.errors.some((e: any) => e.cityId === 'unknown-city')).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 });

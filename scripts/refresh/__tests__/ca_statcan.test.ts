@@ -2,8 +2,6 @@
  * ca_statcan.mjs 테스트.
  * TESTING.md §9-A.4 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';

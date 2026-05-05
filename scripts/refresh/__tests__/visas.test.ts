@@ -2,8 +2,6 @@
  * visas.mjs 테스트.
  * TESTING.md §9-A.9 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -16,6 +14,7 @@ import refreshVisas, {
   getVisaForCity,
   fetchVisaFees,
 } from '../visas.mjs';
+import type { RefreshChange } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -210,8 +209,8 @@ describe('refresh (integration)', () => {
   it('특정 도시만 갱신', async () => {
     const result = await refreshVisas({ dryRun: true, useStatic: true, cities: ['vancouver'] });
 
-    const vancouverChanges = result.changes.filter((c: any) => c.cityId === 'vancouver');
-    const torontoChanges = result.changes.filter((c: any) => c.cityId === 'toronto');
+    const vancouverChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'vancouver');
+    const torontoChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'toronto');
 
     expect(vancouverChanges.length).toBeGreaterThan(0);
     expect(torontoChanges.length).toBe(0);
@@ -257,7 +256,7 @@ describe('refresh (integration)', () => {
     const result = await refreshVisas({ dryRun: true, useStatic: true, cities: ['vancouver'] });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const visaChange = result.changes.find((c: any) => c.field.includes('visa'));
+    const visaChange = result.changes.find((c: RefreshChange) => c.field.includes('visa'));
     expect(visaChange).toBeDefined();
     expect(typeof visaChange?.pctChange).toBe('number');
   }, 30000);
@@ -285,8 +284,8 @@ describe('refresh (integration)', () => {
   it('통화별 비자 fee 확인', async () => {
     const result = await refreshVisas({ dryRun: true, useStatic: true });
 
-    const jpChanges = result.changes.filter((c: any) => c.cityId === 'tokyo' || c.cityId === 'osaka');
-    const vnChanges = result.changes.filter((c: any) => c.cityId === 'hochiminh');
+    const jpChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'tokyo' || c.cityId === 'osaka');
+    const vnChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'hochiminh');
 
     for (const change of jpChanges) {
       if (change.field === 'visa.settlementApprox') {

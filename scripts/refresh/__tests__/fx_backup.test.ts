@@ -2,8 +2,6 @@
  * fx_backup.mjs 테스트.
  * TESTING.md §9-A.10 환율 백업 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -14,6 +12,7 @@ import refreshFxBackup, {
   ECB_DAILY_URL,
   TARGET_CURRENCIES,
 } from '../fx_backup.mjs';
+import type { RefreshChange } from './_test-types';
 
 let originalFxFallbackPath: string | undefined;
 let testFxFallbackPath: string;
@@ -249,7 +248,7 @@ describe('refresh (integration)', () => {
     const result = await refreshFxBackup();
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const usdChange = result.changes.find((c: any) => c.field === 'USD');
+    const usdChange = result.changes.find((c: RefreshChange) => c.field === 'USD');
     expect(usdChange).toBeDefined();
     expect(typeof usdChange?.oldValue).toBe('number');
     expect(typeof usdChange?.pctChange).toBe('number');

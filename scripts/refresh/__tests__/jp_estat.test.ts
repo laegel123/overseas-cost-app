@@ -2,8 +2,6 @@
  * jp_estat.mjs 테스트.
  * TESTING.md §9-A.8 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -20,6 +18,7 @@ import refreshJpEstat, {
   SOURCE_RENT,
   SOURCE_FOOD,
 } from '../jp_estat.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let originalEstatAppId: string | undefined;
@@ -238,8 +237,8 @@ describe('refresh (integration)', () => {
   it('도쿄/오사카 모두 처리', async () => {
     const result = await refreshJpEstat({ dryRun: true, useStatic: true });
 
-    const tokyoChanges = result.changes.filter((c: any) => c.cityId === 'tokyo');
-    const osakaChanges = result.changes.filter((c: any) => c.cityId === 'osaka');
+    const tokyoChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'tokyo');
+    const osakaChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'osaka');
 
     expect(tokyoChanges.length).toBeGreaterThan(0);
     expect(osakaChanges.length).toBeGreaterThan(0);
@@ -288,7 +287,7 @@ describe('refresh (integration)', () => {
     const result = await refreshJpEstat({ dryRun: true, useStatic: true, cities: ['tokyo'] });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const rentChange = result.changes.find((c: any) => c.field.startsWith('rent.'));
+    const rentChange = result.changes.find((c: RefreshChange) => c.field.startsWith('rent.'));
     expect(rentChange).toBeDefined();
     expect(typeof rentChange?.pctChange).toBe('number');
   }, 30000);
@@ -296,7 +295,7 @@ describe('refresh (integration)', () => {
   it('알 수 없는 도시: errors에 추가', async () => {
     const result = await refreshJpEstat({ dryRun: true, useStatic: true, cities: ['unknown-city'] });
 
-    expect(result.errors.some((e: any) => e.cityId === 'unknown-city')).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 
   // PR #20 review round 8 — silent fail 금지 회귀 차단.
@@ -339,11 +338,11 @@ describe('refresh (integration)', () => {
 
     // 두 모드의 rent/food 변동 결과가 완전히 동일해야 함 — API sample 가 STATIC 에 미반영.
     const apiRentValues = withApi.changes
-      .filter((c: any) => c.cityId === 'tokyo' && c.field.startsWith('rent.'))
-      .map((c: any) => c.newValue);
+      .filter((c: RefreshChange) => c.cityId === 'tokyo' && c.field.startsWith('rent.'))
+      .map((c: RefreshChange) => c.newValue);
     const staticRentValues = withStatic.changes
-      .filter((c: any) => c.cityId === 'tokyo' && c.field.startsWith('rent.'))
-      .map((c: any) => c.newValue);
+      .filter((c: RefreshChange) => c.cityId === 'tokyo' && c.field.startsWith('rent.'))
+      .map((c: RefreshChange) => c.newValue);
 
     expect(apiRentValues).toEqual(staticRentValues);
   }, 30000);

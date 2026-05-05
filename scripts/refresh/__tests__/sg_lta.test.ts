@@ -2,8 +2,6 @@
  * sg_lta.mjs 테스트.
  * TESTING.md §9-A.8 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -15,6 +13,7 @@ import refreshSgLta, {
   STATIC_TRANSPORT,
   SOURCE,
 } from '../sg_lta.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -124,7 +123,7 @@ describe('refresh (integration)', () => {
   it('싱가포르 처리', async () => {
     const result = await refreshSgLta({ dryRun: true, useStatic: true });
 
-    const sgChanges = result.changes.filter((c: any) => c.cityId === 'singapore');
+    const sgChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'singapore');
     expect(sgChanges.length).toBeGreaterThan(0);
   }, 30000);
 
@@ -149,7 +148,7 @@ describe('refresh (integration)', () => {
     const result = await refreshSgLta({ dryRun: true, useStatic: true, cities: ['singapore'] });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const transportChange = result.changes.find((c: any) => c.field.startsWith('transport.'));
+    const transportChange = result.changes.find((c: RefreshChange) => c.field.startsWith('transport.'));
     expect(transportChange).toBeDefined();
     expect(typeof transportChange?.pctChange).toBe('number');
   }, 30000);
@@ -157,7 +156,7 @@ describe('refresh (integration)', () => {
   it('알 수 없는 도시: errors에 추가', async () => {
     const result = await refreshSgLta({ dryRun: true, useStatic: true, cities: ['unknown-city'] });
 
-    expect(result.errors.some((e: any) => e.cityId === 'unknown-city')).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 
   it('페이지 불가 시 static fallback + errors에 추가', async () => {
@@ -165,7 +164,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshSgLta({ dryRun: true, useStatic: false });
 
-    expect(result.errors.some((e: any) => e.reason.includes('unavailable'))).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.reason.includes('unavailable'))).toBe(true);
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 });

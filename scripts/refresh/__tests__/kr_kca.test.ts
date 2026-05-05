@@ -2,8 +2,6 @@
  * kr_kca.mjs 테스트.
  * TESTING.md §9-A.3 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -14,6 +12,7 @@ import refreshKrKca, {
   ITEM_MAPPING,
   SOURCE,
 } from '../kr_kca.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let originalApiKey: string | undefined;
@@ -273,7 +272,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshKrKca({ dryRun: true });
 
-    expect(result.errors.some((e: any) => e.reason.includes('Missing required field'))).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.reason.includes('Missing required field'))).toBe(true);
   });
 
   it('HTTP 4xx: errors에 추가', async () => {
@@ -319,7 +318,7 @@ describe('refresh (integration)', () => {
     const result = await refreshKrKca({ dryRun: true });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const milkChange = result.changes.find((c: any) => c.field === 'food.groceries.milk1L');
+    const milkChange = result.changes.find((c: RefreshChange) => c.field === 'food.groceries.milk1L');
     expect(milkChange).toBeDefined();
     expect(typeof milkChange?.pctChange).toBe('number');
   });

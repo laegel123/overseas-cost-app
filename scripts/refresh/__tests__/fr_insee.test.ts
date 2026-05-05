@@ -2,8 +2,6 @@
  * fr_insee.mjs 테스트.
  * TESTING.md §9-A.3 인벤토리 — 프랑스.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -20,6 +18,7 @@ import refreshFrInsee, {
   SOURCE_RENT,
   SOURCE_FOOD,
 } from '../fr_insee.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -273,7 +272,7 @@ describe('refresh (integration)', () => {
     const result = await refreshFrInsee({ dryRun: true, useStatic: true });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const rentChange = result.changes.find((c: any) => c.field.startsWith('rent.'));
+    const rentChange = result.changes.find((c: RefreshChange) => c.field.startsWith('rent.'));
     expect(rentChange).toBeDefined();
     expect(typeof rentChange?.pctChange).toBe('number');
   }, 30000);
@@ -281,7 +280,7 @@ describe('refresh (integration)', () => {
   it('알 수 없는 도시: errors에 추가', async () => {
     const result = await refreshFrInsee({ dryRun: true, useStatic: true, cities: ['unknown-city'] });
 
-    expect(result.errors.some((e: any) => e.cityId === 'unknown-city')).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 
   it('API 불가: errors에 추가 + static fallback', async () => {
@@ -289,7 +288,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshFrInsee({ dryRun: true });
 
-    expect(result.errors.some((e: any) => e.reason.includes('unavailable'))).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.reason.includes('unavailable'))).toBe(true);
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 });

@@ -2,8 +2,6 @@
  * universities.mjs 테스트.
  * TESTING.md §9-A.9 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -15,6 +13,7 @@ import refreshUniversities, {
   getTuitionForCity,
   fetchUniversityTuition,
 } from '../universities.mjs';
+import type { RefreshChange } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -203,8 +202,8 @@ describe('refresh (integration)', () => {
   it('특정 도시만 갱신', async () => {
     const result = await refreshUniversities({ dryRun: true, useStatic: true, cities: ['vancouver'] });
 
-    const vancouverChanges = result.changes.filter((c: any) => c.cityId === 'vancouver');
-    const torontoChanges = result.changes.filter((c: any) => c.cityId === 'toronto');
+    const vancouverChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'vancouver');
+    const torontoChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'toronto');
 
     expect(vancouverChanges.length).toBeGreaterThan(0);
     expect(torontoChanges.length).toBe(0);
@@ -248,7 +247,7 @@ describe('refresh (integration)', () => {
     const result = await refreshUniversities({ dryRun: true, useStatic: true, cities: ['vancouver'] });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const tuitionChange = result.changes.find((c: any) => c.field.includes('tuition'));
+    const tuitionChange = result.changes.find((c: RefreshChange) => c.field.includes('tuition'));
     expect(tuitionChange).toBeDefined();
     expect(typeof tuitionChange?.pctChange).toBe('number');
   }, 30000);

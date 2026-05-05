@@ -2,8 +2,6 @@
  * eu_eurostat.mjs 테스트.
  * TESTING.md §9-A.8 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import refreshEuEurostat, {
   checkEurostatStatus,
   parseEurostatResponse,
@@ -12,6 +10,7 @@ import refreshEuEurostat, {
   EUROSTAT_DATASETS,
   SOURCE,
 } from '../eu_eurostat.mjs';
+import type { RefreshError } from './_test-types';
 
 describe('parseEurostatResponse', () => {
   it('정상 JSON-stat 응답 파싱', () => {
@@ -126,7 +125,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshEuEurostat({});
 
-    expect(result.errors.some((e: any) => e.reason.includes('unavailable'))).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.reason.includes('unavailable'))).toBe(true);
     expect(result.cities).toHaveLength(0);
     expect(result.changes).toHaveLength(0);
   }, 30000);
@@ -187,7 +186,7 @@ describe('refresh (integration)', () => {
     const result = await refreshEuEurostat({});
 
     expect(result.cities).toContain('berlin');
-    expect(result.errors.some((e: any) => e.cityId === 'FR')).toBe(true);
-    expect(result.errors.some((e: any) => e.cityId === 'NL')).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId === 'FR')).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId === 'NL')).toBe(true);
   }, 30000);
 });

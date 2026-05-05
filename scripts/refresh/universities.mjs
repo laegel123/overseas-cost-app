@@ -139,7 +139,7 @@ export const SOURCE = {
  * fetcher 골조와 sources.accessedAt 갱신만 맞춰 둠 — ADR-032 의 자동 fetch 정책에 맞춘
  * 일관된 갱신 경로 확보가 목적.
  *
- * @param {Object} university
+ * @param {{school: string, level: string, url: string, staticAnnual: number}} university
  * @returns {Promise<{school: string, level: string, annual: number, fetchedFromPage: boolean}>}
  */
 export async function fetchUniversityTuition(university) {

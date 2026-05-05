@@ -2,8 +2,6 @@
  * kr_molit.mjs 테스트.
  * TESTING.md §9-A.3 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -16,6 +14,7 @@ import refreshKrMolit, {
   SEOUL_DISTRICT_CODES,
   SOURCE,
 } from '../kr_molit.mjs';
+import type { RefreshChange } from './_test-types';
 
 let originalDataDir: string | undefined;
 let originalApiKey: string | undefined;
@@ -338,7 +337,7 @@ describe('refresh (integration)', () => {
     const result = await refreshKrMolit({ dryRun: true });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const shareChange = result.changes.find((c: any) => c.field === 'rent.share');
+    const shareChange = result.changes.find((c: RefreshChange) => c.field === 'rent.share');
     expect(shareChange).toBeDefined();
     expect(typeof shareChange?.pctChange).toBe('number');
   }, 30000);

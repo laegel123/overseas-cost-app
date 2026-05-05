@@ -2,8 +2,6 @@
  * _common.mjs 테스트.
  * TESTING.md §9-A.1 공통 헬퍼 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
@@ -172,7 +170,7 @@ describe('writeCity', () => {
     const written = readTempCityFile('multi-source') as any;
     // 기존 1개 + 새 3개 = 4개. 연쇄 writeCity 호출 시 발생하던 누락 버그 회귀 차단.
     expect(written.sources).toHaveLength(4);
-    expect(written.sources.map((s: any) => s.name)).toEqual(
+    expect(written.sources.map((s: { name: string }) => s.name)).toEqual(
       expect.arrayContaining(['Test Source', 'Rent Src', 'Food Src', 'Transit Src']),
     );
   });

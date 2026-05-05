@@ -2,8 +2,6 @@
  * jp_transit.mjs 테스트.
  * TESTING.md §9-A.8 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -15,6 +13,7 @@ import refreshJpTransit, {
   STATIC_TRANSPORT,
   SOURCE,
 } from '../jp_transit.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -145,8 +144,8 @@ describe('refresh (integration)', () => {
   it('도쿄/오사카 모두 처리', async () => {
     const result = await refreshJpTransit({ dryRun: true, useStatic: true });
 
-    const tokyoChanges = result.changes.filter((c: any) => c.cityId === 'tokyo');
-    const osakaChanges = result.changes.filter((c: any) => c.cityId === 'osaka');
+    const tokyoChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'tokyo');
+    const osakaChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'osaka');
 
     expect(tokyoChanges.length).toBeGreaterThan(0);
     expect(osakaChanges.length).toBeGreaterThan(0);
@@ -173,7 +172,7 @@ describe('refresh (integration)', () => {
     const result = await refreshJpTransit({ dryRun: true, useStatic: true, cities: ['tokyo'] });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const transportChange = result.changes.find((c: any) => c.field.startsWith('transport.'));
+    const transportChange = result.changes.find((c: RefreshChange) => c.field.startsWith('transport.'));
     expect(transportChange).toBeDefined();
     expect(typeof transportChange?.pctChange).toBe('number');
   }, 30000);
@@ -181,7 +180,7 @@ describe('refresh (integration)', () => {
   it('알 수 없는 도시: errors에 추가', async () => {
     const result = await refreshJpTransit({ dryRun: true, useStatic: true, cities: ['unknown-city'] });
 
-    expect(result.errors.some((e: any) => e.cityId === 'unknown-city')).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 
   it('API 불가 시 static fallback + errors에 추가', async () => {
@@ -189,7 +188,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshJpTransit({ dryRun: true, useStatic: false });
 
-    expect(result.errors.some((e: any) => e.reason.includes('unavailable'))).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.reason.includes('unavailable'))).toBe(true);
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 });

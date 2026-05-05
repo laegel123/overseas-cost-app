@@ -2,8 +2,6 @@
  * sg_singstat.mjs 테스트.
  * TESTING.md §9-A.8 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -20,6 +18,7 @@ import refreshSgSingstat, {
   SOURCE_RENT,
   SOURCE_FOOD,
 } from '../sg_singstat.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let originalSgDataGovKey: string | undefined;
@@ -207,14 +206,14 @@ describe('refresh (integration)', () => {
   it('싱가포르 처리', async () => {
     const result = await refreshSgSingstat({ dryRun: true, useStatic: true });
 
-    const sgChanges = result.changes.filter((c: any) => c.cityId === 'singapore');
+    const sgChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'singapore');
     expect(sgChanges.length).toBeGreaterThan(0);
   }, 30000);
 
   it('SG_DATA_GOV_KEY 미설정 시 errors에 추가 (useStatic=false)', async () => {
     const result = await refreshSgSingstat({ dryRun: true, useStatic: false });
 
-    expect(result.errors.some((e: any) => e.reason.includes('SG_DATA_GOV_KEY'))).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.reason.includes('SG_DATA_GOV_KEY'))).toBe(true);
   }, 30000);
 
   it('기존 데이터 대비 changes 계산', async () => {
@@ -238,7 +237,7 @@ describe('refresh (integration)', () => {
     const result = await refreshSgSingstat({ dryRun: true, useStatic: true, cities: ['singapore'] });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const rentChange = result.changes.find((c: any) => c.field.startsWith('rent.'));
+    const rentChange = result.changes.find((c: RefreshChange) => c.field.startsWith('rent.'));
     expect(rentChange).toBeDefined();
     expect(typeof rentChange?.pctChange).toBe('number');
   }, 30000);
@@ -246,6 +245,6 @@ describe('refresh (integration)', () => {
   it('알 수 없는 도시: errors에 추가', async () => {
     const result = await refreshSgSingstat({ dryRun: true, useStatic: true, cities: ['unknown-city'] });
 
-    expect(result.errors.some((e: any) => e.cityId === 'unknown-city')).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 });

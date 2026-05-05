@@ -2,8 +2,6 @@
  * kr_kosis.mjs 테스트.
  * TESTING.md §9-A.3 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -15,6 +13,7 @@ import refreshKrKosis, {
   BASE_PRICES,
   SOURCE,
 } from '../kr_kosis.mjs';
+import type { RefreshChange, RefreshError } from './_test-types';
 
 let originalDataDir: string | undefined;
 let originalApiKey: string | undefined;
@@ -175,7 +174,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshKrKosis({ dryRun: true });
 
-    const mealChange = result.changes.find((c: any) => c.field === 'food.restaurantMeal');
+    const mealChange = result.changes.find((c: RefreshChange) => c.field === 'food.restaurantMeal');
     expect(mealChange?.newValue).toBe(cpiToPrice('restaurantMeal', 115.5));
   });
 
@@ -204,7 +203,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshKrKosis({ dryRun: true });
 
-    expect(result.errors.some((e: any) => e.reason.includes('Missing CPI for cafe'))).toBe(true);
+    expect(result.errors.some((e: RefreshError) => e.reason.includes('Missing CPI for cafe'))).toBe(true);
   });
 
   it('비-JSON 응답: errors 추가', async () => {
@@ -263,7 +262,7 @@ describe('refresh (integration)', () => {
     const result = await refreshKrKosis({ dryRun: true });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const mealChange = result.changes.find((c: any) => c.field === 'food.restaurantMeal');
+    const mealChange = result.changes.find((c: RefreshChange) => c.field === 'food.restaurantMeal');
     expect(mealChange).toBeDefined();
     expect(typeof mealChange?.pctChange).toBe('number');
   });
