@@ -184,6 +184,16 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
+  it('push retry 의 git pull --rebase 실패는 silent 가 아닌 ::warning 으로 노출 (PR #20 review round 8)', () => {
+    // 과거 `|| true` 로 rebase 실패가 silent fail → 충돌 진단 어려움. ::warning echo 로 표면화.
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      expect(content).toContain('git pull --rebase origin');
+      expect(content).not.toMatch(/git pull --rebase origin .* \|\| true$/m);
+      expect(content).toMatch(/git pull --rebase origin .* \|\| echo "::warning::rebase attempt/);
+    }
+  });
+
   it('각 워크플로우에 permissions 설정 존재', () => {
     for (const workflow of REFRESH_WORKFLOWS) {
       const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');

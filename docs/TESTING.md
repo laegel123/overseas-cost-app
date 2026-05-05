@@ -2198,6 +2198,11 @@ afterEach(() => {
 - [x] 음수 입력 → throws (cost 데이터에 음수 미허용)
 - [x] `NaN` 입력 → throws
 
+#### `iterNumericFields(oldData, newData)` (in `_outlier.mjs`)
+
+- [x] `rent.censusMedian` 추적하지 않음 — cross-validation 보조 필드 (PR #20 review round 8)
+- [x] `rent.deposit`, `tax.*` 추적하지 않음 — fetcher 가 채우지 않거나 변동 알림이 의미 없는 필드
+
 #### `diffCities(oldData, newData): ChangeRecord[]` (in `_diff.mjs`)
 
 - [x] 변경 없음: 빈 배열
@@ -2308,6 +2313,7 @@ afterEach(() => {
 - [x] `parseCensusResponse` 파싱
 - [x] `US_CENSUS_API_KEY` 환경변수 필수 (MissingApiKeyError)
 - [x] censusMedian 필드로 교차 검증용 저장
+- [x] ACS_YEAR 상수 — fetch URL 의 연도가 미래 연도가 아님 (운영 정책 회귀, PR #20 review round 8)
 
 #### `us_bls.mjs`
 
@@ -2453,6 +2459,8 @@ afterEach(() => {
 - [x] refresh: 기존 데이터 대비 changes 계산
 - [x] refresh: 알 수 없는 도시 → errors에 추가
 - [x] refresh: API 불가 시 static fallback + errors에 추가
+- [x] `fetchEstatData` fetch 실패 시 `console.warn` 으로 예외 노출 (silent fail 금지, PR #20 review round 8)
+- [x] v1.0 계약 — e-Stat API sample 응답이 도시 JSON 의 rent/food 값에 미반영 (응답 단위 검증 v1.x)
 
 #### `sg_singstat.mjs`
 
@@ -2675,6 +2683,7 @@ afterEach(() => {
 - [x] outlier 라벨 분기 (PR 생성 vs 직접 commit)
 - [x] 환경변수 export (`HAS_OUTLIERS=true`) 정확
 - [x] v1.0 useStatic 정책 — visas / universities / jp_estat 호출은 `--useStatic` 동반 (PR #20 review round 7)
+- [x] push retry 의 `git pull --rebase` 실패는 `::warning` 으로 노출, silent `|| true` 금지 (PR #20 review round 8)
 
 ### 9-A.14 `_registry.mjs` (도시 ↔ 출처 매핑)
 

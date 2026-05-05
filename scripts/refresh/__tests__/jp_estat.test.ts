@@ -12,6 +12,7 @@ import refreshJpEstat, {
   parseEstatValue,
   mapToRent,
   mapToGroceries,
+  fetchEstatData,
   CITY_CONFIGS,
   STATIC_RENT,
   STATIC_GROCERIES,
@@ -296,5 +297,54 @@ describe('refresh (integration)', () => {
     const result = await refreshJpEstat({ dryRun: true, useStatic: true, cities: ['unknown-city'] });
 
     expect(result.errors.some((e: any) => e.cityId === 'unknown-city')).toBe(true);
+  }, 30000);
+
+  // PR #20 review round 8 — silent fail 금지 회귀 차단.
+  it('fetchEstatData fetch 실패 시 console.warn 으로 예외 노출 (silent fail 금지)', async () => {
+    const fetchSpy = jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Network timeout'));
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const result = await fetchEstatData('0003427113', '13000', 'test-app-id');
+
+    expect(result).toBeNull();
+    expect(warnSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/\[jp_estat\] fetchEstatData 0003427113\/13000 failed: .*Network timeout/),
+    );
+    fetchSpy.mockRestore();
+    warnSpy.mockRestore();
+  }, 30000);
+
+  // PR #20 review round 8 — v1.0 계약 회귀 차단.
+  // jp_estat 가 fetchEstatData 응답을 STATIC 보정에 적용하지 않음을 보장 (v1.x 단위 검증 도입 전까지).
+  it('v1.0 계약: e-Stat API sample 응답이 도시 JSON 의 rent/food 값에 영향 없음', async () => {
+    process.env.JP_ESTAT_APP_ID = 'test-app-id';
+
+    // STATIC 과 큰 차이 나는 의도적 sample 값 — 만약 v1.0 에서 응답이 STATIC 보정에 wire 된다면
+    // result.changes 의 rent/food 값이 sample 영향을 받아야 한다. 본 테스트는 그렇지 않음을 단언.
+    const farFromStaticResponse = {
+      GET_STATS_DATA: {
+        STATISTICAL_DATA: { DATA_INF: { VALUE: [{ $: '999999' }] } },
+      },
+    };
+    const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify(farFromStaticResponse), { status: 200 }),
+    );
+    const infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
+
+    const withApi = await refreshJpEstat({ dryRun: true, useStatic: false, cities: ['tokyo'] });
+    fetchSpy.mockRestore();
+    infoSpy.mockRestore();
+
+    const withStatic = await refreshJpEstat({ dryRun: true, useStatic: true, cities: ['tokyo'] });
+
+    // 두 모드의 rent/food 변동 결과가 완전히 동일해야 함 — API sample 가 STATIC 에 미반영.
+    const apiRentValues = withApi.changes
+      .filter((c: any) => c.cityId === 'tokyo' && c.field.startsWith('rent.'))
+      .map((c: any) => c.newValue);
+    const staticRentValues = withStatic.changes
+      .filter((c: any) => c.cityId === 'tokyo' && c.field.startsWith('rent.'))
+      .map((c: any) => c.newValue);
+
+    expect(apiRentValues).toEqual(staticRentValues);
   }, 30000);
 });

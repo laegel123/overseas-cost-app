@@ -3,7 +3,7 @@
  * TESTING.md §9-A.1 classifyChange 인벤토리 100% 커버.
  */
 
-import { classifyChange, computePctChange } from '../_outlier.mjs';
+import { classifyChange, computePctChange, iterNumericFields } from '../_outlier.mjs';
 
 describe('classifyChange', () => {
   describe('null 처리', () => {
@@ -148,5 +148,58 @@ describe('computePctChange', () => {
 
   it('0 → 0: 0', () => {
     expect(computePctChange(0, 0)).toBe(0);
+  });
+});
+
+describe('iterNumericFields', () => {
+  // PR #20 review round 8 — us_census.mjs 의 `rent.censusMedian` 은 cross-validation 보조 필드라
+  // outlier PR 트리거 대상이 아님. 본 테스트가 추적 제외 정책을 회귀 차단한다.
+  // 정책이 변경되어 censusMedian 도 추적해야 한다면 본 테스트 + us_census.mjs 모듈 주석 + TESTING.md 동기화.
+  it('rent.censusMedian 는 추적하지 않음 (cross-validation 전용 보조 필드)', () => {
+    const oldData = {
+      rent: { share: 1000, studio: 1500, oneBed: 1800, twoBed: 2200, censusMedian: 2100 },
+      food: { restaurantMeal: 20, cafe: 5, groceries: {} },
+      transport: { monthlyPass: 100, singleRide: 2.5, taxiBase: 3 },
+      tuition: [],
+      visa: { studentApplicationFee: 100, workApplicationFee: 200, settlementApprox: 3000 },
+    };
+    const newData = {
+      rent: { share: 1100, studio: 1600, oneBed: 1900, twoBed: 2300, censusMedian: 2400 },
+      food: { restaurantMeal: 20, cafe: 5, groceries: {} },
+      transport: { monthlyPass: 100, singleRide: 2.5, taxiBase: 3 },
+      tuition: [],
+      visa: { studentApplicationFee: 100, workApplicationFee: 200, settlementApprox: 3000 },
+    };
+
+    const paths = [...iterNumericFields(oldData, newData)].map((f) => f.path);
+
+    expect(paths).toContain('rent.share');
+    expect(paths).toContain('rent.studio');
+    expect(paths).toContain('rent.oneBed');
+    expect(paths).toContain('rent.twoBed');
+    expect(paths).not.toContain('rent.censusMedian');
+  });
+
+  it('tax / rent.deposit 도 추적하지 않음 (의도적 제외)', () => {
+    // 모듈 주석에 명시된 정책 — fetcher 가 채우지 않거나 변동 알림이 의미 없는 필드.
+    const oldData = {
+      rent: { share: 1000, deposit: 5000 },
+      food: {},
+      transport: {},
+      tax: { annualSalary: 50000000, takeHomePctApprox: 0.78 },
+    };
+    const newData = {
+      rent: { share: 1100, deposit: 6000 },
+      food: {},
+      transport: {},
+      tax: { annualSalary: 55000000, takeHomePctApprox: 0.77 },
+    };
+
+    const paths = [...iterNumericFields(oldData, newData)].map((f) => f.path);
+
+    expect(paths).toContain('rent.share');
+    expect(paths).not.toContain('rent.deposit');
+    expect(paths).not.toContain('tax.annualSalary');
+    expect(paths).not.toContain('tax.takeHomePctApprox');
   });
 });

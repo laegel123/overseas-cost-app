@@ -22,7 +22,11 @@
 import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, createMissingApiKeyError } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
-const CENSUS_API_BASE = 'https://api.census.gov/data/2022/acs/acs5';
+// ACS 5-Year Estimates 는 매년 12월에 직전 연도 dataset 이 공개된다 (예: 2023 dataset → 2024-12 공개).
+// 본 상수는 운영자가 매년 1회 수동 갱신해야 한다 — Census API 가 미래 연도에 대해 redirect 가 아니라
+// 4xx 를 반환하므로 자동 fallback 은 위험. CHANGELOG/AUTOMATION.md 의 "연 1회 ACS_YEAR 갱신" 항목 참조.
+const ACS_YEAR = 2023;
+const CENSUS_API_BASE = `https://api.census.gov/data/${ACS_YEAR}/acs/acs5`;
 
 export const CITY_CONFIGS = {
   nyc: {
@@ -122,6 +126,11 @@ export default async function refresh(opts = {}) {
 
     let medianRent;
     try {
+      // Census API 는 GET-only — `key` 를 query param 외 다른 곳으로 옮길 수 없다 (ADR-032 공공 API 제약).
+      // `fetchWithRetry` 가 던지는 에러는 `redactSecretsInUrl` 가 `key=...` 를 마스킹하므로 에러 로그 안전.
+      // 단 `ACTIONS_STEP_DEBUG=true` (GitHub Actions debug 모드) 활성화 시 워크플로우 runner 가 fetch
+      // 명령 자체를 stderr 에 dump 할 수 있어 URL 가 노출될 수 있다 — Census API 키는 무료·공공 키라
+      // 위험도는 낮으나, 디버깅 시 의도적으로 활성화해야 한다는 점을 운영자가 인지해야 한다.
       const url = `${CENSUS_API_BASE}?get=B25064_001E,NAME&for=metropolitan%20statistical%20area/micropolitan%20statistical%20area:${config.cbsaCode}&key=${apiKey}`;
       const response = await fetchWithRetry(url);
       const data = await response.json();

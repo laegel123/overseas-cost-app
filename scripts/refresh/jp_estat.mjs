@@ -114,7 +114,13 @@ export async function fetchEstatData(statsDataId, areaCode, appId) {
     });
     const data = await response.json();
     return parseEstatValue(data);
-  } catch {
+  } catch (err) {
+    // CLAUDE.md "silent fail 금지" — 예외 원인 (timeout / 5xx / JSON 파싱 실패) 을 log 로 보존.
+    // 호출자(refresh)는 null 을 받아 errors 에 cityId 단위로 기록하므로 여기서 throw 하지 않고
+    // graceful degradation 유지. URL 의 appId 는 redactErrorMessage 로 마스킹.
+    console.warn(
+      `[jp_estat] fetchEstatData ${statsDataId}/${areaCode} failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`,
+    );
     return null;
   }
 }

@@ -100,6 +100,13 @@ const HALF_GALLON_LITERS = 1.8927;
 // 배경: 과거 chicken1kg 시리즈가 실제 시장가 ($1.5~2.0/lb) 의 5× 가량인 ~$10/lb 를 반환해
 // 도시 JSON 에 25.3 USD/kg (= $11.5/lb) 의 비현실적 값이 적재된 사례 (PR #20 review).
 // silent fail 금지 정책상 발견 시 errors 에 명시 기록 후 정적 추정치로 대체한다.
+//
+// **단위 주의** (PR #20 round 7 review):
+//  - 본 범위는 BLS API 의 **원시 응답값** (per lb / per dozen / per ½ gallon) 단위.
+//  - STATIC_GROCERIES.chicken1kg (10 USD/kg) 와 직접 비교 불가 — STATIC 은 이미 kg 단위 + 도시별
+//    adjustmentFactor 가 적용된 값이고, validation 은 raw BLS value 통과 여부만 본다.
+//  - 결과적으로 NYC 의 chicken 값은 STATIC fallback 시 11.5 USD/kg, BLS pass 시 최대 12.65 USD/kg
+//    까지 가능 (5.0/lb × 2.2 × 1.15) — 두 경로 모두 일관되게 "whole chicken 시장가 ±2배 이내".
 export const BLS_VALUE_RANGES = {
   milk1L: { min: 1.0, max: 6.0 }, // USD per ½ gallon (1.89 L)
   eggs12: { min: 1.0, max: 8.0 }, // USD per dozen
@@ -196,6 +203,8 @@ export function mapToGroceries(blsData, seriesIds, adjustmentFactor) {
   return {
     milk1L: milk1L ? applyFactor(milk1L / HALF_GALLON_LITERS) : applyFactor(STATIC_GROCERIES.milk1L),
     eggs12: eggs12 ? applyFactor(eggs12) : applyFactor(STATIC_GROCERIES.eggs12),
+    // BLS APU 시리즈에 white rice 항목이 없어 (BLS 가 rice 를 별도 series 로 추적하지 않음)
+    // 항상 static 추정치 사용. onion1kg / apple1kg / ramen 도 동일 사유로 static 전용.
     rice1kg: applyFactor(STATIC_GROCERIES.rice1kg),
     chicken1kg: chicken1kg ? applyFactor(chicken1kg * 2.2) : applyFactor(STATIC_GROCERIES.chicken1kg),
     bread: bread ? applyFactor(bread) : applyFactor(STATIC_GROCERIES.bread),

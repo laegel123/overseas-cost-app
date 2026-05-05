@@ -434,8 +434,13 @@ PR 자동 생성: `peter-evans/create-pull-request@v6` 액션 사용. 라벨 자
 | 자동 PR 리뷰 (auto-update) | 주 ~5건   | ~30분/주          |
 | 자동 PR 리뷰 (outlier)     | 월 ~3건   | ~1시간/월         |
 | 워크플로우 실패 대응       | 분기 ~1건 | ~1시간/분기       |
+| ACS_YEAR 수동 갱신         | 연 1회    | ~10분/년          |
 | 신규 도시 추가 (확장)      | ad-hoc    | ~3시간/도시       |
 | **연간 총 운영 시간**      | —         | **~30~40시간/년** |
+
+> `scripts/refresh/us_census.mjs` 의 `ACS_YEAR` 상수는 매년 12월에 새 dataset 이 공개되면 직전
+> 연도로 갱신해야 한다 (Census API 가 미래 연도에 4xx 반환 → 자동 fallback 위험). PR 리뷰 round 8
+> 에서 추출 — 갱신 시 us_census 출력값이 1년치 변동을 반영하므로 outlier PR 발생 가능.
 
 수동 큐레이션 70시간/년 → 자동화 후 30~40시간/년. **운영 부담 ~50% 감소**.
 

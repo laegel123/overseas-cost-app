@@ -142,6 +142,29 @@ describe('refresh (integration)', () => {
     expect(result.changes[0]?.field).toBe('rent.censusMedian');
   }, 30000);
 
+  // PR #20 review round 8 — Census API 연도 운영 정책 회귀 차단.
+  it('Census API URL 에 ACS 연도가 포함되며 미래 연도가 아니어야 함 (운영 정책)', async () => {
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => VALID_CENSUS_RESPONSE,
+    });
+
+    await refreshUsCensus({ dryRun: true, cities: ['nyc'] });
+
+    expect(fetchSpy).toHaveBeenCalled();
+    const calledUrl = String(fetchSpy.mock.calls[0]?.[0] ?? '');
+    const match = calledUrl.match(/api\.census\.gov\/data\/(\d{4})\/acs\/acs5/);
+    expect(match).not.toBeNull();
+
+    const year = Number(match![1]);
+    const currentYear = new Date().getFullYear();
+    // ACS 5-Year 는 매년 12월 직전 연도 dataset 공개 — 운영자가 갱신 안 한 경우 currentYear-1
+    // 도 허용. 미래 연도는 Census API 가 4xx 반환하므로 차단.
+    expect(year).toBeGreaterThanOrEqual(2022);
+    expect(year).toBeLessThanOrEqual(currentYear);
+  }, 30000);
+
   it('dryRun=true: 파일 미갱신', async () => {
     fetchSpy.mockResolvedValue({
       ok: true,
