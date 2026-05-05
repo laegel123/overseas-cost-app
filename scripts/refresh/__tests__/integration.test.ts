@@ -278,33 +278,54 @@ describe('Integration: Workflow YAML Validation', () => {
 describe('Integration: Schedule Validation', () => {
   const WORKFLOW_DIR = path.join(__dirname, '..', '..', '..', '.github', 'workflows');
 
-  it('refresh-fx: 매일 00:00 UTC', () => {
+  // GitHub Actions cron 은 UTC 기준. KST 운영 시각 → UTC 변환:
+  //  - 09:00 KST = 00:00 UTC (refresh-fx 만)
+  //  - 18:00 KST = 09:00 UTC (refresh-prices/rent/transit/tuition/visa)
+  // 과거 round 0~20 까지 5개 워크플로우 cron 이 '0 18 ...' 로 적혀 있어 실제로는 UTC 18:00 = 익일
+  // 03:00 KST 새벽 실행. PR #20 review round 21 에서 발견 후 '0 9 ...' 로 정정.
+
+  it('refresh-fx: 매일 00:00 UTC (= 09:00 KST)', () => {
     const content = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-fx.yml'), 'utf-8');
     expect(content).toContain("cron: '0 0 * * *'");
   });
 
-  it('refresh-prices: 매주 월요일', () => {
+  it('refresh-prices: 매주 월요일 09:00 UTC (= 18:00 KST)', () => {
     const content = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-prices.yml'), 'utf-8');
-    expect(content).toContain("cron: '0 18 * * 1'");
+    expect(content).toContain("cron: '0 9 * * 1'");
   });
 
-  it('refresh-rent: 매월 1일', () => {
+  it('refresh-rent: 매월 1일 09:00 UTC (= 18:00 KST)', () => {
     const content = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-rent.yml'), 'utf-8');
-    expect(content).toContain("cron: '0 18 1 * *'");
+    expect(content).toContain("cron: '0 9 1 * *'");
   });
 
-  it('refresh-transit: 분기 첫 달 2일 (rent 와 동시 실행 충돌 회피)', () => {
+  it('refresh-transit: 분기 첫 달 2일 09:00 UTC (= 18:00 KST). 1일 rent 와 동시 실행 충돌 회피', () => {
     const content = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-transit.yml'), 'utf-8');
-    expect(content).toContain("cron: '0 18 2 1,4,7,10 *'");
+    expect(content).toContain("cron: '0 9 2 1,4,7,10 *'");
   });
 
-  it('refresh-tuition: 분기 첫 달 15일', () => {
+  it('refresh-tuition: 분기 첫 달 15일 09:00 UTC (= 18:00 KST)', () => {
     const content = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-tuition.yml'), 'utf-8');
-    expect(content).toContain("cron: '0 18 15 1,4,7,10 *'");
+    expect(content).toContain("cron: '0 9 15 1,4,7,10 *'");
   });
 
-  it('refresh-visa: 분기 첫 달 20일', () => {
+  it('refresh-visa: 분기 첫 달 20일 09:00 UTC (= 18:00 KST)', () => {
     const content = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-visa.yml'), 'utf-8');
-    expect(content).toContain("cron: '0 18 20 1,4,7,10 *'");
+    expect(content).toContain("cron: '0 9 20 1,4,7,10 *'");
+  });
+
+  it('과거 03:00 KST 실행 회귀 차단 — 어떤 워크플로우도 cron hour 가 18 이 되어선 안 됨 (PR #20 review round 21)', () => {
+    const REFRESH_WORKFLOWS = [
+      'refresh-fx.yml', 'refresh-prices.yml', 'refresh-rent.yml',
+      'refresh-transit.yml', 'refresh-tuition.yml', 'refresh-visa.yml',
+    ];
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      // cron 줄에서 hour 부분만 추출. 주석에 '18:00 KST' 같은 텍스트가 있는 건 무관.
+      const match = content.match(/^\s*-\s*cron:\s*'\d+\s+(\d+)\s+/m);
+      expect(match).not.toBeNull();
+      const hour = Number(match![1]);
+      expect(hour).not.toBe(18);
+    }
   });
 });

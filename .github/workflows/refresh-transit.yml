@@ -2,7 +2,7 @@ name: Refresh Transit
 
 on:
   schedule:
-    - cron: '0 18 2 1,4,7,10 *' # 분기 첫 달 2일 18:00 KST (= 09:00 UTC). 1일은 refresh-rent 와 충돌 회피.
+    - cron: '0 9 2 1,4,7,10 *' # 분기 첫 달 2일 09:00 UTC (= 18:00 KST). 1일은 refresh-rent 와 충돌 회피. PR #20 review round 21 — 과거 '0 18'은 UTC 18:00 = 익일 03:00 KST 였음.
   workflow_dispatch:  # 운영자 수동 트리거 — feature 브랜치 dispatch 시 해당 브랜치에 데이터 commit. main 외 브랜치는 의도된 운영자만 사용 (AUTOMATION.md §8.1).
 
 # **호치민(VN) transit 은 본 워크플로우에서 갱신되지 않음 — 의도적**.
