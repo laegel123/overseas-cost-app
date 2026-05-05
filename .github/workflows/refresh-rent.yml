@@ -3,7 +3,7 @@ name: Refresh Rent
 on:
   schedule:
     - cron: '0 18 1 * *' # 매월 1일 18:00 KST (= 09:00 UTC)
-  workflow_dispatch:
+  workflow_dispatch:  # 운영자 수동 트리거 — feature 브랜치 dispatch 시 해당 브랜치에 데이터 commit. main 외 브랜치는 의도된 운영자만 사용 (AUTOMATION.md §8.1).
 
 concurrency:
   group: data-refresh-rent-${{ github.ref }}
@@ -23,9 +23,8 @@ jobs:
     env:
       KR_DATA_API_KEY: ${{ secrets.KR_DATA_API_KEY }}
       US_CENSUS_API_KEY: ${{ secrets.US_CENSUS_API_KEY }}
-      SG_DATA_GOV_KEY: ${{ secrets.SG_DATA_GOV_KEY }}
-      # JP_ESTAT_APP_ID 는 v1.0 에서 사용 안 함 (jp_estat 가 --useStatic 모드).
-      # v1.x 응답 단위 검증 도입 시 다시 wire up.
+      # JP_ESTAT_APP_ID / SG_DATA_GOV_KEY 는 v1.0 에서 사용 안 함 (jp_estat / sg_singstat 가
+      # --useStatic 모드). v1.x 응답 단위 검증 도입 시 다시 wire up.
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -96,15 +95,12 @@ jobs:
       - name: Refresh JP e-Stat (useStatic — v1.0)
         run: node scripts/refresh/_run.mjs jp_estat --useStatic
 
-      # Singapore - SingStat. data.gov.sg dataset 일부가 SG_DATA_GOV_KEY 를 요구하므로
-      # 키 부재 시 sg_singstat 가 errors 에 'SG_DATA_GOV_KEY not set' 을 기록 + static 사용.
-      # 다른 fetcher 의 conditional skip 패턴과 일관 — 키 없을 때 명시적 warning.
-      - name: Skip sg_singstat warning if API key absent
-        if: env.SG_DATA_GOV_KEY == ''
-        run: echo "::warning::SG_DATA_GOV_KEY not set, sg_singstat will use static values"
-
-      - name: Refresh SG SingStat
-        run: node scripts/refresh/_run.mjs sg_singstat
+      # Singapore - SingStat — v1.0 정책상 --useStatic 필수 (PR #20 review round 13).
+      # sg_singstat.mjs 의 fetchSingStatTable / apiAvailable 는 v1.0 에서 응답 단위 검증 미완으로
+      # STATIC 보정에 wire up 되지 않아 항상 STATIC 반환. SingStat tablebuilder API 호출 + 키 노출
+      # 위험을 차단하기 위해 jp_estat 와 동일 패턴으로 --useStatic 강제. v1.x 응답 단위 검증 후 제거.
+      - name: Refresh SG SingStat (useStatic — v1.0)
+        run: node scripts/refresh/_run.mjs sg_singstat --useStatic
 
       # Vietnam - GSO (rent + food + transport — static estimates)
       - name: Refresh VN GSO

@@ -3,7 +3,7 @@ name: Refresh FX (daily backup of client-side FX cache)
 on:
   schedule:
     - cron: '0 0 * * *' # 매일 00:00 UTC (= 09:00 KST)
-  workflow_dispatch:
+  workflow_dispatch:  # 운영자 수동 트리거 — feature 브랜치 dispatch 시 해당 브랜치에 데이터 commit. main 외 브랜치는 의도된 운영자만 사용 (AUTOMATION.md §8.1).
 
 concurrency:
   # 카테고리별 고유 group — refresh-prices 와 refresh-rent 가 같은 ref 에서도 병렬 실행 가능.

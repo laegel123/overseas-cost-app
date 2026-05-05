@@ -143,11 +143,11 @@ describe('constants', () => {
     expect(STATIC_RENT.twoBed).toBeGreaterThan(STATIC_RENT.oneBed);
   });
 
-  it('STATIC_FOOD: 싱가포르 외식비 + hawker', () => {
+  it('STATIC_FOOD: 싱가포르 외식비 — restaurantMeal / cafe 만 (PR #20 review round 13)', () => {
     expect(STATIC_FOOD.restaurantMeal).toBeGreaterThan(0);
     expect(STATIC_FOOD.cafe).toBeGreaterThan(0);
-    expect(STATIC_FOOD.hawkerMeal).toBeGreaterThan(0);
-    expect(STATIC_FOOD.hawkerMeal).toBeLessThan(STATIC_FOOD.restaurantMeal);
+    // hawkerMeal 은 v1.0 schema 에 없는 dead field 라 제거 — 본 단언이 미래 회귀 차단.
+    expect(STATIC_FOOD).not.toHaveProperty('hawkerMeal');
   });
 
   it('SOURCE_RENT 정의', () => {

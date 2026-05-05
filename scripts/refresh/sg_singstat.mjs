@@ -7,6 +7,20 @@
  * API: https://tablebuilder.singstat.gov.sg/api/table/tabledata/<resourceId>
  * 키: SG_DATA_GOV_KEY (data.gov.sg API)
  *
+ * **v1.0 한계 (PR #20 review round 13)**: jp_estat 와 동일 패턴 — `fetchSingStatTable` /
+ * `apiAvailable` 가 정의돼 있으나 실제 데이터 fetch 결과를 STATIC 보정에 적용하지 않는다.
+ * `checkSingStatStatus()` 는 호출되지만 결과 (`apiAvailable`) 가 후속 분기에 wire up 되지 않아
+ * sg_singstat 는 사실상 항상 STATIC_RENT / STATIC_GROCERIES 를 반환한다.
+ *
+ * 이유: SingStat tablebuilder API 응답의 row 단위 (월별 누적값 vs 인덱스 vs 가격) 검증이 v1.x
+ * 별도 phase 필요. 워크플로우에서 `--useStatic` 적용으로 무의미한 SingStat API 호출 + 키 노출
+ * 위험 차단 (jp_estat / visas / universities 와 일관 정책).
+ *
+ * v1.x 계획:
+ * - `fetchSingStatTable` 응답 단위 / scale 검증 (HDB rental index 기준년도, CPI item-level 매핑)
+ * - 검증 통과 후 `apiAvailable === true` 분기에서 STATIC 대체
+ * - 워크플로우의 `--useStatic` 제거
+ *
  * 방법:
  * - rent: HDB rental + private property rental 평균
  * - food: CPI by item + hawker centre 가격 정적 추정
@@ -50,10 +64,12 @@ export const STATIC_GROCERIES = {
   ramen: 1.50,
 };
 
+// v1.0 schema (`CityCostData.food`) 에는 `restaurantMeal` / `cafe` / `groceries` 만 존재.
+// 과거 `hawkerMeal` 필드가 정의돼 있었으나 city JSON 으로 흘러들지 않는 dead field 라 제거 (PR #20
+// review round 13). hawker centre 가격은 v1.x 에서 schema 확장 시 별도 필드로 도입 검토.
 export const STATIC_FOOD = {
   restaurantMeal: 15.00,
   cafe: 6.00,
-  hawkerMeal: 5.00,
 };
 
 export const SOURCE_RENT = {
@@ -108,6 +124,10 @@ export function parseSingStatValue(data) {
 
 /**
  * SingStat 테이블 데이터 fetch.
+ *
+ * **TODO (v1.x)**: 본 함수는 v1.0 에서 호출되지 않음 — 응답 row 단위/scale 검증 후 wire up 예정
+ * (헤더 주석의 v1.0 한계 참조).
+ *
  * @param {string} tableId
  * @param {string} [apiKey]
  * @returns {Promise<number | null>}

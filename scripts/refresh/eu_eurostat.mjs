@@ -53,6 +53,9 @@ export async function checkEurostatStatus() {
   const url = `${EUROSTAT_API_BASE}/${EUROSTAT_DATASETS.hicp}?format=JSON&geo=EU27_2020&lastNObservations=1`;
   try {
     const response = await fetchWithRetry(url, { timeoutMs: 15000 });
+    // reachability check 만 필요 — body 미사용. undici keep-alive 연결 점유 방지
+    // (vn_gso::checkGsoStatus / visas::fetchVisaFees 동일 패턴, PR #20 review round 13).
+    await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch {
     return false;

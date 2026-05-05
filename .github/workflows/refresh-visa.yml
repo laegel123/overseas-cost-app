@@ -3,7 +3,7 @@ name: Refresh Visa
 on:
   schedule:
     - cron: '0 18 20 1,4,7,10 *' # 분기 첫 달 20일 18:00 KST (= 09:00 UTC)
-  workflow_dispatch:
+  workflow_dispatch:  # 운영자 수동 트리거 — feature 브랜치 dispatch 시 해당 브랜치에 데이터 commit. main 외 브랜치는 의도된 운영자만 사용 (AUTOMATION.md §8.1).
 
 concurrency:
   group: data-refresh-visa-${{ github.ref }}

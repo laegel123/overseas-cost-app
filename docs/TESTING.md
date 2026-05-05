@@ -2475,7 +2475,7 @@ afterEach(() => {
 - [x] mapToRent: 정적 임대료 (SGD 단위)
 - [x] mapToGroceries: 정적 식재료 가격
 - [x] CITY_CONFIGS: 싱가포르 포함 (id, name, country, currency, region)
-- [x] STATIC_FOOD: hawkerMeal 포함 (hawker centre 정적)
+- [x] STATIC_FOOD: restaurantMeal / cafe 만 (hawkerMeal 은 dead field 로 제거, PR #20 review round 13)
 - [x] SOURCE_RENT / SOURCE_FOOD: singstat.gov.sg URL 명시
 - [x] refresh: useStatic=true 시 API 호출 없이 정적 데이터 사용
 - [x] refresh: dryRun=true 시 파일 미갱신

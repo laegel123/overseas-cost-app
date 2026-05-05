@@ -202,10 +202,14 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
-  it('refresh-rent.yml env 에 SG_DATA_GOV_KEY 가 wired (sg_singstat 동작 보장, PR #20 review round 9)', () => {
-    // 누락 시 sg_singstat 가 항상 errors+static 으로 떨어져 SingStat API 가 실질적 미동작.
+  it('v1.0 useStatic 정책 — sg_singstat 도 --useStatic 동반 (PR #20 review round 13)', () => {
+    // round 9 에서 SG_DATA_GOV_KEY env 를 wire up 했으나, round 13 에서 sg_singstat 의
+    // fetchSingStatTable / apiAvailable 가 실제 보정에 적용되지 않는 것이 확인돼 jp_estat 와
+    // 동일 패턴으로 --useStatic 강제. v1.x 응답 단위 검증 후 정책 전환.
     const rentYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-rent.yml'), 'utf-8');
-    expect(rentYml).toMatch(/SG_DATA_GOV_KEY:\s*\$\{\{\s*secrets\.SG_DATA_GOV_KEY\s*\}\}/);
+    expect(rentYml).toMatch(/_run\.mjs sg_singstat --useStatic/);
+    // env 에서도 제거되어 jp_estat 와 일관 — 키가 의미 없을 때 wire 안 함.
+    expect(rentYml).not.toMatch(/SG_DATA_GOV_KEY:\s*\$\{\{\s*secrets\.SG_DATA_GOV_KEY\s*\}\}/);
   });
 
   it('HAS_NEW 가 모든 워크플로우의 PR-update / commit 분기에 반영 (PR #20 review round 11)', () => {
