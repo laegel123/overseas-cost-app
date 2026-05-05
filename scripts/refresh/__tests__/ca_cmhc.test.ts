@@ -2,8 +2,6 @@
  * ca_cmhc.mjs 테스트.
  * TESTING.md §9-A.4 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -14,6 +12,7 @@ import refreshCaCmhc, {
   CITY_CONFIGS,
   SOURCE,
 } from '../ca_cmhc.mjs';
+import type { RefreshChange } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -236,8 +235,8 @@ describe('refresh (integration)', () => {
 
     const result = await refreshCaCmhc({ dryRun: true, cities: ['vancouver'] });
 
-    const vancouverChanges = result.changes.filter((c: any) => c.cityId === 'vancouver');
-    const torontoChanges = result.changes.filter((c: any) => c.cityId === 'toronto');
+    const vancouverChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'vancouver');
+    const torontoChanges = result.changes.filter((c: RefreshChange) => c.cityId === 'toronto');
 
     expect(vancouverChanges.length).toBeGreaterThan(0);
     expect(torontoChanges.length).toBe(0);
@@ -294,7 +293,7 @@ describe('refresh (integration)', () => {
     const result = await refreshCaCmhc({ dryRun: true, cities: ['vancouver'] });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const studioChange = result.changes.find((c: any) => c.field === 'rent.studio');
+    const studioChange = result.changes.find((c: RefreshChange) => c.field === 'rent.studio');
     expect(studioChange).toBeDefined();
     expect(typeof studioChange?.pctChange).toBe('number');
   }, 30000);

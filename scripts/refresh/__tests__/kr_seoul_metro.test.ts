@@ -2,8 +2,6 @@
  * kr_seoul_metro.mjs 테스트.
  * TESTING.md §9-A.3 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
@@ -14,6 +12,7 @@ import refreshKrSeoulMetro, {
   STATIC_FARES,
   SOURCE,
 } from '../kr_seoul_metro.mjs';
+import type { RefreshChange } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -209,7 +208,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshKrSeoulMetro({ dryRun: true });
 
-    const singleRideChange = result.changes.find((c: any) => c.field === 'transport.singleRide');
+    const singleRideChange = result.changes.find((c: RefreshChange) => c.field === 'transport.singleRide');
     expect(singleRideChange?.newValue).toBe(STATIC_FARES.singleRide);
   });
 
@@ -256,7 +255,7 @@ describe('refresh (integration)', () => {
     const result = await refreshKrSeoulMetro({ dryRun: true });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    const passChange = result.changes.find((c: any) => c.field === 'transport.monthlyPass');
+    const passChange = result.changes.find((c: RefreshChange) => c.field === 'transport.monthlyPass');
     expect(passChange).toBeDefined();
     expect(typeof passChange?.pctChange).toBe('number');
   });

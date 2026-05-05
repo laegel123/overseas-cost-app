@@ -38,12 +38,27 @@ export function getCityPath(id) {
 }
 
 /**
- * @typedef {Object} RefreshResult
+ * @typedef {Object} RefreshChange 단일 numeric 필드 변경 — fetcher 가 produce.
+ * @property {string} cityId
+ * @property {string} field 점 표기 경로 (e.g. 'rent.studio', 'food.groceries.milk1L', 'tuition[0].annual')
+ * @property {number | null} oldValue
+ * @property {number | null} newValue
+ * @property {number} pctChange 변동률 (0.05 = 5%, computePctChange 결과)
+ */
+
+/**
+ * @typedef {Object} RefreshError 단일 도시·이유 에러 — silent fail 금지 정책상 모든 실패가 여기로.
+ * @property {string} cityId
+ * @property {string} reason
+ */
+
+/**
+ * @typedef {Object} RefreshResult 모든 fetcher 의 default export 반환 타입.
  * @property {string} source
  * @property {string[]} cities
  * @property {string[]} fields
- * @property {Array<{cityId: string, field: string, oldValue: number|null, newValue: number|null, pctChange: number}>} changes
- * @property {Array<{cityId: string, reason: string}>} errors
+ * @property {RefreshChange[]} changes
+ * @property {RefreshError[]} errors
  */
 
 const BACKOFF_BASE_MS = 1000;
@@ -162,9 +177,15 @@ export async function readCity(id) {
 
 /**
  * 도시 JSON 쓰기 (atomic write).
+ *
+ * `source` 가 배열이면 한 번의 호출로 여러 카테고리 sources 를 누적 갱신.
+ * 동일 파일에 writeCity 를 연쇄 호출하면 두 번째 이후의 호출이 디스크에 저장된
+ * 첫 호출의 sources 를 덮어쓰므로 (in-memory data 만 바라보기 때문),
+ * 단일 호출에서 배열을 넘기는 방식이 vn_gso·ae_fcsc 같은 복수 카테고리 fetcher 의 정답.
+ *
  * @param {string} id
  * @param {import('../../src/types/city').CityCostData} data
- * @param {{category: string, name: string, url: string}} source
+ * @param {{category: string, name: string, url: string} | Array<{category: string, name: string, url: string}>} source
  * @returns {Promise<void>}
  */
 export async function writeCity(id, data, source) {
@@ -175,10 +196,15 @@ export async function writeCity(id, data, source) {
 
   // UTC 기준 — GitHub Actions 가 UTC 로 실행되므로 KST 와 9시간 차이로 인한 날짜 불일치 방지.
   const now = new Date().toISOString().slice(0, 10);
+  const sourceList = Array.isArray(source) ? source : [source];
+  let nextSources = data.sources;
+  for (const s of sourceList) {
+    nextSources = updateSources(nextSources, s, now);
+  }
   const updatedData = {
     ...data,
     lastUpdated: now,
-    sources: updateSources(data.sources, source, now),
+    sources: nextSources,
   };
 
   validateCityData(updatedData, id);
@@ -328,13 +354,37 @@ export function redactSecretsInUrl(url) {
 }
 
 /**
- * 에러 메시지 안에 박혀 있는 URL 의 secret 쿼리도 마스킹.
- * undici 등이 던지는 에러는 원본 URL 을 그대로 메시지에 포함하므로 별도 처리 필요.
+ * JSON POST body 의 민감한 키 (registrationkey 등) 를 마스킹.
+ *
+ * `redactSecretsInUrl` 은 URL query 만 다루므로 `us_bls.mjs` 처럼 POST body 에 API 키를 보내는
+ * fetcher 가 디버깅 중 body 를 로깅하면 키가 노출된다. 본 헬퍼는 (1) caller 가 명시적으로 body
+ * 를 로깅할 때 직접 호출하거나, (2) `redactErrorMessage` 가 자동 적용해 fetch 에러에 body
+ * 단편이 섞여 들어와도 안전 처리한다.
+ *
+ * 키 이름 정규식 매칭 — JSON 구조 파싱은 안 함 (depth 제한 없는 객체 안전 보장 어려움).
+ *
+ * @param {string} body JSON 직렬화된 문자열 또는 JSON 단편이 박힌 임의 문자열
+ * @returns {string} 마스킹된 문자열
+ */
+export function redactSecretsInBody(body) {
+  // SECRET_KEYS 는 redactSecretsInUrl 의 SECRET_PARAMS 와 동일 단어를 키 이름으로 가정.
+  // JSON 의 key:value 쌍 ("key": "value") 매칭 — value 는 모든 quote 문자 허용.
+  return body.replace(
+    /"(serviceKey|api_?Key|apikey|key|token|access_?Token|registrationkey|app_?Id|app_?key)"\s*:\s*"[^"]*"/gi,
+    '"$1":"***REDACTED***"',
+  );
+}
+
+/**
+ * 에러 메시지 안에 박혀 있는 URL 의 secret 쿼리 + body 단편의 secret JSON 키도 마스킹.
+ * undici 등이 던지는 에러는 원본 URL 또는 request body 단편을 메시지에 포함할 수 있으므로
+ * `fetchWithRetry` 가 에러를 throw 하기 전에 본 함수를 거쳐 누출 방지.
  * @param {string} message
  * @returns {string}
  */
 export function redactErrorMessage(message) {
-  return message.replace(/https?:\/\/[^\s'"]+/g, (m) => redactSecretsInUrl(m));
+  const urlMasked = message.replace(/https?:\/\/[^\s'"]+/g, (m) => redactSecretsInUrl(m));
+  return redactSecretsInBody(urlMasked);
 }
 
 /**
@@ -375,6 +425,14 @@ function combineSignals(signal1, signal2) {
  * updateSources 로 sources 추가 → validateCityData 통과 → 파일 저장.
  *
  * 외부 호출 금지 — refresh 스크립트 내부에서만 사용 (writeCity 의 updateSources 통과 후에만 valid).
+ *
+ * **placeholder 정책**:
+ *  - `rent.*` 는 `null` — `iterNumericFields` 가 null 을 명시적으로 지원하고 fetcher 들이
+ *    "데이터 부재" 와 "값 0" 을 구분해야 하기 때문 (예: us_hud 가 share 를 censusMedian 만
+ *    있고 직접값 부재 시 null 유지).
+ *  - `food.*` / `transport.*` 는 `0` — schema 가 양수 number 만 허용 (null 미허용) 이라 0 으로
+ *    초기화. fetcher 후속 갱신 시 `classifyChange(0, value)` 가 'new' 를 반환해 PR 검토 강제
+ *    (`detect_outliers::HAS_NEW`, _outlier.mjs:47).
  *
  * @param {{id: string, name: {ko: string, en: string}, country: string, currency: string, region: string}} config
  * @returns {import('../../src/types/city').CityCostData}

@@ -1,0 +1,90 @@
+{
+  "id": "sf",
+  "name": {
+    "ko": "샌프란시스코",
+    "en": "San Francisco"
+  },
+  "country": "US",
+  "currency": "USD",
+  "region": "na",
+  "lastUpdated": "2026-05-04",
+  "rent": {
+    "share": 1560,
+    "studio": 2400,
+    "oneBed": 3000,
+    "twoBed": 3800
+  },
+  "food": {
+    "restaurantMeal": 22.5,
+    "cafe": 6.88,
+    "groceries": {
+      "milk1L": 1.5,
+      "eggs12": 5.63,
+      "rice1kg": 4.38,
+      "chicken1kg": 12.5,
+      "bread": 4.38,
+      "onion1kg": 3.5,
+      "apple1kg": 5.25,
+      "ramen": 1.88
+    }
+  },
+  "transport": {
+    "monthlyPass": 81,
+    "singleRide": 3,
+    "taxiBase": 3.5
+  },
+  "tuition": [
+    {
+      "school": "UC Berkeley",
+      "level": "undergrad",
+      "annual": 48000
+    },
+    {
+      "school": "Stanford",
+      "level": "undergrad",
+      "annual": 60000
+    },
+    {
+      "school": "CCSF",
+      "level": "language",
+      "annual": 8000
+    }
+  ],
+  "visa": {
+    "studentApplicationFee": 185,
+    "workApplicationFee": 190,
+    "settlementApprox": 3000
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)",
+      "url": "https://www.huduser.gov/portal/datasets/fmr.html",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "US BLS CPI + static estimates (ADR-059 adjustment)",
+      "url": "https://www.bls.gov/cpi/",
+      "accessedAt": "2026-05-04"
+    },
+    {
+      "category": "transport",
+      "name": "SFMTA",
+      "url": "https://www.sfmta.com/fares",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

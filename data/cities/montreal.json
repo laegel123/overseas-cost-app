@@ -33,6 +33,28 @@
     "singleRide": 3.75,
     "taxiBase": 3.85
   },
+  "tuition": [
+    {
+      "school": "McGill",
+      "level": "undergrad",
+      "annual": 25000
+    },
+    {
+      "school": "Concordia",
+      "level": "undergrad",
+      "annual": 22000
+    },
+    {
+      "school": "UdeM",
+      "level": "graduate",
+      "annual": 20000
+    }
+  ],
+  "visa": {
+    "studentApplicationFee": 150,
+    "workApplicationFee": 255,
+    "settlementApprox": 2500
+  },
   "sources": [
     {
       "category": "rent",
@@ -50,6 +72,18 @@
       "category": "transport",
       "name": "STM (Société de transport de Montréal)",
       "url": "https://www.stm.info/",
+      "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-02"
     }
   ]

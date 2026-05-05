@@ -1,0 +1,90 @@
+{
+  "id": "osaka",
+  "name": {
+    "ko": "오사카",
+    "en": "Osaka"
+  },
+  "country": "JP",
+  "currency": "JPY",
+  "region": "asia",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 45000,
+    "studio": 60000,
+    "oneBed": 80000,
+    "twoBed": 120000
+  },
+  "food": {
+    "restaurantMeal": 1000,
+    "cafe": 450,
+    "groceries": {
+      "milk1L": 220,
+      "eggs12": 280,
+      "rice1kg": 450,
+      "chicken1kg": 900,
+      "bread": 180,
+      "onion1kg": 350,
+      "apple1kg": 600,
+      "ramen": 120
+    }
+  },
+  "transport": {
+    "monthlyPass": 9600,
+    "singleRide": 180,
+    "taxiBase": 500
+  },
+  "tuition": [
+    {
+      "school": "大阪大学",
+      "level": "undergrad",
+      "annual": 535800
+    },
+    {
+      "school": "京都大学",
+      "level": "undergrad",
+      "annual": 535800
+    },
+    {
+      "school": "関西学院大学",
+      "level": "undergrad",
+      "annual": 1200000
+    }
+  ],
+  "visa": {
+    "studentApplicationFee": 3000,
+    "workApplicationFee": 6000,
+    "settlementApprox": 200000
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "e-Stat 住宅・土地統計調査 + static estimates",
+      "url": "https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200522",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "e-Stat 消費者物価指数 + static estimates",
+      "url": "https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200573",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "東京メトロ + 大阪Metro + static estimates",
+      "url": "https://www.tokyometro.jp/en/ticket/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

@@ -43,9 +43,11 @@ GitHub Actions (cron schedule)
 
 scripts/refresh/
   ├── _common.mjs         # 공통 헬퍼 (fetch, retry, validation, commit logic)
-  ├── _outlier.mjs        # 변동 폭 검증
+  ├── _outlier.mjs        # 변동 폭 검증 + iterNumericFields
   ├── _diff.mjs           # 직전 분기 대비 비교
   ├── _registry.mjs       # 도시 ↔ 출처 매핑 (DATA_SOURCES.md 의 코드화)
+  ├── _cities.mjs         # 20개 해외 도시 공통 메타 (visas / universities 단일 출처)
+  ├── _run.mjs            # CLI wrapper — 모든 fetcher default export 를 호출 + path traversal 방어
   │
   ├── kr_molit.mjs        # 한국 국토부 실거래가 (임차료)
   ├── kr_kca.mjs          # 한국소비자원 참가격 (식재료)
@@ -89,7 +91,7 @@ scripts/refresh/
   ├── ae_fcsc.mjs         # UAE FCSC + DSC
   ├── ae_rta.mjs          # RTA Dubai fare
   │
-  ├── eu_eurostat.mjs     # EU Eurostat fallback (입자도 보조)
+  ├── eu_eurostat.mjs     # EU Eurostat fallback (v1.x — 라이브러리 골조, 실제 fallback 미연결)
   │
   ├── universities.mjs    # 대학 학비 (각 대학 공식 page fetch)
   └── visas.mjs           # 비자 fee (정부 page fetch)
@@ -123,13 +125,19 @@ export interface RefreshResult {
 export default async function refresh(): Promise<RefreshResult>;
 ```
 
-공통 헬퍼 (`_common.mjs`):
+공통 헬퍼 (`_common.mjs` / `_outlier.mjs`):
 
 ```ts
+// _common.mjs
 export async function fetchWithRetry(url, opts?): Promise<Response>; // exponential backoff 3회
 export async function readCity(id): Promise<CityCostData>;
 export async function writeCity(id, data, source): Promise<void>; // sources 자동 갱신
-export function classifyChange(pct): 'commit' | 'pr-update' | 'pr-outlier';
+
+// _outlier.mjs — classifyChange 는 oldVal/newVal 두 인자를 받아 분기 분류
+export function classifyChange(
+  oldVal: number | null,
+  newVal: number | null,
+): 'new' | 'commit' | 'pr-update' | 'pr-outlier' | 'pr-removed';
 ```
 
 ## 4. 워크플로우 명세
@@ -210,6 +218,8 @@ jobs:
 
 ### 4.3 `refresh-transit.yml` — 분기 1회
 
+> **호치민(VN) transit 은 본 워크플로우에서 갱신되지 않음 — 의도적**. `vn_gso.mjs` 가 rent + food + transport 통합형이라 같은 도시 파일을 1회 writeCity 로 갱신해야 하므로, 호치민 transport 는 분기 transit 이 아니라 월간 `refresh-rent.yml` 의 `vn_gso` step 에서 함께 갱신된다. 결과적으로 호치민 transport 는 다른 도시(분기)보다 자주 (월) 갱신될 수 있으나 정적 추정치 변동이 거의 없어 실질 영향은 0.
+
 ```yaml
 name: Refresh Transit
 on:
@@ -239,6 +249,9 @@ jobs:
 
 ### 4.4 `refresh-tuition.yml` — 분기 1회
 
+> **v1.0 한계**: `universities.mjs` 는 페이지 reachability 만 확인하고 HTML 파싱은 미구현 — 모든 대학이 항상 `UNIVERSITY_REGISTRY.staticAnnual` 을 반환한다. 결과적으로 `data/cities/*.json` 의 `tuition[].annual` 변동이 발생하지 않으며, `detect_outliers` 의 `outlier`/`update` PR 분기는 본 워크플로우에서 절대 트리거되지 않고 직접 commit (변경 0) 으로 종료된다. 학교별 selector 도입은 v1.x 별도 phase.
+
+
 ```yaml
 name: Refresh Tuition
 on:
@@ -255,6 +268,9 @@ jobs:
 ```
 
 ### 4.5 `refresh-visa.yml` — 분기 1회
+
+> **v1.0 한계**: `visas.mjs` 도 동일 — 정부 비자 페이지 reachability 만 확인하고 HTML 파싱은 미구현 (`VISA_REGISTRY` 의 static 값 항상 반환). `outlier`/`update` PR 분기 트리거 0. 국가별 selector 도입은 v1.x 별도 phase.
+
 
 ```yaml
 name: Refresh Visa
@@ -273,17 +289,21 @@ jobs:
 
 ### 4.5b 워크플로우 동시성 (concurrency)
 
-여러 워크플로우가 동시에 git push 시 race condition 발생 가능. 모든 워크플로우에 동일 concurrency group 적용:
+각 워크플로우는 **카테고리별 고유** concurrency group 을 사용한다 — 같은 카테고리의 동시 실행은 직렬화하지만 카테고리 간에는 병렬 실행을 허용해 처리량을 올린다. 카테고리 간 git push race 는 push retry 루프 (`git rebase --abort` → `git pull --rebase` → `git push` 3회) 가 흡수한다.
 
 ```yaml
 concurrency:
-  group: data-refresh-${{ github.ref }}
+  # refresh-fx.yml
+  group: data-refresh-fx-${{ github.ref }}
+  # refresh-prices.yml
+  group: data-refresh-prices-${{ github.ref }}
+  # refresh-rent / refresh-transit / refresh-tuition / refresh-visa 도 카테고리별 고유 group
   cancel-in-progress: false
 ```
 
-- `cancel-in-progress: false` — 진행 중 워크플로우 완료까지 대기 (취소 X, 큐잉)
-- 동일 group: 모든 6개 refresh-\* 워크플로우 + build_data 가 동일 group → 항상 직렬 실행
-- 새 push 가 진행 중이면 대기 후 차례로 실행 → git push race 방지
+- `cancel-in-progress: false` — 같은 카테고리의 진행 중 워크플로우 완료까지 대기 (취소 X, 큐잉). 부분 실행으로 인한 데이터 불완전 갱신 차단.
+- 카테고리별 고유 group: fx / prices / rent / transit / tuition / visa 가 같은 ref 에서도 병렬 실행 가능. 운영자 관점 "월요일 아침에 prices · transit 동시 실행" 같은 시나리오 정상.
+- 카테고리 간 push race: 두 카테고리가 같은 push 윈도우에 들어오면 push retry 가 fast-forward 충돌을 처리. `integration.test.ts` 가 push retry 패턴을 회귀 검증.
 
 ### 4.5c API 키 부재 시 처리
 
@@ -404,6 +424,19 @@ PR 자동 생성: `peter-evans/create-pull-request@v6` 액션 사용. 라벨 자
 
 이런 예외는 모두 `data/cities/<id>.json` 의 `sources[].name` 에 "추정" 또는 "static" 마커로 표기.
 
+### 8.1 v1.x TODO — 추적 항목
+
+PR #20 round 11 review 에서 확인된 후속 phase 항목. 각 항목은 별도 phase 로 진행되며 ADR 및 인벤토리 갱신 동반.
+
+| 영역 | 현재 상태 | v1.x 계획 |
+| --- | --- | --- |
+| `eu_eurostat.mjs` fallback wire up | 라이브러리 모듈 골조만 — `de_destatis` / `fr_insee` / `nl_cbs` 어디서도 import 안 됨 | 각 국가 fetcher 가 본 모듈 import 후 응답 실패 시 EU HICP 보정으로 fallback |
+| `uk_ons.mjs` ONS 시리즈 ID 검증 | `MM23-CZMP` 등 시리즈가 ONS API 에서 실제 조회 가능한지 미검증 (코드 내 TODO) | 실 호출 검증 + 응답 단위 / scale 보정 + integration test 회귀 |
+| `jp_estat.mjs` 응답 단위 wire up | API 호출 후 sample 로깅만, STATIC 보정에 미반영 | 응답 단위 (천엔 vs 엔, 도/현 vs 전국) 검증 + STATIC 대체 |
+| `visas.mjs` / `universities.mjs` HTML 파싱 | reachability check 만, 항상 static | 국가별 / 학교별 selector + 단위 정규화 |
+| `workflow_dispatch` 브랜치 제한 | 모든 브랜치에서 dispatch 가능 (위험도 낮음) | main 브랜치 보호 규칙 도입 시 dispatch 제한 검토 |
+| Eurostat / actionlint CI | 자동화 안 됨 (수동 검증) | actionlint job 추가 |
+
 ## 9. 자동화 vs 수동 정책
 
 | 카테고리             | 자동화                         | 빈도     | 한계                                 |
@@ -426,22 +459,27 @@ PR 자동 생성: `peter-evans/create-pull-request@v6` 액션 사용. 라벨 자
 | 자동 PR 리뷰 (auto-update) | 주 ~5건   | ~30분/주          |
 | 자동 PR 리뷰 (outlier)     | 월 ~3건   | ~1시간/월         |
 | 워크플로우 실패 대응       | 분기 ~1건 | ~1시간/분기       |
+| ACS_YEAR 수동 갱신         | 연 1회    | ~10분/년          |
 | 신규 도시 추가 (확장)      | ad-hoc    | ~3시간/도시       |
 | **연간 총 운영 시간**      | —         | **~30~40시간/년** |
+
+> `scripts/refresh/us_census.mjs` 의 `ACS_YEAR` 상수는 매년 12월에 새 dataset 이 공개되면 직전
+> 연도로 갱신해야 한다 (Census API 가 미래 연도에 4xx 반환 → 자동 fallback 위험). PR 리뷰 round 8
+> 에서 추출 — 갱신 시 us_census 출력값이 1년치 변동을 반영하므로 outlier PR 발생 가능.
 
 수동 큐레이션 70시간/년 → 자동화 후 30~40시간/년. **운영 부담 ~50% 감소**.
 
 ## 11. 테스트 (TESTING.md 와 연계)
 
-자동화 스크립트도 테스트 인벤토리 §9.30 (신설) 에 추가:
+자동화 스크립트도 테스트 인벤토리 §9-A (신설) 에 추가:
 
-- [ ] 각 `scripts/refresh/*.mjs` 가 표준 인터페이스 (`RefreshResult`) 반환
-- [ ] fetch 실패 → exponential backoff 3회 후 throw
-- [ ] 응답 shape 변경 → 명시적 에러
-- [ ] `classifyChange` 경계값 (0.049, 0.05, 0.299, 0.30, 신규, 제거)
-- [ ] `build_data.mjs` 가 21개 도시 모두 처리
-- [ ] outlier PR 생성 시 라벨 정확
-- [ ] 빈 응답·HTML 응답 처리
+- [x] 각 `scripts/refresh/*.mjs` 가 표준 인터페이스 (`RefreshResult`) 반환
+- [x] fetch 실패 → exponential backoff 3회 후 throw
+- [x] 응답 shape 변경 → 명시적 에러
+- [x] `classifyChange` 경계값 (0.049, 0.05, 0.299, 0.30, 신규, 제거)
+- [x] `build_data.mjs` 가 21개 도시 모두 처리
+- [x] outlier PR 생성 시 라벨 정확
+- [x] 빈 응답·HTML 응답 처리
 
 ## 12. 변경 이력
 

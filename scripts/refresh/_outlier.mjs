@@ -14,9 +14,10 @@
 /**
  * oldVal → newVal 변동폭에 따라 분류.
  *
- * 사용 시점: step 10 (GitHub Actions 워크플로우 — refresh-*.yml) 에서 RefreshResult.changes 를
- * 순회하며 각 change.pctChange 를 본 함수로 분류 → commit / pr-update / pr-outlier 결정.
- * 현재 step 0–3 의 refresh 스크립트 자체는 본 함수를 호출하지 않음 (워크플로우 단계 책임).
+ * 사용 시점: `scripts/detect_outliers.mjs` 가 워킹트리 ↔ HEAD 비교 시 본 함수를 호출 →
+ * `HAS_OUTLIERS` (≥30%) / `HAS_UPDATES` (5~30%) 두 GitHub Actions 출력으로 export →
+ * 워크플로우가 outlier PR / auto-update PR / 직접 commit 중 하나로 분기
+ * (AUTOMATION.md §1 의 분류 정책 명세 그대로).
  *
  * @param {number | null} oldVal
  * @param {number | null} newVal
@@ -72,6 +73,84 @@ export function computePctChange(oldVal, newVal) {
     return -100;
   }
   return ((newVal - oldVal) / oldVal) * 100;
+}
+
+/**
+ * 도시 JSON 의 비교 가능한 numeric 필드 평탄화 — rent / food / food.groceries / transport /
+ * tuition[].annual / visa.* 까지. detect_outliers.mjs 가 직전 commit 비교 시 사용.
+ *
+ * @param {Object} oldData
+ * @param {Object} newData
+ * @returns {Iterable<{path: string, oldVal: number|null, newVal: number|null}>}
+ */
+export function* iterNumericFields(oldData, newData) {
+  // tax 섹션 (annualSalary, takeHomePctApprox) 은 의도적으로 추적 제외 — v1.0 fetcher 가 채우지 않고
+  // (data/static/tax_brackets.json 직접 편집), 변동 자체가 정책 결정 (정부 세제 변경) 이라 outlier 알림이
+  // 의미 없음. 추후 자동화 시 본 배열에 추가.
+  // rent.deposit 도 v1.0 fetcher 가 채우지 않음 + 도시 JSON 에도 부재 → 추적 목록에서 제외.
+  const sections = [
+    { key: 'rent', fields: ['share', 'studio', 'oneBed', 'twoBed'] },
+    { key: 'food', fields: ['restaurantMeal', 'cafe'] },
+    { key: 'transport', fields: ['monthlyPass', 'singleRide', 'taxiBase'] },
+  ];
+
+  for (const { key, fields } of sections) {
+    const oldSection = oldData[key] ?? {};
+    const newSection = newData[key] ?? {};
+    for (const f of fields) {
+      const o = oldSection[f];
+      const n = newSection[f];
+      if (o === undefined && n === undefined) continue;
+      yield {
+        path: `${key}.${f}`,
+        oldVal: typeof o === 'number' ? o : null,
+        newVal: typeof n === 'number' ? n : null,
+      };
+    }
+  }
+
+  const oldGroceries = oldData.food?.groceries ?? {};
+  const newGroceries = newData.food?.groceries ?? {};
+  const groceryKeys = new Set([...Object.keys(oldGroceries), ...Object.keys(newGroceries)]);
+  for (const f of groceryKeys) {
+    const o = oldGroceries[f];
+    const n = newGroceries[f];
+    yield {
+      path: `food.groceries.${f}`,
+      oldVal: typeof o === 'number' ? o : null,
+      newVal: typeof n === 'number' ? n : null,
+    };
+  }
+
+  // tuition 인덱스 기반 비교 — v1.0 에서는 `UNIVERSITY_REGISTRY` 학교 순서가 고정이라 안전.
+  // **TODO (v1.x, )**: HTML 파싱 도입 시 학교 응답 순서가 바뀌면
+  // 데이터 변경 없이도 모든 항목이 `pr-update` 로 잘못 감지됨. `school` key 기반 Map 비교로
+  // 전환 필요 (universities.mjs 의 동일 패턴과 함께 갱신).
+  const oldTuition = Array.isArray(oldData.tuition) ? oldData.tuition : [];
+  const newTuition = Array.isArray(newData.tuition) ? newData.tuition : [];
+  const tuitionLen = Math.max(oldTuition.length, newTuition.length);
+  for (let i = 0; i < tuitionLen; i++) {
+    const o = oldTuition[i]?.annual;
+    const n = newTuition[i]?.annual;
+    yield {
+      path: `tuition[${i}].annual`,
+      oldVal: typeof o === 'number' ? o : null,
+      newVal: typeof n === 'number' ? n : null,
+    };
+  }
+
+  const oldVisa = oldData.visa ?? {};
+  const newVisa = newData.visa ?? {};
+  for (const f of ['studentApplicationFee', 'workApplicationFee', 'settlementApprox']) {
+    const o = oldVisa[f];
+    const n = newVisa[f];
+    if (o === undefined && n === undefined) continue;
+    yield {
+      path: `visa.${f}`,
+      oldVal: typeof o === 'number' ? o : null,
+      newVal: typeof n === 'number' ? n : null,
+    };
+  }
 }
 
 /**

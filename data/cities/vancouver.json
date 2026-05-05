@@ -33,6 +33,28 @@
     "singleRide": 3.35,
     "taxiBase": 3.95
   },
+  "tuition": [
+    {
+      "school": "UBC",
+      "level": "undergrad",
+      "annual": 45000
+    },
+    {
+      "school": "SFU",
+      "level": "undergrad",
+      "annual": 32000
+    },
+    {
+      "school": "BCIT",
+      "level": "language",
+      "annual": 18000
+    }
+  ],
+  "visa": {
+    "studentApplicationFee": 150,
+    "workApplicationFee": 255,
+    "settlementApprox": 2500
+  },
   "sources": [
     {
       "category": "rent",
@@ -50,6 +72,18 @@
       "category": "transport",
       "name": "TransLink",
       "url": "https://www.translink.ca/",
+      "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-02"
     }
   ]

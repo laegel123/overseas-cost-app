@@ -1,0 +1,90 @@
+{
+  "id": "london",
+  "name": {
+    "ko": "런던",
+    "en": "London"
+  },
+  "country": "GB",
+  "currency": "GBP",
+  "region": "eu",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 1105,
+    "studio": 1700,
+    "oneBed": 2100,
+    "twoBed": 2800
+  },
+  "food": {
+    "restaurantMeal": 15,
+    "cafe": 4,
+    "groceries": {
+      "milk1L": 1.5,
+      "eggs12": 3.5,
+      "rice1kg": 2.2,
+      "chicken1kg": 6,
+      "bread": 1.4,
+      "onion1kg": 1.5,
+      "apple1kg": 2.8,
+      "ramen": 1.2
+    }
+  },
+  "transport": {
+    "monthlyPass": 165,
+    "singleRide": 2.8,
+    "taxiBase": 3.8
+  },
+  "tuition": [
+    {
+      "school": "Imperial College",
+      "level": "undergrad",
+      "annual": 38000
+    },
+    {
+      "school": "UCL",
+      "level": "undergrad",
+      "annual": 35000
+    },
+    {
+      "school": "King's College",
+      "level": "undergrad",
+      "annual": 32000
+    }
+  ],
+  "visa": {
+    "studentApplicationFee": 490,
+    "workApplicationFee": 719,
+    "settlementApprox": 3500
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "ONS Private Rental Market Statistics",
+      "url": "https://www.ons.gov.uk/peoplepopulationandcommunity/housing/datasets/privaterentalmarketsummarystatisticsinengland",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "ONS Consumer Price Inflation + static estimates",
+      "url": "https://www.ons.gov.uk/economy/inflationandpriceindices",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "TfL Unified API + static estimates",
+      "url": "https://tfl.gov.uk/fares/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

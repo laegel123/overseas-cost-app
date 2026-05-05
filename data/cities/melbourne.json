@@ -1,0 +1,90 @@
+{
+  "id": "melbourne",
+  "name": {
+    "ko": "멜버른",
+    "en": "Melbourne"
+  },
+  "country": "AU",
+  "currency": "AUD",
+  "region": "oceania",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 953,
+    "studio": 1732,
+    "oneBed": 2165,
+    "twoBed": 2815
+  },
+  "food": {
+    "restaurantMeal": 25,
+    "cafe": 5.5,
+    "groceries": {
+      "milk1L": 2.5,
+      "eggs12": 6.5,
+      "rice1kg": 3.5,
+      "chicken1kg": 12,
+      "bread": 3.8,
+      "onion1kg": 2.8,
+      "apple1kg": 5.5,
+      "ramen": 2
+    }
+  },
+  "transport": {
+    "monthlyPass": 180,
+    "singleRide": 4.6,
+    "taxiBase": 4.2
+  },
+  "tuition": [
+    {
+      "school": "UniMelb",
+      "level": "undergrad",
+      "annual": 52000
+    },
+    {
+      "school": "Monash",
+      "level": "undergrad",
+      "annual": 48000
+    },
+    {
+      "school": "RMIT",
+      "level": "undergrad",
+      "annual": 40000
+    }
+  ],
+  "visa": {
+    "studentApplicationFee": 710,
+    "workApplicationFee": 450,
+    "settlementApprox": 4000
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "ABS Residential Property Price Indexes + static estimates",
+      "url": "https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "ABS Consumer Price Index + static estimates",
+      "url": "https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "Transport NSW + PTV Victoria + static estimates",
+      "url": "https://transportnsw.info/tickets-opal/opal/fares",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

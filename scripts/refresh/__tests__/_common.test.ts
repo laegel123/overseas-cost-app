@@ -2,8 +2,6 @@
  * _common.mjs 테스트.
  * TESTING.md §9-A.1 공통 헬퍼 인벤토리.
  */
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import {
@@ -21,6 +19,8 @@ import {
   getCityPath,
   getDataDir,
   redactSecretsInUrl,
+  redactSecretsInBody,
+  redactErrorMessage,
   createCitySeed,
 } from '../_common.mjs';
 
@@ -157,6 +157,25 @@ describe('writeCity', () => {
     expect(written.sources[0].accessedAt).toBe('2026-04-27');
   });
 
+  it('sources 배열 — 한 호출로 여러 카테고리 누적 (vn_gso·ae_fcsc 패턴)', async () => {
+    const existingData = { ...VALID_CITY_FIXTURE, id: 'multi-source' };
+    createTempCityFile('multi-source', existingData as any);
+
+    const sources = [
+      { category: 'rent', name: 'Rent Src', url: 'https://rent.example.com' },
+      { category: 'food', name: 'Food Src', url: 'https://food.example.com' },
+      { category: 'transport', name: 'Transit Src', url: 'https://transit.example.com' },
+    ];
+    await writeCity('multi-source', existingData as any, sources);
+
+    const written = readTempCityFile('multi-source') as any;
+    // 기존 1개 + 새 3개 = 4개. 연쇄 writeCity 호출 시 발생하던 누락 버그 회귀 차단.
+    expect(written.sources).toHaveLength(4);
+    expect(written.sources.map((s: { name: string }) => s.name)).toEqual(
+      expect.arrayContaining(['Test Source', 'Rent Src', 'Food Src', 'Transit Src']),
+    );
+  });
+
   it('스키마 위반 데이터: throws', async () => {
     const invalidData = { id: 'invalid' };
     const source = { category: 'rent', name: 'Test', url: 'https://example.com' };
@@ -237,6 +256,46 @@ describe('fetchWithRetry', () => {
       code: 'FETCH_RETRY_EXHAUSTED',
     });
   });
+
+  // 재시도/backoff 로직 회귀 테스트.
+  it('5xx 응답 후 성공: 재시도 동작 (attempts 카운트)', async () => {
+    let attempt = 0;
+    jest.spyOn(global, 'fetch').mockImplementation(async () => {
+      attempt += 1;
+      if (attempt < 3) return new Response('temporary', { status: 503 });
+      return new Response(JSON.stringify({ ok: true }), { status: 200 });
+    });
+
+    const result = await fetchWithRetry('https://example.com', { maxRetries: 3 });
+    expect(result.ok).toBe(true);
+    expect(attempt).toBe(3);
+  }, 30000);
+
+  it('429 (Rate limit) 도 5xx 와 동일하게 재시도 (transient)', async () => {
+    let attempt = 0;
+    jest.spyOn(global, 'fetch').mockImplementation(async () => {
+      attempt += 1;
+      if (attempt < 2) return new Response('rate limited', { status: 429 });
+      return new Response('ok', { status: 200 });
+    });
+
+    await fetchWithRetry('https://example.com', { maxRetries: 3 });
+    expect(attempt).toBe(2);
+  }, 30000);
+
+  it('네트워크 에러 → 모든 시도 실패 시 maxRetries+1 회 호출', async () => {
+    let attempt = 0;
+    jest.spyOn(global, 'fetch').mockImplementation(async () => {
+      attempt += 1;
+      throw new Error('Network down');
+    });
+
+    await expect(
+      fetchWithRetry('https://example.com', { maxRetries: 2 }),
+    ).rejects.toMatchObject({ code: 'FETCH_RETRY_EXHAUSTED' });
+    // maxRetries=2 → 3회 시도 (initial + 2 retries).
+    expect(attempt).toBe(3);
+  }, 30000);
 });
 
 describe('redactSecretsInUrl', () => {
@@ -260,6 +319,64 @@ describe('redactSecretsInUrl', () => {
 
   it('잘못된 URL 은 원본 반환', () => {
     expect(redactSecretsInUrl('not a url')).toBe('not a url');
+  });
+});
+
+describe('redactSecretsInBody', () => {
+  // POST body 의 API 키 마스킹.
+  it('registrationkey 마스킹 (us_bls 패턴)', () => {
+    const body = JSON.stringify({ seriesid: ['APU0100709112'], registrationkey: 'secret-key-123', startyear: 2025 });
+    expect(redactSecretsInBody(body)).toContain('"registrationkey":"***REDACTED***"');
+    expect(redactSecretsInBody(body)).not.toContain('secret-key-123');
+    expect(redactSecretsInBody(body)).toContain('"seriesid"');
+  });
+
+  it('apiKey / apikey / api_key 모두 마스킹 (case insensitive)', () => {
+    expect(redactSecretsInBody('{"apikey":"AAA"}')).toContain('***REDACTED***');
+    expect(redactSecretsInBody('{"api_Key":"AAA"}')).toContain('***REDACTED***');
+    expect(redactSecretsInBody('{"ApiKey":"AAA"}')).toContain('***REDACTED***');
+  });
+
+  it('appId / token / serviceKey 마스킹 (다른 fetcher 패턴)', () => {
+    expect(redactSecretsInBody('{"appId":"X"}')).toContain('***REDACTED***');
+    expect(redactSecretsInBody('{"token":"Y"}')).toContain('***REDACTED***');
+    expect(redactSecretsInBody('{"serviceKey":"Z"}')).toContain('***REDACTED***');
+  });
+
+  it('민감하지 않은 키는 유지', () => {
+    const body = '{"seriesid":["A","B"],"startyear":2025,"endyear":2026}';
+    expect(redactSecretsInBody(body)).toBe(body);
+  });
+});
+
+describe('redactErrorMessage (URL + body 자동 마스킹)', () => {
+  // 미래 회귀 차단: undici 에러 메시지에 request body 단편이 박혀 들어와도 secret 노출 X.
+  // `fetchWithRetry` 가 모든 에러를 본 함수 거쳐 throw 하므로 caller 가 잊어도 안전.
+  it('에러 메시지의 URL secret 마스킹', () => {
+    const msg = 'fetch failed: https://api.example.com?serviceKey=ABC123';
+    const out = redactErrorMessage(msg);
+    expect(out).not.toContain('ABC123');
+    expect(out).toContain('***REDACTED***');
+  });
+
+  it('에러 메시지에 박힌 JSON body secret 도 자동 마스킹 (us_bls registrationkey)', () => {
+    const msg = 'fetch failed: body={"seriesid":["A"],"registrationkey":"secret-AAA"}';
+    const out = redactErrorMessage(msg);
+    expect(out).not.toContain('secret-AAA');
+    expect(out).toContain('"registrationkey":"***REDACTED***"');
+  });
+
+  it('URL + body 가 동시에 박혀 있어도 양쪽 모두 마스킹', () => {
+    const msg = 'POST https://api.example.com?token=URL_TOK body={"apikey":"BODY_SEC"}';
+    const out = redactErrorMessage(msg);
+    expect(out).not.toContain('URL_TOK');
+    expect(out).not.toContain('BODY_SEC');
+    expect((out.match(/\*\*\*REDACTED\*\*\*/g) ?? []).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('민감하지 않은 메시지는 변형 X', () => {
+    const msg = 'HTTP 500 internal server error';
+    expect(redactErrorMessage(msg)).toBe(msg);
   });
 });
 

@@ -23,6 +23,26 @@
 | 자동화     | GitHub Actions cron (공공 출처 100% 자동 갱신)       |
 | 테스트     | Jest + @testing-library/react-native (~1,500 케이스) |
 
+## 데이터 자동화
+
+6개 GitHub Actions 워크플로우가 공공 출처에서 데이터를 자동 갱신:
+
+| 워크플로우       | 빈도       | 대상                                |
+| ---------------- | ---------- | ----------------------------------- |
+| refresh-fx       | 일 1회     | 환율 fallback                       |
+| refresh-prices   | 주 1회     | 식재료·외식 CPI (12개국 통계청)     |
+| refresh-rent     | 월 1회     | 임차료 (정부 통계)                  |
+| refresh-transit  | 분기 1회   | 교통요금 (교통공사 공식)            |
+| refresh-tuition  | 분기 1회   | 대학 학비 (공식 페이지)             |
+| refresh-visa     | 분기 1회   | 비자 수수료 (정부 페이지)           |
+
+변동폭에 따른 자동 처리:
+- **<5%**: 자동 commit + push
+- **5~30%**: 자동 PR 생성 (auto-update 라벨)
+- **≥30%**: 자동 PR 생성 (outlier 라벨, 운영자 검토)
+
+자세한 내용은 `docs/AUTOMATION.md` 참조.
+
 ## Phase 진행 현황
 
 7개 phase / 28개 step 으로 분해된 청사진을 따라 진행:

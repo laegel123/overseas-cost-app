@@ -1,0 +1,90 @@
+{
+  "id": "la",
+  "name": {
+    "ko": "로스앤젤레스",
+    "en": "Los Angeles"
+  },
+  "country": "US",
+  "currency": "USD",
+  "region": "na",
+  "lastUpdated": "2026-05-04",
+  "rent": {
+    "share": 1170,
+    "studio": 1800,
+    "oneBed": 2300,
+    "twoBed": 2900
+  },
+  "food": {
+    "restaurantMeal": 18.9,
+    "cafe": 5.78,
+    "groceries": {
+      "milk1L": 1.26,
+      "eggs12": 4.73,
+      "rice1kg": 3.68,
+      "chicken1kg": 10.5,
+      "bread": 3.68,
+      "onion1kg": 2.94,
+      "apple1kg": 4.41,
+      "ramen": 1.58
+    }
+  },
+  "transport": {
+    "monthlyPass": 100,
+    "singleRide": 1.75,
+    "taxiBase": 4.1
+  },
+  "tuition": [
+    {
+      "school": "UCLA",
+      "level": "undergrad",
+      "annual": 45000
+    },
+    {
+      "school": "USC",
+      "level": "undergrad",
+      "annual": 65000
+    },
+    {
+      "school": "SMC",
+      "level": "language",
+      "annual": 10000
+    }
+  ],
+  "visa": {
+    "studentApplicationFee": 185,
+    "workApplicationFee": 190,
+    "settlementApprox": 3000
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)",
+      "url": "https://www.huduser.gov/portal/datasets/fmr.html",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "US BLS CPI + static estimates (ADR-059 adjustment)",
+      "url": "https://www.bls.gov/cpi/",
+      "accessedAt": "2026-05-04"
+    },
+    {
+      "category": "transport",
+      "name": "LA Metro",
+      "url": "https://www.metro.net/riding/fares/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

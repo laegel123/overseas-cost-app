@@ -32,42 +32,54 @@
     },
     {
       "step": 4,
-      "name": "step-4",
-      "status": "error",
+      "name": "usa",
+      "status": "completed",
       "started_at": "2026-05-02T23:06:39+0900",
-      "error_message": "[3회 시도 후 실패] Step did not update status",
-      "failed_at": "2026-05-03T01:23:34+0900"
+      "completed_at": "2026-05-03T17:50:16+0900"
     },
     {
       "step": 5,
-      "name": "step-5",
-      "status": "pending"
+      "name": "uk-de",
+      "status": "completed",
+      "started_at": "2026-05-03T17:50:16+0900",
+      "completed_at": "2026-05-03T17:59:51+0900"
     },
     {
       "step": 6,
-      "name": "step-6",
-      "status": "pending"
+      "name": "fr-nl",
+      "status": "completed",
+      "started_at": "2026-05-03T17:59:51+0900",
+      "completed_at": "2026-05-03T18:06:48+0900"
     },
     {
       "step": 7,
-      "name": "step-7",
-      "status": "pending"
+      "name": "au-jp",
+      "status": "completed",
+      "started_at": "2026-05-03T18:06:49+0900",
+      "completed_at": "2026-05-03T18:13:10+0900"
     },
     {
       "step": 8,
-      "name": "step-8",
-      "status": "pending"
+      "name": "sg-vn-ae",
+      "status": "completed",
+      "started_at": "2026-05-03T18:13:10+0900",
+      "completed_at": "2026-05-03T18:24:08+0900"
     },
     {
       "step": 9,
-      "name": "step-9",
-      "status": "pending"
+      "name": "universities-visas",
+      "status": "completed",
+      "started_at": "2026-05-03T18:24:08+0900",
+      "completed_at": "2026-05-03T18:33:09+0900"
     },
     {
       "step": 10,
-      "name": "step-10",
-      "status": "pending"
+      "name": "workflows-and-data",
+      "status": "completed",
+      "started_at": "2026-05-03T18:33:09+0900",
+      "completed_at": "2026-05-04T09:43:13+0900"
     }
   ],
-  "created_at": "2026-05-02T21:41:58+0900"
+  "created_at": "2026-05-02T21:41:58+0900",
+  "completed_at": "2026-05-04T09:43:13+0900"
 }

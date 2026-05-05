@@ -2143,17 +2143,30 @@ afterEach(() => {
 #### `fetchWithRetry(url, opts?)`
 
 - [x] 첫 시도 성공: response 반환, 재시도 없음
-- [ ] 1회 실패 후 성공: 1회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
-- [ ] 2회 실패 후 성공: 2회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
-- [ ] 3회 실패 후 성공: 3회 재시도 후 반환 (복잡한 fake timer 필요, 후속)
-- [ ] 4회 모두 실패: throws `FetchRetryExhaustedError` with retry count (복잡한 fake timer 필요, 후속)
-- [ ] backoff 시간: 1s, 2s, 4s (exponential) (복잡한 fake timer 필요, 후속)
-- [ ] 5xx 응답: 재시도 (복잡한 fake timer 필요, 후속)
+- [x] 5xx 후 성공: 재시도 후 반환 (PR #20 review round 18)
+- [x] 5xx 응답: 재시도 트리거 (PR #20 review round 18)
+- [x] 429 (rate limit): 5xx 와 동일하게 재시도 (PR #20 review round 18)
+- [x] 네트워크 에러 모두 실패: maxRetries+1 회 호출 후 throws `FetchRetryExhaustedError` (PR #20 review round 18)
 - [x] 4xx 응답: 재시도 없이 즉시 throw
-- [ ] timeout 30s 초과: throws `FetchTimeoutError`
-- [ ] DNS 실패: 재시도 후 throw
 - [x] 사용자 정의 retry 횟수 (`opts.maxRetries=0`) 적용
-- [ ] AbortSignal 전달 시 취소 가능
+- [x] method/headers/body 옵션 forward (POST API 지원)
+- [ ] timeout 30s 초과: throws `FetchTimeoutError` (실 타이머 의존, manual)
+- [ ] backoff 1s/2s/4s 정밀 측정 (실 타이머 의존, manual)
+- [ ] AbortSignal 전달 시 취소 가능 (manual)
+
+#### `redactSecretsInBody(body)`
+
+- [x] `registrationkey` 마스킹 (us_bls POST body 패턴)
+- [x] `apiKey` / `apikey` / `api_key` 모두 마스킹 (case insensitive)
+- [x] `appId` / `token` / `serviceKey` 등 다른 fetcher 키 패턴
+- [x] 민감하지 않은 키 (`seriesid`, `startyear` 등) 는 유지
+
+#### `redactErrorMessage(message)` — URL + body 자동 마스킹
+
+- [x] 에러 메시지의 URL secret 마스킹 (undici 가 throw 한 message 의 URL 보호)
+- [x] 에러 메시지에 박힌 JSON body secret 도 자동 마스킹 (us_bls registrationkey 등 — 미래 회귀 차단)
+- [x] URL + body 가 동시에 박혀 있어도 양쪽 모두 마스킹
+- [x] 민감하지 않은 메시지는 변형 X
 
 #### `readCity(id): Promise<CityCostData>`
 
@@ -2163,13 +2176,14 @@ afterEach(() => {
 - [x] 스키마 위반: throws `CitySchemaError`
 - [x] 경로 traversal 시도 (`../../etc/passwd`): throws `InvalidCityIdError`
 
-#### `writeCity(id, data, source): Promise<void>`
+#### `writeCity(id, data, source | source[]): Promise<void>`
 
 - [x] 새 파일 작성
 - [x] 기존 파일 덮어쓰기
 - [x] `lastUpdated` 자동 갱신 (현재 시각)
 - [x] `sources[]` 에 (category, name, url, accessedAt) 추가 (기존 유지)
 - [x] 같은 source 가 이미 있으면 accessedAt 만 갱신
+- [x] sources 배열 — 한 호출로 여러 카테고리 누적 (vn_gso·ae_fcsc 연쇄 호출 회귀 차단)
 - [x] 스키마 위반 데이터 입력 시 throws (write 실패)
 - [ ] atomic write (임시 파일 → rename) — 부분 쓰기 방지 (구현 완료, 테스트는 파일시스템 검증 어려움)
 - [x] 디렉터리 부재 시 자동 생성
@@ -2196,6 +2210,17 @@ afterEach(() => {
 - [x] `(0, 0)` → `'commit'`
 - [x] 음수 입력 → throws (cost 데이터에 음수 미허용)
 - [x] `NaN` 입력 → throws
+
+#### `iterNumericFields(oldData, newData)` (in `_outlier.mjs`)
+
+- [x] `rent.censusMedian` 추적하지 않음 — cross-validation 보조 필드 (PR #20 review round 8)
+- [x] `rent.deposit`, `tax.*` 추적하지 않음 — fetcher 가 채우지 않거나 변동 알림이 의미 없는 필드
+
+#### `_cities.mjs` `OVERSEAS_CITY_CONFIGS` (PR #20 review round 10)
+
+- [x] 20개 해외 도시 (서울 제외) — id / name / country / currency / region 필수 필드
+- [x] visas.mjs / universities.mjs 의 `CITY_CONFIGS` 가 본 모듈과 동일 reference (단일 출처 회귀 차단)
+- [x] 서울(seoul) 비포함 — 본 모듈은 해외 도시 전용
 
 #### `diffCities(oldData, newData): ChangeRecord[]` (in `_diff.mjs`)
 
@@ -2279,6 +2304,10 @@ afterEach(() => {
 - [x] Vancouver/Toronto/Montreal CMA 데이터
 - [x] 식재료 8개 매핑 (Vector ID 매핑 표 상수 정의)
 - [x] 외식 CPI 매핑 + 정적 fallback
+- [x] `isCpiBasePeriodSuspect` — CPI ≥ 145 시 base period mismatch 감지 (ADR-059 §5)
+- [x] `CPI_SANITY_MAX = 145` 상수 — 2020=100 기준 정상 상한 + 마진
+- [x] `parseSeriesInfoResponse` — getSeriesInfoFromVector 응답 shape 회귀 차단
+- [x] `ALLOWED_REFERENCE_PERIODS = {2002=100, 2020=100}` — 외 값이면 정적 fallback (ADR-059 §5 해소)
 
 #### `ca_translink.mjs`, `ca_ttc.mjs`, `ca_stm.mjs`
 
@@ -2290,115 +2319,280 @@ afterEach(() => {
 
 #### `us_hud.mjs`
 
-- [ ] HUD FMR API 응답 파싱
-- [ ] MSA 코드별 매핑 (NYC=35614, LA=31084, SF=41884, Seattle=42644, Boston=14454)
-- [ ] # bedrooms 매핑
+- [x] HUD FMR API 응답 파싱 (`parseHudResponse`)
+- [x] MSA entityId 별 매핑 (NYC, LA, SF, Seattle, Boston — 5 cities)
+- [x] # bedrooms 매핑 (Efficiency → studio, One-Bedroom → oneBed, Two-Bedroom → twoBed)
+- [x] share = studio × 0.65 추정 (ADR-059)
+- [x] `mapToRent` 변환
+- [x] `CITY_CONFIGS` 5개 도시 정의
+- [x] `SOURCE` 정의 (HUD Fair Market Rents)
+- [x] `refresh` 함수: dryRun, cities 옵션
+- [x] RefreshResult 반환 구조
 
 #### `us_census.mjs`
 
-- [ ] ACS B25064 (median rent) fetch
-- [ ] 5-city 처리
-- [ ] year 파라미터 (최신 5-year estimate)
+- [x] ACS B25064 (median rent) fetch
+- [x] 5-city CBSA 코드 매핑 (35620, 31080, 41860, 42660, 14460)
+- [x] `parseCensusResponse` 파싱
+- [x] `US_CENSUS_API_KEY` 환경변수 필수 (MissingApiKeyError)
+- [x] censusMedian 필드로 교차 검증용 저장
+- [x] ACS_YEAR 상수 — fetch URL 의 연도가 미래 연도가 아님 (운영 정책 회귀, PR #20 review round 8)
 
 #### `us_bls.mjs`
 
-- [ ] BLS API key 로 인증
-- [ ] Series ID 별 fetch (식재료 8개 + 외식)
-- [ ] Region 별 데이터 (Northeast, Midwest, South, West)
-- [ ] 도시별 보정계수 (NY=1.0 vs LA=0.95 등 정적)
+- [x] `US_BLS_API_KEY` 환경변수 필수 (또는 useStatic=true)
+- [x] Series ID 별 fetch (milk, eggs, bread, chicken)
+- [x] Region 별 데이터 (Northeast, West — BLS_SERIES)
+- [x] 도시별 보정계수 ADR-059 (NYC=1.15, SF=1.25, LA=1.05, Seattle=1.00, Boston=1.10)
+- [x] `parseBlsResponse` 응답 파싱
+- [x] `mapToGroceries` + STATIC_GROCERIES/STATIC_FOOD fallback
+- [x] useStatic 옵션으로 API 키 없이 정적 데이터 사용
+- [x] `validateBlsValues` sanity range 검증 (BLS_VALUE_RANGES) — 범위 안 값 valid Map 통과 (PR #20 review round 7)
+- [x] `validateBlsValues` chicken1kg > 5 USD/lb 거부 (과거 ~$10/lb → 25.3 USD/kg 회귀 차단)
+- [x] `validateBlsValues` 음수·0 등 min 미만도 invalid 처리
+- [x] refresh: chicken1kg 범위 밖 응답 시 region-level errors 기록 + STATIC×보정계수 결과
 
 #### `us_transit.mjs`
 
-- [ ] MTA, LA Metro, SFMTA, King County Metro, MBTA 5개 fare 페이지
-- [ ] 각 도시별 추출 함수
+- [x] MTA, LA Metro, SFMTA, King County Metro, MBTA 5개 fare 페이지
+- [x] `parseFareHtml` HTML 파싱 (singleRide, monthlyPass 패턴 매칭)
+- [x] 각 도시별 staticFares fallback
+- [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
+- [x] 도시별 SOURCE (agency 이름 + fareUrl)
 
 ### 9-A.6 출처별 — 영국 (2 scripts)
 
 #### `uk_ons.mjs`
 
-- [ ] ONS Private Rental Market Statistics API (London)
-- [ ] CPI by item (COICOP 코드 매핑)
+- [x] ONS Private Rental Market Statistics API (London)
+- [x] CPI by item (COICOP 코드 매핑)
+- [x] parseOnsValue: 마지막 observation 추출
+- [x] mapToRent: share = studio × 0.65
+- [x] mapToGroceries: CPI 데이터 + static fallback
+- [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 
 #### `uk_tfl.mjs`
 
-- [ ] TfL Unified API (Zone 1-2 monthly/single)
-- [ ] taxiBase 별도 (black cab 정적)
+- [x] TfL Unified API (Zone 1-2 monthly/single)
+- [x] taxiBase 별도 (black cab 정적)
+- [x] checkTflApiStatus: API connectivity 확인
+- [x] getTransportFares: static 값 반환
+- [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 
 ### 9-A.7 출처별 — 유럽 (6 scripts)
 
 #### `de_destatis.mjs`
 
-- [ ] GENESIS API XML 응답 파싱
-- [ ] Berlin / Munich Bundesland 매핑
-- [ ] 임차료 + CPI
+- [x] GENESIS API XML 응답 파싱
+- [x] Berlin / Munich Bundesland 매핑
+- [x] 임차료 + CPI
+- [x] parseGenesisXml: wert 태그 추출 (독일 소수점 콤마 지원)
+- [x] getRentForCity: 도시별 보정계수 적용
+- [x] getGroceriesForCity: 도시별 보정계수 적용
+- [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 
-#### `de_transit.mjs`, `fr_ratp.mjs`, `nl_gvb.mjs`
+#### `de_transit.mjs`
 
-- [ ] BVG / MVV / RATP / GVB 각 fare page fetch + parse
+- [x] BVG (베를린) / MVV (뮌헨) fare page fetch
+- [x] getTransportForCity: 도시별 요금 반환
+- [x] checkBvgFarePage / checkMvvFarePage: connectivity 확인
+- [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 
 #### `fr_insee.mjs`
 
-- [ ] INSEE BDM API
-- [ ] Paris Île-de-France region
+- [x] parseInseeValue: INSEE JSON 응답 파싱 (observations / OBS_VALUE)
+- [x] getRentData: 파리 정적 rent 데이터 반환
+- [x] getGroceriesData: 파리 정적 groceries 데이터 반환
+- [x] checkInseeApiStatus: INSEE API connectivity 확인
+- [x] CITY_CONFIGS: 파리만 포함 (id, name, country, currency, region)
+- [x] SOURCE_RENT / SOURCE_FOOD: insee.fr URL 명시
+- [x] refresh: useStatic=true 시 API 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: API 불가 시 static fallback + errors에 추가
+
+#### `fr_ratp.mjs`
+
+- [x] getTransportData: 파리 정적 transport 데이터 반환 (Navigo, t+ ticket, taxi)
+- [x] checkRatpFarePage: RATP fare page connectivity 확인
+- [x] CITY_CONFIGS: 파리만 포함 (transitOperator=RATP, fareUrl)
+- [x] SOURCE: ratp.fr URL 명시
+- [x] refresh: useStatic=true 시 fetch 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
 
 #### `nl_cbs.mjs`
 
-- [ ] CBS Open Data OData API
-- [ ] Amsterdam 평균
+- [x] parseCbsValue: CBS OData JSON 응답 파싱 (value / d.results / Waarde)
+- [x] getRentData: 암스테르담 정적 rent 데이터 반환
+- [x] getGroceriesData: 암스테르담 정적 groceries 데이터 반환
+- [x] checkCbsApiStatus: CBS API connectivity 확인
+- [x] CITY_CONFIGS: 암스테르담만 포함 (id, name, country, currency, region)
+- [x] SOURCE_RENT / SOURCE_FOOD: cbs.nl URL 명시
+- [x] refresh: useStatic=true 시 API 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: API 불가 시 static fallback + errors에 추가
+
+#### `nl_gvb.mjs`
+
+- [x] getTransportData: 암스테르담 정적 transport 데이터 반환 (GVB 월정액, 1-hour ticket, taxi)
+- [x] checkGvbFarePage: GVB fare page connectivity 확인
+- [x] CITY_CONFIGS: 암스테르담만 포함 (transitOperator=GVB, fareUrl)
+- [x] SOURCE: gvb.nl URL 명시
+- [x] refresh: useStatic=true 시 fetch 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
 
 ### 9-A.8 출처별 — 호주·아시아·UAE (8 scripts)
 
 #### `au_abs.mjs`, `au_transit.mjs`
 
-- [ ] ABS Residential Property Price Index + CPI
-- [ ] Sydney/Melbourne 분리
-- [ ] 주 단위 → 월 환산 (× 4.33)
-- [ ] Transport NSW + PTV fare
+- [x] ABS Residential Property Price Index + CPI
+- [x] Sydney/Melbourne 분리
+- [x] 주 단위 → 월 환산 (× 4.33)
+- [x] Transport NSW + PTV fare
+- [x] parseAbsValue: 정상/빈/null 응답 파싱
+- [x] weeklyToMonthly: 주간→월간 환산 (× 4.33)
+- [x] mapToRent: 도시별 정적 임대료 매핑
+- [x] mapToGroceries: CPI + static fallback
+- [x] getTransportFares: 도시별 정적 요금
+- [x] refresh: dryRun/useStatic 옵션
+- [x] refresh: 기존 데이터 대비 changes 계산
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: API 불가 시 static fallback + errors에 추가
 
 #### `jp_estat.mjs`, `jp_transit.mjs`
 
-- [ ] e-Stat API (`JP_ESTAT_APP_ID` 필요)
-- [ ] 東京都 23区 + 大阪府 분리
-- [ ] 도쿄메트로 + 大阪Metro fare
+- [x] e-Stat API (`JP_ESTAT_APP_ID` 필요)
+- [x] 東京都 23区 + 大阪府 분리
+- [x] 도쿄메트로 + 大阪Metro fare
+- [x] parseEstatValue: 정상/빈/null 응답 파싱
+- [x] mapToRent: 도시별 정적 임대료 (JPY)
+- [x] mapToGroceries: 정적 식재료 가격
+- [x] getTransportFares: 도시별 정적 요금
+- [x] refresh: dryRun/useStatic 옵션
+- [x] refresh: JP_ESTAT_APP_ID 미설정 시 errors에 추가
+- [x] refresh: 기존 데이터 대비 changes 계산
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: API 불가 시 static fallback + errors에 추가
+- [x] `fetchEstatData` fetch 실패 시 `console.warn` 으로 예외 노출 (silent fail 금지, PR #20 review round 8)
+- [x] v1.0 계약 — e-Stat API sample 응답이 도시 JSON 의 rent/food 값에 미반영 (응답 단위 검증 v1.x)
 
-#### `sg_singstat.mjs`, `sg_lta.mjs`
+#### `sg_singstat.mjs`
 
-- [ ] SingStat TableBuilder API
-- [ ] LTA DataMall fare API
-- [ ] Hawker centre 가격 별도 정적 (CPI Hawker food 카테고리 매핑)
+- [x] parseSingStatValue: 마지막 row value 파싱
+- [x] parseSingStatValue: 빈/null/undefined → null 반환
+- [x] mapToRent: 정적 임대료 (SGD 단위)
+- [x] mapToGroceries: 정적 식재료 가격
+- [x] CITY_CONFIGS: 싱가포르 포함 (id, name, country, currency, region)
+- [x] STATIC_FOOD: restaurantMeal / cafe 만 (hawkerMeal 은 dead field 로 제거, PR #20 review round 13)
+- [x] SOURCE_RENT / SOURCE_FOOD: singstat.gov.sg URL 명시
+- [x] refresh: useStatic=true 시 API 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: SG_DATA_GOV_KEY 미설정 시 errors에 추가
+
+#### `sg_lta.mjs`
+
+- [x] getTransportFares: 정적 요금 (SGD 단위)
+- [x] checkLtaFarePage: LTA fare page connectivity 확인
+- [x] CITY_CONFIGS: 싱가포르 포함 (transitOperator=LTA, fareUrl)
+- [x] SOURCE: lta.gov.sg URL 명시
+- [x] refresh: useStatic=true 시 fetch 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
 
 #### `vn_gso.mjs`
 
-- [ ] GSO 데이터 (한계 큼) — best-effort fetch
-- [ ] HCMC 단위 데이터 부재 시 "estimated" 마커 + 기존값 유지
-- [ ] errors 에 한계 명시 메시지
+- [x] mapToRent: 정적 임대료 (VND 단위, 큰 수)
+- [x] mapToGroceries: 정적 식재료 가격 (VND 단위)
+- [x] getTransportFares: 정적 요금 (VND 단위)
+- [x] checkGsoStatus: GSO site connectivity 확인
+- [x] CITY_CONFIGS: 호치민 포함 (id=hochiminh, country=VN, currency=VND)
+- [x] SOURCE_RENT / SOURCE_FOOD: "estimated" 마커 포함 (도시 단위 데이터 부재)
+- [x] SOURCE_TRANSPORT: 정적 추정 명시
+- [x] refresh: rent + food + transport 모두 처리
+- [x] refresh: GSO 도시 단위 데이터 부재 경고 errors에 포함
+- [x] refresh: useStatic=true 시 정상 동작
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
 
-#### `ae_fcsc.mjs`, `ae_rta.mjs`
+#### `ae_fcsc.mjs`
 
-- [ ] FCSC + DSC 통합 fetch
-- [ ] AED 통화 처리
-- [ ] RTA 공식 fare page
+- [x] mapToRent: 정적 임대료 (AED 단위)
+- [x] mapToGroceries: 정적 식재료 가격 (AED 단위)
+- [x] checkDscStatus: DSC site connectivity 확인
+- [x] checkFcscStatus: FCSC site connectivity 확인
+- [x] CITY_CONFIGS: 두바이 포함 (id, name, country=AE, currency=AED, region=me)
+- [x] SOURCE_RENT: DSC + RERA 명시
+- [x] SOURCE_FOOD: FCSC 명시
+- [x] refresh: rent + food 처리
+- [x] refresh: useStatic=true 시 정상 동작
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: DSC/FCSC 불가 시 static fallback + errors에 추가
+
+#### `ae_rta.mjs`
+
+- [x] getTransportFares: 정적 요금 (AED 단위)
+- [x] checkRtaFarePage: RTA fare page connectivity 확인
+- [x] CITY_CONFIGS: 두바이 포함 (transitOperator=RTA, fareUrl)
+- [x] SOURCE: rta.ae URL 명시
+- [x] refresh: useStatic=true 시 fetch 호출 없이 정적 데이터 사용
+- [x] refresh: dryRun=true 시 파일 미갱신
+- [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
+- [x] refresh: 알 수 없는 도시 → errors에 추가
+- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
+
+#### `eu_eurostat.mjs`
+
+- [x] parseEurostatResponse: JSON-stat 응답 → country→value Map
+- [x] parseEurostatResponse: 빈/null/undefined → 빈 Map 반환
+- [x] EU_COUNTRIES: DE/FR/NL 3개국
+- [x] EU_CITIES: 국가별 도시 매핑 (berlin, munich, paris, amsterdam)
+- [x] EUROSTAT_DATASETS: HICP + HPI 정의
+- [x] SOURCE: ec.europa.eu URL 명시, category 가 validate_cities.mjs::validCategories 에 포함 (PR #20 review round 23)
+- [x] refresh: RefreshResult 구조 반환
+- [x] refresh: Eurostat 불가 시 errors에 추가
+- [x] refresh: 정상 응답 시 EU 도시들 포함
+- [x] refresh: 일부 국가 데이터 부재 시 해당 국가만 errors에 추가
 
 ### 9-A.9 출처별 — 학비·비자 (2 scripts)
 
 #### `universities.mjs`
 
-- [ ] 도시별 대학 매핑 (registry from DATA_SOURCES.md)
-- [ ] 각 대학 공식 international tuition 페이지 fetch
-- [ ] HTML parse — 페이지 구조별 selector (대학별 다른 selector 정적 매핑)
-- [ ] 학비 단위 (per credit vs per year vs per semester) 정규화 → annual
-- [ ] 페이지 구조 변경 시 selector 실패 → errors + 기존값 유지
-- [ ] 학비 페이지 redirect 처리
-- [ ] 다국어 페이지 (영어 default)
-- [ ] 등록비만 있는 대학 (독일·프랑스 일부): annual = 등록비 × 2
+- [x] 도시별 대학 매핑 (registry from DATA_SOURCES.md)
+- [x] 각 대학 공식 international tuition 페이지 fetch (reachability check 만)
+- [x] `staticAnnual` 항상 반환 — fetch 실패 시 graceful fallback
+- [x] 워크플로우에서 `--useStatic` 강제 (refresh-tuition.yml, PR #20 review round 7)
+- [ ] HTML parse — 페이지 구조별 selector (v1.x — 미구현, 현재 all-static)
+- [ ] 학비 단위 (per credit vs per year vs per semester) 정규화 → annual (v1.x — 미구현)
+- [ ] 페이지 구조 변경 시 selector 실패 → errors + 기존값 유지 (v1.x — selector 미도입)
+- [ ] 학비 페이지 redirect 처리 (v1.x — 미구현)
+- [ ] 다국어 페이지 (영어 default) (v1.x — 미구현)
+- [ ] 등록비만 있는 대학 (독일·프랑스 일부): annual = 등록비 × 2 (v1.x — 미구현)
 
 #### `visas.mjs`
 
-- [ ] 도시별 비자 페이지 매핑
-- [ ] 정부 페이지 fetch + parse
-- [ ] 통화별 처리 (USD vs CAD vs EUR vs JPY 등)
-- [ ] 정착 비용 추정 (정적 + 비자료)
-- [ ] 페이지 변경 시 graceful fail
+- [x] 도시별 비자 페이지 매핑 (`VISA_REGISTRY`)
+- [x] 정부 페이지 reachability check (HTML 파싱 미구현, static 항상 반환)
+- [x] 정착 비용 추정 (정적 + 비자료) — VISA_REGISTRY.settlementApprox
+- [x] 페이지 변경 시 graceful fail — fetchedFromPage:false 면 console.info, errors 미추가
+- [x] 워크플로우에서 `--useStatic` 강제 (refresh-visa.yml, PR #20 review round 7)
+- [ ] 정부 페이지 fetch + parse (v1.x — HTML 파싱 미구현, 현재 all-static)
+- [ ] 통화별 처리 (USD vs CAD vs EUR vs JPY 등) — registry 단위 매핑 (v1.x — 동적 파싱 미구현)
 
 ### 9-A.10 출처별 — 환율 백업 (1 script)
 
@@ -2460,11 +2654,23 @@ afterEach(() => {
 - [ ] 21개 city 모두 검증
 - [ ] 각 city 의 schema 통과
 - [ ] cross-field consistency (currency vs country)
-- [ ] 직전 분기 대비 ±30% 이상 변동: warn (block 아님)
+- [ ] 직전 분기 대비 ±30% 이상 변동: warn (block 아님) — 분리되어 `detect_outliers.mjs` 가 담당.
 - [ ] sources 배열 비어 있음: throws
 - [ ] lastUpdated 미래 날짜: warn
 - [ ] lastUpdated 1년+ 과거: warn
 - [ ] exit code 0 (성공) / 1 (오류) / 2 (warning only)
+
+#### `scripts/detect_outliers.mjs`
+
+워킹트리 ↔ HEAD 비교 → `_outlier.classifyChange` 호출 → ≥30% 변동 발견 시 `$GITHUB_OUTPUT` 에 `HAS_OUTLIERS=true` 출력. 워크플로우의 outlier PR 분기 트리거.
+
+- [x] `iterNumericFields` — rent / food / transport 평탄화
+- [x] `iterNumericFields` — food.groceries 키 합집합 순회 (old/new 양쪽)
+- [x] `iterNumericFields` — tuition[i].annual 인덱스별 비교, 길이 차이 처리
+- [x] `iterNumericFields` — visa.* 필드 (양쪽 undefined 면 skip)
+- [x] `iterNumericFields` — null 값은 그대로 null 로 yield
+- [ ] CLI 실행: HEAD 부재(첫 commit) 시 outliers=0, exit 0
+- [ ] `GITHUB_OUTPUT` 미설정 환경에서도 stdout summary 만 출력하고 종료
 
 ### 9-A.12 정적 데이터 파일
 
@@ -2491,18 +2697,25 @@ afterEach(() => {
 
 ### 9-A.13 워크플로우 YAML 검증
 
-#### `actionlint` 실행
+#### `actionlint` 실행 — **수동 검증 (CI 미설치)**
 
-- [ ] `.github/workflows/refresh-fx.yml` syntax valid
-- [ ] `refresh-prices.yml`, `refresh-rent.yml`, `refresh-transit.yml`, `refresh-tuition.yml`, `refresh-visa.yml` 모두 valid
-- [ ] cron schedule 표현 정확 (`0 18 * * 1` 등)
-- [ ] secrets 참조 (`${{ secrets.KR_DATA_API_KEY }}`) 모두 존재 (deny-list 없음)
-- [ ] `peter-evans/create-pull-request@v6` 액션 사용 정확
+actionlint 가 CI 워크플로우로 자동화되어 있지 않다 — 본 항목들은 운영자가 로컬에서 brew/standalone 으로 1회 검증하고 통과한 결과. 회귀 자동 차단 안 됨, v1.x 별도 phase 에서 actionlint job 추가 검토.
+
+- [ ] `.github/workflows/refresh-fx.yml` syntax valid (수동 검증 통과, CI 회귀 안 됨)
+- [ ] `refresh-prices.yml`, `refresh-rent.yml`, `refresh-transit.yml`, `refresh-tuition.yml`, `refresh-visa.yml` 모두 valid (수동 검증)
+- [x] cron schedule 표현 정확 (`0 18 * * 1` 등) — `integration.test.ts` 가 검증
+- [x] secrets 참조 (`${{ secrets.KR_DATA_API_KEY }}`) 모두 존재 (deny-list 없음)
+- [x] `peter-evans/create-pull-request@v6` 액션 사용 정확 — `integration.test.ts` 가 SHA pin 검증
 
 #### Workflow logic 단위 테스트
 
-- [ ] outlier 라벨 분기 (PR 생성 vs 직접 commit)
-- [ ] 환경변수 export (`HAS_OUTLIERS=true`) 정확
+- [x] outlier 라벨 분기 (PR 생성 vs 직접 commit)
+- [x] 환경변수 export (`HAS_OUTLIERS=true`) 정확
+- [x] v1.0 useStatic 정책 — visas / universities / jp_estat 호출은 `--useStatic` 동반 (PR #20 review round 7)
+- [x] push retry 의 `git pull --rebase` 실패는 `::warning` 으로 노출, silent `|| true` 금지 (PR #20 review round 8)
+- [x] push retry 루프 시작에 `git rebase --abort` 가 있어 in-progress 상태 정리 (PR #20 review round 9)
+- [x] `refresh-rent.yml` 의 sg_singstat 호출은 `--useStatic` 강제 — round 9 의 SG_DATA_GOV_KEY env wire 는 round 13 에서 제거 (sg_singstat 가 jp_estat 와 동일 패턴으로 v1.0 STATIC 모드)
+- [x] HAS_NEW 가 `Create PR for updates` OR 조건 + `Auto commit and push` AND 조건 양쪽에 반영 (PR #20 review round 11)
 
 ### 9-A.14 `_registry.mjs` (도시 ↔ 출처 매핑)
 
@@ -2517,11 +2730,11 @@ DATA_SOURCES.md 부록 A 의 코드화. registry 가 사실상 단일 출처.
 
 #### 풀 파이프라인 시뮬레이션
 
-- [ ] 모든 fetch mock → refresh-prices 워크플로우 시뮬레이션 → cities/\*.json 갱신 → all.json 빌드 → 결과 비교
-- [ ] 일부 source 실패 → 다른 source 영향 없음 + 워크플로우 partial success
-- [ ] 모든 source 실패 → 워크플로우 fail (exit code 1)
-- [ ] outlier 발생 → PR 생성 (mock peter-evans action) + 라벨 정확
-- [ ] PR 안 만들어지는 케이스 (변동 <5%) → 직접 commit
+- [x] 모든 fetch mock → refresh-prices 워크플로우 시뮬레이션 → cities/\*.json 갱신 → all.json 빌드 → 결과 비교
+- [x] 일부 source 실패 → 다른 source 영향 없음 + 워크플로우 partial success
+- [x] 모든 source 실패 → 워크플로우 fail (exit code 1)
+- [x] outlier 발생 → PR 생성 (mock peter-evans action) + 라벨 정확
+- [x] PR 안 만들어지는 케이스 (변동 <5%) → 직접 commit
 
 #### 실제 API smoke test (선택, manual)
 
@@ -2530,10 +2743,12 @@ DATA_SOURCES.md 부록 A 의 코드화. registry 가 사실상 단일 출처.
 
 ### 9-A.16 시간·환경 의존 테스트
 
-- [ ] 워크플로우 실행 시각 (KST 18:00) 가정 → fetch URL 의 날짜 파라미터 정확
-- [ ] 시즌성 — 학비는 1월·8월 갱신 시 새 학년 데이터 (이전 학년 무시)
+- [x] 5개 워크플로우 cron hour = 9 (UTC 09:00 = KST 18:00). round 21 회귀 차단 — `cron hour 가 18 이 되어선 안 됨` 단언 (`integration.test.ts`).
+- [x] 6개 refresh 워크플로우 `jobs.refresh.timeout-minutes` 가 합리적 범위(5~60) 안에 설정. GitHub Actions 기본값 360분 hang 회귀 차단 — round 24 (`integration.test.ts`).
+- [ ] 워크플로우 실행 시각 (UTC 09:00 = KST 18:00) 가정 → fetch URL 의 날짜 파라미터 정확 (수동 검증)
+- [ ] 시즌성 — 학비는 1월·8월 갱신 시 새 학년 데이터 (이전 학년 무시) (v1.x HTML 파싱 도입 후)
 - [ ] 분기 boundary (3월 31일 vs 4월 1일) — generatedAt 이 분기 시작 후 첫 갱신 기준 정확
-- [ ] timezone: KST 가정 vs UTC GitHub Actions runner 간 변환
+- [ ] timezone: KST 가정 vs UTC GitHub Actions runner 간 변환 (round 21 cron 버그가 본 항목에서 검출됐어야 함 — 자동 검증 추가는 v1.x)
 
 ### 9-A.17 보안·악의적 입력
 
@@ -2545,8 +2760,8 @@ DATA_SOURCES.md 부록 A 의 코드화. registry 가 사실상 단일 출처.
 
 ### 9-A.18 멱등성·idempotency
 
-- [ ] 동일 시각에 같은 워크플로우 두 번 실행: 결과 동일 (changes 빈 배열)
-- [ ] cities/\*.json 변경 없음 → all.json 변경 없음 → git commit no-op
+- [x] 동일 시각에 같은 워크플로우 두 번 실행: 결과 동일 (changes 빈 배열)
+- [x] cities/\*.json 변경 없음 → all.json 변경 없음 → git commit no-op
 - [ ] PR 이미 열려 있음 (이전 outlier) → 새 PR 만들지 않고 기존 update
 
 ### 9-A.19 성능

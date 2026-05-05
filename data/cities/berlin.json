@@ -1,0 +1,90 @@
+{
+  "id": "berlin",
+  "name": {
+    "ko": "베를린",
+    "en": "Berlin"
+  },
+  "country": "DE",
+  "currency": "EUR",
+  "region": "eu",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 550,
+    "studio": 850,
+    "oneBed": 1000,
+    "twoBed": 1400
+  },
+  "food": {
+    "restaurantMeal": 12,
+    "cafe": 3.5,
+    "groceries": {
+      "milk1L": 1.1,
+      "eggs12": 2.8,
+      "rice1kg": 2.5,
+      "chicken1kg": 8,
+      "bread": 1.8,
+      "onion1kg": 1.2,
+      "apple1kg": 2.5,
+      "ramen": 0.9
+    }
+  },
+  "transport": {
+    "monthlyPass": 86,
+    "singleRide": 3.2,
+    "taxiBase": 4
+  },
+  "tuition": [
+    {
+      "school": "TU Berlin",
+      "level": "undergrad",
+      "annual": 700
+    },
+    {
+      "school": "HU Berlin",
+      "level": "undergrad",
+      "annual": 700
+    },
+    {
+      "school": "FU Berlin",
+      "level": "undergrad",
+      "annual": 700
+    }
+  ],
+  "visa": {
+    "studentApplicationFee": 75,
+    "workApplicationFee": 100,
+    "settlementApprox": 1500
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "Destatis GENESIS + static estimates",
+      "url": "https://www.destatis.de/EN/Themes/Society-Environment/Housing/_node.html",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "Destatis CPI + static estimates",
+      "url": "https://www.destatis.de/EN/Themes/Economy/Prices/_node.html",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "BVG official fares + static estimates",
+      "url": "https://www.bvg.de/en/tickets-fares",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

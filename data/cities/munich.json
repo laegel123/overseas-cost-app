@@ -1,0 +1,85 @@
+{
+  "id": "munich",
+  "name": {
+    "ko": "뮌헨",
+    "en": "Munich"
+  },
+  "country": "DE",
+  "currency": "EUR",
+  "region": "eu",
+  "lastUpdated": "2026-05-03",
+  "rent": {
+    "share": 750,
+    "studio": 1150,
+    "oneBed": 1350,
+    "twoBed": 1900
+  },
+  "food": {
+    "restaurantMeal": 13.2,
+    "cafe": 3.85,
+    "groceries": {
+      "milk1L": 1.21,
+      "eggs12": 3.08,
+      "rice1kg": 2.75,
+      "chicken1kg": 8.8,
+      "bread": 1.98,
+      "onion1kg": 1.32,
+      "apple1kg": 2.75,
+      "ramen": 0.99
+    }
+  },
+  "transport": {
+    "monthlyPass": 63.2,
+    "singleRide": 3.7,
+    "taxiBase": 4.7
+  },
+  "tuition": [
+    {
+      "school": "LMU München",
+      "level": "undergrad",
+      "annual": 700
+    },
+    {
+      "school": "TU München",
+      "level": "undergrad",
+      "annual": 700
+    }
+  ],
+  "visa": {
+    "studentApplicationFee": 75,
+    "workApplicationFee": 100,
+    "settlementApprox": 1500
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "Destatis GENESIS + static estimates",
+      "url": "https://www.destatis.de/EN/Themes/Society-Environment/Housing/_node.html",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "Destatis CPI + static estimates",
+      "url": "https://www.destatis.de/EN/Themes/Economy/Prices/_node.html",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "transport",
+      "name": "MVV official fares + static estimates",
+      "url": "https://www.mvv-muenchen.de/en/tickets-fares/",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}

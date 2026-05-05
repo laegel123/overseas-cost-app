@@ -1,7 +1,14 @@
 module.exports = {
   preset: 'jest-expo',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testPathIgnorePatterns: ['/node_modules/', '/.expo/', '/dist/', 'scripts/refresh/__tests__/setup.ts'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/.expo/',
+    '/dist/',
+    'scripts/refresh/__tests__/setup.ts',
+    // type-only helper — describe() 없는 type 정의 모듈.
+    'scripts/refresh/__tests__/_test-types.ts',
+  ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     // global.css (NativeWind) 는 metro/babel 에서 처리되며 jest 런타임에서는 빈 객체로 stub.

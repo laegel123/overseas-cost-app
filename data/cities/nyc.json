@@ -1,0 +1,90 @@
+{
+  "id": "nyc",
+  "name": {
+    "ko": "뉴욕",
+    "en": "New York"
+  },
+  "country": "US",
+  "currency": "USD",
+  "region": "na",
+  "lastUpdated": "2026-05-04",
+  "rent": {
+    "share": 1430,
+    "studio": 2200,
+    "oneBed": 2800,
+    "twoBed": 3500
+  },
+  "food": {
+    "restaurantMeal": 20.7,
+    "cafe": 6.32,
+    "groceries": {
+      "milk1L": 1.38,
+      "eggs12": 5.18,
+      "rice1kg": 4.02,
+      "chicken1kg": 11.5,
+      "bread": 4.02,
+      "onion1kg": 3.22,
+      "apple1kg": 4.83,
+      "ramen": 1.73
+    }
+  },
+  "transport": {
+    "monthlyPass": 132,
+    "singleRide": 2.9,
+    "taxiBase": 3
+  },
+  "tuition": [
+    {
+      "school": "Columbia",
+      "level": "undergrad",
+      "annual": 65000
+    },
+    {
+      "school": "NYU",
+      "level": "undergrad",
+      "annual": 60000
+    },
+    {
+      "school": "CUNY",
+      "level": "undergrad",
+      "annual": 18000
+    }
+  ],
+  "visa": {
+    "studentApplicationFee": 185,
+    "workApplicationFee": 190,
+    "settlementApprox": 3000
+  },
+  "sources": [
+    {
+      "category": "rent",
+      "name": "HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)",
+      "url": "https://www.huduser.gov/portal/datasets/fmr.html",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "food",
+      "name": "US BLS CPI + static estimates (ADR-059 adjustment)",
+      "url": "https://www.bls.gov/cpi/",
+      "accessedAt": "2026-05-04"
+    },
+    {
+      "category": "transport",
+      "name": "MTA",
+      "url": "https://new.mta.info/fares",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "tuition",
+      "name": "Official university international tuition pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    },
+    {
+      "category": "visa",
+      "name": "Government visa fee pages (static estimates)",
+      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
+      "accessedAt": "2026-05-03"
+    }
+  ]
+}
