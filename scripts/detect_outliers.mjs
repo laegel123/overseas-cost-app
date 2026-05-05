@@ -14,7 +14,10 @@
  *   - process.env.GITHUB_OUTPUT 가 설정된 경우:
  *       HAS_OUTLIERS=true|false  (≥30% 변동 1건 이상)
  *       HAS_UPDATES=true|false   (5~30% 변동 1건 이상, outlier 와 별개로 집계)
- *       HAS_NEW=true|false       (HEAD 에 없던 신규 도시 JSON 1건 이상 — 검토 없이 main 직접 push 차단)
+ *       HAS_NEW=true|false       (`classifyChange` 가 'new' 를 반환한 항목 1건 이상 — 검토 없이 main 직접 push 차단)
+ *                                 - HEAD 에 없던 신규 도시 JSON 의 모든 numeric 필드, 그리고
+ *                                 - 기존 도시의 placeholder(0 또는 null) 필드가 처음 실제 값으로 채워지는 경우
+ *                                 (createCitySeed 가 placeholder 0 으로 도시 파일을 만든 뒤 fetcher 가 후속 갱신하는 패턴 보호)
  *
  * 종료 코드: 항상 0 (변동폭 자체는 에러가 아님 — schema 위반은 validate_cities.mjs 책임).
  */

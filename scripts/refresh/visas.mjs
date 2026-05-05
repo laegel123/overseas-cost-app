@@ -16,6 +16,7 @@
 
 import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
+import { OVERSEAS_CITY_CONFIGS } from './_cities.mjs';
 
 export const VISA_REGISTRY = {
   CA: {
@@ -109,28 +110,9 @@ export const CITY_TO_COUNTRY = {
   dubai: 'AE',
 };
 
-export const CITY_CONFIGS = {
-  vancouver: { id: 'vancouver', name: { ko: '밴쿠버', en: 'Vancouver' }, country: 'CA', currency: 'CAD', region: 'na' },
-  toronto: { id: 'toronto', name: { ko: '토론토', en: 'Toronto' }, country: 'CA', currency: 'CAD', region: 'na' },
-  montreal: { id: 'montreal', name: { ko: '몬트리올', en: 'Montreal' }, country: 'CA', currency: 'CAD', region: 'na' },
-  nyc: { id: 'nyc', name: { ko: '뉴욕', en: 'New York' }, country: 'US', currency: 'USD', region: 'na' },
-  la: { id: 'la', name: { ko: '로스앤젤레스', en: 'Los Angeles' }, country: 'US', currency: 'USD', region: 'na' },
-  sf: { id: 'sf', name: { ko: '샌프란시스코', en: 'San Francisco' }, country: 'US', currency: 'USD', region: 'na' },
-  seattle: { id: 'seattle', name: { ko: '시애틀', en: 'Seattle' }, country: 'US', currency: 'USD', region: 'na' },
-  boston: { id: 'boston', name: { ko: '보스턴', en: 'Boston' }, country: 'US', currency: 'USD', region: 'na' },
-  london: { id: 'london', name: { ko: '런던', en: 'London' }, country: 'GB', currency: 'GBP', region: 'eu' },
-  berlin: { id: 'berlin', name: { ko: '베를린', en: 'Berlin' }, country: 'DE', currency: 'EUR', region: 'eu' },
-  munich: { id: 'munich', name: { ko: '뮌헨', en: 'Munich' }, country: 'DE', currency: 'EUR', region: 'eu' },
-  paris: { id: 'paris', name: { ko: '파리', en: 'Paris' }, country: 'FR', currency: 'EUR', region: 'eu' },
-  amsterdam: { id: 'amsterdam', name: { ko: '암스테르담', en: 'Amsterdam' }, country: 'NL', currency: 'EUR', region: 'eu' },
-  sydney: { id: 'sydney', name: { ko: '시드니', en: 'Sydney' }, country: 'AU', currency: 'AUD', region: 'oceania' },
-  melbourne: { id: 'melbourne', name: { ko: '멜버른', en: 'Melbourne' }, country: 'AU', currency: 'AUD', region: 'oceania' },
-  tokyo: { id: 'tokyo', name: { ko: '도쿄', en: 'Tokyo' }, country: 'JP', currency: 'JPY', region: 'asia' },
-  osaka: { id: 'osaka', name: { ko: '오사카', en: 'Osaka' }, country: 'JP', currency: 'JPY', region: 'asia' },
-  singapore: { id: 'singapore', name: { ko: '싱가포르', en: 'Singapore' }, country: 'SG', currency: 'SGD', region: 'asia' },
-  hochiminh: { id: 'hochiminh', name: { ko: '호치민', en: 'Ho Chi Minh City' }, country: 'VN', currency: 'VND', region: 'asia' },
-  dubai: { id: 'dubai', name: { ko: '두바이', en: 'Dubai' }, country: 'AE', currency: 'AED', region: 'me' },
-};
+// 20개 도시 메타 — 단일 출처 `_cities.mjs` 에서 import (PR #20 review round 10).
+// 도시 추가·통화 변경 시 `_cities.mjs` 만 수정하면 universities.mjs / visas.mjs 양쪽에 자동 반영.
+export const CITY_CONFIGS = OVERSEAS_CITY_CONFIGS;
 
 export const SOURCE = {
   category: 'visa',

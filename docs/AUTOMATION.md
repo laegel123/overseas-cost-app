@@ -43,9 +43,11 @@ GitHub Actions (cron schedule)
 
 scripts/refresh/
   ├── _common.mjs         # 공통 헬퍼 (fetch, retry, validation, commit logic)
-  ├── _outlier.mjs        # 변동 폭 검증
+  ├── _outlier.mjs        # 변동 폭 검증 + iterNumericFields
   ├── _diff.mjs           # 직전 분기 대비 비교
   ├── _registry.mjs       # 도시 ↔ 출처 매핑 (DATA_SOURCES.md 의 코드화)
+  ├── _cities.mjs         # 20개 해외 도시 공통 메타 (visas / universities 단일 출처)
+  ├── _run.mjs            # CLI wrapper — 모든 fetcher default export 를 호출 + path traversal 방어
   │
   ├── kr_molit.mjs        # 한국 국토부 실거래가 (임차료)
   ├── kr_kca.mjs          # 한국소비자원 참가격 (식재료)
@@ -123,13 +125,19 @@ export interface RefreshResult {
 export default async function refresh(): Promise<RefreshResult>;
 ```
 
-공통 헬퍼 (`_common.mjs`):
+공통 헬퍼 (`_common.mjs` / `_outlier.mjs`):
 
 ```ts
+// _common.mjs
 export async function fetchWithRetry(url, opts?): Promise<Response>; // exponential backoff 3회
 export async function readCity(id): Promise<CityCostData>;
 export async function writeCity(id, data, source): Promise<void>; // sources 자동 갱신
-export function classifyChange(pct): 'commit' | 'pr-update' | 'pr-outlier';
+
+// _outlier.mjs — classifyChange 는 oldVal/newVal 두 인자를 받아 분기 분류
+export function classifyChange(
+  oldVal: number | null,
+  newVal: number | null,
+): 'new' | 'commit' | 'pr-update' | 'pr-outlier' | 'pr-removed';
 ```
 
 ## 4. 워크플로우 명세
@@ -281,17 +289,21 @@ jobs:
 
 ### 4.5b 워크플로우 동시성 (concurrency)
 
-여러 워크플로우가 동시에 git push 시 race condition 발생 가능. 모든 워크플로우에 동일 concurrency group 적용:
+각 워크플로우는 **카테고리별 고유** concurrency group 을 사용한다 — 같은 카테고리의 동시 실행은 직렬화하지만 카테고리 간에는 병렬 실행을 허용해 처리량을 올린다. 카테고리 간 git push race 는 push retry 루프 (`git rebase --abort` → `git pull --rebase` → `git push` 3회) 가 흡수한다.
 
 ```yaml
 concurrency:
-  group: data-refresh-${{ github.ref }}
+  # refresh-fx.yml
+  group: data-refresh-fx-${{ github.ref }}
+  # refresh-prices.yml
+  group: data-refresh-prices-${{ github.ref }}
+  # refresh-rent / refresh-transit / refresh-tuition / refresh-visa 도 카테고리별 고유 group
   cancel-in-progress: false
 ```
 
-- `cancel-in-progress: false` — 진행 중 워크플로우 완료까지 대기 (취소 X, 큐잉)
-- 동일 group: 모든 6개 refresh-\* 워크플로우 + build_data 가 동일 group → 항상 직렬 실행
-- 새 push 가 진행 중이면 대기 후 차례로 실행 → git push race 방지
+- `cancel-in-progress: false` — 같은 카테고리의 진행 중 워크플로우 완료까지 대기 (취소 X, 큐잉). 부분 실행으로 인한 데이터 불완전 갱신 차단.
+- 카테고리별 고유 group: fx / prices / rent / transit / tuition / visa 가 같은 ref 에서도 병렬 실행 가능. 운영자 관점 "월요일 아침에 prices · transit 동시 실행" 같은 시나리오 정상.
+- 카테고리 간 push race: 두 카테고리가 같은 push 윈도우에 들어오면 push retry 가 fast-forward 충돌을 처리. `integration.test.ts` 가 push retry 패턴을 회귀 검증.
 
 ### 4.5c API 키 부재 시 처리
 

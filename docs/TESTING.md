@@ -2203,6 +2203,12 @@ afterEach(() => {
 - [x] `rent.censusMedian` 추적하지 않음 — cross-validation 보조 필드 (PR #20 review round 8)
 - [x] `rent.deposit`, `tax.*` 추적하지 않음 — fetcher 가 채우지 않거나 변동 알림이 의미 없는 필드
 
+#### `_cities.mjs` `OVERSEAS_CITY_CONFIGS` (PR #20 review round 10)
+
+- [x] 20개 해외 도시 (서울 제외) — id / name / country / currency / region 필수 필드
+- [x] visas.mjs / universities.mjs 의 `CITY_CONFIGS` 가 본 모듈과 동일 reference (단일 출처 회귀 차단)
+- [x] 서울(seoul) 비포함 — 본 모듈은 해외 도시 전용
+
 #### `diffCities(oldData, newData): ChangeRecord[]` (in `_diff.mjs`)
 
 - [x] 변경 없음: 빈 배열
