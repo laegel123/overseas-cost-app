@@ -91,7 +91,7 @@ scripts/refresh/
   ├── ae_fcsc.mjs         # UAE FCSC + DSC
   ├── ae_rta.mjs          # RTA Dubai fare
   │
-  ├── eu_eurostat.mjs     # EU Eurostat fallback (입자도 보조)
+  ├── eu_eurostat.mjs     # EU Eurostat fallback (v1.x — 라이브러리 골조, 실제 fallback 미연결)
   │
   ├── universities.mjs    # 대학 학비 (각 대학 공식 page fetch)
   └── visas.mjs           # 비자 fee (정부 page fetch)

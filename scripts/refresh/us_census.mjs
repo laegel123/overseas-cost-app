@@ -110,6 +110,16 @@ export default async function refresh(opts = {}) {
   const fields = [];
   const updatedCities = [];
 
+  // ACS 5-Year Estimates 는 매년 12월에 직전 연도 dataset 이 공개됨 (예: 2024 dataset → 2024-12 공개).
+  // 즉 현재 연도 기준 N-1 년 dataset 가 최신 — currentYear - ACS_YEAR > 2 이면 운영자가 수동 갱신
+  // 누락한 stale 상태 (PR #20 review round 12).
+  const currentYear = new Date().getUTCFullYear();
+  if (currentYear - ACS_YEAR > 2) {
+    console.warn(
+      `::warning::ACS_YEAR(${ACS_YEAR}) is stale — Census ACS 5-Year ${currentYear - 1} dataset 이 공개돼 있을 가능성. us_census.mjs 의 ACS_YEAR 상수 갱신 필요 (AUTOMATION.md §10).`,
+    );
+  }
+
   const apiKey = process.env.US_CENSUS_API_KEY;
   if (!apiKey) {
     throw createMissingApiKeyError('US_CENSUS_API_KEY environment variable is required');

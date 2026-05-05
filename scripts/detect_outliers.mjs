@@ -63,6 +63,10 @@ async function main() {
       if (change === 'pr-outlier') {
         outliers.push({ cityId, field: path, oldValue: oldVal, newValue: newVal });
       } else if (change === 'pr-update' || change === 'pr-removed') {
+        // pr-removed (값이 null 로 사라짐) 도 HAS_UPDATES 에 포함 — 값 소실은 5~30% 변동보다
+        // 잠재적으로 더 심각한 신호이나 v1.0 에서는 outlier 한 단계 낮춰 auto-update PR 로 처리.
+        // 핵심 의도: 직접 commit 차단 + 운영자 검토 강제 (silent data loss 방지). v1.x 별도 분기
+        // (`HAS_REMOVED`) 도입 시 본 OR 조건 분리 (PR #20 review round 12).
         updates += 1;
       } else if (change === 'commit') {
         commits += 1;

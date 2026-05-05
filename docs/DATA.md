@@ -394,6 +394,10 @@ v1.0 은 항목별 신고 없음(ADR-010). v1.1:
 
 ### 11.7 비자
 
+- **단위 (PR #20 review round 12)**: 모든 visa 필드 (`studentApplicationFee` / `workApplicationFee` /
+  `settlementApprox`) 는 **각 도시의 로컬 통화 기준** (도시 JSON 의 `currency` 필드 단위). 예:
+  도쿄 `200000` JPY (≈ $1,300), 호치민 `5000000` VND (≈ $200). UI 환산은 클라이언트가 `currency.ts`
+  fx rate 로 처리. KRW 환산값은 직접 저장하지 않음 (환율 변동 따라 stale 됨).
 - studentApplicationFee: 정부 공식 신청 수수료
 - workApplicationFee: 한국인 적용 카테고리 (워홀 협정국가)
 - settlementApprox: 비자료 + 건강검진 + 편도 항공권 추정. 가정을 sources 에 명시.

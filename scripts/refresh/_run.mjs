@@ -30,6 +30,10 @@ if (!moduleName) {
 }
 
 // path traversal / 잘못된 모듈명 차단 — `_outlier`, `../../etc/passwd` 등 거부.
+//
+// `^[a-z]` regex 가 사실상 `_` 시작 모듈을 이미 차단하므로 `startsWith('_')` 는 redundant 처럼 보인다
+// (PR #20 review round 12). 의도적으로 두 단계 검증을 유지하는 이유: regex 가 실수로 변경되어
+// `^[a-z_]` 로 완화되더라도 두 번째 조건이 라이브러리 모듈 직접 실행을 방어하는 defense-in-depth.
 if (!/^[a-z][a-z0-9_]*$/.test(moduleName) || moduleName.startsWith('_')) {
   console.error(`Invalid module name: ${moduleName}`);
   process.exit(1);
