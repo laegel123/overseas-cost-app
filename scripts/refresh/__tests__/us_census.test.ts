@@ -140,7 +140,7 @@ describe('refresh (integration)', () => {
     expect(result.changes[0]?.field).toBe('rent.censusMedian');
   }, 30000);
 
-  // PR #20 review round 8 — Census API 연도 운영 정책 회귀 차단.
+  // Census API 연도 운영 정책 회귀 차단.
   it('Census API URL 에 ACS 연도가 포함되며 미래 연도가 아니어야 함 (운영 정책)', async () => {
     fetchSpy.mockResolvedValue({
       ok: true,

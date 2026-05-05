@@ -110,14 +110,14 @@ export const CITY_TO_COUNTRY = {
   dubai: 'AE',
 };
 
-// 20개 도시 메타 — 단일 출처 `_cities.mjs` 에서 import (PR #20 review round 10).
+// 20개 도시 메타 — 단일 출처 `_cities.mjs` 에서 import.
 // 도시 추가·통화 변경 시 `_cities.mjs` 만 수정하면 universities.mjs / visas.mjs 양쪽에 자동 반영.
 export const CITY_CONFIGS = OVERSEAS_CITY_CONFIGS;
 
 export const SOURCE = {
   category: 'visa',
   name: 'Government visa fee pages (static estimates)',
-  // main 브랜치 고정 (PR #20 review round 22) — 과거 HEAD alias 는 시점에 따라 다른 commit 을 가리켜 sources URL 의 시간적 일관성이 흔들렸다. main 으로 고정하면 release 후 변경되지 않는다.
+  // main 브랜치 고정 — 과거 HEAD alias 는 시점에 따라 다른 commit 을 가리켜 sources URL 의 시간적 일관성이 흔들렸다. main 으로 고정하면 release 후 변경되지 않는다.
   url: 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md',
 };
 
@@ -164,7 +164,7 @@ export async function fetchVisaFees(countryCode) {
     };
   } catch (err) {
     // v1.0: HTML 파싱 미구현 + 정부 사이트 봇 차단이 흔해 errors 대신 info 로그.
-    // v1.x 파싱 도입 시 디버깅 단서 보존 — silent 차단 회피 (PR #20 review round 19).
+    // v1.x 파싱 도입 시 디버깅 단서 보존 — silent 차단 회피.
     console.info(`[visas] ${countryCode} fetch failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`);
     return {
       visa: {

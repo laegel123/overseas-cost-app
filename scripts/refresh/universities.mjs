@@ -118,14 +118,14 @@ export const UNIVERSITY_REGISTRY = {
   ],
 };
 
-// 20개 도시 메타 — 단일 출처 `_cities.mjs` 에서 import (PR #20 review round 10).
+// 20개 도시 메타 — 단일 출처 `_cities.mjs` 에서 import.
 // 도시 추가·통화 변경 시 `_cities.mjs` 만 수정하면 universities.mjs / visas.mjs 양쪽에 자동 반영.
 export const CITY_CONFIGS = OVERSEAS_CITY_CONFIGS;
 
 export const SOURCE = {
   category: 'tuition',
   name: 'Official university international tuition pages (static estimates)',
-  // main 브랜치 고정 (PR #20 review round 22) — 과거 HEAD alias 는 시점에 따라 다른 commit 을 가리켜 sources URL 의 시간적 일관성이 흔들렸다. main 으로 고정하면 release 후 변경되지 않는다.
+  // main 브랜치 고정 — 과거 HEAD alias 는 시점에 따라 다른 commit 을 가리켜 sources URL 의 시간적 일관성이 흔들렸다. main 으로 고정하면 release 후 변경되지 않는다.
   url: 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md',
 };
 
@@ -153,7 +153,7 @@ export async function fetchUniversityTuition(university) {
     return { school: university.school, level: university.level, annual: university.staticAnnual, fetchedFromPage: true };
   } catch (err) {
     // v1.0: HTML 파싱 미구현 + 정부·대학 사이트 봇 차단으로 fetch 실패가 흔해 errors 대신 info 로그.
-    // v1.x HTML 파싱 도입 시 디버깅 단서 보존 — silent 차단 회피 (PR #20 review round 19).
+    // v1.x HTML 파싱 도입 시 디버깅 단서 보존 — silent 차단 회피.
     console.info(`[universities] ${university.school} fetch failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`);
     return { school: university.school, level: university.level, annual: university.staticAnnual, fetchedFromPage: false };
   }
@@ -236,7 +236,7 @@ export default async function refresh(opts = {}) {
     const oldTuition = oldData?.tuition ?? [];
     let hasChanges = false;
 
-    // **TODO (v1.x — `--useStatic` 제거 전 필수 수정, PR #20 review round 14)**:
+    // **TODO (v1.x — `--useStatic` 제거 전 필수 수정, )**:
     //   현재 인덱스 기반 비교는 `UNIVERSITY_REGISTRY` 의 학교 순서가 고정이라 안전하지만, v1.x 에서
     //   실제 HTML 파싱이 도입되면 학교 응답 순서가 바뀌었을 때 데이터 변경 없이도 모든 항목이
     //   `pr-update` 로 잘못 감지된다. 학교 이름 (`oldEntry.school`) key 기반 Map 비교로 전환 필요.

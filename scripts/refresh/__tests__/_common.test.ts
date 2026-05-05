@@ -20,6 +20,7 @@ import {
   getDataDir,
   redactSecretsInUrl,
   redactSecretsInBody,
+  redactErrorMessage,
   createCitySeed,
 } from '../_common.mjs';
 
@@ -256,7 +257,7 @@ describe('fetchWithRetry', () => {
     });
   });
 
-  // PR #20 review round 18 — 재시도/backoff 로직 회귀 테스트.
+  // 재시도/backoff 로직 회귀 테스트.
   it('5xx 응답 후 성공: 재시도 동작 (attempts 카운트)', async () => {
     let attempt = 0;
     jest.spyOn(global, 'fetch').mockImplementation(async () => {
@@ -322,7 +323,7 @@ describe('redactSecretsInUrl', () => {
 });
 
 describe('redactSecretsInBody', () => {
-  // PR #20 review round 18 — POST body 의 API 키 마스킹.
+  // POST body 의 API 키 마스킹.
   it('registrationkey 마스킹 (us_bls 패턴)', () => {
     const body = JSON.stringify({ seriesid: ['APU0100709112'], registrationkey: 'secret-key-123', startyear: 2025 });
     expect(redactSecretsInBody(body)).toContain('"registrationkey":"***REDACTED***"');
@@ -345,6 +346,37 @@ describe('redactSecretsInBody', () => {
   it('민감하지 않은 키는 유지', () => {
     const body = '{"seriesid":["A","B"],"startyear":2025,"endyear":2026}';
     expect(redactSecretsInBody(body)).toBe(body);
+  });
+});
+
+describe('redactErrorMessage (URL + body 자동 마스킹)', () => {
+  // 미래 회귀 차단: undici 에러 메시지에 request body 단편이 박혀 들어와도 secret 노출 X.
+  // `fetchWithRetry` 가 모든 에러를 본 함수 거쳐 throw 하므로 caller 가 잊어도 안전.
+  it('에러 메시지의 URL secret 마스킹', () => {
+    const msg = 'fetch failed: https://api.example.com?serviceKey=ABC123';
+    const out = redactErrorMessage(msg);
+    expect(out).not.toContain('ABC123');
+    expect(out).toContain('***REDACTED***');
+  });
+
+  it('에러 메시지에 박힌 JSON body secret 도 자동 마스킹 (us_bls registrationkey)', () => {
+    const msg = 'fetch failed: body={"seriesid":["A"],"registrationkey":"secret-AAA"}';
+    const out = redactErrorMessage(msg);
+    expect(out).not.toContain('secret-AAA');
+    expect(out).toContain('"registrationkey":"***REDACTED***"');
+  });
+
+  it('URL + body 가 동시에 박혀 있어도 양쪽 모두 마스킹', () => {
+    const msg = 'POST https://api.example.com?token=URL_TOK body={"apikey":"BODY_SEC"}';
+    const out = redactErrorMessage(msg);
+    expect(out).not.toContain('URL_TOK');
+    expect(out).not.toContain('BODY_SEC');
+    expect((out.match(/\*\*\*REDACTED\*\*\*/g) ?? []).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('민감하지 않은 메시지는 변형 X', () => {
+    const msg = 'HTTP 500 internal server error';
+    expect(redactErrorMessage(msg)).toBe(msg);
   });
 });
 

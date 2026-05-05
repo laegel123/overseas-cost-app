@@ -123,7 +123,7 @@ export function* iterNumericFields(oldData, newData) {
   }
 
   // tuition 인덱스 기반 비교 — v1.0 에서는 `UNIVERSITY_REGISTRY` 학교 순서가 고정이라 안전.
-  // **TODO (v1.x, PR #20 review round 14)**: HTML 파싱 도입 시 학교 응답 순서가 바뀌면
+  // **TODO (v1.x, )**: HTML 파싱 도입 시 학교 응답 순서가 바뀌면
   // 데이터 변경 없이도 모든 항목이 `pr-update` 로 잘못 감지됨. `school` key 기반 Map 비교로
   // 전환 필요 (universities.mjs 의 동일 패턴과 함께 갱신).
   const oldTuition = Array.isArray(oldData.tuition) ? oldData.tuition : [];

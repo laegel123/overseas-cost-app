@@ -354,17 +354,17 @@ export function redactSecretsInUrl(url) {
 }
 
 /**
- * JSON POST body 의 민감한 키 (registrationkey 등) 를 마스킹 (PR #20 review round 18).
+ * JSON POST body 의 민감한 키 (registrationkey 등) 를 마스킹.
  *
  * `redactSecretsInUrl` 은 URL query 만 다루므로 `us_bls.mjs` 처럼 POST body 에 API 키를 보내는
- * fetcher 가 디버깅 중 body 를 로깅하면 키가 노출된다. 본 헬퍼로 안전한 로깅 가능 — 단,
- * `fetchWithRetry` 가 자동 적용하지 않으므로 caller 가 명시적으로 호출해야 한다 (의도된 호출만
- * 마스킹 적용, 무의식적 body 출력 방지에 의존하지 않음).
+ * fetcher 가 디버깅 중 body 를 로깅하면 키가 노출된다. 본 헬퍼는 (1) caller 가 명시적으로 body
+ * 를 로깅할 때 직접 호출하거나, (2) `redactErrorMessage` 가 자동 적용해 fetch 에러에 body
+ * 단편이 섞여 들어와도 안전 처리한다.
  *
  * 키 이름 정규식 매칭 — JSON 구조 파싱은 안 함 (depth 제한 없는 객체 안전 보장 어려움).
  *
- * @param {string} body JSON 직렬화된 문자열
- * @returns {string} 마스킹된 body 문자열
+ * @param {string} body JSON 직렬화된 문자열 또는 JSON 단편이 박힌 임의 문자열
+ * @returns {string} 마스킹된 문자열
  */
 export function redactSecretsInBody(body) {
   // SECRET_KEYS 는 redactSecretsInUrl 의 SECRET_PARAMS 와 동일 단어를 키 이름으로 가정.
@@ -376,13 +376,15 @@ export function redactSecretsInBody(body) {
 }
 
 /**
- * 에러 메시지 안에 박혀 있는 URL 의 secret 쿼리도 마스킹.
- * undici 등이 던지는 에러는 원본 URL 을 그대로 메시지에 포함하므로 별도 처리 필요.
+ * 에러 메시지 안에 박혀 있는 URL 의 secret 쿼리 + body 단편의 secret JSON 키도 마스킹.
+ * undici 등이 던지는 에러는 원본 URL 또는 request body 단편을 메시지에 포함할 수 있으므로
+ * `fetchWithRetry` 가 에러를 throw 하기 전에 본 함수를 거쳐 누출 방지.
  * @param {string} message
  * @returns {string}
  */
 export function redactErrorMessage(message) {
-  return message.replace(/https?:\/\/[^\s'"]+/g, (m) => redactSecretsInUrl(m));
+  const urlMasked = message.replace(/https?:\/\/[^\s'"]+/g, (m) => redactSecretsInUrl(m));
+  return redactSecretsInBody(urlMasked);
 }
 
 /**
@@ -424,7 +426,7 @@ function combineSignals(signal1, signal2) {
  *
  * 외부 호출 금지 — refresh 스크립트 내부에서만 사용 (writeCity 의 updateSources 통과 후에만 valid).
  *
- * **placeholder 정책 (PR #20 review round 17)**:
+ * **placeholder 정책**:
  *  - `rent.*` 는 `null` — `iterNumericFields` 가 null 을 명시적으로 지원하고 fetcher 들이
  *    "데이터 부재" 와 "값 0" 을 구분해야 하기 때문 (예: us_hud 가 share 를 censusMedian 만
  *    있고 직접값 부재 시 null 유지).

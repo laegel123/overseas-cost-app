@@ -17,7 +17,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    # PR #20 review round 24 — GitHub Actions 기본 timeout (360분/6시간) 으로 hang 시 분 소모 + 다음
+    # GitHub Actions 기본 timeout (360분/6시간) 으로 hang 시 분 소모 + 다음
     # cron 대기 발생. 10여개 fetcher × 30s timeout = 최대 ~5분이라 30분이면 충분히 여유 있음.
     timeout-minutes: 30
     steps:
@@ -95,7 +95,7 @@ jobs:
             git pull --rebase origin "$(git rev-parse --abbrev-ref HEAD)" || echo "::warning::rebase attempt $attempt failed (continuing to push)"
             if git push; then exit 0; fi
             echo "::warning::push attempt $attempt failed; retrying..."
-            sleep $((attempt * 15 + RANDOM % 10))  # jitter backoff — 매월 1일 rent + fx 동시 실행 race 완화 (PR #20 review round 19)
+            sleep $((attempt * 15 + RANDOM % 10))  # jitter backoff — 매월 1일 rent + fx 동시 실행 race 완화
           done
           echo "::error::push failed after 3 attempts"
           exit 1

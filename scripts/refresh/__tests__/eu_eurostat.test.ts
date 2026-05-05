@@ -73,7 +73,7 @@ describe('constants', () => {
     expect(EUROSTAT_DATASETS.rent).toBeDefined();
   });
 
-  it('SOURCE: Eurostat 명시 + validCategories 정합 (PR #20 review round 23)', () => {
+  it('SOURCE: Eurostat 명시 + validCategories 정합', () => {
     // validate_cities.mjs::validCategories = ['rent','food','transport','tuition','tax','visa']
     // wire-up 시 writeCity → validate 순서로 흐르므로 category 가 위 리스트에 포함되어야 함.
     const VALID_CATEGORIES = ['rent', 'food', 'transport', 'tuition', 'tax', 'visa'];
@@ -157,7 +157,7 @@ describe('refresh (integration)', () => {
     expect(result.cities).toContain('amsterdam');
   }, 30000);
 
-  it('_run.mjs 진입점 감지 시 throw — defense-in-depth (PR #20 review round 16)', async () => {
+  it('_run.mjs 진입점 감지 시 throw — defense-in-depth', async () => {
     // LIBRARY_MODULES 갱신 누락 시 _run.mjs 가 default export 를 호출하면 "updated N cities"
     // 잘못된 로그가 찍히는 회귀 차단. process.argv[1] 을 _run.mjs 로 가장.
     const originalArgv = process.argv[1] ?? '';

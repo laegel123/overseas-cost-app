@@ -152,7 +152,7 @@ describe('computePctChange', () => {
 });
 
 describe('iterNumericFields', () => {
-  // PR #20 review round 8 — us_census.mjs 의 `rent.censusMedian` 은 cross-validation 보조 필드라
+  // us_census.mjs 의 `rent.censusMedian` 은 cross-validation 보조 필드라
   // outlier PR 트리거 대상이 아님. 본 테스트가 추적 제외 정책을 회귀 차단한다.
   // 정책이 변경되어 censusMedian 도 추적해야 한다면 본 테스트 + us_census.mjs 모듈 주석 + TESTING.md 동기화.
   it('rent.censusMedian 는 추적하지 않음 (cross-validation 전용 보조 필드)', () => {

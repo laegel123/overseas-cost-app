@@ -130,7 +130,7 @@ export default async function refresh(opts = {}) {
 
   // v1.0: dscAvailable / fcscAvailable 는 reachability 로깅 목적만 — 후속 분기에 wire 되지 않고
   // 항상 STATIC_RENT / STATIC_GROCERIES 가 도시 JSON 에 적재된다. v1.x 에서 응답 단위 검증 후
-  // 실제 보정 분기에 연결 (jp_estat / sg_singstat 와 동일 패턴, PR #20 review round 22).
+  // 실제 보정 분기에 연결 (jp_estat / sg_singstat 와 동일 패턴, ).
   let dscAvailable = false;
   let fcscAvailable = false;
 

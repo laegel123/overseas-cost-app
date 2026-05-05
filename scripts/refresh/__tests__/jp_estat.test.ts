@@ -298,7 +298,7 @@ describe('refresh (integration)', () => {
     expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 
-  // PR #20 review round 8 — silent fail 금지 회귀 차단.
+  // silent fail 금지 회귀 차단.
   it('fetchEstatData fetch 실패 시 console.warn 으로 예외 노출 (silent fail 금지)', async () => {
     const fetchSpy = jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Network timeout'));
     const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
@@ -313,7 +313,7 @@ describe('refresh (integration)', () => {
     warnSpy.mockRestore();
   }, 30000);
 
-  // PR #20 review round 8 — v1.0 계약 회귀 차단.
+  // v1.0 계약 회귀 차단.
   // jp_estat 가 fetchEstatData 응답을 STATIC 보정에 적용하지 않음을 보장 (v1.x 단위 검증 도입 전까지).
   it('v1.0 계약: e-Stat API sample 응답이 도시 JSON 의 rent/food 값에 영향 없음', async () => {
     process.env.JP_ESTAT_APP_ID = 'test-app-id';

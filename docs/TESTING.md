@@ -2154,12 +2154,19 @@ afterEach(() => {
 - [ ] backoff 1s/2s/4s 정밀 측정 (실 타이머 의존, manual)
 - [ ] AbortSignal 전달 시 취소 가능 (manual)
 
-#### `redactSecretsInBody(body)` (PR #20 review round 18)
+#### `redactSecretsInBody(body)`
 
 - [x] `registrationkey` 마스킹 (us_bls POST body 패턴)
 - [x] `apiKey` / `apikey` / `api_key` 모두 마스킹 (case insensitive)
 - [x] `appId` / `token` / `serviceKey` 등 다른 fetcher 키 패턴
 - [x] 민감하지 않은 키 (`seriesid`, `startyear` 등) 는 유지
+
+#### `redactErrorMessage(message)` — URL + body 자동 마스킹
+
+- [x] 에러 메시지의 URL secret 마스킹 (undici 가 throw 한 message 의 URL 보호)
+- [x] 에러 메시지에 박힌 JSON body secret 도 자동 마스킹 (us_bls registrationkey 등 — 미래 회귀 차단)
+- [x] URL + body 가 동시에 박혀 있어도 양쪽 모두 마스킹
+- [x] 민감하지 않은 메시지는 변형 X
 
 #### `readCity(id): Promise<CityCostData>`
 
@@ -2297,8 +2304,10 @@ afterEach(() => {
 - [x] Vancouver/Toronto/Montreal CMA 데이터
 - [x] 식재료 8개 매핑 (Vector ID 매핑 표 상수 정의)
 - [x] 외식 CPI 매핑 + 정적 fallback
-- [x] `isCpiBasePeriodSuspect` — CPI ≥ 145 시 base period mismatch 감지 (PR #20 review round 18, ADR-059 §5)
+- [x] `isCpiBasePeriodSuspect` — CPI ≥ 145 시 base period mismatch 감지 (ADR-059 §5)
 - [x] `CPI_SANITY_MAX = 145` 상수 — 2020=100 기준 정상 상한 + 마진
+- [x] `parseSeriesInfoResponse` — getSeriesInfoFromVector 응답 shape 회귀 차단
+- [x] `ALLOWED_REFERENCE_PERIODS = {2002=100, 2020=100}` — 외 값이면 정적 fallback (ADR-059 §5 해소)
 
 #### `ca_translink.mjs`, `ca_ttc.mjs`, `ca_stm.mjs`
 

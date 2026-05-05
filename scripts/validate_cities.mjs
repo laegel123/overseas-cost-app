@@ -228,7 +228,7 @@ function validateFood(food, id) {
   if (typeof food.groceries !== 'object' || food.groceries === null) {
     throw new Error('food.groceries: missing or invalid');
   }
-  // PR #20 review round 23 — 모든 도시 JSON 이 8필드 (milk1L, eggs12, rice1kg, chicken1kg, bread,
+  // 모든 도시 JSON 이 8필드 (milk1L, eggs12, rice1kg, chicken1kg, bread,
   // onion1kg, apple1kg, ramen) 를 채우는데 검증은 5필드만 했었다. 스키마 계약 일관성을 위해 8필드 모두 검증.
   for (const key of ['milk1L', 'eggs12', 'rice1kg', 'chicken1kg', 'bread', 'onion1kg', 'apple1kg', 'ramen']) {
     if (typeof food.groceries[key] !== 'number' || food.groceries[key] <= 0) {

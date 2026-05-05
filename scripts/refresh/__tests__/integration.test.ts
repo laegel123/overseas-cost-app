@@ -165,7 +165,7 @@ describe('Integration: Workflow YAML Validation', () => {
   it('v1.0 useStatic 정책: visas / universities / jp_estat 호출은 --useStatic 동반', () => {
     // 세 fetcher 는 v1.0 에서 HTML 파싱 / 응답 검증이 미구현이라 fetch 결과를 STATIC 에 적용하지 않음.
     // 매 워크플로우 실행마다 정부·대학·e-Stat 사이트에 무의미한 HTTP 요청을 보내는 것을 차단.
-    // PR #20 review round 7 (회귀 차단) — v1.x 파싱 도입 시 본 단언을 갱신.
+    //  (회귀 차단) — v1.x 파싱 도입 시 본 단언을 갱신.
     const visaYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-visa.yml'), 'utf-8');
     const tuitionYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-tuition.yml'), 'utf-8');
     const rentYml = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-rent.yml'), 'utf-8');
@@ -184,7 +184,7 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
-  it('push retry 의 git pull --rebase 실패는 silent 가 아닌 ::warning 으로 노출 (PR #20 review round 8)', () => {
+  it('push retry 의 git pull --rebase 실패는 silent 가 아닌 ::warning 으로 노출', () => {
     // 과거 `|| true` 로 rebase 실패가 silent fail → 충돌 진단 어려움. ::warning echo 로 표면화.
     for (const workflow of REFRESH_WORKFLOWS) {
       const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
@@ -194,7 +194,7 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
-  it('push retry 루프 시작에 git rebase --abort 로 in-progress rebase 정리 (PR #20 review round 9)', () => {
+  it('push retry 루프 시작에 git rebase --abort 로 in-progress rebase 정리', () => {
     // rebase 충돌로 in-progress 상태가 남으면 다음 attempt 의 git pull --rebase 가 즉시 실패하므로 정리.
     for (const workflow of REFRESH_WORKFLOWS) {
       const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
@@ -202,7 +202,7 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
-  it('push retry sleep 은 jitter backoff (PR #20 review round 19)', () => {
+  it('push retry sleep 은 jitter backoff', () => {
     // 과거 sleep $((attempt * 5)) 은 너무 짧음 (5/10/15초). 매월 1일 rent + fx 동시 실행 race 시
     // 3회 모두 실패 가능. 15초 + RANDOM % 10 jitter 로 분산 (15-24/30-39/45-54초).
     for (const workflow of REFRESH_WORKFLOWS) {
@@ -212,7 +212,7 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
-  it('v1.0 useStatic 정책 — sg_singstat 도 --useStatic 동반 (PR #20 review round 13)', () => {
+  it('v1.0 useStatic 정책 — sg_singstat 도 --useStatic 동반', () => {
     // round 9 에서 SG_DATA_GOV_KEY env 를 wire up 했으나, round 13 에서 sg_singstat 의
     // fetchSingStatTable / apiAvailable 가 실제 보정에 적용되지 않는 것이 확인돼 jp_estat 와
     // 동일 패턴으로 --useStatic 강제. v1.x 응답 단위 검증 후 정책 전환.
@@ -222,7 +222,7 @@ describe('Integration: Workflow YAML Validation', () => {
     expect(rentYml).not.toMatch(/SG_DATA_GOV_KEY:\s*\$\{\{\s*secrets\.SG_DATA_GOV_KEY\s*\}\}/);
   });
 
-  it('HAS_NEW 가 모든 워크플로우의 PR-update / commit 분기에 반영 (PR #20 review round 11)', () => {
+  it('HAS_NEW 가 모든 워크플로우의 PR-update / commit 분기에 반영', () => {
     // placeholder(0) → 실제값 첫 갱신은 PR 검토 강제 — `Create PR for updates` 의 OR 조건 +
     // `Auto commit and push` 의 != 'true' 조건 양쪽에 HAS_NEW 가 들어가야 한 곳이라도 누락 시
     // 신규 항목이 검토 없이 직접 commit 되는 회귀 발생.
@@ -274,9 +274,9 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
-  // PR #20 review round 24 — GitHub Actions 기본 timeout (360분/6시간) 으로 hang 시 분 소모 + 다음
+  // GitHub Actions 기본 timeout (360분/6시간) 으로 hang 시 분 소모 + 다음
   // cron 대기. 합리적 범위 (5~60분) 안에 설정되어 있어야 함. 누락 회귀 차단.
-  it('각 워크플로우의 jobs.refresh 에 timeout-minutes 가 합리적 범위(5~60)로 설정 (PR #20 review round 24)', () => {
+  it('각 워크플로우의 jobs.refresh 에 timeout-minutes 가 합리적 범위(5~60)로 설정', () => {
     for (const workflow of REFRESH_WORKFLOWS) {
       const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
       const match = content.match(/^\s+timeout-minutes:\s+(\d+)\s*$/m);
@@ -295,7 +295,7 @@ describe('Integration: Schedule Validation', () => {
   //  - 09:00 KST = 00:00 UTC (refresh-fx 만)
   //  - 18:00 KST = 09:00 UTC (refresh-prices/rent/transit/tuition/visa)
   // 과거 round 0~20 까지 5개 워크플로우 cron 이 '0 18 ...' 로 적혀 있어 실제로는 UTC 18:00 = 익일
-  // 03:00 KST 새벽 실행. PR #20 review round 21 에서 발견 후 '0 9 ...' 로 정정.
+  // 03:00 KST 새벽 실행.  에서 발견 후 '0 9 ...' 로 정정.
 
   it('refresh-fx: 매일 00:00 UTC (= 09:00 KST)', () => {
     const content = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-fx.yml'), 'utf-8');
@@ -327,7 +327,7 @@ describe('Integration: Schedule Validation', () => {
     expect(content).toContain("cron: '0 9 20 1,4,7,10 *'");
   });
 
-  it('과거 03:00 KST 실행 회귀 차단 — 어떤 워크플로우도 cron hour 가 18 이 되어선 안 됨 (PR #20 review round 21)', () => {
+  it('과거 03:00 KST 실행 회귀 차단 — 어떤 워크플로우도 cron hour 가 18 이 되어선 안 됨', () => {
     const REFRESH_WORKFLOWS = [
       'refresh-fx.yml', 'refresh-prices.yml', 'refresh-rent.yml',
       'refresh-transit.yml', 'refresh-tuition.yml', 'refresh-visa.yml',

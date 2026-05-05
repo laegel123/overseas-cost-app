@@ -2,7 +2,7 @@ name: Refresh Transit
 
 on:
   schedule:
-    - cron: '0 9 2 1,4,7,10 *' # 분기 첫 달 2일 09:00 UTC (= 18:00 KST). 1일은 refresh-rent 와 충돌 회피. PR #20 review round 21 — 과거 '0 18'은 UTC 18:00 = 익일 03:00 KST 였음.
+    - cron: '0 9 2 1,4,7,10 *' # 분기 첫 달 2일 09:00 UTC (= 18:00 KST). 1일은 refresh-rent 와 충돌 회피. 과거 '0 18'은 UTC 18:00 = 익일 03:00 KST 였음.
   workflow_dispatch:  # 운영자 수동 트리거 — feature 브랜치 dispatch 시 해당 브랜치에 데이터 commit. main 외 브랜치는 의도된 운영자만 사용 (AUTOMATION.md §8.1).
 
 # **호치민(VN) transit 은 본 워크플로우에서 갱신되지 않음 — 의도적**.
@@ -22,7 +22,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    # PR #20 review round 24 — GitHub Actions 기본 timeout (360분/6시간) 으로 hang 시 분 소모 + 다음
+    # GitHub Actions 기본 timeout (360분/6시간) 으로 hang 시 분 소모 + 다음
     # cron 대기 발생. 10여개 fetcher × 30s timeout = 최대 ~5분이라 30분이면 충분히 여유 있음.
     timeout-minutes: 30
     steps:
@@ -149,7 +149,7 @@ jobs:
             git pull --rebase origin "$(git rev-parse --abbrev-ref HEAD)" || echo "::warning::rebase attempt $attempt failed (continuing to push)"
             if git push; then exit 0; fi
             echo "::warning::push attempt $attempt failed; retrying..."
-            sleep $((attempt * 15 + RANDOM % 10))  # jitter backoff — 매월 1일 rent + fx 동시 실행 race 완화 (PR #20 review round 19)
+            sleep $((attempt * 15 + RANDOM % 10))  # jitter backoff — 매월 1일 rent + fx 동시 실행 race 완화
           done
           echo "::error::push failed after 3 attempts"
           exit 1

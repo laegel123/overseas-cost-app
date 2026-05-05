@@ -6,7 +6,7 @@ module.exports = {
     '/.expo/',
     '/dist/',
     'scripts/refresh/__tests__/setup.ts',
-    // type-only helper (PR #20 review round 20) — describe() 없는 type 정의 모듈.
+    // type-only helper — describe() 없는 type 정의 모듈.
     'scripts/refresh/__tests__/_test-types.ts',
   ],
   moduleNameMapper: {

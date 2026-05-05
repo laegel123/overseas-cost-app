@@ -1,7 +1,7 @@
 /**
  * Test-only types — `_common.mjs` 의 JSDoc typedef 와 동일 shape.
  *
- * **존재 이유 (PR #20 review round 20)**: TypeScript 테스트가 fetcher 의 RefreshResult 를
+ * **존재 이유**: TypeScript 테스트가 fetcher 의 RefreshResult 를
  * 검증할 때 `(c: any)` / `(e: any)` 로 우회하던 것을 strict 타입으로 전환. CLAUDE.md "any 금지"
  * 규칙 준수.
  *

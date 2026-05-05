@@ -42,7 +42,7 @@ async function main() {
   let commits = 0;
   // 두 카운터 분리 — `news` 가 단일 변수일 때 신규 도시 파일 (파일 단위 +1) 과 기존 도시의
   // placeholder(0)→실제값 첫 갱신 (필드 단위 +n) 이 합산돼 로그 출력 단위가 혼란스러웠음
-  // (PR #20 review round 14). HAS_NEW 의 boolean 결과는 둘 중 하나만 0 보다 크면 true 로 동일.
+  //. HAS_NEW 의 boolean 결과는 둘 중 하나만 0 보다 크면 true 로 동일.
   let newFiles = 0;
   let newFields = 0;
 
@@ -55,12 +55,18 @@ async function main() {
       continue;
     }
     // 단일 파일 JSON 파싱 실패 시 graceful skip — 깨진 파일 1개로 전체 outlier 감지 중단되지
-    // 않도록 (PR #20 review round 15). 스키마 위반은 validate_cities.mjs 가 fail-fast 책임.
+    // 않도록. 스키마 위반은 validate_cities.mjs 가 fail-fast 책임.
+    // **운영자 주의**: 본 도시는 이번 실행에서 outlier 감지가 누락된다 → HAS_OUTLIERS / HAS_UPDATES
+    // 신호에 반영되지 않음. 따라서 GitHub Actions ::warning:: annotation 으로 격상해 워크플로우
+    // summary 와 PR body 에 노출시킨다 (parsing 실패가 일시적 디스크 이슈가 아니라 컨텐츠 깨짐
+    // 이라면 반드시 운영자 개입 필요).
     let newData;
     try {
       newData = await readJson(join(CITIES_DIR, file));
     } catch (err) {
-      console.warn(`[detect_outliers] ${file} JSON parse failed: ${err?.message ?? 'unknown'} — skipping outlier detection for this file`);
+      console.warn(
+        `::warning file=data/cities/${file}::OUTLIER DETECTION SKIPPED — JSON parse failed: ${err?.message ?? 'unknown'}. validate_cities.mjs 가 후속 단계에서 차단하지만, 이 도시의 비교는 본 실행에서 outlier/update 신호에 포함되지 않는다.`,
+      );
       continue;
     }
     const oldData = readGitHead(`data/cities/${file}`);
@@ -78,7 +84,7 @@ async function main() {
         // pr-removed (값이 null 로 사라짐) 도 HAS_UPDATES 에 포함 — 값 소실은 5~30% 변동보다
         // 잠재적으로 더 심각한 신호이나 v1.0 에서는 outlier 한 단계 낮춰 auto-update PR 로 처리.
         // 핵심 의도: 직접 commit 차단 + 운영자 검토 강제 (silent data loss 방지). v1.x 별도 분기
-        // (`HAS_REMOVED`) 도입 시 본 OR 조건 분리 (PR #20 review round 12).
+        // (`HAS_REMOVED`) 도입 시 본 OR 조건 분리.
         updates += 1;
       } else if (change === 'commit') {
         commits += 1;
@@ -135,7 +141,7 @@ async function readJson(filePath) {
  *
  * `execFileSync` 사용 — 셸 우회로 command injection 방어 (defense-in-depth, repoPath 검증과 이중).
  *
- * **shallow clone 호환 (PR #20 review round 15)**: GitHub Actions 의 `actions/checkout` 기본
+ * **shallow clone 호환**: GitHub Actions 의 `actions/checkout` 기본
  * `fetch-depth: 1` 은 HEAD commit 만 가져오는데, `git show HEAD:<path>` 는 HEAD 만 필요하므로
  * shallow clone 에서도 정상 동작한다. 만약 미래에 분기 비교 (예: HEAD~1) 가 필요해지면
  * checkout step 의 `fetch-depth` 를 0 또는 필요한 수치로 늘려야 한다.

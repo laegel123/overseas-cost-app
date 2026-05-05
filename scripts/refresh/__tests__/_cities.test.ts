@@ -1,6 +1,6 @@
 /**
  * _cities.mjs 테스트.
- * TESTING.md §9-A.1 인벤토리 (PR #20 review round 10 — visas/universities CITY_CONFIGS 단일 출처).
+ * TESTING.md §9-A.1 인벤토리 (visas/universities CITY_CONFIGS 단일 출처).
  */
 
 import { OVERSEAS_CITY_CONFIGS } from '../_cities.mjs';
@@ -28,7 +28,7 @@ describe('OVERSEAS_CITY_CONFIGS', () => {
   });
 
   // 회귀 차단 — visas / universities 가 본 모듈을 재사용함을 보장. 하나만 직접 정의하고
-  // 다른 한쪽이 동기화 누락하는 과거 패턴 (PR #20 review round 10) 회귀 차단.
+  // 다른 한쪽이 동기화 누락하는 과거 패턴 회귀 차단.
   it('visas.mjs 의 CITY_CONFIGS 와 동일 reference (단일 출처)', () => {
     expect(VISA_CITY_CONFIGS).toBe(OVERSEAS_CITY_CONFIGS);
   });

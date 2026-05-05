@@ -10,6 +10,8 @@ import { parseStatCanResponse } from '../_common.mjs';
 import refreshCaStatcan, {
   cpiToPrice,
   isCpiBasePeriodSuspect,
+  parseSeriesInfoResponse,
+  ALLOWED_REFERENCE_PERIODS,
   CPI_SANITY_MAX,
   CITY_CONFIGS,
   CPI_VECTORS,
@@ -54,6 +56,17 @@ const VALID_CPI_RESPONSE = [
   },
 ];
 
+// referencePeriod 검증용 — getSeriesInfoFromVector 응답 mock.
+const VALID_SERIES_INFO_RESPONSE = [
+  {
+    status: 'SUCCESS',
+    object: {
+      vectorId: 41691028,
+      referencePeriod: '2002=100',
+    },
+  },
+];
+
 describe('parseStatCanResponse', () => {
   it('정상 응답 파싱: vector ID → 값 매핑', () => {
     const result = parseStatCanResponse(VALID_CPI_RESPONSE);
@@ -94,7 +107,7 @@ describe('cpiToPrice', () => {
 });
 
 describe('isCpiBasePeriodSuspect', () => {
-  // PR #20 review round 18 — ADR-059 §5 base period mismatch 감지.
+  // ADR-059 §5 base period mismatch 감지.
   it('CPI 145 미만: 정상 (2020=100 기준)', () => {
     expect(isCpiBasePeriodSuspect(100)).toBe(false);
     expect(isCpiBasePeriodSuspect(110)).toBe(false);
@@ -116,6 +129,37 @@ describe('isCpiBasePeriodSuspect', () => {
 
   it('CPI_SANITY_MAX = 145 (2020=100 기준 정상 상한 + 마진)', () => {
     expect(CPI_SANITY_MAX).toBe(145);
+  });
+});
+
+describe('parseSeriesInfoResponse (referencePeriod 추출)', () => {
+  // ADR-059 §5 — getSeriesInfoFromVector 응답 shape 회귀 차단.
+  it('정상 SUCCESS 응답: referencePeriod 추출', () => {
+    const data = [{ status: 'SUCCESS', object: { vectorId: 1, referencePeriod: '2002=100' } }];
+    expect(parseSeriesInfoResponse(data)).toBe('2002=100');
+  });
+
+  it('status !== SUCCESS: null', () => {
+    expect(parseSeriesInfoResponse([{ status: 'FAIL', object: { referencePeriod: 'X' } }])).toBeNull();
+  });
+
+  it('빈 배열 / null / 비배열: null', () => {
+    expect(parseSeriesInfoResponse([])).toBeNull();
+    expect(parseSeriesInfoResponse(null)).toBeNull();
+    expect(parseSeriesInfoResponse({})).toBeNull();
+  });
+
+  it('object 또는 referencePeriod 누락: null', () => {
+    expect(parseSeriesInfoResponse([{ status: 'SUCCESS' }])).toBeNull();
+    expect(parseSeriesInfoResponse([{ status: 'SUCCESS', object: {} }])).toBeNull();
+  });
+});
+
+describe('ALLOWED_REFERENCE_PERIODS', () => {
+  it('2002=100 / 2020=100 만 허용 (ADR-059 §5)', () => {
+    expect(ALLOWED_REFERENCE_PERIODS.has('2002=100')).toBe(true);
+    expect(ALLOWED_REFERENCE_PERIODS.has('2020=100')).toBe(true);
+    expect(ALLOWED_REFERENCE_PERIODS.has('1992=100')).toBe(false);
   });
 });
 
@@ -184,10 +228,17 @@ describe('refresh (integration)', () => {
   }, 30000);
 
   it('정상 API 응답: CPI 적용', async () => {
-    fetchSpy.mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => VALID_CPI_RESPONSE,
+    // 두 endpoint (getSeriesInfoFromVector + getDataFromVectorsAndLatestNPeriods) 호출 분기.
+    fetchSpy.mockImplementation(async (url: string) => {
+      const body =
+        typeof url === 'string' && url.includes('getSeriesInfoFromVector')
+          ? VALID_SERIES_INFO_RESPONSE
+          : VALID_CPI_RESPONSE;
+      return {
+        ok: true,
+        status: 200,
+        json: async () => body,
+      } as unknown as Response;
     });
 
     const result = await refreshCaStatcan({ dryRun: true });

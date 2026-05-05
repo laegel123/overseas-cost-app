@@ -81,7 +81,7 @@ export const BLS_SERIES = {
 
 // STATIC fallback 가격 — BLS API 가 부재하거나 sanity range 밖 응답 시 사용.
 //
-// **`chicken1kg = 10.00 USD/kg` (≈ $4.54/lb) 의 의도** (PR #20 review round 11):
+// **`chicken1kg = 10.00 USD/kg` (≈ $4.54/lb) 의 의도**:
 //   BLS APU 시리즈 자체는 whole fryer/broiler (US 평균 $1.5~2.5/lb) 인데 본 static 은 의도적으로
 //   부위별 (boneless skinless breast, drumstick 등) 시장가 mix 의 평균에 가까운 값을 사용한다.
 //   이유: 한국 사용자의 "치킨 1kg" 멘탈 모델이 통닭 한 마리가 아니라 부위별 구매 가격 평균에 더
@@ -129,7 +129,7 @@ export const BLS_VALUE_RANGES = {
   chicken1kg: { min: 1.0, max: 5.0 }, // USD per lb (whole chicken — boneless cuts >$5/lb 는 reject)
 };
 
-// 외식·카페 가격은 BLS APU 시리즈가 아닌 static 사용 (PR #20 review round 22 명시).
+// 외식·카페 가격은 BLS APU 시리즈가 아닌 static 사용.
 // BLS CPI 의 "Food away from home" 카테고리는 도시별 absolute 가격이 아닌 인덱스 (2020=100) 만
 // 제공해 cpiToPrice 변환식 적용 시 ca_statcan §5 와 동일한 base period 검증 부담이 큼. v1.0 에서는
 // "1인 한 끼 평균" 직관에 가까운 STATIC 추정치 사용 — ADR-059 §1 의 STATIC fallback 정책 부합.
@@ -227,7 +227,7 @@ export function mapToGroceries(blsData, seriesIds, adjustmentFactor) {
     // 항상 static 추정치 사용. onion1kg / apple1kg / ramen 도 동일 사유로 static 전용.
     rice1kg: applyFactor(STATIC_GROCERIES.rice1kg),
     chicken1kg: chicken1kg ? applyFactor(chicken1kg * LB_PER_KG) : applyFactor(STATIC_GROCERIES.chicken1kg),
-    // **단위 의도 (PR #20 review round 16)**: BLS APU0x00702111 = "Bread, white, pan, per lb" 의
+    // **단위 의도**: BLS APU0x00702111 = "Bread, white, pan, per lb" 의
     // 원시값을 lb→kg 변환 없이 그대로 사용. 미국 슈퍼마켓의 표준 식빵 한 덩어리가 약 1lb (454g) 라
     // "bread" 필드를 "한 덩어리 (loaf) 가격" 으로 해석하면 단위가 일관 — 서울 3500 KRW (약 500g 식빵
     // 한 덩어리 기준) 와도 비교 가능. milk1L (½ gal → L), chicken1kg (lb → kg) 처럼 변환 안 하는
@@ -273,7 +273,7 @@ export default async function refresh(opts = {}) {
       try {
         // **보안 주의**: `registrationkey` 가 POST body 에 포함되므로 본 request body 를 로그에 dump
         // 하면 API 키가 노출된다. `fetchWithRetry::redactSecretsInUrl` 은 URL 만 마스킹 — body 미적용.
-        // 디버깅 시 `console.log(JSON.stringify(...))` 추가 금지 (PR #20 review round 14).
+        // 디버깅 시 `console.log(JSON.stringify(...))` 추가 금지.
         const response = await fetchWithRetry(BLS_API_BASE, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

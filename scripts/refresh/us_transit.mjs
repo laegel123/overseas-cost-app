@@ -177,7 +177,7 @@ export default async function refresh(opts = {}) {
         if (html && html.length > 0) {
           const parsed = parseFareHtml(html, config.agency);
           // dryRun 시 파싱 결과 노출 — 정규식이 "Save $2.90 with EasyPay" 같은 할인 문구를
-          // false-positive 매칭하는 케이스 디버깅 용도 (PR #20 review round 12).
+          // false-positive 매칭하는 케이스 디버깅 용도.
           if (opts.dryRun) {
             console.log(
               `[us_transit] ${cityId} parsed: singleRide=${parsed.singleRide ?? 'null'} monthlyPass=${parsed.monthlyPass ?? 'null'} (static singleRide=${config.staticFares.singleRide}, monthlyPass=${config.staticFares.monthlyPass})`,

@@ -49,7 +49,7 @@ export const SOURCE = {
 export async function checkLtaFarePage() {
   try {
     const response = await fetchWithRetry(LTA_FARES_URL, { timeoutMs: 10000 });
-    // reachability check 만 필요 — body 미사용. undici keep-alive 연결 점유 방지 (PR #20 review round 23).
+    // reachability check 만 필요 — body 미사용. undici keep-alive 연결 점유 방지.
     await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch {

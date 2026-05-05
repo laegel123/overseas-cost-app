@@ -3,7 +3,7 @@
  *
  * 21개 도시 (서울 + 해외 20개) 공통 메타 — id / name / country / currency / region.
  *
- * **존재 이유** (PR #20 review round 10):
+ * **존재 이유**:
  *   `visas.mjs` / `universities.mjs` 가 각자 동일한 20도시 CITY_CONFIGS 를 선언해 도시명·통화
  *   변경 시 두 곳 동시 수정이 필요했음. 본 모듈로 단일화. 20도시 fetcher (visas / universities) 는
  *   본 OVERSEAS_CITY_CONFIGS 를 import 해서 재사용한다.

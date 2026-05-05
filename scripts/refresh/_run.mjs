@@ -32,7 +32,7 @@ if (!moduleName) {
 // path traversal / 잘못된 모듈명 차단 — `_outlier`, `../../etc/passwd` 등 거부.
 //
 // `^[a-z]` regex 가 사실상 `_` 시작 모듈을 이미 차단하므로 `startsWith('_')` 는 redundant 처럼 보인다
-// (PR #20 review round 12). 의도적으로 두 단계 검증을 유지하는 이유: regex 가 실수로 변경되어
+//. 의도적으로 두 단계 검증을 유지하는 이유: regex 가 실수로 변경되어
 // `^[a-z_]` 로 완화되더라도 두 번째 조건이 라이브러리 모듈 직접 실행을 방어하는 defense-in-depth.
 if (!/^[a-z][a-z0-9_]*$/.test(moduleName) || moduleName.startsWith('_')) {
   console.error(`Invalid module name: ${moduleName}`);
@@ -44,10 +44,16 @@ if (!/^[a-z][a-z0-9_]*$/.test(moduleName) || moduleName.startsWith('_')) {
 // 실행하면 데이터 변경 0 + 의도 불명확이라 fail-fast. integration.test.ts 가 워크플로우 yml 에서
 // LIBRARY_MODULES 호출 라인이 들어오지 않는지 회귀 검증한다.
 //
-// **주의 (PR #20 review round 17)**: `eu_eurostat` 는 파일명에 `_` prefix 가 없어 위쪽
+// **주의**: `eu_eurostat` 는 파일명에 `_` prefix 가 없어 위쪽
 // path traversal 정규식 (`startsWith('_')` 차단) 으로는 통과한다 — 본 Set 이 LIBRARY_MODULES
 // 호출 차단의 **유일한** 방어선이다. 이중 방어는 (a) 본 Set + (b) eu_eurostat.mjs default export
 // 진입부의 `process.argv[1]` 기반 self-check + (c) integration.test.ts 의 yml 회귀 검증 3중.
+//
+// **신규 라이브러리 모듈 추가 시**: writeCity 를 호출하지 않고 다른 fetcher 가 import 만 하는
+// 모듈을 추가했다면, (1) 본 Set 에 모듈명 추가 (2) 해당 모듈 default export 진입부에
+// `process.argv[1].endsWith('_run.mjs')` self-check 추가 (3) integration.test.ts 의 yml 회귀
+// 검증에 모듈명 추가 — 3 단계 모두 갱신해야 한다. 누락 시 워크플로우가 silent 하게 0 변경
+// 결과를 commit 할 위험.
 const LIBRARY_MODULES = new Set(['eu_eurostat']);
 if (LIBRARY_MODULES.has(moduleName)) {
   console.error(`${moduleName} is a library module (no writeCity) and cannot be run directly.`);

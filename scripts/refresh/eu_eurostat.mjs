@@ -7,7 +7,7 @@
  * API: https://ec.europa.eu/eurostat/api/
  * 키: 불필요 (공개 API)
  *
- * **v1.0 상태 (PR #20 review round 11)**: 라이브러리 모듈 골조만 존재 — `de_destatis` /
+ * **v1.0 상태**: 라이브러리 모듈 골조만 존재 — `de_destatis` /
  * `fr_insee` / `nl_cbs` 어디서도 본 모듈을 import 하지 않으므로 실제 fallback 동작 0.
  * `_run.mjs::LIBRARY_MODULES` 가 단독 실행을 차단하고 `integration.test.ts` 가 워크플로우에서
  * `_run.mjs eu_eurostat` 호출 라인이 들어오지 않는지 검증한다.
@@ -39,7 +39,7 @@ export const EUROSTAT_DATASETS = {
   rent: 'prc_hpi_a',
 };
 
-// PR #20 review round 23 — `validate_cities.mjs::validCategories` 는 ['rent','food','transport','tuition','tax','visa'].
+// `validate_cities.mjs::validCategories` 는 ['rent','food','transport','tuition','tax','visa'].
 // 본 모듈은 v1.x 에서 de_destatis / fr_insee / nl_cbs 의 rent fallback 으로 wire-up 될 예정이므로
 // 'rent' 로 통일. 추후 HICP (소비자물가) 를 food fallback 으로도 쓸 경우, 호출 측이 카테고리별
 // 별도 SOURCE 객체로 분리해 writeCity 에 넘긴다 (vn_gso 가 SOURCE_RENT/FOOD/TRANSPORT 분리한 패턴).
@@ -58,7 +58,7 @@ export async function checkEurostatStatus() {
   try {
     const response = await fetchWithRetry(url, { timeoutMs: 15000 });
     // reachability check 만 필요 — body 미사용. undici keep-alive 연결 점유 방지
-    // (vn_gso::checkGsoStatus / visas::fetchVisaFees 동일 패턴, PR #20 review round 13).
+    // (vn_gso::checkGsoStatus / visas::fetchVisaFees 동일 패턴, ).
     await response.body?.cancel().catch(() => {});
     return response.ok;
   } catch {
@@ -102,7 +102,7 @@ async function fetchHicpData(countries) {
   const geoParam = countries.join('+');
   const url = `${EUROSTAT_API_BASE}/${EUROSTAT_DATASETS.hicp}?format=JSON&geo=${geoParam}&lastNObservations=1`;
 
-  // CLAUDE.md "silent fail 금지" 준수 (PR #20 review round 22) — fetch / 파싱 실패 시 throw 하여
+  // CLAUDE.md "silent fail 금지" 준수 — fetch / 파싱 실패 시 throw 하여
   // caller 가 errors[] 에 명시 기록할 수 있게 함. 과거 catch { return new Map(); } 는 데이터
   // 부재와 fetch 실패를 caller 가 구분하지 못해 v1.x wire-up 시 silent data corruption 위험.
   const response = await fetchWithRetry(url, {
@@ -121,7 +121,7 @@ async function fetchHicpData(countries) {
  * 이 스크립트는 파일을 직접 갱신하지 않고, fallback 데이터만 반환.
  * 각 국가 스크립트에서 필요시 호출.
  *
- * **Defense-in-depth (PR #20 review round 16 + 20)**: `_run.mjs` 의 LIBRARY_MODULES 가 단독
+ * **Defense-in-depth**: `_run.mjs` 의 LIBRARY_MODULES 가 단독
  * 실행을 1차 차단한다. LIBRARY_MODULES 갱신 누락 시 `_run.mjs` 가 본 default export 를 호출하면
  * 본 entry guard 가 throw → `_run.mjs` catch 가 process.exit(1) → 워크플로우 fail (잘못된 로그
  * 출력보다 더 강한 보호). process.argv[1] (CLI runner 경로) 을 보고 직접 실행 케이스를 감지.
@@ -163,7 +163,7 @@ export default async function refresh(opts = {}) {
   try {
     hicpData = await fetchHicpData(targetCountries);
   } catch (err) {
-    // PR #20 review round 22 — fetchHicpData silent fail 제거 후 caller 처리.
+    // fetchHicpData silent fail 제거 후 caller 처리.
     errors.push({
       cityId: 'all',
       reason: `Eurostat HICP fetch failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`,

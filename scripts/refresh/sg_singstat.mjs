@@ -7,7 +7,7 @@
  * API: https://tablebuilder.singstat.gov.sg/api/table/tabledata/<resourceId>
  * 키: SG_DATA_GOV_KEY (data.gov.sg API)
  *
- * **v1.0 한계 (PR #20 review round 13)**: jp_estat 와 동일 패턴 — `fetchSingStatTable` /
+ * **v1.0 한계**: jp_estat 와 동일 패턴 — `fetchSingStatTable` /
  * `apiAvailable` 가 정의돼 있으나 실제 데이터 fetch 결과를 STATIC 보정에 적용하지 않는다.
  * `checkSingStatStatus()` 는 호출되지만 결과 (`apiAvailable`) 가 후속 분기에 wire up 되지 않아
  * sg_singstat 는 사실상 항상 STATIC_RENT / STATIC_GROCERIES 를 반환한다.
@@ -87,7 +87,7 @@ export const SOURCE_FOOD = {
 /**
  * SingStat API 상태 체크 — reachability 만 확인.
  *
- * **v1.0 한계 (PR #20 review round 16)**: 본 함수의 반환값은 `refresh()` 내에서 errors 기록 +
+ * **v1.0 한계**: 본 함수의 반환값은 `refresh()` 내에서 errors 기록 +
  * 가용성 로깅 목적으로만 사용되며, **STATIC vs API 분기에 wire up 되지 않는다**. 즉 `apiAvailable`
  * 가 `true` 여도 도시 JSON 에는 항상 STATIC_RENT / STATIC_GROCERIES 가 적재된다 (헤더 주석 참조).
  * v1.x 응답 단위 검증 후 실제 분기에 연결.
@@ -130,7 +130,7 @@ export function parseSingStatValue(data) {
   return null;
 }
 
-// **TODO (v1.x — PR #20 review round 19 정리)**:
+// **TODO (v1.x —  정리)**:
 //   `fetchSingStatTable` 함수를 v1.0 에서 호출하지 않아 dead code 였음. wire-up 시점에 재구현.
 //   참고 구현 (v1.0 round 13 까지 유지):
 //     async function fetchSingStatTable(tableId, apiKey) {
@@ -182,7 +182,7 @@ export default async function refresh(opts = {}) {
 
   // v1.0: useStatic=false 라도 mapToRent / mapToGroceries 는 항상 STATIC 을 반환 (헤더 주석 참조).
   // checkSingStatStatus 호출은 reachability 로깅 목적만 — apiAvailable 분기에 wire 되지 않음.
-  // v1.x 응답 단위 검증 후 본 분기에서 STATIC 대체 (PR #20 review round 15).
+  // v1.x 응답 단위 검증 후 본 분기에서 STATIC 대체.
   if (!opts.useStatic) {
     if (!apiKey) {
       errors.push({
