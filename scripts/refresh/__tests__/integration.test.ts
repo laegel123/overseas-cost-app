@@ -202,6 +202,16 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
+  it('push retry sleep 은 jitter backoff (PR #20 review round 19)', () => {
+    // 과거 sleep $((attempt * 5)) 은 너무 짧음 (5/10/15초). 매월 1일 rent + fx 동시 실행 race 시
+    // 3회 모두 실패 가능. 15초 + RANDOM % 10 jitter 로 분산 (15-24/30-39/45-54초).
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      expect(content).toContain('sleep $((attempt * 15 + RANDOM % 10))');
+      expect(content).not.toMatch(/sleep \$\(\(attempt \* 5\)\)/);
+    }
+  });
+
   it('v1.0 useStatic 정책 — sg_singstat 도 --useStatic 동반 (PR #20 review round 13)', () => {
     // round 9 에서 SG_DATA_GOV_KEY env 를 wire up 했으나, round 13 에서 sg_singstat 의
     // fetchSingStatTable / apiAvailable 가 실제 보정에 적용되지 않는 것이 확인돼 jp_estat 와

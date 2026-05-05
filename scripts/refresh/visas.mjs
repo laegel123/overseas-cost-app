@@ -162,7 +162,10 @@ export async function fetchVisaFees(countryCode) {
       },
       fetchedFromPage: true,
     };
-  } catch {
+  } catch (err) {
+    // v1.0: HTML 파싱 미구현 + 정부 사이트 봇 차단이 흔해 errors 대신 info 로그.
+    // v1.x 파싱 도입 시 디버깅 단서 보존 — silent 차단 회피 (PR #20 review round 19).
+    console.info(`[visas] ${countryCode} fetch failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`);
     return {
       visa: {
         studentApplicationFee: registry.studentApplicationFee,

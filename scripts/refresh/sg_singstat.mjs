@@ -130,31 +130,20 @@ export function parseSingStatValue(data) {
   return null;
 }
 
-/**
- * SingStat 테이블 데이터 fetch.
- *
- * **TODO (v1.x)**: 본 함수는 v1.0 에서 호출되지 않음 — 응답 row 단위/scale 검증 후 wire up 예정
- * (헤더 주석의 v1.0 한계 참조).
- *
- * @param {string} tableId
- * @param {string} [apiKey]
- * @returns {Promise<number | null>}
- */
-async function fetchSingStatTable(tableId, apiKey) {
-  const url = `${SINGSTAT_API_BASE}/${tableId}`;
-  const headers = { Accept: 'application/json' };
-  if (apiKey) {
-    headers['api-key'] = apiKey;
-  }
-
-  try {
-    const response = await fetchWithRetry(url, { headers });
-    const data = await response.json();
-    return parseSingStatValue(data);
-  } catch {
-    return null;
-  }
-}
+// **TODO (v1.x — PR #20 review round 19 정리)**:
+//   `fetchSingStatTable` 함수를 v1.0 에서 호출하지 않아 dead code 였음. wire-up 시점에 재구현.
+//   참고 구현 (v1.0 round 13 까지 유지):
+//     async function fetchSingStatTable(tableId, apiKey) {
+//       const url = `${SINGSTAT_API_BASE}/${tableId}`;
+//       const headers = { Accept: 'application/json' };
+//       if (apiKey) headers['api-key'] = apiKey;
+//       try {
+//         const response = await fetchWithRetry(url, { headers });
+//         return parseSingStatValue(await response.json());
+//       } catch { return null; }
+//     }
+//   wire-up 단계: (a) 응답 row 단위 검증 (HDB rental index 기준년도, CPI item-level 매핑), (b)
+//   apiAvailable === true 분기에서 STATIC 대체, (c) 워크플로우의 --useStatic 제거.
 
 /**
  * 정적 임대료 데이터 매핑.

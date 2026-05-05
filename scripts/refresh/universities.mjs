@@ -151,7 +151,10 @@ export async function fetchUniversityTuition(university) {
       return { school: university.school, level: university.level, annual: university.staticAnnual, fetchedFromPage: false };
     }
     return { school: university.school, level: university.level, annual: university.staticAnnual, fetchedFromPage: true };
-  } catch {
+  } catch (err) {
+    // v1.0: HTML 파싱 미구현 + 정부·대학 사이트 봇 차단으로 fetch 실패가 흔해 errors 대신 info 로그.
+    // v1.x HTML 파싱 도입 시 디버깅 단서 보존 — silent 차단 회피 (PR #20 review round 19).
+    console.info(`[universities] ${university.school} fetch failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`);
     return { school: university.school, level: university.level, annual: university.staticAnnual, fetchedFromPage: false };
   }
 }
