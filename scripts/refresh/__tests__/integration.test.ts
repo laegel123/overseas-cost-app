@@ -273,6 +273,19 @@ describe('Integration: Workflow YAML Validation', () => {
       expect(content).toContain('node scripts/validate_cities.mjs');
     }
   });
+
+  // PR #20 review round 24 — GitHub Actions 기본 timeout (360분/6시간) 으로 hang 시 분 소모 + 다음
+  // cron 대기. 합리적 범위 (5~60분) 안에 설정되어 있어야 함. 누락 회귀 차단.
+  it('각 워크플로우의 jobs.refresh 에 timeout-minutes 가 합리적 범위(5~60)로 설정 (PR #20 review round 24)', () => {
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      const match = content.match(/^\s+timeout-minutes:\s+(\d+)\s*$/m);
+      expect(match).not.toBeNull();
+      const minutes = Number(match![1]);
+      expect(minutes).toBeGreaterThanOrEqual(5);
+      expect(minutes).toBeLessThanOrEqual(60);
+    }
+  });
 });
 
 describe('Integration: Schedule Validation', () => {

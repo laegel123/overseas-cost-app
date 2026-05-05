@@ -22,6 +22,9 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    # PR #20 review round 24 — GitHub Actions 기본 timeout (360분/6시간) 으로 hang 시 분 소모 + 다음
+    # cron 대기 발생. 10여개 fetcher × 30s timeout = 최대 ~5분이라 30분이면 충분히 여유 있음.
+    timeout-minutes: 30
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

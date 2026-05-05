@@ -21,6 +21,9 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    # PR #20 review round 24 — GitHub Actions 기본 timeout (360분/6시간) 으로 hang 시 분 소모 + 다음
+    # cron 대기 발생. 10여개 fetcher × 30s timeout = 최대 ~5분이라 30분이면 충분히 여유 있음.
+    timeout-minutes: 30
     env:
       KR_DATA_API_KEY: ${{ secrets.KR_DATA_API_KEY }}
       US_BLS_API_KEY: ${{ secrets.US_BLS_API_KEY }}

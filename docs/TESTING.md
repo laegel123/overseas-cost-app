@@ -2735,6 +2735,7 @@ DATA_SOURCES.md 부록 A 의 코드화. registry 가 사실상 단일 출처.
 ### 9-A.16 시간·환경 의존 테스트
 
 - [x] 5개 워크플로우 cron hour = 9 (UTC 09:00 = KST 18:00). round 21 회귀 차단 — `cron hour 가 18 이 되어선 안 됨` 단언 (`integration.test.ts`).
+- [x] 6개 refresh 워크플로우 `jobs.refresh.timeout-minutes` 가 합리적 범위(5~60) 안에 설정. GitHub Actions 기본값 360분 hang 회귀 차단 — round 24 (`integration.test.ts`).
 - [ ] 워크플로우 실행 시각 (UTC 09:00 = KST 18:00) 가정 → fetch URL 의 날짜 파라미터 정확 (수동 검증)
 - [ ] 시즌성 — 학비는 1월·8월 갱신 시 새 학년 데이터 (이전 학년 무시) (v1.x HTML 파싱 도입 후)
 - [ ] 분기 boundary (3월 31일 vs 4월 1일) — generatedAt 이 분기 시작 후 첫 갱신 기준 정확
