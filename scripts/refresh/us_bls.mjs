@@ -79,6 +79,17 @@ export const BLS_SERIES = {
   },
 };
 
+// STATIC fallback 가격 — BLS API 가 부재하거나 sanity range 밖 응답 시 사용.
+//
+// **`chicken1kg = 10.00 USD/kg` (≈ $4.54/lb) 의 의도** (PR #20 review round 11):
+//   BLS APU 시리즈 자체는 whole fryer/broiler (US 평균 $1.5~2.5/lb) 인데 본 static 은 의도적으로
+//   부위별 (boneless skinless breast, drumstick 등) 시장가 mix 의 평균에 가까운 값을 사용한다.
+//   이유: 한국 사용자의 "치킨 1kg" 멘탈 모델이 통닭 한 마리가 아니라 부위별 구매 가격 평균에 더
+//   가깝고, 비교 baseline 인 서울 (`seoul.json` chicken1kg = 12000 KRW ≈ $9/kg) 과 단위 일관성 유지.
+//   ADR-059 의 "STATIC fallback 정책" 항목 (식재료 8종 중 일부 항목 static fallback) 에 부합.
+//
+// 다른 항목 (milk / eggs / bread) 은 BLS 시리즈 단위와 일관 (per ½ gallon / per dozen / per lb).
+// rice / onion / apple / ramen 은 BLS 시리즈 부재 → static 전용.
 export const STATIC_GROCERIES = {
   milk1L: 1.20,
   eggs12: 4.50,
@@ -93,6 +104,10 @@ export const STATIC_GROCERIES = {
 // BLS Series APU0100709112 / APU0400709112 = "Milk, fresh, whole, fortified, per ½ gallon (1.89 L)".
 // 1L 가격으로 환산하려면 ½ gallon liter 값으로 나눠야 함 — 미환산 시 가격이 약 1.89× 부풀려짐.
 const HALF_GALLON_LITERS = 1.8927;
+
+// 정확한 lb→kg 변환 계수 (NIST). 과거 2.2 로 반올림 사용했으나 일관성 위해 상수화 (PR #20
+// review round 11). 0.5% 차이라 생활비 비교 정밀도에는 무영향이지만 단위 환산 의도 명시.
+const LB_PER_KG = 2.2046;
 
 // BLS API 가 반환하는 원시 값(보정계수 적용 전)의 plausible 범위. 범위 밖이면 시리즈가 의도와
 // 다르거나 API 응답 이상으로 간주, STATIC fallback 사용 + region-level errors 기록.
@@ -206,7 +221,7 @@ export function mapToGroceries(blsData, seriesIds, adjustmentFactor) {
     // BLS APU 시리즈에 white rice 항목이 없어 (BLS 가 rice 를 별도 series 로 추적하지 않음)
     // 항상 static 추정치 사용. onion1kg / apple1kg / ramen 도 동일 사유로 static 전용.
     rice1kg: applyFactor(STATIC_GROCERIES.rice1kg),
-    chicken1kg: chicken1kg ? applyFactor(chicken1kg * 2.2) : applyFactor(STATIC_GROCERIES.chicken1kg),
+    chicken1kg: chicken1kg ? applyFactor(chicken1kg * LB_PER_KG) : applyFactor(STATIC_GROCERIES.chicken1kg),
     bread: bread ? applyFactor(bread) : applyFactor(STATIC_GROCERIES.bread),
     onion1kg: applyFactor(STATIC_GROCERIES.onion1kg),
     apple1kg: applyFactor(STATIC_GROCERIES.apple1kg),

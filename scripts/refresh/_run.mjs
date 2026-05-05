@@ -35,8 +35,11 @@ if (!/^[a-z][a-z0-9_]*$/.test(moduleName) || moduleName.startsWith('_')) {
   process.exit(1);
 }
 
-// writeCity 를 호출하지 않는 라이브러리 모듈 — 워크플로우에서 단독 실행 시 데이터 변경 0.
-// 직접 호출 시 의도 명확화 차원에서 fail-fast.
+// writeCity 를 호출하지 않는 라이브러리 모듈 — 다른 fetcher 가 import 해서 보조 자료로 사용하는
+// 골조 (v1.x 에서 실제 fallback wire up 예정, eu_eurostat.mjs 헤더 참조). 워크플로우에서 단독
+// 실행하면 데이터 변경 0 + 의도 불명확이라 fail-fast. integration.test.ts 가 워크플로우 yml 에서
+// LIBRARY_MODULES 호출 라인이 들어오지 않는지 회귀 검증한다. 파일명도 `_` prefix 라 path
+// traversal 정규식으로 1차 차단되지만 의미적 의도 명시 차원에서 본 set 도 유지.
 const LIBRARY_MODULES = new Set(['eu_eurostat']);
 if (LIBRARY_MODULES.has(moduleName)) {
   console.error(`${moduleName} is a library module (no writeCity) and cannot be run directly.`);

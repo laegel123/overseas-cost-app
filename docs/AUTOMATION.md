@@ -424,6 +424,19 @@ PR 자동 생성: `peter-evans/create-pull-request@v6` 액션 사용. 라벨 자
 
 이런 예외는 모두 `data/cities/<id>.json` 의 `sources[].name` 에 "추정" 또는 "static" 마커로 표기.
 
+### 8.1 v1.x TODO — 추적 항목
+
+PR #20 round 11 review 에서 확인된 후속 phase 항목. 각 항목은 별도 phase 로 진행되며 ADR 및 인벤토리 갱신 동반.
+
+| 영역 | 현재 상태 | v1.x 계획 |
+| --- | --- | --- |
+| `eu_eurostat.mjs` fallback wire up | 라이브러리 모듈 골조만 — `de_destatis` / `fr_insee` / `nl_cbs` 어디서도 import 안 됨 | 각 국가 fetcher 가 본 모듈 import 후 응답 실패 시 EU HICP 보정으로 fallback |
+| `uk_ons.mjs` ONS 시리즈 ID 검증 | `MM23-CZMP` 등 시리즈가 ONS API 에서 실제 조회 가능한지 미검증 (코드 내 TODO) | 실 호출 검증 + 응답 단위 / scale 보정 + integration test 회귀 |
+| `jp_estat.mjs` 응답 단위 wire up | API 호출 후 sample 로깅만, STATIC 보정에 미반영 | 응답 단위 (천엔 vs 엔, 도/현 vs 전국) 검증 + STATIC 대체 |
+| `visas.mjs` / `universities.mjs` HTML 파싱 | reachability check 만, 항상 static | 국가별 / 학교별 selector + 단위 정규화 |
+| `workflow_dispatch` 브랜치 제한 | 모든 브랜치에서 dispatch 가능 (위험도 낮음) | main 브랜치 보호 규칙 도입 시 dispatch 제한 검토 |
+| Eurostat / actionlint CI | 자동화 안 됨 (수동 검증) | actionlint job 추가 |
+
 ## 9. 자동화 vs 수동 정책
 
 | 카테고리             | 자동화                         | 빈도     | 한계                                 |

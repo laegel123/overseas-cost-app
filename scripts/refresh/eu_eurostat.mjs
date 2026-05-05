@@ -7,12 +7,18 @@
  * API: https://ec.europa.eu/eurostat/api/
  * 키: 불필요 (공개 API)
  *
- * 용도:
- * - 각 국가별 스크립트 (de_destatis, fr_insee, nl_cbs) 실패 시 fallback
- * - Eurostat HICP (Harmonised Index of Consumer Prices) 기반 보정
+ * **v1.0 상태 (PR #20 review round 11)**: 라이브러리 모듈 골조만 존재 — `de_destatis` /
+ * `fr_insee` / `nl_cbs` 어디서도 본 모듈을 import 하지 않으므로 실제 fallback 동작 0.
+ * `_run.mjs::LIBRARY_MODULES` 가 단독 실행을 차단하고 `integration.test.ts` 가 워크플로우에서
+ * `_run.mjs eu_eurostat` 호출 라인이 들어오지 않는지 검증한다.
  *
- * 방법:
- * - EU 평균 CPI 대비 국가별 지수로 가격 보정
+ * **v1.x 계획**:
+ * - 각 국가 fetcher 가 본 모듈을 import 해 fallback 으로 사용 (de_destatis 응답 실패 시
+ *   Eurostat HICP 로 보정한 값 반환).
+ * - 단위/스케일 검증 후 wire up (jp_estat 와 동일한 패턴).
+ *
+ * 의도된 용도 (구현 시):
+ * - Eurostat HICP (Harmonised Index of Consumer Prices) 기반 EU 평균 대비 국가별 보정
  * - 각 국가 스크립트가 주요 출처, 본 스크립트는 보조용
  */
 

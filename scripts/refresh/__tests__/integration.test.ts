@@ -208,6 +208,21 @@ describe('Integration: Workflow YAML Validation', () => {
     expect(rentYml).toMatch(/SG_DATA_GOV_KEY:\s*\$\{\{\s*secrets\.SG_DATA_GOV_KEY\s*\}\}/);
   });
 
+  it('HAS_NEW 가 모든 워크플로우의 PR-update / commit 분기에 반영 (PR #20 review round 11)', () => {
+    // placeholder(0) → 실제값 첫 갱신은 PR 검토 강제 — `Create PR for updates` 의 OR 조건 +
+    // `Auto commit and push` 의 != 'true' 조건 양쪽에 HAS_NEW 가 들어가야 한 곳이라도 누락 시
+    // 신규 항목이 검토 없이 직접 commit 되는 회귀 발생.
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      // PR-update 분기 — HAS_UPDATES 또는 HAS_NEW 면 PR 생성.
+      expect(content).toContain(
+        "(steps.outliers.outputs.HAS_UPDATES == 'true' || steps.outliers.outputs.HAS_NEW == 'true')",
+      );
+      // commit 분기 — 세 변수 모두 false 일 때만 직접 commit.
+      expect(content).toContain("steps.outliers.outputs.HAS_NEW != 'true'");
+    }
+  });
+
   it('각 워크플로우에 permissions 설정 존재', () => {
     for (const workflow of REFRESH_WORKFLOWS) {
       const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
