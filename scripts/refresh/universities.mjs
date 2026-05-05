@@ -125,8 +125,8 @@ export const CITY_CONFIGS = OVERSEAS_CITY_CONFIGS;
 export const SOURCE = {
   category: 'tuition',
   name: 'Official university international tuition pages (static estimates)',
-  // HEAD alias — default branch 이름이 변경돼도 깨지지 않음 (main hardcoding dead link 방어).
-  url: 'https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md',
+  // main 브랜치 고정 (PR #20 review round 22) — 과거 HEAD alias 는 시점에 따라 다른 commit 을 가리켜 sources URL 의 시간적 일관성이 흔들렸다. main 으로 고정하면 release 후 변경되지 않는다.
+  url: 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md',
 };
 
 /**

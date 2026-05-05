@@ -98,15 +98,14 @@ async function fetchHicpData(countries) {
   const geoParam = countries.join('+');
   const url = `${EUROSTAT_API_BASE}/${EUROSTAT_DATASETS.hicp}?format=JSON&geo=${geoParam}&lastNObservations=1`;
 
-  try {
-    const response = await fetchWithRetry(url, {
-      headers: { Accept: 'application/json' },
-    });
-    const data = await response.json();
-    return parseEurostatResponse(data);
-  } catch {
-    return new Map();
-  }
+  // CLAUDE.md "silent fail 금지" 준수 (PR #20 review round 22) — fetch / 파싱 실패 시 throw 하여
+  // caller 가 errors[] 에 명시 기록할 수 있게 함. 과거 catch { return new Map(); } 는 데이터
+  // 부재와 fetch 실패를 caller 가 구분하지 못해 v1.x wire-up 시 silent data corruption 위험.
+  const response = await fetchWithRetry(url, {
+    headers: { Accept: 'application/json' },
+  });
+  const data = await response.json();
+  return parseEurostatResponse(data);
 }
 
 /**
@@ -156,7 +155,23 @@ export default async function refresh(opts = {}) {
     };
   }
 
-  const hicpData = await fetchHicpData(targetCountries);
+  let hicpData;
+  try {
+    hicpData = await fetchHicpData(targetCountries);
+  } catch (err) {
+    // PR #20 review round 22 — fetchHicpData silent fail 제거 후 caller 처리.
+    errors.push({
+      cityId: 'all',
+      reason: `Eurostat HICP fetch failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`,
+    });
+    return {
+      source: 'eu_eurostat',
+      cities: [],
+      fields: [],
+      changes: [],
+      errors,
+    };
+  }
 
   for (const country of targetCountries) {
     const hicpValue = hicpData.get(country);

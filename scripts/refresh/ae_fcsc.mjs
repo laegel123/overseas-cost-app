@@ -128,6 +128,9 @@ export default async function refresh(opts = {}) {
 
   const targetCities = opts.cities ?? Object.keys(CITY_CONFIGS);
 
+  // v1.0: dscAvailable / fcscAvailable 는 reachability 로깅 목적만 — 후속 분기에 wire 되지 않고
+  // 항상 STATIC_RENT / STATIC_GROCERIES 가 도시 JSON 에 적재된다. v1.x 에서 응답 단위 검증 후
+  // 실제 보정 분기에 연결 (jp_estat / sg_singstat 와 동일 패턴, PR #20 review round 22).
   let dscAvailable = false;
   let fcscAvailable = false;
 
@@ -149,6 +152,9 @@ export default async function refresh(opts = {}) {
         reason: 'FCSC site unavailable, using static values for food',
       });
     }
+    // 의도적 미사용 — 헤더 주석 참조.
+    void dscAvailable;
+    void fcscAvailable;
   }
 
   for (const cityId of targetCities) {

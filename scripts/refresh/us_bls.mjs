@@ -129,6 +129,11 @@ export const BLS_VALUE_RANGES = {
   chicken1kg: { min: 1.0, max: 5.0 }, // USD per lb (whole chicken — boneless cuts >$5/lb 는 reject)
 };
 
+// 외식·카페 가격은 BLS APU 시리즈가 아닌 static 사용 (PR #20 review round 22 명시).
+// BLS CPI 의 "Food away from home" 카테고리는 도시별 absolute 가격이 아닌 인덱스 (2020=100) 만
+// 제공해 cpiToPrice 변환식 적용 시 ca_statcan §5 와 동일한 base period 검증 부담이 큼. v1.0 에서는
+// "1인 한 끼 평균" 직관에 가까운 STATIC 추정치 사용 — ADR-059 §1 의 STATIC fallback 정책 부합.
+// 도시별 보정은 adjustmentFactor 가 1차 보정 (NYC=1.15 등). v1.x StatCan-style detailed CPI 도입 시 교체.
 export const STATIC_FOOD = {
   restaurantMeal: 18.00,
   cafe: 5.50,
