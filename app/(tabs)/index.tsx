@@ -6,7 +6,7 @@
  * - Search bar (v1.0 stub — 시각만)
  * - Favorite cards (horizontal scroll, accent=true 첫 카드)
  * - Recent cities list (vertical, max 5)
- * - Region pills (v1.0 시각만, 실제 필터링 미구현)
+ * - Region pills + 권역별 도시 리스트 (PRD F2.2 "지역별 도시 리스트")
  */
 
 import * as React from 'react';
@@ -45,6 +45,7 @@ const REGIONS: RegionConfig[] = [
   { id: 'eu', label: '유럽' },
   { id: 'asia', label: '아시아' },
   { id: 'oceania', label: '오세아니아' },
+  { id: 'me', label: '중동' },
 ];
 
 const FOOD_RESTAURANT_DAYS_PER_MONTH = 20;
@@ -220,6 +221,14 @@ export default function HomeScreen(): React.ReactElement {
     );
   }, [cities, seoulTotal, fx]);
 
+  // 권역 필터 적용된 도시 리스트. 한글 도시명 가나다 순으로 안정 정렬.
+  const regionFilteredCities = React.useMemo(() => {
+    const overseas = Object.values(cities).filter((c) => c.id !== 'seoul');
+    const filtered =
+      activeRegion === 'all' ? overseas : overseas.filter((c) => c.region === activeRegion);
+    return filtered.slice().sort((a, b) => a.name.ko.localeCompare(b.name.ko, 'ko'));
+  }, [cities, activeRegion]);
+
   if (state.status === 'loading') {
     return (
       <Screen testID="home-screen-loading">
@@ -360,7 +369,7 @@ export default function HomeScreen(): React.ReactElement {
         )}
       </View>
 
-      {/* Region pills */}
+      {/* Region pills + 권역별 도시 리스트 (PRD F2.2) */}
       <View className="mt-6 mb-4">
         <Body color="navy" className="font-manrope-bold mb-3">
           권역
@@ -382,6 +391,22 @@ export default function HomeScreen(): React.ReactElement {
             />
           ))}
         </ScrollView>
+
+        <View className="mt-4 gap-2" testID="home-region-cities">
+          {regionFilteredCities.map((city, idx) => (
+            <RecentRow
+              key={city.id}
+              cityId={city.id}
+              cityName={city.name.ko}
+              cityNameEn={city.name.en}
+              countryCode={city.country}
+              mult={multMap[city.id] ?? '신규'}
+              isLast={idx === regionFilteredCities.length - 1}
+              onPress={handleCityPress}
+              testID={`home-region-city-${city.id}`}
+            />
+          ))}
+        </View>
       </View>
 
       {/* Bottom spacing for tab bar */}
