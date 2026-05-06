@@ -3,15 +3,17 @@
  *
  * design/README §2 + step2.md 구현.
  * - Greeting block + avatar placeholder
- * - Search bar (v1.0 stub — 시각만)
+ * - Search bar (한글/영어 도시명 부분 일치 — PRD F2 "도시 검색")
  * - Favorite cards (horizontal scroll, accent=true 첫 카드)
  * - Recent cities list (vertical, max 5)
  * - Region pills + 권역별 도시 리스트 (PRD F2.2 "지역별 도시 리스트")
+ *
+ * 검색 시: 즐겨찾기/최근/권역 섹션을 검색 결과 리스트로 교체.
  */
 
 import * as React from 'react';
 
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, TextInput, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
@@ -97,6 +99,7 @@ export default function HomeScreen(): React.ReactElement {
 
   const [state, setState] = React.useState<HomeState>({ status: 'loading' });
   const [activeRegion, setActiveRegion] = React.useState<Region | 'all'>('all');
+  const [query, setQuery] = React.useState('');
 
   const [reloadKey, setReloadKey] = React.useState(0);
 
@@ -229,6 +232,23 @@ export default function HomeScreen(): React.ReactElement {
     return filtered.slice().sort((a, b) => a.name.ko.localeCompare(b.name.ko, 'ko'));
   }, [cities, activeRegion]);
 
+  // 검색어 정규화. trim + 소문자 (영문) — 한글은 lower 영향 없음.
+  const normalizedQuery = query.trim().toLowerCase();
+  const isSearching = normalizedQuery.length > 0;
+
+  // name.ko / name.en 부분 일치. 서울은 비교 대상이 아니라 결과에서도 제외.
+  const searchResults = React.useMemo(() => {
+    if (!isSearching) return [];
+    const overseas = Object.values(cities).filter((c) => c.id !== 'seoul');
+    return overseas
+      .filter(
+        (c) =>
+          c.name.ko.toLowerCase().includes(normalizedQuery) ||
+          c.name.en.toLowerCase().includes(normalizedQuery),
+      )
+      .sort((a, b) => a.name.ko.localeCompare(b.name.ko, 'ko'));
+  }, [cities, normalizedQuery, isSearching]);
+
   if (state.status === 'loading') {
     return (
       <Screen testID="home-screen-loading">
@@ -286,18 +306,71 @@ export default function HomeScreen(): React.ReactElement {
         </Pressable>
       </View>
 
-      {/* Search bar (v1.0 stub) */}
+      {/* Search bar */}
       <View
         className="mt-4 flex-row items-center px-3.5 py-3 bg-light rounded-button"
-        testID="home-search-stub"
+        testID="home-search"
       >
         <Icon name="search" size={18} color={colors.gray2} />
-        <Body color="gray-2" className="flex-1 ml-3">
-          도시 검색 · 한글/영어
-        </Body>
-        <Icon name="filter" size={18} color={colors.gray2} />
+        <TextInput
+          value={query}
+          onChangeText={setQuery}
+          placeholder="도시 검색 · 한글/영어"
+          placeholderTextColor={colors.gray2}
+          autoCorrect={false}
+          autoCapitalize="none"
+          returnKeyType="search"
+          accessibilityLabel="도시 검색"
+          className="flex-1 ml-3 font-mulish text-body text-navy"
+          testID="home-search-input"
+        />
+        {query.length > 0 && (
+          <Pressable
+            onPress={() => setQuery('')}
+            accessibilityRole="button"
+            accessibilityLabel="검색어 지우기"
+            testID="home-search-clear"
+            hitSlop={8}
+          >
+            <Icon name="close" size={18} color={colors.gray2} />
+          </Pressable>
+        )}
       </View>
 
+      {isSearching ? (
+        <View className="mt-6 mb-4">
+          <Body color="navy" className="font-manrope-bold mb-3">
+            검색 결과 ({searchResults.length})
+          </Body>
+          {searchResults.length === 0 ? (
+            <View
+              className="py-8 items-center justify-center"
+              testID="home-search-empty"
+            >
+              <Body color="gray-2" className="text-center">
+                검색 결과가 없어요
+              </Body>
+            </View>
+          ) : (
+            <View className="gap-2" testID="home-search-results">
+              {searchResults.map((city, idx) => (
+                <RecentRow
+                  key={city.id}
+                  cityId={city.id}
+                  cityName={city.name.ko}
+                  cityNameEn={city.name.en}
+                  countryCode={city.country}
+                  mult={multMap[city.id] ?? '신규'}
+                  isLast={idx === searchResults.length - 1}
+                  onPress={handleCityPress}
+                  testID={`home-search-result-${city.id}`}
+                />
+              ))}
+            </View>
+          )}
+        </View>
+      ) : (
+        <>
       {/* Favorite cards section */}
       <View className="mt-6">
         <Body color="navy" className="font-manrope-bold mb-3">
@@ -408,6 +481,8 @@ export default function HomeScreen(): React.ReactElement {
           ))}
         </View>
       </View>
+        </>
+      )}
 
       {/* Bottom spacing for tab bar */}
       <View className="h-4" />

@@ -1,5 +1,5 @@
 /**
- * Icon — TESTING.md §9.10 매트릭스. 25 IconName 매핑 + props passthrough.
+ * Icon — TESTING.md §9.10 매트릭스. 26 IconName 매핑 + props passthrough.
  *
  * lucide-react-native 컴포넌트는 testID / accessibilityLabel 을 svg 까지
  * propagate 하지 않으므로 Icon 은 View 로 wrap. 본 테스트는 wrapper View 의
@@ -15,15 +15,15 @@ import { colors } from '@/theme/tokens';
 import { Icon, ICON_NAMES, type IconName } from '../Icon';
 
 describe('Icon', () => {
-  // ─── 25 IconName 모두 렌더 ────────────────────────────────────────────────
+  // ─── 26 IconName 모두 렌더 ────────────────────────────────────────────────
   describe('IconName 카탈로그', () => {
     it.each(ICON_NAMES)('"%s" 렌더 (testID 발견)', (name) => {
       render(<Icon name={name} testID={`icon-${name}`} />);
       expect(screen.getByTestId(`icon-${name}`)).toBeTruthy();
     });
 
-    it('ICON_NAMES 배열은 25개', () => {
-      expect(ICON_NAMES).toHaveLength(25);
+    it('ICON_NAMES 배열은 26개', () => {
+      expect(ICON_NAMES).toHaveLength(26);
     });
 
     it('ICON_NAMES 는 readonly tuple — 중복 없음', () => {

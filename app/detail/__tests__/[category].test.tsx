@@ -240,6 +240,32 @@ describe('DetailScreen', () => {
       // 식비 + 도시명 포함 검증 (TopBar title 텍스트)
       expect(screen.getByText(/식비.*밴쿠버/)).toBeTruthy();
     });
+
+    it('출처 푸터: 헤더(N개 + 갱신 MM-DD) + 카테고리 출처 모두 노출', async () => {
+      setupMocks({ category: 'food' });
+      render(<DetailScreen />);
+      await flush();
+
+      const footer = screen.getByTestId('detail-sources');
+      expect(footer).toBeTruthy();
+      // food 카테고리 → vancouver fixture 의 'Statistics Canada CPI' 1개
+      expect(screen.getByText('출처 1개')).toBeTruthy();
+      expect(screen.getByText(/^갱신/)).toBeTruthy();
+      expect(screen.getByTestId('detail-source-0')).toBeTruthy();
+      expect(screen.getByText('Statistics Canada CPI')).toBeTruthy();
+    });
+
+    it('출처 0건 카테고리 → "출처 정보가 없어요"', async () => {
+      // sources 가 비어있는 도시로 override (vancouver fixture 에 모든 카테고리 source 존재).
+      setupMocks({
+        category: 'visa',
+        city: { ...vancouverValid, sources: [] },
+      });
+      render(<DetailScreen />);
+      await flush();
+      expect(screen.getByText('출처 0개')).toBeTruthy();
+      expect(screen.getByText('출처 정보가 없어요')).toBeTruthy();
+    });
   });
 
   describe('핵심 contract (TESTING.md §6.3·§6.4 / PR #17 review 이슈 2)', () => {

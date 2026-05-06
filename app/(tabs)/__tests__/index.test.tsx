@@ -136,8 +136,163 @@ describe('HomeScreen', () => {
       expect(getByTestId('home-screen')).toBeTruthy();
       expect(getByText('안녕하세요 👋')).toBeTruthy();
       expect(getByText('어디 가시나요?')).toBeTruthy();
-      expect(getByTestId('home-search-stub')).toBeTruthy();
+      expect(getByTestId('home-search')).toBeTruthy();
+      expect(getByTestId('home-search-input')).toBeTruthy();
       expect(getByTestId('home-avatar')).toBeTruthy();
+    });
+  });
+
+  describe('도시 검색', () => {
+    it('검색 input 비어있을 때 즐겨찾기/최근/권역 섹션 노출', async () => {
+      setupMocks();
+
+      const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('home-favorites-empty')).toBeTruthy();
+      expect(getByTestId('home-recent-empty')).toBeTruthy();
+      expect(getByTestId('home-region-pills')).toBeTruthy();
+      expect(queryByTestId('home-search-results')).toBeNull();
+      expect(queryByTestId('home-search-empty')).toBeNull();
+    });
+
+    it('한글 입력 시 부분 일치 결과만 노출 + 다른 섹션은 숨김', async () => {
+      setupMocks();
+
+      const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.changeText(getByTestId('home-search-input'), '도쿄');
+
+      await waitFor(() => {
+        expect(getByTestId('home-search-results')).toBeTruthy();
+        expect(getByTestId('home-search-result-tokyo')).toBeTruthy();
+        expect(queryByTestId('home-search-result-vancouver')).toBeNull();
+        expect(queryByTestId('home-search-result-london')).toBeNull();
+        expect(queryByTestId('home-favorites-empty')).toBeNull();
+        expect(queryByTestId('home-recent-empty')).toBeNull();
+        expect(queryByTestId('home-region-pills')).toBeNull();
+      });
+    });
+
+    it('영어 입력 (대소문자 무시) 부분 일치', async () => {
+      setupMocks();
+
+      const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.changeText(getByTestId('home-search-input'), 'LON');
+
+      await waitFor(() => {
+        expect(getByTestId('home-search-result-london')).toBeTruthy();
+        expect(queryByTestId('home-search-result-tokyo')).toBeNull();
+      });
+    });
+
+    it('검색 결과 0건 — 빈 상태 메시지', async () => {
+      setupMocks();
+
+      const { getByTestId, getByText } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.changeText(getByTestId('home-search-input'), '없는도시');
+
+      await waitFor(() => {
+        expect(getByTestId('home-search-empty')).toBeTruthy();
+        expect(getByText('검색 결과가 없어요')).toBeTruthy();
+      });
+    });
+
+    it('검색 결과 행 탭 → /compare/{cityId} push', async () => {
+      setupMocks();
+
+      const { getByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.changeText(getByTestId('home-search-input'), 'tokyo');
+
+      await waitFor(() => {
+        expect(getByTestId('home-search-result-tokyo')).toBeTruthy();
+      });
+
+      fireEvent.press(getByTestId('home-search-result-tokyo'));
+
+      expect(mockPush).toHaveBeenCalledWith('/compare/tokyo');
+    });
+
+    it('서울은 검색 결과에서 제외 (비교 대상 아님)', async () => {
+      setupMocks();
+
+      const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.changeText(getByTestId('home-search-input'), '서울');
+
+      await waitFor(() => {
+        expect(getByTestId('home-search-empty')).toBeTruthy();
+        expect(queryByTestId('home-search-result-seoul')).toBeNull();
+      });
+    });
+
+    it('clear 버튼 → query 초기화 + 원래 섹션 복귀', async () => {
+      setupMocks();
+
+      const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.changeText(getByTestId('home-search-input'), '도쿄');
+
+      await waitFor(() => {
+        expect(getByTestId('home-search-clear')).toBeTruthy();
+      });
+
+      fireEvent.press(getByTestId('home-search-clear'));
+
+      await waitFor(() => {
+        expect(queryByTestId('home-search-clear')).toBeNull();
+        expect(queryByTestId('home-search-results')).toBeNull();
+        expect(getByTestId('home-favorites-empty')).toBeTruthy();
+        expect(getByTestId('home-region-pills')).toBeTruthy();
+      });
+    });
+
+    it('공백만 입력 시 검색하지 않음 (원래 섹션 유지)', async () => {
+      setupMocks();
+
+      const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.changeText(getByTestId('home-search-input'), '   ');
+
+      await waitFor(() => {
+        expect(queryByTestId('home-search-results')).toBeNull();
+        expect(queryByTestId('home-search-empty')).toBeNull();
+        expect(getByTestId('home-favorites-empty')).toBeTruthy();
+      });
     });
   });
 
