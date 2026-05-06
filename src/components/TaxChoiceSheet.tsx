@@ -226,7 +226,7 @@ export function TaxChoiceSheet({
               testID={testID !== undefined ? `${testID}-custom-input` : undefined}
             />
             <Tiny color="gray-2">
-              0보다 큰 숫자. 실수령률은 도시 평균값을 사용합니다.
+              0보다 큰 숫자. 실수령률은 등록된 첫 연봉 tier 기준으로 계산됩니다.
             </Tiny>
           </View>
 

@@ -76,6 +76,10 @@ export function BottomSheet({
             onPress={() => undefined}
           >
             <View
+              // accessibilityViewIsModal — VoiceOver/TalkBack 이 시트 외부 요소를
+              // 접근 트리에서 제외 (PR #25 4차 review). a11y 사용자가 modal
+              // 컨텍스트만 탐색하도록.
+              accessibilityViewIsModal
               className="bg-white rounded-t-[22px] px-screen-x pt-5"
               style={{ paddingBottom: bottomPad }}
               testID={testID !== undefined ? `${testID}-body` : undefined}

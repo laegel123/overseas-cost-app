@@ -145,7 +145,8 @@ export function TuitionChoiceSheet({
             );
           })}
 
-          <View className="border-t border-line my-2" />
+          {/* PR #25 4차 review — entries 없으면 구분선만 홀로 렌더되어 어색함. */}
+          {entries.length > 0 ? <View className="border-t border-line my-2" /> : null}
 
           <Pressable
             onPress={() => {

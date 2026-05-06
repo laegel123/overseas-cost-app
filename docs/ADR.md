@@ -1188,5 +1188,7 @@ Compare 화면에서 학비·세금 카드는 `seoulVal=null` (서울 데이터 
 - tax 의 takeHomePctApprox 보간 (사용자 custom annualSalary 와 가장 가까운 두 preset 사이 선형 보간) — 현재 첫 preset 값 차용.
 - 시트 swipe-down dismiss (UI_GUIDE §295) — 현재 backdrop 탭 + Android 백버튼만.
 - 직접 입력값의 KRW 환산 라이브 미리보기 (사용자 입력 시).
+- `TaxChoice` discriminated union 의 두 variant 가 현재 동일한 필드 (`annualSalary`) 만 가지지만, custom variant 가 메모·메타 필드를 추가할 가능성을 위해 `kind` 분기 유지 (PR #25 4차 review).
+- `useChoiceSheetState` 공통 훅 추출 — `TuitionChoiceSheet` / `TaxChoiceSheet` 가 `mode` / `draft` / `handleSaveCustom` / `handleClearCustom` / `isValidDraft` / `useEffect` 패턴을 거의 동일하게 공유. 현 규모 (2 시트) 에선 추상화 비용이 더 큼. 3개 이상으로 확장 시 추출.
 
 **관련:** ADR-004 (도메인별 store), ADR-014 (silent fail 금지), ADR-051 (store 추가 시 hydration import), ADR-052 (hydration timeout), ADR-060 (rent 단일 선택 패턴 — 본 ADR 의 모태), `src/store/tuitionChoice.ts`, `src/store/taxChoice.ts`, `src/components/BottomSheet.tsx`, `src/components/TuitionChoiceSheet.tsx`, `src/components/TaxChoiceSheet.tsx`, `app/detail/[cityId]/[category].tsx`, `app/compare/[cityId].tsx`, TESTING.md §9.8.2 / §9.8.3 / §9.20.4 / §9.20.5 / §9.20.6 / §9.24 / §9.25.
