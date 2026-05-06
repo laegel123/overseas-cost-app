@@ -397,8 +397,8 @@ export default function DetailScreen(): React.ReactElement {
   const subtitle = `1 ${city.currency} = ${rateDisplay}원 · ${syncDisplay}`;
 
   const categoryLabel = CATEGORY_LABEL[cat];
-  const sourceCount = city.sources.filter((s) => s.category === cat).length;
-  const primarySource = city.sources.find((s) => s.category === cat);
+  const categorySources = city.sources.filter((s) => s.category === cat);
+  const sourceCount = categorySources.length;
 
   return (
     <Screen scroll testID="detail-screen">
@@ -470,17 +470,31 @@ export default function DetailScreen(): React.ReactElement {
         ))}
       </View>
 
-      <View className="px-screen-x mt-6 pt-4 border-t border-dashed border-line">
+      <View
+        className="px-screen-x mt-6 pt-4 border-t border-dashed border-line gap-2"
+        testID="detail-sources"
+      >
         <View className="flex-row items-center justify-between">
-          <Small color="gray-2">
-            출처 {sourceCount}개 · 갱신 {lastSync ? formatShortDate(lastSync) : '?'}
-          </Small>
-          {primarySource !== undefined && (
-            <Small color="navy" className="font-manrope-bold">
-              {primarySource.name}
-            </Small>
-          )}
+          <MonoLabel color="gray-2">출처 {sourceCount}개</MonoLabel>
+          <Tiny color="gray-2">
+            갱신 {lastSync ? formatShortDate(lastSync) : '?'}
+          </Tiny>
         </View>
+        {sourceCount === 0 ? (
+          <Small color="gray-2">출처 정보가 없어요</Small>
+        ) : (
+          <View className="gap-1">
+            {categorySources.map((s, idx) => (
+              <Small
+                key={`${s.name}-${idx}`}
+                color="navy"
+                testID={`detail-source-${idx}`}
+              >
+                {s.name}
+              </Small>
+            ))}
+          </View>
+        )}
       </View>
 
       <View className="h-6" />

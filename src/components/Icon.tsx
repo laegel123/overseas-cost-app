@@ -1,5 +1,5 @@
 /**
- * Icon — design/README.md §Assets 의 25 아이콘 카탈로그 단일 진입점.
+ * Icon — design/README.md §Assets 의 아이콘 카탈로그 단일 진입점.
  *
  * lucide-react-native (ADR-054) 의 named export 를 정적 매핑. 사용처는
  * `<Icon name="home" size={22} color={colors.navy} />` 처럼 IconName 만 알면
@@ -43,6 +43,7 @@ import {
   Star,
   User,
   UtensilsCrossed,
+  X,
 } from 'lucide-react-native';
 
 import { type ColorToken, colors } from '@/theme/tokens';
@@ -77,6 +78,7 @@ export const ICON_NAMES = [
   'plus',
   'filter',
   'up',
+  'close',
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];
@@ -122,6 +124,7 @@ const ICON_MAP: Record<IconName, LucideComponent> = {
   plus: Plus,
   filter: SlidersHorizontal,
   up: ArrowUp,
+  close: X,
 };
 
 const DEFAULT_SIZE = 22;
