@@ -1,0 +1,1854 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-05-04T14:10:02.053Z",
+  "fxBaseDate": "2026-05-04",
+  "cities": {
+    "amsterdam": {
+      "id": "amsterdam",
+      "name": {
+        "ko": "암스테르담",
+        "en": "Amsterdam"
+      },
+      "country": "NL",
+      "currency": "EUR",
+      "region": "eu",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 700,
+        "studio": 1200,
+        "oneBed": 1500,
+        "twoBed": 2100
+      },
+      "food": {
+        "restaurantMeal": 18,
+        "cafe": 4.5,
+        "groceries": {
+          "milk1L": 1.15,
+          "eggs12": 3.2,
+          "rice1kg": 2.4,
+          "chicken1kg": 9,
+          "bread": 1.6,
+          "onion1kg": 1.5,
+          "apple1kg": 2.8,
+          "ramen": 0.95
+        }
+      },
+      "transport": {
+        "monthlyPass": 100,
+        "singleRide": 3.4,
+        "taxiBase": 3.19
+      },
+      "tuition": [
+        {
+          "school": "UvA",
+          "level": "undergrad",
+          "annual": 15000
+        },
+        {
+          "school": "VU Amsterdam",
+          "level": "undergrad",
+          "annual": 14500
+        },
+        {
+          "school": "Amsterdam UAS",
+          "level": "undergrad",
+          "annual": 12000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 210,
+        "workApplicationFee": 350,
+        "settlementApprox": 2500
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "CBS Open Data + static estimates",
+          "url": "https://opendata.cbs.nl/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "CBS CPI + static estimates",
+          "url": "https://opendata.cbs.nl/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "GVB official fares + static estimates",
+          "url": "https://en.gvb.nl/abonnementen",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "berlin": {
+      "id": "berlin",
+      "name": {
+        "ko": "베를린",
+        "en": "Berlin"
+      },
+      "country": "DE",
+      "currency": "EUR",
+      "region": "eu",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 550,
+        "studio": 850,
+        "oneBed": 1000,
+        "twoBed": 1400
+      },
+      "food": {
+        "restaurantMeal": 12,
+        "cafe": 3.5,
+        "groceries": {
+          "milk1L": 1.1,
+          "eggs12": 2.8,
+          "rice1kg": 2.5,
+          "chicken1kg": 8,
+          "bread": 1.8,
+          "onion1kg": 1.2,
+          "apple1kg": 2.5,
+          "ramen": 0.9
+        }
+      },
+      "transport": {
+        "monthlyPass": 86,
+        "singleRide": 3.2,
+        "taxiBase": 4
+      },
+      "tuition": [
+        {
+          "school": "TU Berlin",
+          "level": "undergrad",
+          "annual": 700
+        },
+        {
+          "school": "HU Berlin",
+          "level": "undergrad",
+          "annual": 700
+        },
+        {
+          "school": "FU Berlin",
+          "level": "undergrad",
+          "annual": 700
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 75,
+        "workApplicationFee": 100,
+        "settlementApprox": 1500
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "Destatis GENESIS + static estimates",
+          "url": "https://www.destatis.de/EN/Themes/Society-Environment/Housing/_node.html",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "Destatis CPI + static estimates",
+          "url": "https://www.destatis.de/EN/Themes/Economy/Prices/_node.html",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "BVG official fares + static estimates",
+          "url": "https://www.bvg.de/en/tickets-fares",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "boston": {
+      "id": "boston",
+      "name": {
+        "ko": "보스턴",
+        "en": "Boston"
+      },
+      "country": "US",
+      "currency": "USD",
+      "region": "na",
+      "lastUpdated": "2026-05-04",
+      "rent": {
+        "share": 1300,
+        "studio": 2000,
+        "oneBed": 2500,
+        "twoBed": 3100
+      },
+      "food": {
+        "restaurantMeal": 19.8,
+        "cafe": 6.05,
+        "groceries": {
+          "milk1L": 1.32,
+          "eggs12": 4.95,
+          "rice1kg": 3.85,
+          "chicken1kg": 11,
+          "bread": 3.85,
+          "onion1kg": 3.08,
+          "apple1kg": 4.62,
+          "ramen": 1.65
+        }
+      },
+      "transport": {
+        "monthlyPass": 90,
+        "singleRide": 2.4,
+        "taxiBase": 2.6
+      },
+      "tuition": [
+        {
+          "school": "Harvard",
+          "level": "undergrad",
+          "annual": 57000
+        },
+        {
+          "school": "MIT",
+          "level": "undergrad",
+          "annual": 58000
+        },
+        {
+          "school": "BU",
+          "level": "undergrad",
+          "annual": 62000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 185,
+        "workApplicationFee": 190,
+        "settlementApprox": 3000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)",
+          "url": "https://www.huduser.gov/portal/datasets/fmr.html",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "US BLS CPI + static estimates (ADR-059 adjustment)",
+          "url": "https://www.bls.gov/cpi/",
+          "accessedAt": "2026-05-04"
+        },
+        {
+          "category": "transport",
+          "name": "MBTA",
+          "url": "https://www.mbta.com/fares",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "dubai": {
+      "id": "dubai",
+      "name": {
+        "ko": "두바이",
+        "en": "Dubai"
+      },
+      "country": "AE",
+      "currency": "AED",
+      "region": "me",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 3000,
+        "studio": 5500,
+        "oneBed": 7500,
+        "twoBed": 11000
+      },
+      "food": {
+        "restaurantMeal": 45,
+        "cafe": 18,
+        "groceries": {
+          "milk1L": 6.5,
+          "eggs12": 14,
+          "rice1kg": 8,
+          "chicken1kg": 25,
+          "bread": 5.5,
+          "onion1kg": 4.5,
+          "apple1kg": 12,
+          "ramen": 4
+        }
+      },
+      "transport": {
+        "monthlyPass": 350,
+        "singleRide": 4,
+        "taxiBase": 12
+      },
+      "tuition": [
+        {
+          "school": "American University in Dubai",
+          "level": "undergrad",
+          "annual": 80000
+        },
+        {
+          "school": "Wollongong Dubai",
+          "level": "undergrad",
+          "annual": 65000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 500,
+        "workApplicationFee": 1200,
+        "settlementApprox": 8000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "DSC + RERA Rental Index + static estimates",
+          "url": "https://www.dsc.gov.ae/en-us/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "FCSC CPI + static estimates",
+          "url": "https://fcsc.gov.ae/en-us/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "RTA Public Transport Fares + static estimates",
+          "url": "https://www.rta.ae/wps/portal/rta/ae/home/fares-and-payment",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "hochiminh": {
+      "id": "hochiminh",
+      "name": {
+        "ko": "호치민",
+        "en": "Ho Chi Minh City"
+      },
+      "country": "VN",
+      "currency": "VND",
+      "region": "asia",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 5000000,
+        "studio": 8000000,
+        "oneBed": 12000000,
+        "twoBed": 18000000
+      },
+      "food": {
+        "restaurantMeal": 80000,
+        "cafe": 45000,
+        "groceries": {
+          "milk1L": 35000,
+          "eggs12": 45000,
+          "rice1kg": 20000,
+          "chicken1kg": 85000,
+          "bread": 25000,
+          "onion1kg": 30000,
+          "apple1kg": 80000,
+          "ramen": 8000
+        }
+      },
+      "transport": {
+        "monthlyPass": 200000,
+        "singleRide": 7000,
+        "taxiBase": 12000
+      },
+      "tuition": [
+        {
+          "school": "VNU-HCMC",
+          "level": "undergrad",
+          "annual": 50000000
+        },
+        {
+          "school": "RMIT Vietnam",
+          "level": "undergrad",
+          "annual": 350000000
+        },
+        {
+          "school": "Fulbright",
+          "level": "undergrad",
+          "annual": 450000000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 25,
+        "workApplicationFee": 50,
+        "settlementApprox": 5000000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "GSO estimates (도시 단위 데이터 부재, estimated)",
+          "url": "https://www.gso.gov.vn/en/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "GSO CPI + estimates (도시 단위 데이터 부재, estimated)",
+          "url": "https://www.gso.gov.vn/en/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "Ho Chi Minh City static estimates",
+          "url": "https://hochiminhcity.gov.vn/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "la": {
+      "id": "la",
+      "name": {
+        "ko": "로스앤젤레스",
+        "en": "Los Angeles"
+      },
+      "country": "US",
+      "currency": "USD",
+      "region": "na",
+      "lastUpdated": "2026-05-04",
+      "rent": {
+        "share": 1170,
+        "studio": 1800,
+        "oneBed": 2300,
+        "twoBed": 2900
+      },
+      "food": {
+        "restaurantMeal": 18.9,
+        "cafe": 5.78,
+        "groceries": {
+          "milk1L": 1.26,
+          "eggs12": 4.73,
+          "rice1kg": 3.68,
+          "chicken1kg": 10.5,
+          "bread": 3.68,
+          "onion1kg": 2.94,
+          "apple1kg": 4.41,
+          "ramen": 1.58
+        }
+      },
+      "transport": {
+        "monthlyPass": 100,
+        "singleRide": 1.75,
+        "taxiBase": 4.1
+      },
+      "tuition": [
+        {
+          "school": "UCLA",
+          "level": "undergrad",
+          "annual": 45000
+        },
+        {
+          "school": "USC",
+          "level": "undergrad",
+          "annual": 65000
+        },
+        {
+          "school": "SMC",
+          "level": "language",
+          "annual": 10000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 185,
+        "workApplicationFee": 190,
+        "settlementApprox": 3000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)",
+          "url": "https://www.huduser.gov/portal/datasets/fmr.html",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "US BLS CPI + static estimates (ADR-059 adjustment)",
+          "url": "https://www.bls.gov/cpi/",
+          "accessedAt": "2026-05-04"
+        },
+        {
+          "category": "transport",
+          "name": "LA Metro",
+          "url": "https://www.metro.net/riding/fares/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "london": {
+      "id": "london",
+      "name": {
+        "ko": "런던",
+        "en": "London"
+      },
+      "country": "GB",
+      "currency": "GBP",
+      "region": "eu",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 1105,
+        "studio": 1700,
+        "oneBed": 2100,
+        "twoBed": 2800
+      },
+      "food": {
+        "restaurantMeal": 15,
+        "cafe": 4,
+        "groceries": {
+          "milk1L": 1.5,
+          "eggs12": 3.5,
+          "rice1kg": 2.2,
+          "chicken1kg": 6,
+          "bread": 1.4,
+          "onion1kg": 1.5,
+          "apple1kg": 2.8,
+          "ramen": 1.2
+        }
+      },
+      "transport": {
+        "monthlyPass": 165,
+        "singleRide": 2.8,
+        "taxiBase": 3.8
+      },
+      "tuition": [
+        {
+          "school": "Imperial College",
+          "level": "undergrad",
+          "annual": 38000
+        },
+        {
+          "school": "UCL",
+          "level": "undergrad",
+          "annual": 35000
+        },
+        {
+          "school": "King's College",
+          "level": "undergrad",
+          "annual": 32000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 490,
+        "workApplicationFee": 719,
+        "settlementApprox": 3500
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "ONS Private Rental Market Statistics",
+          "url": "https://www.ons.gov.uk/peoplepopulationandcommunity/housing/datasets/privaterentalmarketsummarystatisticsinengland",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "ONS Consumer Price Inflation + static estimates",
+          "url": "https://www.ons.gov.uk/economy/inflationandpriceindices",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "TfL Unified API + static estimates",
+          "url": "https://tfl.gov.uk/fares/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "melbourne": {
+      "id": "melbourne",
+      "name": {
+        "ko": "멜버른",
+        "en": "Melbourne"
+      },
+      "country": "AU",
+      "currency": "AUD",
+      "region": "oceania",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 953,
+        "studio": 1732,
+        "oneBed": 2165,
+        "twoBed": 2815
+      },
+      "food": {
+        "restaurantMeal": 25,
+        "cafe": 5.5,
+        "groceries": {
+          "milk1L": 2.5,
+          "eggs12": 6.5,
+          "rice1kg": 3.5,
+          "chicken1kg": 12,
+          "bread": 3.8,
+          "onion1kg": 2.8,
+          "apple1kg": 5.5,
+          "ramen": 2
+        }
+      },
+      "transport": {
+        "monthlyPass": 180,
+        "singleRide": 4.6,
+        "taxiBase": 4.2
+      },
+      "tuition": [
+        {
+          "school": "UniMelb",
+          "level": "undergrad",
+          "annual": 52000
+        },
+        {
+          "school": "Monash",
+          "level": "undergrad",
+          "annual": 48000
+        },
+        {
+          "school": "RMIT",
+          "level": "undergrad",
+          "annual": 40000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 710,
+        "workApplicationFee": 450,
+        "settlementApprox": 4000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "ABS Residential Property Price Indexes + static estimates",
+          "url": "https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "ABS Consumer Price Index + static estimates",
+          "url": "https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "Transport NSW + PTV Victoria + static estimates",
+          "url": "https://transportnsw.info/tickets-opal/opal/fares",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "montreal": {
+      "id": "montreal",
+      "name": {
+        "ko": "몬트리올",
+        "en": "Montreal"
+      },
+      "country": "CA",
+      "currency": "CAD",
+      "region": "na",
+      "lastUpdated": "2026-05-02",
+      "rent": {
+        "share": 1105,
+        "studio": 1700,
+        "oneBed": 1950,
+        "twoBed": 2500
+      },
+      "food": {
+        "restaurantMeal": 19,
+        "cafe": 5.5,
+        "groceries": {
+          "milk1L": 3.1,
+          "eggs12": 4.2,
+          "rice1kg": 3.5,
+          "chicken1kg": 14,
+          "bread": 3.3,
+          "onion1kg": 2.5,
+          "apple1kg": 4,
+          "ramen": 1.3
+        }
+      },
+      "transport": {
+        "monthlyPass": 94,
+        "singleRide": 3.75,
+        "taxiBase": 3.85
+      },
+      "tuition": [
+        {
+          "school": "McGill",
+          "level": "undergrad",
+          "annual": 25000
+        },
+        {
+          "school": "Concordia",
+          "level": "undergrad",
+          "annual": 22000
+        },
+        {
+          "school": "UdeM",
+          "level": "graduate",
+          "annual": 20000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 150,
+        "workApplicationFee": 255,
+        "settlementApprox": 2500
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)",
+          "url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI (static fallback, ADR-059)",
+          "url": "https://www150.statcan.gc.ca/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "transport",
+          "name": "STM (Société de transport de Montréal)",
+          "url": "https://www.stm.info/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-02"
+        }
+      ]
+    },
+    "munich": {
+      "id": "munich",
+      "name": {
+        "ko": "뮌헨",
+        "en": "Munich"
+      },
+      "country": "DE",
+      "currency": "EUR",
+      "region": "eu",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 750,
+        "studio": 1150,
+        "oneBed": 1350,
+        "twoBed": 1900
+      },
+      "food": {
+        "restaurantMeal": 13.2,
+        "cafe": 3.85,
+        "groceries": {
+          "milk1L": 1.21,
+          "eggs12": 3.08,
+          "rice1kg": 2.75,
+          "chicken1kg": 8.8,
+          "bread": 1.98,
+          "onion1kg": 1.32,
+          "apple1kg": 2.75,
+          "ramen": 0.99
+        }
+      },
+      "transport": {
+        "monthlyPass": 63.2,
+        "singleRide": 3.7,
+        "taxiBase": 4.7
+      },
+      "tuition": [
+        {
+          "school": "LMU München",
+          "level": "undergrad",
+          "annual": 700
+        },
+        {
+          "school": "TU München",
+          "level": "undergrad",
+          "annual": 700
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 75,
+        "workApplicationFee": 100,
+        "settlementApprox": 1500
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "Destatis GENESIS + static estimates",
+          "url": "https://www.destatis.de/EN/Themes/Society-Environment/Housing/_node.html",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "Destatis CPI + static estimates",
+          "url": "https://www.destatis.de/EN/Themes/Economy/Prices/_node.html",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "MVV official fares + static estimates",
+          "url": "https://www.mvv-muenchen.de/en/tickets-fares/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "nyc": {
+      "id": "nyc",
+      "name": {
+        "ko": "뉴욕",
+        "en": "New York"
+      },
+      "country": "US",
+      "currency": "USD",
+      "region": "na",
+      "lastUpdated": "2026-05-04",
+      "rent": {
+        "share": 1430,
+        "studio": 2200,
+        "oneBed": 2800,
+        "twoBed": 3500
+      },
+      "food": {
+        "restaurantMeal": 20.7,
+        "cafe": 6.32,
+        "groceries": {
+          "milk1L": 1.38,
+          "eggs12": 5.18,
+          "rice1kg": 4.02,
+          "chicken1kg": 11.5,
+          "bread": 4.02,
+          "onion1kg": 3.22,
+          "apple1kg": 4.83,
+          "ramen": 1.73
+        }
+      },
+      "transport": {
+        "monthlyPass": 132,
+        "singleRide": 2.9,
+        "taxiBase": 3
+      },
+      "tuition": [
+        {
+          "school": "Columbia",
+          "level": "undergrad",
+          "annual": 65000
+        },
+        {
+          "school": "NYU",
+          "level": "undergrad",
+          "annual": 60000
+        },
+        {
+          "school": "CUNY",
+          "level": "undergrad",
+          "annual": 18000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 185,
+        "workApplicationFee": 190,
+        "settlementApprox": 3000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)",
+          "url": "https://www.huduser.gov/portal/datasets/fmr.html",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "US BLS CPI + static estimates (ADR-059 adjustment)",
+          "url": "https://www.bls.gov/cpi/",
+          "accessedAt": "2026-05-04"
+        },
+        {
+          "category": "transport",
+          "name": "MTA",
+          "url": "https://new.mta.info/fares",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "osaka": {
+      "id": "osaka",
+      "name": {
+        "ko": "오사카",
+        "en": "Osaka"
+      },
+      "country": "JP",
+      "currency": "JPY",
+      "region": "asia",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 45000,
+        "studio": 60000,
+        "oneBed": 80000,
+        "twoBed": 120000
+      },
+      "food": {
+        "restaurantMeal": 1000,
+        "cafe": 450,
+        "groceries": {
+          "milk1L": 220,
+          "eggs12": 280,
+          "rice1kg": 450,
+          "chicken1kg": 900,
+          "bread": 180,
+          "onion1kg": 350,
+          "apple1kg": 600,
+          "ramen": 120
+        }
+      },
+      "transport": {
+        "monthlyPass": 9600,
+        "singleRide": 180,
+        "taxiBase": 500
+      },
+      "tuition": [
+        {
+          "school": "大阪大学",
+          "level": "undergrad",
+          "annual": 535800
+        },
+        {
+          "school": "京都大学",
+          "level": "undergrad",
+          "annual": 535800
+        },
+        {
+          "school": "関西学院大学",
+          "level": "undergrad",
+          "annual": 1200000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 3000,
+        "workApplicationFee": 6000,
+        "settlementApprox": 200000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "e-Stat 住宅・土地統計調査 + static estimates",
+          "url": "https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200522",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "e-Stat 消費者物価指数 + static estimates",
+          "url": "https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200573",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "東京メトロ + 大阪Metro + static estimates",
+          "url": "https://www.tokyometro.jp/en/ticket/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "paris": {
+      "id": "paris",
+      "name": {
+        "ko": "파리",
+        "en": "Paris"
+      },
+      "country": "FR",
+      "currency": "EUR",
+      "region": "eu",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 650,
+        "studio": 1050,
+        "oneBed": 1300,
+        "twoBed": 1800
+      },
+      "food": {
+        "restaurantMeal": 15,
+        "cafe": 4,
+        "groceries": {
+          "milk1L": 1.2,
+          "eggs12": 3.5,
+          "rice1kg": 2.3,
+          "chicken1kg": 10,
+          "bread": 1.5,
+          "onion1kg": 1.8,
+          "apple1kg": 3,
+          "ramen": 1
+        }
+      },
+      "transport": {
+        "monthlyPass": 86.4,
+        "singleRide": 2.15,
+        "taxiBase": 4.18
+      },
+      "tuition": [
+        {
+          "school": "Sorbonne Université",
+          "level": "undergrad",
+          "annual": 3800
+        },
+        {
+          "school": "Sciences Po",
+          "level": "undergrad",
+          "annual": 14500
+        },
+        {
+          "school": "École Polytechnique",
+          "level": "graduate",
+          "annual": 15000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 99,
+        "workApplicationFee": 225,
+        "settlementApprox": 2000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "INSEE BDM + static estimates",
+          "url": "https://www.insee.fr/fr/statistiques",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "INSEE CPI + static estimates",
+          "url": "https://www.insee.fr/fr/statistiques",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "RATP official fares + static estimates",
+          "url": "https://www.ratp.fr/en/titres-et-tarifs",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "seattle": {
+      "id": "seattle",
+      "name": {
+        "ko": "시애틀",
+        "en": "Seattle"
+      },
+      "country": "US",
+      "currency": "USD",
+      "region": "na",
+      "lastUpdated": "2026-05-04",
+      "rent": {
+        "share": 1170,
+        "studio": 1800,
+        "oneBed": 2200,
+        "twoBed": 2800
+      },
+      "food": {
+        "restaurantMeal": 18,
+        "cafe": 5.5,
+        "groceries": {
+          "milk1L": 1.2,
+          "eggs12": 4.5,
+          "rice1kg": 3.5,
+          "chicken1kg": 10,
+          "bread": 3.5,
+          "onion1kg": 2.8,
+          "apple1kg": 4.2,
+          "ramen": 1.5
+        }
+      },
+      "transport": {
+        "monthlyPass": 99,
+        "singleRide": 2.75,
+        "taxiBase": 2.6
+      },
+      "tuition": [
+        {
+          "school": "University of Washington",
+          "level": "undergrad",
+          "annual": 42000
+        },
+        {
+          "school": "Seattle Central",
+          "level": "language",
+          "annual": 11000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 185,
+        "workApplicationFee": 190,
+        "settlementApprox": 3000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)",
+          "url": "https://www.huduser.gov/portal/datasets/fmr.html",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "US BLS CPI + static estimates (ADR-059 adjustment)",
+          "url": "https://www.bls.gov/cpi/",
+          "accessedAt": "2026-05-04"
+        },
+        {
+          "category": "transport",
+          "name": "King County Metro",
+          "url": "https://kingcounty.gov/en/dept/metro/fares-and-payment",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "seoul": {
+      "id": "seoul",
+      "name": {
+        "ko": "서울",
+        "en": "Seoul"
+      },
+      "country": "KR",
+      "currency": "KRW",
+      "region": "asia",
+      "lastUpdated": "2026-05-02",
+      "rent": {
+        "share": 350000,
+        "studio": 650000,
+        "oneBed": 1200000,
+        "twoBed": 1800000
+      },
+      "food": {
+        "restaurantMeal": 10400,
+        "cafe": 5900,
+        "groceries": {
+          "milk1L": 3200,
+          "eggs12": 2600,
+          "rice1kg": 2750,
+          "chicken1kg": 12000,
+          "bread": 3500,
+          "onion1kg": 2500,
+          "apple1kg": 8000,
+          "ramen": 900
+        }
+      },
+      "transport": {
+        "monthlyPass": 65000,
+        "singleRide": 1400,
+        "taxiBase": 4800
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "국토교통부 실거래가 공개시스템",
+          "url": "https://rt.molit.go.kr/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "food",
+          "name": "한국소비자원 참가격",
+          "url": "https://www.price.go.kr/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "food",
+          "name": "통계청 KOSIS 소비자물가지수",
+          "url": "https://kosis.kr/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "transport",
+          "name": "서울교통공사",
+          "url": "https://www.seoulmetro.co.kr/",
+          "accessedAt": "2026-05-02"
+        }
+      ]
+    },
+    "sf": {
+      "id": "sf",
+      "name": {
+        "ko": "샌프란시스코",
+        "en": "San Francisco"
+      },
+      "country": "US",
+      "currency": "USD",
+      "region": "na",
+      "lastUpdated": "2026-05-04",
+      "rent": {
+        "share": 1560,
+        "studio": 2400,
+        "oneBed": 3000,
+        "twoBed": 3800
+      },
+      "food": {
+        "restaurantMeal": 22.5,
+        "cafe": 6.88,
+        "groceries": {
+          "milk1L": 1.5,
+          "eggs12": 5.63,
+          "rice1kg": 4.38,
+          "chicken1kg": 12.5,
+          "bread": 4.38,
+          "onion1kg": 3.5,
+          "apple1kg": 5.25,
+          "ramen": 1.88
+        }
+      },
+      "transport": {
+        "monthlyPass": 81,
+        "singleRide": 3,
+        "taxiBase": 3.5
+      },
+      "tuition": [
+        {
+          "school": "UC Berkeley",
+          "level": "undergrad",
+          "annual": 48000
+        },
+        {
+          "school": "Stanford",
+          "level": "undergrad",
+          "annual": 60000
+        },
+        {
+          "school": "CCSF",
+          "level": "language",
+          "annual": 8000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 185,
+        "workApplicationFee": 190,
+        "settlementApprox": 3000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)",
+          "url": "https://www.huduser.gov/portal/datasets/fmr.html",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "US BLS CPI + static estimates (ADR-059 adjustment)",
+          "url": "https://www.bls.gov/cpi/",
+          "accessedAt": "2026-05-04"
+        },
+        {
+          "category": "transport",
+          "name": "SFMTA",
+          "url": "https://www.sfmta.com/fares",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "singapore": {
+      "id": "singapore",
+      "name": {
+        "ko": "싱가포르",
+        "en": "Singapore"
+      },
+      "country": "SG",
+      "currency": "SGD",
+      "region": "asia",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 1200,
+        "studio": 2200,
+        "oneBed": 2800,
+        "twoBed": 3800
+      },
+      "food": {
+        "restaurantMeal": 15,
+        "cafe": 6,
+        "groceries": {
+          "milk1L": 3.8,
+          "eggs12": 4.5,
+          "rice1kg": 3.2,
+          "chicken1kg": 9.5,
+          "bread": 2.8,
+          "onion1kg": 2.5,
+          "apple1kg": 5.8,
+          "ramen": 1.5
+        }
+      },
+      "transport": {
+        "monthlyPass": 128,
+        "singleRide": 1.19,
+        "taxiBase": 4
+      },
+      "tuition": [
+        {
+          "school": "NUS",
+          "level": "undergrad",
+          "annual": 35000
+        },
+        {
+          "school": "NTU",
+          "level": "undergrad",
+          "annual": 33000
+        },
+        {
+          "school": "SMU",
+          "level": "undergrad",
+          "annual": 38000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 30,
+        "workApplicationFee": 105,
+        "settlementApprox": 1500
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "SingStat Rental Index + static estimates",
+          "url": "https://www.singstat.gov.sg/find-data/search-by-theme/industry/real-estate",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "SingStat CPI + hawker centre estimates",
+          "url": "https://www.singstat.gov.sg/find-data/search-by-theme/economy/prices-and-price-indices",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "LTA Public Transport Fares + static estimates",
+          "url": "https://www.lta.gov.sg/content/ltagov/en/getting_around/public_transport/fares_payment_methods.html",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "sydney": {
+      "id": "sydney",
+      "name": {
+        "ko": "시드니",
+        "en": "Sydney"
+      },
+      "country": "AU",
+      "currency": "AUD",
+      "region": "oceania",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 1083,
+        "studio": 1949,
+        "oneBed": 2382,
+        "twoBed": 3031
+      },
+      "food": {
+        "restaurantMeal": 25,
+        "cafe": 5.5,
+        "groceries": {
+          "milk1L": 2.5,
+          "eggs12": 6.5,
+          "rice1kg": 3.5,
+          "chicken1kg": 12,
+          "bread": 3.8,
+          "onion1kg": 2.8,
+          "apple1kg": 5.5,
+          "ramen": 2
+        }
+      },
+      "transport": {
+        "monthlyPass": 200,
+        "singleRide": 3.8,
+        "taxiBase": 3.6
+      },
+      "tuition": [
+        {
+          "school": "USyd",
+          "level": "undergrad",
+          "annual": 50000
+        },
+        {
+          "school": "UNSW",
+          "level": "undergrad",
+          "annual": 48000
+        },
+        {
+          "school": "Macquarie",
+          "level": "undergrad",
+          "annual": 42000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 710,
+        "workApplicationFee": 450,
+        "settlementApprox": 4000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "ABS Residential Property Price Indexes + static estimates",
+          "url": "https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "ABS Consumer Price Index + static estimates",
+          "url": "https://www.abs.gov.au/statistics/economy/price-indexes-and-inflation/consumer-price-index-australia",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "Transport NSW + PTV Victoria + static estimates",
+          "url": "https://transportnsw.info/tickets-opal/opal/fares",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "tokyo": {
+      "id": "tokyo",
+      "name": {
+        "ko": "도쿄",
+        "en": "Tokyo"
+      },
+      "country": "JP",
+      "currency": "JPY",
+      "region": "asia",
+      "lastUpdated": "2026-05-03",
+      "rent": {
+        "share": 65000,
+        "studio": 85000,
+        "oneBed": 110000,
+        "twoBed": 160000
+      },
+      "food": {
+        "restaurantMeal": 1200,
+        "cafe": 500,
+        "groceries": {
+          "milk1L": 220,
+          "eggs12": 280,
+          "rice1kg": 450,
+          "chicken1kg": 900,
+          "bread": 180,
+          "onion1kg": 350,
+          "apple1kg": 600,
+          "ramen": 120
+        }
+      },
+      "transport": {
+        "monthlyPass": 10600,
+        "singleRide": 180,
+        "taxiBase": 500
+      },
+      "tuition": [
+        {
+          "school": "東京大学",
+          "level": "undergrad",
+          "annual": 535800
+        },
+        {
+          "school": "早稲田大学",
+          "level": "undergrad",
+          "annual": 1500000
+        },
+        {
+          "school": "慶應義塾大学",
+          "level": "undergrad",
+          "annual": 1600000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 3000,
+        "workApplicationFee": 6000,
+        "settlementApprox": 200000
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "e-Stat 住宅・土地統計調査 + static estimates",
+          "url": "https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200522",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "food",
+          "name": "e-Stat 消費者物価指数 + static estimates",
+          "url": "https://www.e-stat.go.jp/stat-search/files?page=1&toukei=00200573",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "transport",
+          "name": "東京メトロ + 大阪Metro + static estimates",
+          "url": "https://www.tokyometro.jp/en/ticket/",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-03"
+        }
+      ]
+    },
+    "toronto": {
+      "id": "toronto",
+      "name": {
+        "ko": "토론토",
+        "en": "Toronto"
+      },
+      "country": "CA",
+      "currency": "CAD",
+      "region": "na",
+      "lastUpdated": "2026-05-02",
+      "rent": {
+        "share": 1235,
+        "studio": 1900,
+        "oneBed": 2200,
+        "twoBed": 2900
+      },
+      "food": {
+        "restaurantMeal": 21,
+        "cafe": 5.8,
+        "groceries": {
+          "milk1L": 3.2,
+          "eggs12": 4.4,
+          "rice1kg": 3.6,
+          "chicken1kg": 14.5,
+          "bread": 3.4,
+          "onion1kg": 2.6,
+          "apple1kg": 4.3,
+          "ramen": 1.4
+        }
+      },
+      "transport": {
+        "monthlyPass": 156.3,
+        "singleRide": 3.5,
+        "taxiBase": 4.75
+      },
+      "tuition": [
+        {
+          "school": "University of Toronto",
+          "level": "undergrad",
+          "annual": 60000
+        },
+        {
+          "school": "York University",
+          "level": "undergrad",
+          "annual": 35000
+        },
+        {
+          "school": "Seneca",
+          "level": "language",
+          "annual": 16000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 150,
+        "workApplicationFee": 255,
+        "settlementApprox": 2500
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)",
+          "url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI (static fallback, ADR-059)",
+          "url": "https://www150.statcan.gc.ca/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "transport",
+          "name": "TTC (Toronto Transit Commission)",
+          "url": "https://www.ttc.ca/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-02"
+        }
+      ]
+    },
+    "vancouver": {
+      "id": "vancouver",
+      "name": {
+        "ko": "밴쿠버",
+        "en": "Vancouver"
+      },
+      "country": "CA",
+      "currency": "CAD",
+      "region": "na",
+      "lastUpdated": "2026-05-02",
+      "rent": {
+        "share": 1203,
+        "studio": 1850,
+        "oneBed": 2100,
+        "twoBed": 2800
+      },
+      "food": {
+        "restaurantMeal": 22,
+        "cafe": 6,
+        "groceries": {
+          "milk1L": 3.25,
+          "eggs12": 4.5,
+          "rice1kg": 3.8,
+          "chicken1kg": 15,
+          "bread": 3.5,
+          "onion1kg": 2.8,
+          "apple1kg": 4.5,
+          "ramen": 1.5
+        }
+      },
+      "transport": {
+        "monthlyPass": 104,
+        "singleRide": 3.35,
+        "taxiBase": 3.95
+      },
+      "tuition": [
+        {
+          "school": "UBC",
+          "level": "undergrad",
+          "annual": 45000
+        },
+        {
+          "school": "SFU",
+          "level": "undergrad",
+          "annual": 32000
+        },
+        {
+          "school": "BCIT",
+          "level": "language",
+          "annual": 18000
+        }
+      ],
+      "visa": {
+        "studentApplicationFee": 150,
+        "workApplicationFee": 255,
+        "settlementApprox": 2500
+      },
+      "sources": [
+        {
+          "category": "rent",
+          "name": "CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)",
+          "url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI (static fallback, ADR-059)",
+          "url": "https://www150.statcan.gc.ca/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "transport",
+          "name": "TransLink",
+          "url": "https://www.translink.ca/",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "tuition",
+          "name": "Official university international tuition pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "visa",
+          "name": "Government visa fee pages (static estimates)",
+          "url": "https://github.com/laegel123/overseas-cost-app/blob/HEAD/docs/DATA_SOURCES.md",
+          "accessedAt": "2026-05-02"
+        }
+      ]
+    }
+  }
+}
