@@ -180,7 +180,11 @@ export function TuitionChoiceSheet({
             </View>
           </Pressable>
         </ScrollView>
-      ) : (
+      ) : (() => {
+        // PR #25 review — Number(draft) 가 렌더마다 3회 평가되던 것을 1회로.
+        const draftNum = Number(draft);
+        const isValidDraft = Number.isFinite(draftNum) && draftNum > 0;
+        return (
         <View className="gap-4">
           <View className="gap-1">
             <Small color="navy" className="font-manrope-bold">
@@ -215,14 +219,9 @@ export function TuitionChoiceSheet({
             <Pressable
               onPress={handleSaveCustom}
               accessibilityRole="button"
-              accessibilityState={{
-                disabled:
-                  !Number.isFinite(Number(draft)) || Number(draft) <= 0,
-              }}
+              accessibilityState={{ disabled: !isValidDraft }}
               className={`flex-1 items-center justify-center py-3 rounded-button ${
-                Number.isFinite(Number(draft)) && Number(draft) > 0
-                  ? 'bg-orange'
-                  : 'bg-orange-soft'
+                isValidDraft ? 'bg-orange' : 'bg-orange-soft'
               }`}
               testID={testID !== undefined ? `${testID}-save` : undefined}
             >
@@ -244,7 +243,8 @@ export function TuitionChoiceSheet({
             </Pressable>
           ) : null}
         </View>
-      )}
+        );
+      })()}
     </BottomSheet>
   );
 }

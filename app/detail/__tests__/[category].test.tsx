@@ -435,6 +435,17 @@ describe('DetailScreen', () => {
       expect(screen.queryByTestId('detail-row-tax-80000')).toBeNull();
     });
 
+    // PR #25 review — takeHomePctApprox 의 `/100` 버그 회귀 방지.
+    // 60000 CAD * (1 - 0.74) / 12 * 980 = 1,274,000원 = 127.4만원.
+    // 버그 (`/100`) 이면 4,963,740원 ≈ 496.4만원으로 4× 차이가 나므로 명확.
+    it('hero — 첫 tier (60000 CAD, 0.74 takeHome) 월 세금 = 127.4만원', async () => {
+      setupMocks({ category: 'tax' });
+      render(<DetailScreen />);
+      await flush();
+      const hero = screen.getByTestId('detail-hero');
+      expect(within(hero).getByText('127.4만원')).toBeTruthy();
+    });
+
     it('preset 변경 → 다른 연봉 tier 의 row 로 변경', async () => {
       setupMocks({ category: 'tax' });
       render(<DetailScreen />);

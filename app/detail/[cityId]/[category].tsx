@@ -248,8 +248,10 @@ function buildSections(
         },
       ];
     }
+    // takeHomePctApprox 는 [0,1] 소수 (citySchema 검증 — 0.74 = 74%).
+    // 세금 비율 = 1 - takeHome (PR #25 review 반영 — 이전 `/100` 은 명백한 버그).
     const monthlyTaxLocal =
-      (resolved.annualSalary / 12) * (1 - resolved.takeHomePctApprox / 100);
+      (resolved.annualSalary / 12) * (1 - resolved.takeHomePctApprox);
     const annualSalaryKRW = convertToKRW(resolved.annualSalary, city.currency, fx);
     return [
       {

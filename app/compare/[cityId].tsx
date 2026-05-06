@@ -135,7 +135,8 @@ const TAX_CONFIG: CategoryConfig = {
     const resolved = resolveTaxChoice(city.tax, taxChoice);
     if (resolved === null) return null;
     const monthlySalary = resolved.annualSalary / 12;
-    const tax = monthlySalary * (1 - resolved.takeHomePctApprox / 100);
+    // takeHomePctApprox 는 [0,1] 소수 (citySchema 검증 — 0.74 = 74%). PR #25 review.
+    const tax = monthlySalary * (1 - resolved.takeHomePctApprox);
     return convertToKRW(tax, city.currency, fx);
   },
 };

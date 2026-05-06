@@ -547,42 +547,32 @@ describe('CompareScreen', () => {
       expect(within(card).getByText('285.8만원')).toBeTruthy();
     });
 
-    it('tax: 미선택 → 첫 tier (60000) 기준', async () => {
+    // PR #25 review — takeHomePctApprox 의 `/100` 버그 회귀 방지.
+    // 60000 * (1 - 0.74) / 12 * 980 = 1,274,000원 = 127.4만원.
+    it('tax: 미선택 → 첫 tier (60000, 0.74 takeHome) 월 세금 = 127.4만원', async () => {
       usePersonaStore.getState().setPersona('worker');
       setupMocks();
       const { getByTestId } = render(<CompareScreen />);
       await act(async () => {
         await flushPromises();
       });
-      // 60000/12*(1-0.74/100)*980 — takeHomePctApprox=0.74 인 경우 의도가 분기될 수
-      // 있지만 본 테스트는 카드가 실제 렌더되는지만 검증 (수치는 회귀 방지용으로
-      // 실제 렌더된 값을 stable assertion 으로 잡지 않음).
-      expect(getByTestId('compare-pair-tax')).toBeTruthy();
+      const taxCard = getByTestId('compare-pair-tax');
+      expect(within(taxCard).getByText('127.4만원')).toBeTruthy();
     });
 
-    it('tax: store 에 80000 preset → 80000 tier 기준으로 카드 갱신 (60000 결과와 다름)', async () => {
+    // 80000 * (1 - 0.7) / 12 * 980 = 1,960,000원 = 196만원.
+    it('tax: store 80000 preset (0.7 takeHome) → 196만원 (60000 tier 와 다른 값)', async () => {
       usePersonaStore.getState().setPersona('worker');
+      useTaxChoiceStore
+        .getState()
+        .setTaxChoice('vancouver', { kind: 'preset', annualSalary: 80000 });
       setupMocks();
       const { getByTestId } = render(<CompareScreen />);
       await act(async () => {
         await flushPromises();
       });
-      // 60000 tier 기준 카드 텍스트 캡처
-      const before = within(getByTestId('compare-pair-tax')).getAllByText(
-        /\d/,
-      ).length;
-
-      await act(async () => {
-        useTaxChoiceStore
-          .getState()
-          .setTaxChoice('vancouver', { kind: 'preset', annualSalary: 80000 });
-      });
-      // 카드 자체는 여전히 노출 + 값 변경 발생 (단순 mount + reactive 검증).
-      const after = within(getByTestId('compare-pair-tax')).getAllByText(
-        /\d/,
-      ).length;
-      expect(after).toBeGreaterThan(0);
-      expect(after).toEqual(before);
+      const taxCard = getByTestId('compare-pair-tax');
+      expect(within(taxCard).getByText('196만원')).toBeTruthy();
     });
 
     it('tax: custom 100000 CAD/year → 카드 mount + 다른 값으로 갱신', async () => {
