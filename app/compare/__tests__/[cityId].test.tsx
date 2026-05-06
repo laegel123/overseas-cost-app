@@ -4,7 +4,7 @@
 
 import * as React from 'react';
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react-native';
 
 import {
   loadAllCities as mockLoadAllCities,
@@ -15,6 +15,7 @@ import {
 import { useFavoritesStore } from '@/store/favorites';
 import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
+import { useRentChoiceStore } from '@/store/rentChoice';
 
 import { seoulValid } from '../../../src/__fixtures__/cities/seoul-valid';
 import { vancouverValid } from '../../../src/__fixtures__/cities/vancouver-valid';
@@ -82,6 +83,8 @@ function resetStores() {
   usePersonaStore.getState().reset();
   useFavoritesStore.getState().clear();
   useRecentStore.getState().clear();
+  // ADR-060 — rent choice 도 영속 store. 테스트 격리.
+  useRentChoiceStore.getState().reset();
 }
 
 const flushPromises = () => new Promise((r) => setImmediate(r));
@@ -376,6 +379,55 @@ describe('CompareScreen', () => {
 
       // 도시명 노출 — TopBar / hero / 카테고리 카드 어느 곳이든
       expect(screen.getAllByText('밴쿠버').length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('rent — useRentChoiceStore 연동 (ADR-060)', () => {
+    // Detail 화면에서 사용자가 바꾼 주거 형태 선택이 Compare hero / 월세 카드
+    // 에도 같은 기준으로 반영되어야 도시 간 비교가 일관됨. 본 테스트는 store
+    // 가 Compare 의 단일 출처로 작동함을 검증.
+
+    it("기본 'share' → 월세 카드 = 35만원 / 93.1만원 (vancouver fixture)", async () => {
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const rentCard = getByTestId('compare-pair-rent');
+      expect(within(rentCard).getByText('35만원')).toBeTruthy();
+      expect(within(rentCard).getByText('93.1만원')).toBeTruthy();
+    });
+
+    it("store='oneBed' → 월세 카드 = 120만원 / 225.4만원 (Detail 의 변경이 Compare 에 반영)", async () => {
+      useRentChoiceStore.getState().setRentChoice('oneBed');
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const rentCard = getByTestId('compare-pair-rent');
+      expect(within(rentCard).getByText('120만원')).toBeTruthy();
+      expect(within(rentCard).getByText('225.4만원')).toBeTruthy();
+    });
+
+    it('도시에 선택 키 데이터 결측 → resolveRentChoice fallback (share → studio → oneBed → twoBed)', async () => {
+      useRentChoiceStore.getState().setRentChoice('oneBed');
+      // share/studio 는 있지만 oneBed 가 null 인 가상 도시 — fallback 으로 share 사용
+      const cityWithNoOneBed = {
+        ...vancouverValid,
+        rent: { ...vancouverValid.rent, oneBed: null },
+      };
+      setupMocks({ city: cityWithNoOneBed });
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const rentCard = getByTestId('compare-pair-rent');
+      // share 로 fallback — 93.1만원
+      expect(within(rentCard).getByText('93.1만원')).toBeTruthy();
     });
   });
 });

@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 
-import { act, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, screen, within } from '@testing-library/react-native';
 
 import {
   fetchExchangeRates as mockFetchExchangeRates,
@@ -15,6 +15,7 @@ import {
   getLastSync as mockGetLastSync,
   loadAllCities as mockLoadAllCities,
 } from '@/lib';
+import { useRentChoiceStore } from '@/store';
 
 import { seoulValid } from '../../../src/__fixtures__/cities/seoul-valid';
 import { vancouverValid } from '../../../src/__fixtures__/cities/vancouver-valid';
@@ -92,6 +93,8 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockCanGoBack.mockReturnValue(true);
   jest.useRealTimers();
+  // ADR-060 — rentChoice store 는 전역 영속 store. 테스트 격리 위해 reset.
+  useRentChoiceStore.getState().reset();
 });
 
 afterEach(() => {
@@ -183,6 +186,120 @@ describe('DetailScreen', () => {
       render(<DetailScreen />);
       await flush();
       expect(screen.getByTestId('detail-section-주거 형태')).toBeTruthy();
+    });
+
+    // fx CAD=980 + fixture: share 35만 vs 93.1만 / oneBed 120만 vs 225.4만.
+    // hero 합산 모드는 의미가 없어 (한 사람이 4 형태 동시 거주 X) "선택된 행
+    // 1 개 기준" 으로 비교. 기본 선택 = 'share' (셰어하우스), 행 탭으로 교체.
+
+    it('기본 선택 = 셰어하우스 → hero 좌·우값이 share 값과 일치', async () => {
+      setupMocks({ category: 'rent' });
+      render(<DetailScreen />);
+      await flush();
+
+      const hero = screen.getByTestId('detail-hero');
+      expect(within(hero).getByText('35만원')).toBeTruthy();
+      expect(within(hero).getByText('93.1만원')).toBeTruthy();
+      expect(within(hero).getByText(/셰어하우스/)).toBeTruthy();
+    });
+
+    it('hero footer — "선택한 항목 기준 (탭으로 변경)"', async () => {
+      setupMocks({ category: 'rent' });
+      render(<DetailScreen />);
+      await flush();
+
+      const footer = screen.getByTestId('detail-hero-footer');
+      expect(within(footer).getByText('선택한 항목 기준 (탭으로 변경)')).toBeTruthy();
+    });
+
+    it('selected 시각 (bg-orange) 은 기본 share 행에만 적용 (사용자 피드백 2026-05-06)', async () => {
+      setupMocks({ category: 'rent' });
+      render(<DetailScreen />);
+      await flush();
+
+      expect(screen.getByTestId('detail-row-share').props.className).toContain('bg-orange');
+      expect(screen.getByTestId('detail-row-studio').props.className).not.toContain('bg-orange');
+      expect(screen.getByTestId('detail-row-oneBed').props.className).not.toContain('bg-orange');
+      expect(screen.getByTestId('detail-row-twoBed').props.className).not.toContain('bg-orange');
+    });
+
+    it('1베드룸 행 탭 → hero 값/캡션이 oneBed 로 갱신 + selected 강조 이동', async () => {
+      setupMocks({ category: 'rent' });
+      render(<DetailScreen />);
+      await flush();
+
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('detail-row-oneBed'));
+      });
+
+      const hero = screen.getByTestId('detail-hero');
+      expect(within(hero).getByText('120만원')).toBeTruthy();
+      expect(within(hero).getByText('225.4만원')).toBeTruthy();
+      expect(within(hero).getByText(/1베드룸/)).toBeTruthy();
+
+      // selected 강조 이동 — share 에는 없고 oneBed 에 있어야 함
+      expect(screen.getByTestId('detail-row-share').props.className).not.toContain('bg-orange');
+      expect(screen.getByTestId('detail-row-oneBed').props.className).toContain('bg-orange');
+    });
+
+    it('store 에 oneBed 가 미리 박혀 있으면 hero 가 oneBed 기준으로 mount (영속화 — ADR-060)', async () => {
+      useRentChoiceStore.getState().setRentChoice('oneBed');
+      setupMocks({ category: 'rent' });
+      render(<DetailScreen />);
+      await flush();
+
+      const hero = screen.getByTestId('detail-hero');
+      expect(within(hero).getByText('120만원')).toBeTruthy();
+      expect(within(hero).getByText('225.4만원')).toBeTruthy();
+      expect(screen.getByTestId('detail-row-oneBed').props.className).toContain('bg-orange');
+    });
+
+    it('탭으로 바꾼 선택은 store 에 반영된다 (Compare 화면 연동의 단일 출처)', async () => {
+      setupMocks({ category: 'rent' });
+      render(<DetailScreen />);
+      await flush();
+
+      expect(useRentChoiceStore.getState().rentChoice).toBe('share');
+
+      await act(async () => {
+        fireEvent.press(screen.getByTestId('detail-row-twoBed'));
+      });
+
+      expect(useRentChoiceStore.getState().rentChoice).toBe('twoBed');
+    });
+
+    it('rent 행은 Pressable (accessibilityRole=button), food 행은 일반 View', async () => {
+      setupMocks({ category: 'rent' });
+      const { unmount } = render(<DetailScreen />);
+      await flush();
+      const rentRow = screen.getByTestId('detail-row-share');
+      expect(rentRow.props.accessibilityRole).toBe('button');
+      unmount();
+
+      setupMocks({ category: 'food' });
+      render(<DetailScreen />);
+      await flush();
+      const foodRow = screen.getByTestId('detail-row-restaurantMeal');
+      expect(foodRow.props.accessibilityRole).toBeUndefined();
+    });
+  });
+
+  describe('합계 모드 (rent 외)', () => {
+    it('food — hero footer "항목 단가 합" (기존 합계 모드 유지)', async () => {
+      setupMocks({ category: 'food' });
+      render(<DetailScreen />);
+      await flush();
+
+      const footer = screen.getByTestId('detail-hero-footer');
+      expect(within(footer).getByText('항목 단가 합')).toBeTruthy();
+    });
+
+    it('food — selected 강조 미적용 + Pressable 아님 (selectable 아님)', async () => {
+      setupMocks({ category: 'food' });
+      render(<DetailScreen />);
+      await flush();
+      expect(screen.getByTestId('detail-row-restaurantMeal').props.className).not.toContain('bg-orange');
+      expect(screen.getByTestId('detail-row-milk1L').props.className).not.toContain('bg-orange');
     });
   });
 

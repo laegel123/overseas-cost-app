@@ -31,6 +31,8 @@ import {
   getLastSync,
   loadAllCities,
 } from '@/lib';
+import { useRentChoiceStore } from '@/store';
+import type { RentChoice } from '@/store';
 import { colors } from '@/theme/tokens';
 import type {
   CityCostData,
@@ -72,7 +74,14 @@ type Section = {
   label: string;
   rows: Row[];
   emptyText?: string;
+  /**
+   * 단일 선택 모드 — 지정 시 hero 합계 대신 "선택된 행 1 개 기준" 으로 비교.
+   * 현재 rent 카테고리만 사용 (주거 형태는 합산이 의미 없음). 사용자가 행을
+   * 탭해 다른 항목으로 바꿀 수 있다.
+   */
+  selectable?: boolean;
 };
+
 
 const FOOD_RESTAURANT_ROWS: { key: 'restaurantMeal' | 'cafe'; emoji: string; name: string }[] = [
   { key: 'restaurantMeal', emoji: '🍱', name: '식당 한 끼' },
@@ -159,6 +168,7 @@ function buildSections(
         label: '주거 형태',
         rows,
         emptyText: '주거 데이터가 아직 준비되지 않았어요.',
+        selectable: true,
       },
     ];
   }
@@ -294,6 +304,11 @@ export default function DetailScreen(): React.ReactElement {
   const router = useRouter();
 
   const [state, setState] = React.useState<DetailState>({ status: 'loading' });
+  // selectable section (현재 rent 만) 의 선택 행 키. 기본값 'share' (셰어하우스).
+  // 사용자가 다른 주거 형태를 탭하면 store 가 갱신되고, Compare 화면 hero / 월세
+  // 카드도 같은 키 기준으로 같이 갱신된다 (ADR-060). 영속화는 store 책임.
+  const rentChoice = useRentChoiceStore((s) => s.rentChoice);
+  const setRentChoice = useRentChoiceStore((s) => s.setRentChoice);
 
   const handleBack = React.useCallback(() => {
     if (router.canGoBack()) {
@@ -380,16 +395,33 @@ export default function DetailScreen(): React.ReactElement {
   const { seoul, city, fx, lastSync } = state.data;
   const sections = buildSections(cat, seoul, city, fx);
 
-  const seoulTotal = sections.reduce(
-    (acc, sec) => acc + sec.rows.reduce((a, r) => a + r.seoulVal, 0),
-    0,
-  );
-  const cityTotal = sections.reduce(
-    (acc, sec) => acc + sec.rows.reduce((a, r) => a + r.cityVal, 0),
-    0,
-  );
-  const totalMult = computeMultiplier(seoulTotal, cityTotal);
-  const { swPct, cwPct } = computeBarPcts(seoulTotal, cityTotal);
+  // selectable section (rent) — hero 는 "선택된 행 1 개 기준" 으로 비교.
+  // store 의 rentChoice 가 현재 rows 에 없으면 (도시 데이터 결측 — 예: 셰어
+  // 하우스 데이터 없음) 첫 행으로 fallback. Compare 의 resolveRentChoice 와
+  // fallback 정책 일치 (ADR-060).
+  const selectableSection = sections.find((s) => s.selectable);
+  const selectedRow =
+    selectableSection !== undefined
+      ? selectableSection.rows.find((r) => r.key === rentChoice) ??
+        selectableSection.rows[0]
+      : undefined;
+
+  const seoulHeroVal =
+    selectedRow !== undefined
+      ? selectedRow.seoulVal
+      : sections.reduce(
+          (acc, sec) => acc + sec.rows.reduce((a, r) => a + r.seoulVal, 0),
+          0,
+        );
+  const cityHeroVal =
+    selectedRow !== undefined
+      ? selectedRow.cityVal
+      : sections.reduce(
+          (acc, sec) => acc + sec.rows.reduce((a, r) => a + r.cityVal, 0),
+          0,
+        );
+  const totalMult = computeMultiplier(seoulHeroVal, cityHeroVal);
+  const { swPct, cwPct } = computeBarPcts(seoulHeroVal, cityHeroVal);
 
   const rate = fx[city.currency];
   const rateDisplay = rate !== undefined ? Math.round(rate) : '?';
@@ -399,6 +431,15 @@ export default function DetailScreen(): React.ReactElement {
   const categoryLabel = CATEGORY_LABEL[cat];
   const categorySources = city.sources.filter((s) => s.category === cat);
   const sourceCount = categorySources.length;
+
+  // hero caption / footer — selectable 일 때 "{카테고리} · {선택 행 이름}" +
+  // "선택한 항목 기준" 으로 단일 항목 비교임을 명시. 합계 모드에서는 기존 문구.
+  const heroCaption =
+    selectedRow !== undefined
+      ? `${categoryLabel} · ${selectedRow.name}`
+      : `${categoryLabel} 합계`;
+  const heroFooter =
+    selectedRow !== undefined ? '선택한 항목 기준 (탭으로 변경)' : '항목 단가 합';
 
   return (
     <Screen scroll testID="detail-screen">
@@ -421,14 +462,14 @@ export default function DetailScreen(): React.ReactElement {
         <HeroCard
           variant="navy"
           leftLabel="서울"
-          leftValue={formatKRW(seoulTotal)}
+          leftValue={formatKRW(seoulHeroVal)}
           centerMult={formatMultiplier(totalMult)}
-          centerCaption={`${categoryLabel} 합계`}
+          centerCaption={heroCaption}
           rightLabel={city.name.ko}
-          rightValue={formatKRW(cityTotal)}
+          rightValue={formatKRW(cityHeroVal)}
           swPct={swPct}
           cwPct={cwPct}
-          footer="항목 단가 합"
+          footer={heroFooter}
           testID="detail-hero"
         />
       </View>
@@ -450,18 +491,31 @@ export default function DetailScreen(): React.ReactElement {
               <View className="bg-white rounded-card border border-line overflow-hidden">
                 {section.rows.map((row, idx) => {
                   const mult = computeMultiplier(row.seoulVal, row.cityVal);
+                  const isSelectable = section.selectable === true;
+                  const isSelected =
+                    isSelectable && selectedRow !== undefined && row.key === selectedRow.key;
+                  // GroceryRow 가 자체 px-3 을 가짐 — selected 배경이 카드 좌우
+                  // 모서리까지 닿게 하기 위해 wrapping padding 제거
+                  // (사용자 피드백 2026-05-06).
                   return (
-                    <View key={row.key} className="px-3">
-                      <GroceryRow
-                        name={row.name}
-                        emoji={row.emoji}
-                        seoulPrice={formatKRW(row.seoulVal)}
-                        cityPrice={formatKRW(row.cityVal)}
-                        mult={typeof mult === 'number' ? mult : 1}
-                        isLast={idx === section.rows.length - 1}
-                        testID={`detail-row-${row.key}`}
-                      />
-                    </View>
+                    <GroceryRow
+                      key={row.key}
+                      name={row.name}
+                      emoji={row.emoji}
+                      seoulPrice={formatKRW(row.seoulVal)}
+                      cityPrice={formatKRW(row.cityVal)}
+                      mult={typeof mult === 'number' ? mult : 1}
+                      isLast={idx === section.rows.length - 1}
+                      {...(isSelectable
+                        ? {
+                            // row.key 는 RENT_ROWS literal — RentChoice 와 동일 4 값.
+                            // selectable 분기 안에서만 호출되므로 cast 안전.
+                            onPress: () => setRentChoice(row.key as RentChoice),
+                            selected: isSelected,
+                          }
+                        : {})}
+                      testID={`detail-row-${row.key}`}
+                    />
                   );
                 })}
               </View>

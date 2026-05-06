@@ -32,6 +32,8 @@ import {
 import { useFavoritesStore } from '@/store/favorites';
 import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
+import { resolveRentChoice, useRentChoiceStore } from '@/store/rentChoice';
+import type { RentChoice } from '@/store/rentChoice';
 import { colors } from '@/theme/tokens';
 import type {
   CityCostData,
@@ -43,16 +45,25 @@ import type {
 type CategoryConfig = {
   category: SourceCategory;
   label: string;
-  getValue: (city: CityCostData, fx: ExchangeRates) => number | null;
+  /**
+   * 카테고리 월 비용 (KRW). rent 만 사용자 선택 (`rentChoice`) 에 따라 값이
+   * 바뀌고, 다른 카테고리는 인자를 무시한다. ADR-060 — Detail 에서 바꾼
+   * 주거 형태가 Compare hero / 월세 카드에도 같이 반영되도록 단일 출처화.
+   */
+  getValue: (
+    city: CityCostData,
+    fx: ExchangeRates,
+    rentChoice: RentChoice,
+  ) => number | null;
 };
 
 const RENT_CONFIG: CategoryConfig = {
   category: 'rent',
   label: '월세',
-  getValue: (city, fx) => {
-    const val = city.rent.share ?? city.rent.studio ?? city.rent.oneBed;
-    if (val === null) return null;
-    return convertToKRW(val, city.currency, fx);
+  getValue: (city, fx, rentChoice) => {
+    const resolved = resolveRentChoice(city.rent, rentChoice);
+    if (resolved === null) return null;
+    return convertToKRW(resolved.value, city.currency, fx);
   },
 };
 
@@ -159,6 +170,9 @@ export default function CompareScreen(): React.ReactElement {
   const isFavorite = useFavoritesStore((s) => s.has(cityId ?? ''));
   const toggleFavorite = useFavoritesStore((s) => s.toggle);
   const pushRecent = useRecentStore((s) => s.push);
+  // ADR-060 — Detail 에서 바꾼 주거 형태 선택이 Compare hero / 월세 카드에도
+  // 즉시 반영되도록 동일 store 구독.
+  const rentChoice = useRentChoiceStore((s) => s.rentChoice);
 
   const [state, setState] = React.useState<CompareState>({ status: 'loading' });
 
@@ -266,8 +280,8 @@ export default function CompareScreen(): React.ReactElement {
   let cityTotal = 0;
 
   const categoryData = categories.map((cfg) => {
-    const seoulVal = cfg.getValue(seoul, fx);
-    const cityVal = cfg.getValue(city, fx);
+    const seoulVal = cfg.getValue(seoul, fx, rentChoice);
+    const cityVal = cfg.getValue(city, fx, rentChoice);
 
     const sVal = seoulVal ?? 0;
     const cVal = cityVal ?? 0;
