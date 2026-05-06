@@ -274,7 +274,7 @@ describe('HomeScreen', () => {
   });
 
   describe('권역 필터', () => {
-    it('RegionPill 5개 렌더링', async () => {
+    it('RegionPill 6개 렌더링 (전체 + 5개 권역)', async () => {
       setupMocks();
 
       const { getByTestId } = render(<HomeScreen />);
@@ -289,6 +289,7 @@ describe('HomeScreen', () => {
       expect(getByTestId('home-region-eu')).toBeTruthy();
       expect(getByTestId('home-region-asia')).toBeTruthy();
       expect(getByTestId('home-region-oceania')).toBeTruthy();
+      expect(getByTestId('home-region-me')).toBeTruthy();
     });
 
     it('기본 active = 전체', async () => {
@@ -320,6 +321,57 @@ describe('HomeScreen', () => {
         expect(getByTestId('home-region-na').props.accessibilityState.selected).toBe(true);
         expect(getByTestId('home-region-all').props.accessibilityState.selected).toBe(false);
       });
+    });
+
+    it('전체 선택 시 모든 해외 도시 노출 (서울 제외, 가나다 순)', async () => {
+      setupMocks();
+
+      const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // citiesMap: vancouver / tokyo / london / sydney + seoul
+      // 가나다 순 (en 식별자로 testID 만 검증) — 도쿄 / 런던 / 밴쿠버 / 시드니
+      expect(getByTestId('home-region-city-tokyo')).toBeTruthy();
+      expect(getByTestId('home-region-city-london')).toBeTruthy();
+      expect(getByTestId('home-region-city-vancouver')).toBeTruthy();
+      expect(getByTestId('home-region-city-sydney')).toBeTruthy();
+      expect(queryByTestId('home-region-city-seoul')).toBeNull();
+    });
+
+    it('권역 선택 시 해당 권역 도시만 노출', async () => {
+      setupMocks();
+
+      const { getByTestId, queryByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.press(getByTestId('home-region-eu'));
+
+      await waitFor(() => {
+        expect(getByTestId('home-region-city-london')).toBeTruthy();
+        expect(queryByTestId('home-region-city-tokyo')).toBeNull();
+        expect(queryByTestId('home-region-city-vancouver')).toBeNull();
+        expect(queryByTestId('home-region-city-sydney')).toBeNull();
+      });
+    });
+
+    it('권역 도시 행 탭 → /compare/{cityId} push', async () => {
+      setupMocks();
+
+      const { getByTestId } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.press(getByTestId('home-region-city-tokyo'));
+
+      expect(mockPush).toHaveBeenCalledWith('/compare/tokyo');
     });
   });
 
