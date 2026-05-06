@@ -547,6 +547,26 @@ describe('CompareScreen', () => {
       expect(within(card).getByText('285.8만원')).toBeTruthy();
     });
 
+    // PR #25 3차 review — TUITION_CONFIG.getValue 가 seoul 도 동일 호출에 통과
+    // 하므로, custom choice 가 적용되면 seoulVal 이 1500원 등 의도치 않은 값으로
+    // 계산되는 버그 회귀 방지. seoul 정책상 학비 0원이라 카드는 "신규" 배지.
+    it('tuition: custom choice 적용 시에도 seoul 측은 null (0원 정책 유지) → 신규 배지', async () => {
+      usePersonaStore.getState().setPersona('student');
+      useTuitionChoiceStore
+        .getState()
+        .setTuitionChoice('vancouver', { kind: 'custom', annual: 18000 });
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const card = getByTestId('compare-pair-tuition');
+      // 도시 측은 custom 18000 / 12 * 980 = 147만원
+      expect(within(card).getByText('147만원')).toBeTruthy();
+      // 서울 측은 null → '신규' 배지 (visa 와 동일 패턴)
+      expect(within(card).getByText('신규')).toBeTruthy();
+    });
+
     // PR #25 review — takeHomePctApprox 의 `/100` 버그 회귀 방지.
     // 60000 * (1 - 0.74) / 12 * 980 = 1,274,000원 = 127.4만원.
     it('tax: 미선택 → 첫 tier (60000, 0.74 takeHome) 월 세금 = 127.4만원', async () => {

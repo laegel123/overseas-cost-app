@@ -94,4 +94,25 @@ describe('TaxChoiceSheet', () => {
     expect(useTaxChoiceStore.getState().choices.vancouver).toBeUndefined();
     expect(screen.queryByTestId('sheet-custom-input')).toBeNull();
   });
+
+  // PR #25 3차 review — entries 부재 도시는 custom 행 자체를 노출하지 않고
+  // 안내 문구로 대체 (silent failure 방지). takeHomePctApprox 차용 불가.
+  it('cityTax 부재 → custom 행 미렌더 + 안내 문구 노출', () => {
+    render(
+      <TaxChoiceSheet
+        visible
+        onDismiss={jest.fn()}
+        cityId="someCity"
+        cityCurrency="USD"
+        cityTax={undefined}
+        fx={fx}
+        testID="sheet"
+      />,
+    );
+    expect(screen.queryByTestId('sheet-custom-row')).toBeNull();
+    expect(screen.getByTestId('sheet-custom-disabled')).toBeTruthy();
+    expect(
+      screen.getByText('이 도시는 세율 데이터가 없어 직접 입력이 지원되지 않아요.'),
+    ).toBeTruthy();
+  });
 });

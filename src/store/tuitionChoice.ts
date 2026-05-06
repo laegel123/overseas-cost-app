@@ -104,6 +104,13 @@ export type ResolvedTuition = {
  *
  * 본 함수는 store 와 독립 — 순수 함수. Compare/Detail 양쪽이 동일 정책으로
  * 결측을 처리하도록 단일 출처화.
+ *
+ * `resolveTaxChoice` 와의 의도적 비대칭 (PR #25 3차 review):
+ * tuition 의 custom 은 도시 entries 와 무관하게 통과 — 사용자가 입력한 연
+ * 학비만으로 충분한 정보 (월 = 연/12 환산만 필요). 반면 tax 의 custom 은
+ * `takeHomePctApprox` 차용을 위해 entries[0] 가 반드시 필요. Compare 호출부
+ * (`TUITION_CONFIG.getValue`) 가 seoul 처럼 entries 가 비어있는 경우 본 함수
+ * 호출 전 단계에서 짧게 null 처리한다 (서울 학비 0원 정책 일치).
  */
 export function resolveTuitionChoice(
   cityTuition: CityCostData['tuition'],

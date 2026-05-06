@@ -119,7 +119,13 @@ const TUITION_CONFIG: CategoryConfig = {
   label: '학비',
   // ADR-061 — Detail 에서 선택한 학교 (preset) 또는 직접 입력값을 동일 단일
   // 출처에서 적용. 미선택이면 첫 entry fallback. 도시 데이터 결측 → null.
+  // PR #25 3차 review — Compare 가 seoul 도 동일 호출에 통과하므로, entries 가
+  // 비어있으면 (서울 정책 + 도시 데이터 미보유) tuitionChoice 의 custom kind 가
+  // 의도치 않게 통과하지 않도록 짧게 null 반환. resolveTuitionChoice 자체는
+  // sheet 컨텍스트에서 custom 을 entries 와 무관하게 허용하는 의도가 있어
+  // 호출부에서 가드.
   getValue: (city, fx, _rentChoice, tuitionChoice) => {
+    if (!city.tuition || city.tuition.length === 0) return null;
     const resolved = resolveTuitionChoice(city.tuition, tuitionChoice);
     if (resolved === null) return null;
     return convertToKRW(resolved.annual / 12, city.currency, fx);

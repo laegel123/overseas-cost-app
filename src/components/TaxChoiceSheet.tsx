@@ -111,7 +111,7 @@ export function TaxChoiceSheet({
             const monthlyTaxKRW = convertToKRW(monthlyTaxLocal, cityCurrency, fx);
             return (
               <Pressable
-                key={e.annualSalary}
+                key={String(e.annualSalary)}
                 onPress={() => handlePickPreset(e.annualSalary)}
                 accessibilityRole="button"
                 accessibilityState={{ selected: isSelected }}
@@ -153,6 +153,22 @@ export function TaxChoiceSheet({
 
           <View className="border-t border-line my-2" />
 
+          {/*
+            PR #25 3차 review — tax custom 은 takeHomePctApprox 차용을 위해
+            entries[0] 가 필요. entries 부재 시 resolveTaxChoice 가 null 을 반환해
+            저장해도 화면에 반영되지 않는 silent failure. 사용자 혼란 방지를
+            위해 custom 행을 노출하지 않고 안내 문구만 표시.
+          */}
+          {entries.length === 0 ? (
+            <View
+              className="px-3 py-3 rounded-card bg-orange-tint"
+              testID={testID !== undefined ? `${testID}-custom-disabled` : undefined}
+            >
+              <Tiny color="orange">
+                이 도시는 세율 데이터가 없어 직접 입력이 지원되지 않아요.
+              </Tiny>
+            </View>
+          ) : (
           <Pressable
             onPress={() => {
               setMode('custom');
@@ -191,6 +207,7 @@ export function TaxChoiceSheet({
               </Tiny>
             </View>
           </Pressable>
+          )}
         </ScrollView>
       ) : (
         <View className="gap-4">

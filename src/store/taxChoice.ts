@@ -84,6 +84,13 @@ export type ResolvedTax = {
  * - choice 가 `preset` → annualSalary 매칭. 매칭 실패 시 entries[0] fallback.
  * - choice 가 undefined → entries[0] fallback.
  * - entries 부재 → null.
+ *
+ * `resolveTuitionChoice` 와의 의도적 비대칭 (PR #25 3차 review):
+ * tax custom 은 `takeHomePctApprox` 가 사용자 입력 annualSalary 만으로 결정
+ * 불가하므로 도시 첫 preset 의 값을 차용한다 — entries 부재 시 null. 반면
+ * tuition custom 은 연 학비만으로 충분 (월 환산만 필요) 하여 entries 와 무관.
+ * UI 단 (TaxChoiceSheet) 에서 entries 부재 도시는 custom 행 자체를 노출하지
+ * 않아 사용자에게 silent failure 가 발생하지 않도록 한다.
  */
 export function resolveTaxChoice(
   cityTax: CityCostData['tax'],

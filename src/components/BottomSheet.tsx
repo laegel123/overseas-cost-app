@@ -18,6 +18,8 @@ import {
   View,
 } from 'react-native';
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { SHEET_BACKDROP_COLOR } from '@/theme/tokens';
 
 import { H3 } from './typography/Text';
@@ -30,6 +32,11 @@ export type BottomSheetProps = {
   testID?: string;
 };
 
+// PR #25 3차 review — iPhone X+ home indicator 영역 (~34pt) 보다 작은 24pt 만
+// 두면 시트 마지막 항목이 indicator 에 가려질 수 있어 SafeAreaInsets bottom 을
+// 추가로 적용. tailwind 의 pb-6 (24px) 은 minimum 으로 유지.
+const SHEET_BOTTOM_PAD_MIN = 24;
+
 export function BottomSheet({
   visible,
   onDismiss,
@@ -37,6 +44,8 @@ export function BottomSheet({
   children,
   testID,
 }: BottomSheetProps): React.ReactElement {
+  const insets = useSafeAreaInsets();
+  const bottomPad = Math.max(insets.bottom, SHEET_BOTTOM_PAD_MIN);
   return (
     <Modal
       visible={visible}
@@ -67,7 +76,8 @@ export function BottomSheet({
             onPress={() => undefined}
           >
             <View
-              className="bg-white rounded-t-[22px] px-screen-x pt-5 pb-6"
+              className="bg-white rounded-t-[22px] px-screen-x pt-5"
+              style={{ paddingBottom: bottomPad }}
               testID={testID !== undefined ? `${testID}-body` : undefined}
             >
               <H3 color="navy" className="font-manrope-bold mb-4">
