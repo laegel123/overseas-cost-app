@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { GroceryRow, type GroceryRowProps } from '../GroceryRow';
 
@@ -165,6 +165,91 @@ describe('GroceryRow', () => {
       const { testID: _, ...propsWithoutTestID } = defaultProps;
       render(<GroceryRow {...propsWithoutTestID} />);
       expect(screen.queryByTestId('grocery-row')).toBeNull();
+    });
+  });
+
+  describe('onPress (단일 선택 모드)', () => {
+    it('onPress 미지정 → 일반 View 로 렌더 (탭 불가)', () => {
+      renderRow();
+      const row = screen.getByTestId('grocery-row');
+      // accessibilityRole 이 'button' 이 아니어야 함 (Pressable 미적용)
+      expect(row.props.accessibilityRole).toBeUndefined();
+    });
+
+    it('onPress 지정 → Pressable 로 감싸지고 탭 시 콜백 발화', () => {
+      const onPress = jest.fn();
+      renderRow({ onPress });
+      const row = screen.getByTestId('grocery-row');
+      expect(row.props.accessibilityRole).toBe('button');
+      fireEvent.press(row);
+      expect(onPress).toHaveBeenCalledTimes(1);
+    });
+
+    it('onPress + selected=true → accessibilityState.selected=true', () => {
+      renderRow({ onPress: jest.fn(), selected: true });
+      const row = screen.getByTestId('grocery-row');
+      expect(row.props.accessibilityState).toEqual({ selected: true });
+    });
+  });
+
+  describe('selected 시각 표현 (사용자 피드백 2026-05-06 — strip 제거 + brand orange invert)', () => {
+    it('selected=false (기본) → 행 배경 bg-orange 미적용', () => {
+      renderRow();
+      const row = screen.getByTestId('grocery-row');
+      expect(row.props.className).not.toContain('bg-orange');
+    });
+
+    it('strip 은 더 이상 렌더되지 않는다 (사용자 피드백 — 검은 바 제거)', () => {
+      renderRow({ selected: true });
+      expect(screen.queryByTestId('grocery-row-selected-strip')).toBeNull();
+    });
+
+    it('selected=true → 행 배경 bg-orange (brand) + 카드 폭 채우기 위한 px-3', () => {
+      renderRow({ selected: true });
+      const row = screen.getByTestId('grocery-row');
+      expect(row.props.className).toContain('bg-orange');
+      expect(row.props.className).toContain('px-3');
+    });
+
+    it("selected=true → 텍스트 색 white 반전 (품목명 / 가격 / 배수 모두)", () => {
+      renderRow({ selected: true, mult: 1.5 });
+      const mult = screen.getByTestId('grocery-row-mult');
+      expect(mult.props.className).toContain('text-white');
+      const nameNode = screen.getByText('라멘 한 그릇');
+      expect(nameNode.props.className).toContain('text-white');
+      const priceNode = screen.getByText('1.2만 → 2.2만');
+      expect(priceNode.props.className).toContain('text-white');
+    });
+
+    it('selected=true → emoji box 가 white 로 invert (orange 배경 위에 묻히지 않게)', () => {
+      renderRow({ selected: true });
+      const emojiBox = screen.getByTestId('grocery-row-emoji-box');
+      expect(emojiBox.props.className).toContain('bg-white');
+      expect(emojiBox.props.className).not.toContain('bg-orange-soft');
+      expect(emojiBox.props.className).not.toContain('bg-light');
+    });
+
+    it('selected=true + hot 행 → emoji box 는 white (selected 가 hot 시각보다 우선)', () => {
+      renderRow({ selected: true, mult: 3.0 });
+      const emojiBox = screen.getByTestId('grocery-row-emoji-box');
+      expect(emojiBox.props.className).toContain('bg-white');
+      expect(emojiBox.props.className).not.toContain('bg-orange-soft');
+    });
+
+    it('selected=false + hot 행 → 기존 시각 (emoji orange-soft, mult orange) 유지', () => {
+      renderRow({ selected: false, mult: 3.0 });
+      const emojiBox = screen.getByTestId('grocery-row-emoji-box');
+      const mult = screen.getByTestId('grocery-row-mult');
+      expect(emojiBox.props.className).toContain('bg-orange-soft');
+      expect(mult.props.className).toContain('text-orange');
+    });
+  });
+
+  describe('행 padding 위치 (px-3 내부 — 카드 폭 끝까지 채우기)', () => {
+    it('px-3 가 행 className 에 항상 포함 (selected 무관)', () => {
+      renderRow();
+      const row = screen.getByTestId('grocery-row');
+      expect(row.props.className).toContain('px-3');
     });
   });
 });

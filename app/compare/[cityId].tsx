@@ -29,6 +29,8 @@ import {
   isHot,
   loadAllCities,
 } from '@/lib';
+import { resolveRentChoice, useRentChoiceStore } from '@/store';
+import type { RentChoice } from '@/store';
 import { useFavoritesStore } from '@/store/favorites';
 import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
@@ -43,16 +45,29 @@ import type {
 type CategoryConfig = {
   category: SourceCategory;
   label: string;
-  getValue: (city: CityCostData, fx: ExchangeRates) => number | null;
+  /**
+   * 카테고리 월 비용 (KRW). rent 만 사용자 선택 (`rentChoice`) 에 따라 값이
+   * 바뀌고, 다른 카테고리는 인자를 무시한다. ADR-060 — Detail 에서 바꾼
+   * 주거 형태가 Compare hero / 월세 카드에도 같이 반영되도록 단일 출처화.
+   */
+  getValue: (
+    city: CityCostData,
+    fx: ExchangeRates,
+    rentChoice: RentChoice,
+  ) => number | null;
 };
 
 const RENT_CONFIG: CategoryConfig = {
   category: 'rent',
   label: '월세',
-  getValue: (city, fx) => {
-    const val = city.rent.share ?? city.rent.studio ?? city.rent.oneBed;
-    if (val === null) return null;
-    return convertToKRW(val, city.currency, fx);
+  // 본 getValue 는 컴포넌트 본문 categoryData 빌드부에서 직접 호출되지 않는다
+  // (PR #24 review 이슈 2). rent 는 city 기준 resolved key 를 1 회 결정 후
+  // 양쪽 동일 key 적용. 본 정의는 CategoryConfig 인터페이스 충족용 +
+  // 단일 도시 호출 시 일관된 결과 (city 기반 fallback) 보장.
+  getValue: (city, fx, rentChoice) => {
+    const resolved = resolveRentChoice(city.rent, rentChoice);
+    if (resolved === null) return null;
+    return convertToKRW(resolved.value, city.currency, fx);
   },
 };
 
@@ -159,6 +174,9 @@ export default function CompareScreen(): React.ReactElement {
   const isFavorite = useFavoritesStore((s) => s.has(cityId ?? ''));
   const toggleFavorite = useFavoritesStore((s) => s.toggle);
   const pushRecent = useRecentStore((s) => s.push);
+  // ADR-060 — Detail 에서 바꾼 주거 형태 선택이 Compare hero / 월세 카드에도
+  // 즉시 반영되도록 동일 store 구독.
+  const rentChoice = useRentChoiceStore((s) => s.rentChoice);
 
   const [state, setState] = React.useState<CompareState>({ status: 'loading' });
 
@@ -265,9 +283,32 @@ export default function CompareScreen(): React.ReactElement {
   let seoulTotal = 0;
   let cityTotal = 0;
 
+  // PR #24 review 이슈 2 — rent 는 city.rent 기준으로 resolved key 를 1 회
+  // 결정한 뒤 양쪽에 같은 key 를 강제 적용. 두 도시가 각각 독립 fallback 하면
+  // "서울 oneBed vs 도시 share" 같은 의미 없는 비교가 발생할 수 있다.
+  // (seoul.rent 가 v1.0 시드에서 모두 채워져 있어 같은 key 의 seoul 데이터는
+  // 항상 존재 — 만약 결측이면 seoulVal=null 로 표시.)
+  const resolvedRent = resolveRentChoice(city.rent, rentChoice);
+
   const categoryData = categories.map((cfg) => {
-    const seoulVal = cfg.getValue(seoul, fx);
-    const cityVal = cfg.getValue(city, fx);
+    let seoulVal: number | null;
+    let cityVal: number | null;
+    if (cfg.category === 'rent') {
+      if (resolvedRent === null) {
+        seoulVal = null;
+        cityVal = null;
+      } else {
+        const seoulRaw = seoul.rent[resolvedRent.key];
+        seoulVal =
+          seoulRaw !== null && seoulRaw !== undefined
+            ? convertToKRW(seoulRaw, seoul.currency, fx)
+            : null;
+        cityVal = convertToKRW(resolvedRent.value, city.currency, fx);
+      }
+    } else {
+      seoulVal = cfg.getValue(seoul, fx, rentChoice);
+      cityVal = cfg.getValue(city, fx, rentChoice);
+    }
 
     const sVal = seoulVal ?? 0;
     const cVal = cityVal ?? 0;

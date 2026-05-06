@@ -1,10 +1,10 @@
 /**
- * 4 store 의 hasHydrated() 가 모두 true 가 될 때까지 대기.
+ * 5 store 의 hasHydrated() 가 모두 true 가 될 때까지 대기.
  *
  * ARCHITECTURE.md §부팅·hydration 순서 의 Promise B/C/D/E 동시 await 패턴.
  * app-shell phase 의 _layout.tsx 가 useFonts 와 함께 Promise.all 로 합성한다.
  *
- * 본 헬퍼는 4 store 모두를 import 하는 유일한 모듈 — 도메인별 store 분리
+ * 본 헬퍼는 모든 store 를 import 하는 유일한 모듈 — 도메인별 store 분리
  * (ARCHITECTURE.md §상태 관리, ADR-004) 를 깨지 않기 위해 store 간 직접
  * cross-import 는 금지되며, 본 함수만이 boundary 위에서 모두 참조한다.
  *
@@ -24,6 +24,10 @@ import {
 } from './favorites';
 import { INITIAL_STATE as PERSONA_INITIAL, usePersonaStore } from './persona';
 import { INITIAL_STATE as RECENT_INITIAL, useRecentStore } from './recent';
+import {
+  INITIAL_STATE as RENT_CHOICE_INITIAL,
+  useRentChoiceStore,
+} from './rentChoice';
 import {
   INITIAL_STATE as SETTINGS_INITIAL,
   useSettingsStore,
@@ -52,6 +56,7 @@ export function waitForAllStoresHydrated(): Promise<void> {
     waitOne(useFavoritesStore),
     waitOne(useRecentStore),
     waitOne(useSettingsStore),
+    waitOne(useRentChoiceStore),
   ]).then(() => undefined);
 }
 
@@ -112,5 +117,8 @@ function forceInitialOnUnhydratedStores(): void {
   }
   if (!useSettingsStore.persist.hasHydrated()) {
     useSettingsStore.setState(SETTINGS_INITIAL);
+  }
+  if (!useRentChoiceStore.persist.hasHydrated()) {
+    useRentChoiceStore.setState(RENT_CHOICE_INITIAL);
   }
 }
