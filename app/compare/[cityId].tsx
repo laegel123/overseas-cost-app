@@ -29,8 +29,15 @@ import {
   isHot,
   loadAllCities,
 } from '@/lib';
-import { resolveRentChoice, useRentChoiceStore } from '@/store';
-import type { RentChoice } from '@/store';
+import {
+  resolveRentChoice,
+  resolveTaxChoice,
+  resolveTuitionChoice,
+  useRentChoiceStore,
+  useTaxChoiceStore,
+  useTuitionChoiceStore,
+} from '@/store';
+import type { RentChoice, TaxChoice, TuitionChoice } from '@/store';
 import { useFavoritesStore } from '@/store/favorites';
 import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
@@ -46,14 +53,17 @@ type CategoryConfig = {
   category: SourceCategory;
   label: string;
   /**
-   * 카테고리 월 비용 (KRW). rent 만 사용자 선택 (`rentChoice`) 에 따라 값이
-   * 바뀌고, 다른 카테고리는 인자를 무시한다. ADR-060 — Detail 에서 바꾼
-   * 주거 형태가 Compare hero / 월세 카드에도 같이 반영되도록 단일 출처화.
+   * 카테고리 월 비용 (KRW). 사용자 선택 (`rentChoice` / `tuitionChoice` /
+   * `taxChoice`) 에 따라 값이 바뀜 — Detail 의 단일 선택이 Compare hero / 카드
+   * 에도 그대로 반영되도록 단일 출처화 (ADR-060 / ADR-061). 다른 카테고리는
+   * 무시하는 인자도 항상 전달 — 호출부 일관성 유지.
    */
   getValue: (
     city: CityCostData,
     fx: ExchangeRates,
     rentChoice: RentChoice,
+    tuitionChoice: TuitionChoice | undefined,
+    taxChoice: TaxChoice | undefined,
   ) => number | null;
 };
 
@@ -107,24 +117,25 @@ const TRANSPORT_CONFIG: CategoryConfig = {
 const TUITION_CONFIG: CategoryConfig = {
   category: 'tuition',
   label: '학비',
-  getValue: (city, fx) => {
-    if (!city.tuition || city.tuition.length === 0) return null;
-    const entry = city.tuition[0];
-    if (!entry) return null;
-    const monthly = entry.annual / 12;
-    return convertToKRW(monthly, city.currency, fx);
+  // ADR-061 — Detail 에서 선택한 학교 (preset) 또는 직접 입력값을 동일 단일
+  // 출처에서 적용. 미선택이면 첫 entry fallback. 도시 데이터 결측 → null.
+  getValue: (city, fx, _rentChoice, tuitionChoice) => {
+    const resolved = resolveTuitionChoice(city.tuition, tuitionChoice);
+    if (resolved === null) return null;
+    return convertToKRW(resolved.annual / 12, city.currency, fx);
   },
 };
 
 const TAX_CONFIG: CategoryConfig = {
   category: 'tax',
   label: '세금',
-  getValue: (city, fx) => {
-    if (!city.tax || city.tax.length === 0) return null;
-    const entry = city.tax[0];
-    if (!entry) return null;
-    const monthlySalary = entry.annualSalary / 12;
-    const tax = monthlySalary * (1 - entry.takeHomePctApprox / 100);
+  // ADR-061 — Detail 에서 선택한 연봉 tier 또는 직접 입력값. 도시 첫 preset 의
+  // takeHomePctApprox 사용 (custom 일 때).
+  getValue: (city, fx, _rentChoice, _tuitionChoice, taxChoice) => {
+    const resolved = resolveTaxChoice(city.tax, taxChoice);
+    if (resolved === null) return null;
+    const monthlySalary = resolved.annualSalary / 12;
+    const tax = monthlySalary * (1 - resolved.takeHomePctApprox / 100);
     return convertToKRW(tax, city.currency, fx);
   },
 };
@@ -177,6 +188,14 @@ export default function CompareScreen(): React.ReactElement {
   // ADR-060 — Detail 에서 바꾼 주거 형태 선택이 Compare hero / 월세 카드에도
   // 즉시 반영되도록 동일 store 구독.
   const rentChoice = useRentChoiceStore((s) => s.rentChoice);
+  // ADR-061 — 학비/세금 도시별 선택. cityId 미정 단계에선 undefined 반환 후
+  // resolveTuitionChoice / resolveTaxChoice 가 첫 entry fallback 처리.
+  const tuitionChoice = useTuitionChoiceStore((s) =>
+    cityId ? s.choices[cityId] : undefined,
+  );
+  const taxChoice = useTaxChoiceStore((s) =>
+    cityId ? s.choices[cityId] : undefined,
+  );
 
   const [state, setState] = React.useState<CompareState>({ status: 'loading' });
 
@@ -306,8 +325,8 @@ export default function CompareScreen(): React.ReactElement {
         cityVal = convertToKRW(resolvedRent.value, city.currency, fx);
       }
     } else {
-      seoulVal = cfg.getValue(seoul, fx, rentChoice);
-      cityVal = cfg.getValue(city, fx, rentChoice);
+      seoulVal = cfg.getValue(seoul, fx, rentChoice, tuitionChoice, taxChoice);
+      cityVal = cfg.getValue(city, fx, rentChoice, tuitionChoice, taxChoice);
     }
 
     const sVal = seoulVal ?? 0;

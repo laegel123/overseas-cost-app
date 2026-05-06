@@ -1,15 +1,19 @@
 /**
  * Detail 화면 — 카테고리별 항목 단위 비교.
  *
- * design/README §4 + step1.md 구현. v1.0 1차 타겟은 food (외식·식재료 GroceryRow).
- * 다른 카테고리 (rent/transport/tuition/tax/visa) 도 동일 골격 + 데이터 있는 항목만 렌더.
+ * design/README §4 + step1.md 구현. 페르소나 분기, Hot 규칙, 데이터 정책 모두 준수.
  *
  * Hot 판정은 isHot(mult) 단일 함수 (CLAUDE.md CRITICAL).
+ *
+ * 단일 선택 모드 (rent / tuition / tax):
+ *   - rent: 인라인 행 탭으로 4 형태 순환 (ADR-060)
+ *   - tuition / tax: 칩 탭 → 바텀시트 (학교/연봉 목록 + 직접 입력) (ADR-061)
+ *   서울 데이터 결측 (한국 거주 기준 — 학비/세금 0원) 정책: seoulVal=0 직접 사용.
  */
 
 import * as React from 'react';
 
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -19,8 +23,10 @@ import { HeroCard } from '@/components/cards/HeroCard';
 import { ErrorView } from '@/components/ErrorView';
 import { GroceryRow } from '@/components/GroceryRow';
 import { Screen } from '@/components/Screen';
+import { TaxChoiceSheet } from '@/components/TaxChoiceSheet';
 import { TopBar } from '@/components/TopBar';
-import { MonoLabel, Small, Tiny } from '@/components/typography/Text';
+import { TuitionChoiceSheet } from '@/components/TuitionChoiceSheet';
+import { Body, MonoLabel, Small, Tiny } from '@/components/typography/Text';
 import {
   computeBarPcts,
   computeMultiplier,
@@ -33,8 +39,15 @@ import {
   getLastSync,
   loadAllCities,
 } from '@/lib';
-import { resolveRentChoice, useRentChoiceStore } from '@/store';
-import type { RentChoice } from '@/store';
+import {
+  resolveRentChoice,
+  resolveTaxChoice,
+  resolveTuitionChoice,
+  useRentChoiceStore,
+  useTaxChoiceStore,
+  useTuitionChoiceStore,
+} from '@/store';
+import type { RentChoice, TaxChoice, TuitionChoice } from '@/store';
 import { colors } from '@/theme/tokens';
 import type {
   CityCostData,
@@ -77,11 +90,13 @@ type Section = {
   rows: Row[];
   emptyText?: string;
   /**
-   * 단일 선택 모드 — 지정 시 hero 합계 대신 "선택된 행 1 개 기준" 으로 비교.
-   * 현재 rent 카테고리만 사용 (주거 형태는 합산이 의미 없음). 사용자가 행을
-   * 탭해 다른 항목으로 바꿀 수 있다.
+   * rent 인라인 단일 선택 — 사용자가 행을 직접 탭해 4 형태 중 하나로 cycle (ADR-060).
    */
   selectable?: boolean;
+  /**
+   * tuition / tax 시트 기반 단일 선택 — 행은 1개 (현재 선택), 탭 시 시트 오픈 (ADR-061).
+   */
+  pickerKind?: 'tuition' | 'tax';
 };
 
 
@@ -119,6 +134,8 @@ function buildSections(
   seoul: CityCostData,
   city: CityCostData,
   fx: ExchangeRates,
+  tuitionChoice: TuitionChoice | undefined,
+  taxChoice: TaxChoice | undefined,
 ): Section[] {
   if (category === 'food') {
     const restaurant: Row[] = FOOD_RESTAURANT_ROWS.map((r) => ({
@@ -187,64 +204,66 @@ function buildSections(
   }
 
   if (category === 'tuition') {
-    // 인덱스 매핑 정책 (PR #17 review 이슈 5):
-    // 도시 entries 가 N 개, 서울 entries 가 M 개 (M < N) 일 때, idx 가 M 이상인
-    // 도시 entry 는 서울 entry[0] 와 비교 — "기준 학교" 와 비교한다는 fallback.
-    // 의미가 약하지만 v1.0 에선 단일 페르소나 화면이라 "비교 가능한 무언가" 를
-    // 제공하는 게 우선. v1.x 에서 학위·학교 수준 매칭 (level: undergrad/graduate)
-    // 으로 정밀화.
-    const seoulEntries = seoul.tuition ?? [];
-    const cityEntries = city.tuition ?? [];
-    const rows: Row[] = cityEntries.flatMap((cEntry, idx) => {
-      const sEntry = seoulEntries[idx] ?? seoulEntries[0];
-      if (!sEntry) return [];
+    // ADR-061 — 합산 비교는 의미 없어 사용자 선택 1개를 단일 출처로.
+    // 서울 학비 데이터는 정책상 부재 (한국 거주 기준 — 학비 0원). seoulVal=0 직접 사용.
+    const resolved = resolveTuitionChoice(city.tuition, tuitionChoice);
+    if (resolved === null) {
       return [
         {
-          key: `tuition-${idx}`,
-          emoji: '🎓',
-          name: cEntry.school,
-          seoulVal: convertToKRW(sEntry.annual / 12, seoul.currency, fx),
-          cityVal: convertToKRW(cEntry.annual / 12, city.currency, fx),
+          label: '학교 (월 환산)',
+          rows: [],
+          emptyText: '학비 데이터가 아직 준비되지 않았어요.',
+          pickerKind: 'tuition',
         },
       ];
-    });
+    }
     return [
       {
         label: '학교 (월 환산)',
-        rows,
-        emptyText: '학비 데이터가 아직 준비되지 않았어요.',
+        rows: [
+          {
+            key: `tuition-${resolved.isCustom ? 'custom' : resolved.school}`,
+            emoji: resolved.isCustom ? '✏️' : '🎓',
+            // resolved.school 은 custom 일 때 이미 '직접 입력' 문자열 (resolver 정책).
+            name: resolved.school,
+            seoulVal: 0,
+            cityVal: convertToKRW(resolved.annual / 12, city.currency, fx),
+          },
+        ],
+        pickerKind: 'tuition',
       },
     ];
   }
 
   if (category === 'tax') {
-    // tuition 과 동일한 인덱스 매핑 정책. 추가로 row name 에 연봉을 표시 — Row.name
-    // 자체가 표현 문자열이라 formatKRW 호출. PR #17 review 이슈 6 의 "data 와 표현
-    // 분리" 권장이지만, Row 가 이미 표현 레이어 (`emoji`, `name`) 라 일관 유지.
-    // 입력 (`cEntry.annualSalary`) 은 데이터 schema 강제 양수 number — formatKRW
-    // 가 throw 할 가능성 ≈ 0 (정상 fixture / 자동화 검증 통과 후 도달).
-    const seoulEntries = seoul.tax ?? [];
-    const cityEntries = city.tax ?? [];
-    const rows: Row[] = cityEntries.flatMap((cEntry, idx) => {
-      const sEntry = seoulEntries[idx] ?? seoulEntries[0];
-      if (!sEntry) return [];
-      const sMonthlyTax = (sEntry.annualSalary / 12) * (1 - sEntry.takeHomePctApprox / 100);
-      const cMonthlyTax = (cEntry.annualSalary / 12) * (1 - cEntry.takeHomePctApprox / 100);
+    // ADR-061 — 사용자 연봉 1개 선택. 서울 세금 데이터 부재 → seoulVal=0.
+    const resolved = resolveTaxChoice(city.tax, taxChoice);
+    if (resolved === null) {
       return [
         {
-          key: `tax-${idx}`,
-          emoji: '💼',
-          name: `연봉 ${formatKRW(convertToKRW(cEntry.annualSalary, city.currency, fx))}`,
-          seoulVal: convertToKRW(sMonthlyTax, seoul.currency, fx),
-          cityVal: convertToKRW(cMonthlyTax, city.currency, fx),
+          label: '월 세금 (대략)',
+          rows: [],
+          emptyText: '세금 데이터가 아직 준비되지 않았어요.',
+          pickerKind: 'tax',
         },
       ];
-    });
+    }
+    const monthlyTaxLocal =
+      (resolved.annualSalary / 12) * (1 - resolved.takeHomePctApprox / 100);
+    const annualSalaryKRW = convertToKRW(resolved.annualSalary, city.currency, fx);
     return [
       {
         label: '월 세금 (대략)',
-        rows,
-        emptyText: '세금 데이터가 아직 준비되지 않았어요.',
+        rows: [
+          {
+            key: `tax-${resolved.isCustom ? 'custom' : resolved.annualSalary}`,
+            emoji: resolved.isCustom ? '✏️' : '💼',
+            name: `연봉 ${formatKRW(annualSalaryKRW)}${resolved.isCustom ? ' (직접 입력)' : ''}`,
+            seoulVal: 0,
+            cityVal: convertToKRW(monthlyTaxLocal, city.currency, fx),
+          },
+        ],
+        pickerKind: 'tax',
       },
     ];
   }
@@ -306,13 +325,20 @@ export default function DetailScreen(): React.ReactElement {
   const router = useRouter();
 
   const [state, setState] = React.useState<DetailState>({ status: 'loading' });
-  // selectable section (현재 rent 만) 의 선택 행 키. 기본값 'share' (셰어하우스).
-  // 사용자가 다른 주거 형태를 탭하면 store 가 갱신되고, Compare 화면 hero / 월세
-  // 카드도 같은 키 기준으로 같이 갱신된다 (ADR-060). 영속화는 store 책임.
-  // useShallow 로 단일 구독 (PR #24 review — 두 번 구독 정리).
+  // ADR-060: rent — 전역 단일 선택. ADR-061: tuition/tax — 도시별 map.
   const { rentChoice, setRentChoice } = useRentChoiceStore(
     useShallow((s) => ({ rentChoice: s.rentChoice, setRentChoice: s.setRentChoice })),
   );
+  const tuitionChoice = useTuitionChoiceStore((s) =>
+    cityId ? s.choices[cityId] : undefined,
+  );
+  const taxChoice = useTaxChoiceStore((s) =>
+    cityId ? s.choices[cityId] : undefined,
+  );
+
+  // 시트 visibility — tuition/tax 만. category 별로 1 시트만 사용 (다른 카테고리에선
+  // false 유지). Detail 화면은 한 카테고리 한 화면이라 동시 오픈 불가.
+  const [sheetVisible, setSheetVisible] = React.useState(false);
 
   const handleBack = React.useCallback(() => {
     if (router.canGoBack()) {
@@ -397,21 +423,25 @@ export default function DetailScreen(): React.ReactElement {
   // category 는 isValidCategory 통과 후라 SourceCategory 로 단언 가능.
   const cat = category as SourceCategory;
   const { seoul, city, fx, lastSync } = state.data;
-  const sections = buildSections(cat, seoul, city, fx);
+  const sections = buildSections(cat, seoul, city, fx, tuitionChoice, taxChoice);
 
-  // selectable section (rent) — hero 는 "선택된 행 1 개 기준" 으로 비교.
-  // store 의 rentChoice 가 도시에 결측이면 resolveRentChoice 가 fallback 키
-  // (share → studio → oneBed → twoBed) 를 결정 — Compare 와 동일 정책 (ADR-060,
-  // PR #24 review 이슈 1). rows 자체는 (sRaw === null || cRaw === null) 행이
-  // 이미 제외돼 있으므로, resolved key 가 rows 에 없는 극단 케이스 (city 에
-  // 있고 seoul 에 없는 형태) 는 rows[0] 로 안전 fallback.
-  const selectableSection = sections.find((s) => s.selectable);
+  // 단일 선택 섹션 (rent / tuition / tax) — hero 가 "선택된 행 1 개 기준" 으로 비교.
+  // rent: 인라인 행 탭으로 cycle. tuition/tax: 행 탭 → 시트 오픈.
+  const singlePickSection = sections.find((s) => s.selectable || s.pickerKind);
+
   const resolvedRentKey =
-    selectableSection !== undefined ? resolveRentChoice(city.rent, rentChoice)?.key : undefined;
+    singlePickSection?.selectable === true
+      ? resolveRentChoice(city.rent, rentChoice)?.key
+      : undefined;
+
   const selectedRow =
-    selectableSection !== undefined
-      ? selectableSection.rows.find((r) => r.key === resolvedRentKey) ??
-        selectableSection.rows[0]
+    singlePickSection !== undefined
+      ? singlePickSection.selectable === true
+        ? // rent: resolved key 로 row 매칭
+          singlePickSection.rows.find((r) => r.key === resolvedRentKey) ??
+          singlePickSection.rows[0]
+        : // tuition/tax: rows 가 항상 0 또는 1 개 (resolveX 결과)
+          singlePickSection.rows[0]
       : undefined;
 
   const seoulHeroVal =
@@ -440,14 +470,17 @@ export default function DetailScreen(): React.ReactElement {
   const categorySources = city.sources.filter((s) => s.category === cat);
   const sourceCount = categorySources.length;
 
-  // hero caption / footer — selectable 일 때 "{카테고리} · {선택 행 이름}" +
-  // "선택한 항목 기준" 으로 단일 항목 비교임을 명시. 합계 모드에서는 기존 문구.
+  // hero caption / footer — 단일 선택 모드에선 "{카테고리} · {선택 행 이름}" + 안내 문구.
   const heroCaption =
     selectedRow !== undefined
       ? `${categoryLabel} · ${selectedRow.name}`
       : `${categoryLabel} 합계`;
   const heroFooter =
-    selectedRow !== undefined ? '선택한 항목 기준 (탭으로 변경)' : '항목 단가 합';
+    singlePickSection?.pickerKind !== undefined
+      ? '선택된 항목 기준 (탭으로 변경)'
+      : selectedRow !== undefined
+        ? '선택한 항목 기준 (탭으로 변경)'
+        : '항목 단가 합';
 
   return (
     <Screen scroll testID="detail-screen">
@@ -459,13 +492,6 @@ export default function DetailScreen(): React.ReactElement {
         testID="detail-topbar"
       />
 
-      {/*
-        Detail hero 합계는 본 화면 섹션의 단가(또는 월 환산 entry) 합 — Compare
-        화면의 "월 예상 총비용" 휴리스틱과 의도가 다름 (PR #17 review 이슈 1).
-        예: food 의 Compare 카드 = restaurantMeal*20 + grocery*4 (월 추정);
-        Detail food hero = 외식 2 항목 + 식재료 8 항목 단가 합. 사용자 혼동을
-        피하기 위해 hero footer 에 "항목 단가 합" 으로 명시.
-      */}
       <View className="px-screen-x mt-3">
         <HeroCard
           variant="navy"
@@ -487,24 +513,49 @@ export default function DetailScreen(): React.ReactElement {
           <View key={section.label} testID={`detail-section-${section.label}`}>
             <View className="flex-row items-center justify-between mb-2">
               <MonoLabel>{section.label}</MonoLabel>
-              {section.rows.length > 0 && (
+              {section.rows.length > 0 && section.pickerKind === undefined && (
                 <Tiny color="gray-2">{section.rows.length} 항목</Tiny>
               )}
             </View>
             {section.rows.length === 0 ? (
-              <View className="bg-light-2 rounded-card p-4">
+              <View className="bg-light-2 rounded-card p-4 gap-2">
                 <Small color="gray-2">{section.emptyText ?? '데이터 준비 중'}</Small>
+                {section.pickerKind !== undefined ? (
+                  <Pressable
+                    onPress={() => setSheetVisible(true)}
+                    accessibilityRole="button"
+                    className="self-start px-4 py-2 rounded-button bg-orange"
+                    testID={`detail-picker-empty-${section.pickerKind}`}
+                  >
+                    <Body color="white" className="font-manrope-bold">
+                      직접 입력
+                    </Body>
+                  </Pressable>
+                ) : null}
               </View>
             ) : (
               <View className="bg-white rounded-card border border-line overflow-hidden">
                 {section.rows.map((row, idx) => {
                   const mult = computeMultiplier(row.seoulVal, row.cityVal);
-                  const isSelectable = section.selectable === true;
+                  const isSinglePick =
+                    section.selectable === true || section.pickerKind !== undefined;
                   const isSelected =
-                    isSelectable && selectedRow !== undefined && row.key === selectedRow.key;
+                    isSinglePick && selectedRow !== undefined && row.key === selectedRow.key;
                   // GroceryRow 가 자체 px-3 을 가짐 — selected 배경이 카드 좌우
-                  // 모서리까지 닿게 하기 위해 wrapping padding 제거
-                  // (사용자 피드백 2026-05-06).
+                  // 모서리까지 닿게 하기 위해 wrapping padding 제거.
+                  // exactOptionalPropertyTypes: onPress 는 단일 선택일 때만 spread.
+                  const singlePickProps =
+                    section.selectable === true
+                      ? {
+                          onPress: () => setRentChoice(row.key as RentChoice),
+                          selected: isSelected,
+                        }
+                      : section.pickerKind !== undefined
+                        ? {
+                            onPress: () => setSheetVisible(true),
+                            selected: isSelected,
+                          }
+                        : {};
                   return (
                     <GroceryRow
                       key={row.key}
@@ -514,18 +565,26 @@ export default function DetailScreen(): React.ReactElement {
                       cityPrice={formatKRW(row.cityVal)}
                       mult={typeof mult === 'number' ? mult : 1}
                       isLast={idx === section.rows.length - 1}
-                      {...(isSelectable
-                        ? {
-                            // row.key 는 RENT_ROWS literal — RentChoice 와 동일 4 값.
-                            // selectable 분기 안에서만 호출되므로 cast 안전.
-                            onPress: () => setRentChoice(row.key as RentChoice),
-                            selected: isSelected,
-                          }
-                        : {})}
+                      {...singlePickProps}
                       testID={`detail-row-${row.key}`}
                     />
                   );
                 })}
+                {section.pickerKind !== undefined ? (
+                  <Pressable
+                    onPress={() => setSheetVisible(true)}
+                    accessibilityRole="button"
+                    className="px-3 py-2.5 border-t border-line bg-light-2"
+                    testID={`detail-picker-change-${section.pickerKind}`}
+                  >
+                    <Tiny color="gray" className="text-center">
+                      {section.pickerKind === 'tuition'
+                        ? '학교 변경 / 직접 입력'
+                        : '연봉 변경 / 직접 입력'}{' '}
+                      →
+                    </Tiny>
+                  </Pressable>
+                ) : null}
               </View>
             )}
           </View>
@@ -560,6 +619,29 @@ export default function DetailScreen(): React.ReactElement {
       </View>
 
       <View className="h-6" />
+
+      {cat === 'tuition' && cityId ? (
+        <TuitionChoiceSheet
+          visible={sheetVisible}
+          onDismiss={() => setSheetVisible(false)}
+          cityId={cityId}
+          cityCurrency={city.currency}
+          cityTuition={city.tuition}
+          fx={fx}
+          testID="detail-tuition-sheet"
+        />
+      ) : null}
+      {cat === 'tax' && cityId ? (
+        <TaxChoiceSheet
+          visible={sheetVisible}
+          onDismiss={() => setSheetVisible(false)}
+          cityId={cityId}
+          cityCurrency={city.currency}
+          cityTax={city.tax}
+          fx={fx}
+          testID="detail-tax-sheet"
+        />
+      ) : null}
     </Screen>
   );
 }

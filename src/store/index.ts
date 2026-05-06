@@ -27,6 +27,26 @@ export type {
   RentChoiceActions,
   RentChoiceState,
 } from './rentChoice';
+export {
+  resolveTuitionChoice,
+  useTuitionChoiceStore,
+} from './tuitionChoice';
+export type {
+  ResolvedTuition,
+  TuitionChoice,
+  TuitionChoiceActions,
+  TuitionChoiceState,
+} from './tuitionChoice';
+export {
+  resolveTaxChoice,
+  useTaxChoiceStore,
+} from './taxChoice';
+export type {
+  ResolvedTax,
+  TaxChoice,
+  TaxChoiceActions,
+  TaxChoiceState,
+} from './taxChoice';
 
 export {
   DEFAULT_HYDRATION_TIMEOUT_MS,

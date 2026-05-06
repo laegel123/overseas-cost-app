@@ -18,9 +18,29 @@ import {
 } from '../hydration';
 import { INITIAL_STATE as PERSONA_INITIAL, usePersonaStore } from '../persona';
 import { INITIAL_STATE as RECENT_INITIAL, useRecentStore } from '../recent';
+import {
+  INITIAL_STATE as RENT_CHOICE_INITIAL,
+  useRentChoiceStore,
+} from '../rentChoice';
 import { INITIAL_STATE as SETTINGS_INITIAL, useSettingsStore } from '../settings';
+import {
+  INITIAL_STATE as TAX_CHOICE_INITIAL,
+  useTaxChoiceStore,
+} from '../taxChoice';
+import {
+  INITIAL_STATE as TUITION_CHOICE_INITIAL,
+  useTuitionChoiceStore,
+} from '../tuitionChoice';
 
-const ALL_STORES = [usePersonaStore, useFavoritesStore, useRecentStore, useSettingsStore] as const;
+const ALL_STORES = [
+  usePersonaStore,
+  useFavoritesStore,
+  useRecentStore,
+  useSettingsStore,
+  useRentChoiceStore,
+  useTuitionChoiceStore,
+  useTaxChoiceStore,
+] as const;
 
 beforeEach(async () => {
   await AsyncStorage.clear();
@@ -70,11 +90,14 @@ describe('waitForAllStoresHydrated', () => {
     expect(resolved).toBe(true);
   });
 
-  it('4 store 모두 미완 → 모두 완료 후에야 resolve', async () => {
+  it('7 store 모두 미완 → 모두 완료 후에야 resolve', async () => {
     let personaCb: (() => void) | undefined;
     let favoritesCb: (() => void) | undefined;
     let recentCb: (() => void) | undefined;
     let settingsCb: (() => void) | undefined;
+    let rentCb: (() => void) | undefined;
+    let tuitionCb: (() => void) | undefined;
+    let taxCb: (() => void) | undefined;
 
     jest.spyOn(usePersonaStore.persist, 'hasHydrated').mockReturnValue(false);
     jest.spyOn(usePersonaStore.persist, 'onFinishHydration').mockImplementation((fn) => {
@@ -100,6 +123,24 @@ describe('waitForAllStoresHydrated', () => {
       return () => {};
     });
 
+    jest.spyOn(useRentChoiceStore.persist, 'hasHydrated').mockReturnValue(false);
+    jest.spyOn(useRentChoiceStore.persist, 'onFinishHydration').mockImplementation((fn) => {
+      rentCb = () => fn(useRentChoiceStore.getState());
+      return () => {};
+    });
+
+    jest.spyOn(useTuitionChoiceStore.persist, 'hasHydrated').mockReturnValue(false);
+    jest.spyOn(useTuitionChoiceStore.persist, 'onFinishHydration').mockImplementation((fn) => {
+      tuitionCb = () => fn(useTuitionChoiceStore.getState());
+      return () => {};
+    });
+
+    jest.spyOn(useTaxChoiceStore.persist, 'hasHydrated').mockReturnValue(false);
+    jest.spyOn(useTaxChoiceStore.persist, 'onFinishHydration').mockImplementation((fn) => {
+      taxCb = () => fn(useTaxChoiceStore.getState());
+      return () => {};
+    });
+
     let resolved = false;
     const promise = waitForAllStoresHydrated().then(() => {
       resolved = true;
@@ -112,17 +153,23 @@ describe('waitForAllStoresHydrated', () => {
     expect(favoritesCb).toBeDefined();
     expect(recentCb).toBeDefined();
     expect(settingsCb).toBeDefined();
+    expect(rentCb).toBeDefined();
+    expect(tuitionCb).toBeDefined();
+    expect(taxCb).toBeDefined();
 
-    // 3개 완료 — 아직 resolve 안 됨
+    // 6개 완료 — 아직 resolve 안 됨
     personaCb?.();
     favoritesCb?.();
     recentCb?.();
+    settingsCb?.();
+    rentCb?.();
+    tuitionCb?.();
     await Promise.resolve();
     await Promise.resolve();
     expect(resolved).toBe(false);
 
-    // 4번째 완료 → resolve
-    settingsCb?.();
+    // 7번째 완료 → resolve
+    taxCb?.();
     await promise;
     expect(resolved).toBe(true);
   });
@@ -186,6 +233,9 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
       jest.spyOn(useFavoritesStore, 'setState'),
       jest.spyOn(useRecentStore, 'setState'),
       jest.spyOn(useSettingsStore, 'setState'),
+      jest.spyOn(useRentChoiceStore, 'setState'),
+      jest.spyOn(useTuitionChoiceStore, 'setState'),
+      jest.spyOn(useTaxChoiceStore, 'setState'),
     ];
   });
 
@@ -219,15 +269,21 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
     setStateSpies.slice(1).forEach((spy) => expect(spy).not.toHaveBeenCalled());
   });
 
-  it('4 store 모두 미완 + timeout → 4 store 모두 INITIAL_STATE 강제', async () => {
-    [usePersonaStore, useFavoritesStore, useRecentStore, useSettingsStore].forEach(
-      (store) => {
-        jest.spyOn(store.persist, 'hasHydrated').mockReturnValue(false);
-        jest
-          .spyOn(store.persist, 'onFinishHydration')
-          .mockImplementation(() => () => {});
-      },
-    );
+  it('7 store 모두 미완 + timeout → 7 store 모두 INITIAL_STATE 강제', async () => {
+    [
+      usePersonaStore,
+      useFavoritesStore,
+      useRecentStore,
+      useSettingsStore,
+      useRentChoiceStore,
+      useTuitionChoiceStore,
+      useTaxChoiceStore,
+    ].forEach((store) => {
+      jest.spyOn(store.persist, 'hasHydrated').mockReturnValue(false);
+      jest
+        .spyOn(store.persist, 'onFinishHydration')
+        .mockImplementation(() => () => {});
+    });
 
     const promise = waitForStoresOrTimeout(100);
     await jest.advanceTimersByTimeAsync(150);
@@ -238,6 +294,9 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
     expect(setStateSpies[1]).toHaveBeenCalledWith(FAVORITES_INITIAL);
     expect(setStateSpies[2]).toHaveBeenCalledWith(RECENT_INITIAL);
     expect(setStateSpies[3]).toHaveBeenCalledWith(SETTINGS_INITIAL);
+    expect(setStateSpies[4]).toHaveBeenCalledWith(RENT_CHOICE_INITIAL);
+    expect(setStateSpies[5]).toHaveBeenCalledWith(TUITION_CHOICE_INITIAL);
+    expect(setStateSpies[6]).toHaveBeenCalledWith(TAX_CHOICE_INITIAL);
   });
 
   it('timeout 만료 후에도 정상 hydrated store 는 fallback 에서 보존', async () => {
@@ -294,14 +353,20 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
   });
 
   it('default timeout (인자 미제공) → DEFAULT_HYDRATION_TIMEOUT_MS 적용', async () => {
-    [usePersonaStore, useFavoritesStore, useRecentStore, useSettingsStore].forEach(
-      (store) => {
-        jest.spyOn(store.persist, 'hasHydrated').mockReturnValue(false);
-        jest
-          .spyOn(store.persist, 'onFinishHydration')
-          .mockImplementation(() => () => {});
-      },
-    );
+    [
+      usePersonaStore,
+      useFavoritesStore,
+      useRecentStore,
+      useSettingsStore,
+      useRentChoiceStore,
+      useTuitionChoiceStore,
+      useTaxChoiceStore,
+    ].forEach((store) => {
+      jest.spyOn(store.persist, 'hasHydrated').mockReturnValue(false);
+      jest
+        .spyOn(store.persist, 'onFinishHydration')
+        .mockImplementation(() => () => {});
+    });
 
     const promise = waitForStoresOrTimeout();
     await jest.advanceTimersByTimeAsync(DEFAULT_HYDRATION_TIMEOUT_MS + 10);

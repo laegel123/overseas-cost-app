@@ -133,6 +133,12 @@ export const FAV_CARD_SUB_OPACITY = 0.7;
 export const FAV_CARD_LABEL_OPACITY = 0.6;
 
 /**
+ * BottomSheet backdrop 색상 — navy 0.4 alpha. NativeWind className 으로
+ * alpha 표현이 어려워 inline style 로 적용. ADR-061 (시트 컴포넌트 도입).
+ */
+export const SHEET_BACKDROP_COLOR = 'rgba(17, 38, 60, 0.4)' as const;
+
+/**
  * RN fontFamily raw 이름 — `useFonts` / `assets/fonts` / tailwind config 의
  * fontFamily alias 와 1:1 일치. NativeWind className 으로 처리할 수 없는
  * inline style override 시 본 상수만 사용 (매직 스트링 방지).

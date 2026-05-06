@@ -15,7 +15,7 @@ import {
   getLastSync as mockGetLastSync,
   loadAllCities as mockLoadAllCities,
 } from '@/lib';
-import { useRentChoiceStore } from '@/store';
+import { useRentChoiceStore, useTaxChoiceStore, useTuitionChoiceStore } from '@/store';
 
 import { seoulValid } from '../../../src/__fixtures__/cities/seoul-valid';
 import { vancouverValid } from '../../../src/__fixtures__/cities/vancouver-valid';
@@ -93,8 +93,10 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockCanGoBack.mockReturnValue(true);
   jest.useRealTimers();
-  // ADR-060 — rentChoice store 는 전역 영속 store. 테스트 격리 위해 reset.
+  // ADR-060 / ADR-061 — 단일 선택 store 들. 테스트 격리 위해 reset.
   useRentChoiceStore.getState().reset();
+  useTuitionChoiceStore.getState().reset();
+  useTaxChoiceStore.getState().reset();
 });
 
 afterEach(() => {
@@ -335,21 +337,150 @@ describe('DetailScreen', () => {
     });
   });
 
-  describe('tuition 카테고리', () => {
-    it('도시 데이터 있는 경우 학교 섹션', async () => {
+  describe('tuition 카테고리 (ADR-061: 단일 선택 + 시트)', () => {
+    it('도시 데이터 있는 경우 학교 섹션 + 1 row (선택된 학교)', async () => {
       setupMocks({ category: 'tuition' });
       render(<DetailScreen />);
       await flush();
       expect(screen.getByTestId('detail-section-학교 (월 환산)')).toBeTruthy();
+      // 첫 entry fallback — UBC (vancouver fixture)
+      expect(screen.getByTestId('detail-row-tuition-UBC')).toBeTruthy();
+      // 다른 학교 (SFU) 는 노출 안 됨 (단일 선택 1 row)
+      expect(screen.queryByTestId('detail-row-tuition-SFU')).toBeNull();
+    });
+
+    it('서울 학비 데이터 부재 — seoulVal=0 정책 (한국 거주 기준)', async () => {
+      // seoul 에 tuition 없음 — 기본 fixture 그대로
+      setupMocks({ category: 'tuition' });
+      render(<DetailScreen />);
+      await flush();
+      // 서울 0원 → cityVal/seoulVal=∞ → '신규' 처리, 단 hero 에는 도시 단가만.
+      // 서울 가격이 "0원" 으로 row 에 표시되는지 확인.
+      const row = screen.getByTestId('detail-row-tuition-UBC');
+      expect(row).toBeTruthy();
+    });
+
+    it('preset 변경 — store 갱신 시 다른 학교가 row 로 표시', async () => {
+      setupMocks({ category: 'tuition' });
+      render(<DetailScreen />);
+      await flush();
+      expect(screen.getByTestId('detail-row-tuition-UBC')).toBeTruthy();
+
+      await act(async () => {
+        useTuitionChoiceStore
+          .getState()
+          .setTuitionChoice('vancouver', { kind: 'preset', school: 'SFU' });
+      });
+
+      expect(screen.getByTestId('detail-row-tuition-SFU')).toBeTruthy();
+      expect(screen.queryByTestId('detail-row-tuition-UBC')).toBeNull();
+    });
+
+    it('custom 입력값 적용 시 row 가 "직접 입력" 으로 표시', async () => {
+      setupMocks({ category: 'tuition' });
+      render(<DetailScreen />);
+      await flush();
+
+      await act(async () => {
+        useTuitionChoiceStore
+          .getState()
+          .setTuitionChoice('vancouver', { kind: 'custom', annual: 30000 });
+      });
+
+      const customRow = screen.getByTestId('detail-row-tuition-custom');
+      expect(within(customRow).getByText('직접 입력')).toBeTruthy();
+    });
+
+    it('row 탭 → 시트 visible (sheet body 노출)', async () => {
+      setupMocks({ category: 'tuition' });
+      render(<DetailScreen />);
+      await flush();
+      // 시트는 처음엔 닫힘
+      expect(screen.queryByTestId('detail-tuition-sheet-body')).toBeNull();
+      fireEvent.press(screen.getByTestId('detail-row-tuition-UBC'));
+      expect(screen.getByTestId('detail-tuition-sheet-body')).toBeTruthy();
+    });
+
+    it('도시에 tuition 데이터 없음 → emptyText + "직접 입력" 버튼', async () => {
+      const { tuition: _drop, ...rest } = vancouverValid;
+      setupMocks({
+        category: 'tuition',
+        city: rest as typeof vancouverValid,
+      });
+      render(<DetailScreen />);
+      await flush();
+      expect(
+        screen.getByText('학비 데이터가 아직 준비되지 않았어요.'),
+      ).toBeTruthy();
+      // empty 상태에도 직접 입력 버튼 노출
+      expect(screen.getByTestId('detail-picker-empty-tuition')).toBeTruthy();
+    });
+
+    it('hero footer = "선택된 항목 기준 (탭으로 변경)"', async () => {
+      setupMocks({ category: 'tuition' });
+      render(<DetailScreen />);
+      await flush();
+      const footer = screen.getByTestId('detail-hero-footer');
+      expect(within(footer).getByText('선택된 항목 기준 (탭으로 변경)')).toBeTruthy();
     });
   });
 
-  describe('tax 카테고리', () => {
-    it('월 세금 섹션 mount', async () => {
+  describe('tax 카테고리 (ADR-061: 단일 선택 + 시트)', () => {
+    it('월 세금 섹션 + 1 row (첫 연봉 tier)', async () => {
       setupMocks({ category: 'tax' });
       render(<DetailScreen />);
       await flush();
       expect(screen.getByTestId('detail-section-월 세금 (대략)')).toBeTruthy();
+      expect(screen.getByTestId('detail-row-tax-60000')).toBeTruthy();
+      expect(screen.queryByTestId('detail-row-tax-80000')).toBeNull();
+    });
+
+    it('preset 변경 → 다른 연봉 tier 의 row 로 변경', async () => {
+      setupMocks({ category: 'tax' });
+      render(<DetailScreen />);
+      await flush();
+      expect(screen.getByTestId('detail-row-tax-60000')).toBeTruthy();
+      await act(async () => {
+        useTaxChoiceStore
+          .getState()
+          .setTaxChoice('vancouver', { kind: 'preset', annualSalary: 80000 });
+      });
+      expect(screen.getByTestId('detail-row-tax-80000')).toBeTruthy();
+      expect(screen.queryByTestId('detail-row-tax-60000')).toBeNull();
+    });
+
+    it('custom 입력 → row 가 "(직접 입력)" 라벨', async () => {
+      setupMocks({ category: 'tax' });
+      render(<DetailScreen />);
+      await flush();
+      await act(async () => {
+        useTaxChoiceStore
+          .getState()
+          .setTaxChoice('vancouver', { kind: 'custom', annualSalary: 75000 });
+      });
+      expect(screen.getByTestId('detail-row-tax-custom')).toBeTruthy();
+    });
+
+    it('row 탭 → 세금 시트 visible', async () => {
+      setupMocks({ category: 'tax' });
+      render(<DetailScreen />);
+      await flush();
+      expect(screen.queryByTestId('detail-tax-sheet-body')).toBeNull();
+      fireEvent.press(screen.getByTestId('detail-row-tax-60000'));
+      expect(screen.getByTestId('detail-tax-sheet-body')).toBeTruthy();
+    });
+
+    it('도시에 tax 데이터 없음 → emptyText', async () => {
+      const { tax: _drop, ...rest } = vancouverValid;
+      setupMocks({
+        category: 'tax',
+        city: rest as typeof vancouverValid,
+      });
+      render(<DetailScreen />);
+      await flush();
+      expect(
+        screen.getByText('세금 데이터가 아직 준비되지 않았어요.'),
+      ).toBeTruthy();
     });
   });
 

@@ -32,6 +32,14 @@ import {
   INITIAL_STATE as SETTINGS_INITIAL,
   useSettingsStore,
 } from './settings';
+import {
+  INITIAL_STATE as TAX_CHOICE_INITIAL,
+  useTaxChoiceStore,
+} from './taxChoice';
+import {
+  INITIAL_STATE as TUITION_CHOICE_INITIAL,
+  useTuitionChoiceStore,
+} from './tuitionChoice';
 
 type PersistStoreLike<S> = {
   persist: {
@@ -57,6 +65,8 @@ export function waitForAllStoresHydrated(): Promise<void> {
     waitOne(useRecentStore),
     waitOne(useSettingsStore),
     waitOne(useRentChoiceStore),
+    waitOne(useTuitionChoiceStore),
+    waitOne(useTaxChoiceStore),
   ]).then(() => undefined);
 }
 
@@ -120,5 +130,11 @@ function forceInitialOnUnhydratedStores(): void {
   }
   if (!useRentChoiceStore.persist.hasHydrated()) {
     useRentChoiceStore.setState(RENT_CHOICE_INITIAL);
+  }
+  if (!useTuitionChoiceStore.persist.hasHydrated()) {
+    useTuitionChoiceStore.setState(TUITION_CHOICE_INITIAL);
+  }
+  if (!useTaxChoiceStore.persist.hasHydrated()) {
+    useTaxChoiceStore.setState(TAX_CHOICE_INITIAL);
   }
 }
