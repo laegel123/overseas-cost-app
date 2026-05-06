@@ -31,6 +31,34 @@ jobs:
         with:
           fetch-depth: 1
 
+      # 워크어라운드 (anthropics/claude-code-action#1242 / #1260) — v1.0.100+ 의
+      # `curl claude.ai/install.sh | bash` 가 silent fail (no pipefail) 하면
+      # 액션 안의 SDK 가 `~/.local/bin/claude` 부재로 ReferenceError 로 죽는다.
+      # 액션 step 전에 명시적으로 설치 → 이후 액션의 install 재시도가 실패해도
+      # 우리 바이너리가 살아남아 SDK 가 정상 동작.
+      # #1260 머지 (SDK bundled binary fallback) 후 본 step 제거.
+      - name: Pre-install Claude Code (workaround anthropics/claude-code-action#1242)
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.local/bin"
+          # 1차: 공식 install.sh (액션이 쓰는 것과 동일) — 단 strict 에러 처리.
+          if curl -fsSL https://claude.ai/install.sh -o /tmp/claude-install.sh \
+            && bash /tmp/claude-install.sh \
+            && [ -x "$HOME/.local/bin/claude" ]; then
+            echo "✓ installed via claude.ai/install.sh"
+          else
+            echo "install.sh failed; falling back to npm" >&2
+            npm install -g @anthropic-ai/claude-code
+            CLAUDE_BIN="$(command -v claude || true)"
+            if [ -z "$CLAUDE_BIN" ] || [ ! -x "$CLAUDE_BIN" ]; then
+              echo "✗ npm fallback also failed to provide claude binary" >&2
+              exit 1
+            fi
+            ln -sf "$CLAUDE_BIN" "$HOME/.local/bin/claude"
+            echo "✓ installed via npm + symlink"
+          fi
+          "$HOME/.local/bin/claude" --version
+
       - name: Run Claude Code Review
         uses: anthropics/claude-code-action@v1
         with:
