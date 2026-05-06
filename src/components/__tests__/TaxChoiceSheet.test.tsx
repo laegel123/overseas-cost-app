@@ -115,4 +115,26 @@ describe('TaxChoiceSheet', () => {
       screen.getByText('이 도시는 세율 데이터가 없어 직접 입력이 지원되지 않아요.'),
     ).toBeTruthy();
   });
+
+  // PR #25 5차 review — entries=0 일 때 구분선이 빈 영역 위에 단독 렌더되는
+  // 시각적 회귀 방지. entries>0 분기에서만 구분선이 노출되어야 한다.
+  it('cityTax 부재 → 구분선 미렌더', () => {
+    render(
+      <TaxChoiceSheet
+        visible
+        onDismiss={jest.fn()}
+        cityId="someCity"
+        cityCurrency="USD"
+        cityTax={undefined}
+        fx={fx}
+        testID="sheet"
+      />,
+    );
+    expect(screen.queryByTestId('sheet-divider')).toBeNull();
+  });
+
+  it('cityTax entries 존재 → 구분선 렌더', () => {
+    renderSheet();
+    expect(screen.getByTestId('sheet-divider')).toBeTruthy();
+  });
 });

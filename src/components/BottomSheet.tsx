@@ -52,7 +52,7 @@ export function BottomSheet({
       transparent
       animationType="slide"
       onRequestClose={onDismiss}
-      {...(testID !== undefined ? { testID } : {})}
+      testID={testID}
     >
       {/* Backdrop — 탭으로 dismiss */}
       <Pressable

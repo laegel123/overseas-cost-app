@@ -1716,6 +1716,9 @@ useTuitionChoiceStore 와 양방향 — 선택값에 따라 시트 진입 모드
 - [x] 0 / 음수 입력 → save 무시
 - [x] 현재 선택이 custom → 시트가 custom 모드로 시작
 - [x] 초기화 → 도시 entry 제거 + list 복귀
+- [x] cityTax 부재 → custom 행 미렌더 + 안내 문구 노출 (PR #25 3차 review)
+- [x] cityTax 부재 → 구분선 미렌더 (PR #25 5차 review)
+- [x] cityTax entries 존재 → 구분선 렌더 (PR #25 5차 review)
 
 ### 9.20.3 `src/store/lastSyncBridge.ts` (app-shell phase step 4)
 

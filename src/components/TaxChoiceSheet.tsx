@@ -15,6 +15,8 @@ import {
   View,
 } from 'react-native';
 
+import { useShallow } from 'zustand/react/shallow';
+
 import { convertToKRW, formatKRW } from '@/lib';
 import { resolveTaxChoice, useTaxChoiceStore } from '@/store';
 import { colors } from '@/theme/tokens';
@@ -44,9 +46,13 @@ export function TaxChoiceSheet({
   fx,
   testID,
 }: TaxChoiceSheetProps): React.ReactElement {
-  const choice = useTaxChoiceStore((s) => s.choices[cityId]);
-  const setChoice = useTaxChoiceStore((s) => s.setTaxChoice);
-  const clearChoice = useTaxChoiceStore((s) => s.clearTaxChoice);
+  const { choice, setChoice, clearChoice } = useTaxChoiceStore(
+    useShallow((s) => ({
+      choice: s.choices[cityId],
+      setChoice: s.setTaxChoice,
+      clearChoice: s.clearTaxChoice,
+    })),
+  );
 
   const resolved = resolveTaxChoice(cityTax, choice);
 
@@ -151,7 +157,12 @@ export function TaxChoiceSheet({
             );
           })}
 
-          <View className="border-t border-line my-2" />
+          {entries.length > 0 ? (
+            <View
+              className="border-t border-line my-2"
+              testID={testID !== undefined ? `${testID}-divider` : undefined}
+            />
+          ) : null}
 
           {/*
             PR #25 3차 review — tax custom 은 takeHomePctApprox 차용을 위해

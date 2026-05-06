@@ -17,6 +17,8 @@ import {
   View,
 } from 'react-native';
 
+import { useShallow } from 'zustand/react/shallow';
+
 import { convertToKRW, formatKRW } from '@/lib';
 import { resolveTuitionChoice, useTuitionChoiceStore } from '@/store';
 import { colors } from '@/theme/tokens';
@@ -46,9 +48,13 @@ export function TuitionChoiceSheet({
   fx,
   testID,
 }: TuitionChoiceSheetProps): React.ReactElement {
-  const choice = useTuitionChoiceStore((s) => s.choices[cityId]);
-  const setChoice = useTuitionChoiceStore((s) => s.setTuitionChoice);
-  const clearChoice = useTuitionChoiceStore((s) => s.clearTuitionChoice);
+  const { choice, setChoice, clearChoice } = useTuitionChoiceStore(
+    useShallow((s) => ({
+      choice: s.choices[cityId],
+      setChoice: s.setTuitionChoice,
+      clearChoice: s.clearTuitionChoice,
+    })),
+  );
 
   const resolved = resolveTuitionChoice(cityTuition, choice);
 
