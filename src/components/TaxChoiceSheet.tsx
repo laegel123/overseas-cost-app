@@ -78,9 +78,15 @@ export function TaxChoiceSheet({
   };
 
   const handleClearCustom = () => {
-    if (entries.length > 0) clearChoice(cityId);
+    // entries 유무와 무관하게 choice 제거 — stale custom 으로 인한 무한 custom
+    // 모드 진입 방지 (PR #25 2차 review).
+    clearChoice(cityId);
     setMode('list');
   };
+
+  // custom 모드 입력 유효성 — 렌더당 1회 평가 (PR #25 2차 review: IIFE 제거).
+  const draftNum = Number(draft);
+  const isValidDraft = Number.isFinite(draftNum) && draftNum > 0;
 
   return (
     <BottomSheet
@@ -186,11 +192,7 @@ export function TaxChoiceSheet({
             </View>
           </Pressable>
         </ScrollView>
-      ) : (() => {
-        // PR #25 review — Number(draft) 가 렌더마다 3회 평가되던 것을 1회로.
-        const draftNum = Number(draft);
-        const isValidDraft = Number.isFinite(draftNum) && draftNum > 0;
-        return (
+      ) : (
         <View className="gap-4">
           <View className="gap-1">
             <Small color="navy" className="font-manrope-bold">
@@ -249,8 +251,7 @@ export function TaxChoiceSheet({
             </Pressable>
           ) : null}
         </View>
-        );
-      })()}
+      )}
     </BottomSheet>
   );
 }

@@ -59,6 +59,20 @@ describe('기본 동작', () => {
     });
   });
 
+  // PR #25 2차 review — tuitionChoice 와 동일한 도시별 독립 제거 케이스.
+  it("clearTaxChoice('vancouver') → 그 도시만 제거 (다른 도시 보존)", () => {
+    useTaxChoiceStore
+      .getState()
+      .setTaxChoice('vancouver', { kind: 'preset', annualSalary: 60000 });
+    useTaxChoiceStore
+      .getState()
+      .setTaxChoice('nyc', { kind: 'custom', annualSalary: 90000 });
+    useTaxChoiceStore.getState().clearTaxChoice('vancouver');
+    expect(useTaxChoiceStore.getState().choices).toEqual({
+      nyc: { kind: 'custom', annualSalary: 90000 },
+    });
+  });
+
   it('clearTaxChoice 미존재 cityId → no-op', () => {
     useTaxChoiceStore
       .getState()

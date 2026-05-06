@@ -169,4 +169,30 @@ describe('TuitionChoiceSheet', () => {
       annual: 5000,
     });
   });
+
+  // PR #25 2차 review — entries 없는 도시에서 custom 저장 후 초기화 시
+  // store entry 가 stale 로 남던 무한 custom 모드 진입 버그 회귀 방지.
+  it('cityTuition undefined + custom 저장 → 초기화 → store 에서 entry 제거', () => {
+    act(() => {
+      useTuitionChoiceStore
+        .getState()
+        .setTuitionChoice('paris', { kind: 'custom', annual: 9000 });
+    });
+    render(
+      <TuitionChoiceSheet
+        visible
+        onDismiss={jest.fn()}
+        cityId="paris"
+        cityCurrency="EUR"
+        cityTuition={undefined}
+        fx={fx}
+        testID="sheet"
+      />,
+    );
+    // custom 모드로 진입
+    expect(screen.getByTestId('sheet-custom-input')).toBeTruthy();
+    fireEvent.press(screen.getByTestId('sheet-clear'));
+    expect(useTuitionChoiceStore.getState().choices.paris).toBeUndefined();
+    expect(screen.queryByTestId('sheet-custom-input')).toBeNull();
+  });
 });

@@ -81,13 +81,17 @@ export function TuitionChoiceSheet({
   };
 
   const handleClearCustom = () => {
-    if (entries.length > 0) {
-      // 첫 entry 로 fallback 시키려면 choice 자체를 제거 (resolveTuitionChoice
-      // 가 entries[0] 로 fallback).
-      clearChoice(cityId);
-    }
+    // entries 유무와 무관하게 항상 choice 제거 — entries 가 있으면
+    // resolveTuitionChoice 가 entries[0] 로 fallback 하고, 없어도 store 에 stale
+    // custom 이 남아 시트 재오픈 시 custom 모드 자동 진입하는 무한 loop 방지
+    // (PR #25 2차 review).
+    clearChoice(cityId);
     setMode('list');
   };
+
+  // custom 모드 입력 유효성 — 렌더당 1회 평가 (PR #25 2차 review: IIFE 제거).
+  const draftNum = Number(draft);
+  const isValidDraft = Number.isFinite(draftNum) && draftNum > 0;
 
   return (
     <BottomSheet
@@ -180,11 +184,7 @@ export function TuitionChoiceSheet({
             </View>
           </Pressable>
         </ScrollView>
-      ) : (() => {
-        // PR #25 review — Number(draft) 가 렌더마다 3회 평가되던 것을 1회로.
-        const draftNum = Number(draft);
-        const isValidDraft = Number.isFinite(draftNum) && draftNum > 0;
-        return (
+      ) : (
         <View className="gap-4">
           <View className="gap-1">
             <Small color="navy" className="font-manrope-bold">
@@ -243,8 +243,7 @@ export function TuitionChoiceSheet({
             </Pressable>
           ) : null}
         </View>
-        );
-      })()}
+      )}
     </BottomSheet>
   );
 }

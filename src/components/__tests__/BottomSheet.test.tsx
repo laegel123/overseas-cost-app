@@ -51,4 +51,17 @@ describe('BottomSheet', () => {
     fireEvent.press(screen.getByTestId('sheet-backdrop'));
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });
+
+  // PR #25 2차 review — 시트 body 탭은 backdrop 으로 전파되어 dismiss 되면
+  // 안 됨. body 의 빈 onPress 가 이벤트 캡처 역할 (UX 보존).
+  it('시트 body 탭 → onDismiss 미호출', () => {
+    const onDismiss = jest.fn();
+    render(
+      <BottomSheet visible onDismiss={onDismiss} title="시트" testID="sheet">
+        <View testID="sheet-content" />
+      </BottomSheet>,
+    );
+    fireEvent.press(screen.getByTestId('sheet-body'));
+    expect(onDismiss).not.toHaveBeenCalled();
+  });
 });
