@@ -13,6 +13,8 @@ import { ActivityIndicator, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { useShallow } from 'zustand/react/shallow';
+
 import { HeroCard } from '@/components/cards/HeroCard';
 import { ErrorView } from '@/components/ErrorView';
 import { GroceryRow } from '@/components/GroceryRow';
@@ -31,7 +33,7 @@ import {
   getLastSync,
   loadAllCities,
 } from '@/lib';
-import { useRentChoiceStore } from '@/store';
+import { resolveRentChoice, useRentChoiceStore } from '@/store';
 import type { RentChoice } from '@/store';
 import { colors } from '@/theme/tokens';
 import type {
@@ -307,8 +309,10 @@ export default function DetailScreen(): React.ReactElement {
   // selectable section (현재 rent 만) 의 선택 행 키. 기본값 'share' (셰어하우스).
   // 사용자가 다른 주거 형태를 탭하면 store 가 갱신되고, Compare 화면 hero / 월세
   // 카드도 같은 키 기준으로 같이 갱신된다 (ADR-060). 영속화는 store 책임.
-  const rentChoice = useRentChoiceStore((s) => s.rentChoice);
-  const setRentChoice = useRentChoiceStore((s) => s.setRentChoice);
+  // useShallow 로 단일 구독 (PR #24 review — 두 번 구독 정리).
+  const { rentChoice, setRentChoice } = useRentChoiceStore(
+    useShallow((s) => ({ rentChoice: s.rentChoice, setRentChoice: s.setRentChoice })),
+  );
 
   const handleBack = React.useCallback(() => {
     if (router.canGoBack()) {
@@ -396,13 +400,17 @@ export default function DetailScreen(): React.ReactElement {
   const sections = buildSections(cat, seoul, city, fx);
 
   // selectable section (rent) — hero 는 "선택된 행 1 개 기준" 으로 비교.
-  // store 의 rentChoice 가 현재 rows 에 없으면 (도시 데이터 결측 — 예: 셰어
-  // 하우스 데이터 없음) 첫 행으로 fallback. Compare 의 resolveRentChoice 와
-  // fallback 정책 일치 (ADR-060).
+  // store 의 rentChoice 가 도시에 결측이면 resolveRentChoice 가 fallback 키
+  // (share → studio → oneBed → twoBed) 를 결정 — Compare 와 동일 정책 (ADR-060,
+  // PR #24 review 이슈 1). rows 자체는 (sRaw === null || cRaw === null) 행이
+  // 이미 제외돼 있으므로, resolved key 가 rows 에 없는 극단 케이스 (city 에
+  // 있고 seoul 에 없는 형태) 는 rows[0] 로 안전 fallback.
   const selectableSection = sections.find((s) => s.selectable);
+  const resolvedRentKey =
+    selectableSection !== undefined ? resolveRentChoice(city.rent, rentChoice)?.key : undefined;
   const selectedRow =
     selectableSection !== undefined
-      ? selectableSection.rows.find((r) => r.key === rentChoice) ??
+      ? selectableSection.rows.find((r) => r.key === resolvedRentKey) ??
         selectableSection.rows[0]
       : undefined;
 

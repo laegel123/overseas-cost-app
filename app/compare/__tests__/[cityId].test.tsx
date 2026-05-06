@@ -429,5 +429,52 @@ describe('CompareScreen', () => {
       // share 로 fallback — 93.1만원
       expect(within(rentCard).getByText('93.1만원')).toBeTruthy();
     });
+
+    // PR #24 review 이슈 2 — 두 도시가 각각 fallback 하면 "서울 oneBed vs 도시
+    // share" 같은 의미 없는 비교가 발생할 수 있다. city 기준 resolved key 를
+    // 1 회 결정 후 양쪽에 같은 key 강제 적용하는지 회귀 검증.
+    it('city.oneBed=null 이고 store=oneBed → 양쪽 모두 share 기준 (서울 oneBed 사용 안 함)', async () => {
+      useRentChoiceStore.getState().setRentChoice('oneBed');
+      const cityWithNoOneBed = {
+        ...vancouverValid,
+        rent: { ...vancouverValid.rent, oneBed: null },
+      };
+      setupMocks({ city: cityWithNoOneBed });
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const rentCard = getByTestId('compare-pair-rent');
+      // 서울도 share 기준 (35만원) — seoul.oneBed (120만원) 가 노출되면 안 됨
+      expect(within(rentCard).getByText('35만원')).toBeTruthy();
+      expect(within(rentCard).getByText('93.1만원')).toBeTruthy();
+      expect(within(rentCard).queryByText('120만원')).toBeNull();
+    });
+
+    // PR #24 review 이슈 3 — 마운트된 상태에서 store 변경 → 화면 실시간 갱신.
+    // 기존 테스트는 모두 "mount 전 store 설정 → mount" 패턴이라 reactive 동작이
+    // 검증되지 않음.
+    it('마운트된 상태에서 store rentChoice 변경 → Compare 월세 카드 실시간 갱신', async () => {
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // 초기: share 기준
+      let rentCard = getByTestId('compare-pair-rent');
+      expect(within(rentCard).getByText('35만원')).toBeTruthy();
+      expect(within(rentCard).getByText('93.1만원')).toBeTruthy();
+
+      // store 변경 (Detail 화면에서 탭한 것과 동일 효과)
+      await act(async () => {
+        useRentChoiceStore.getState().setRentChoice('oneBed');
+      });
+
+      rentCard = getByTestId('compare-pair-rent');
+      expect(within(rentCard).getByText('120만원')).toBeTruthy();
+      expect(within(rentCard).getByText('225.4만원')).toBeTruthy();
+    });
   });
 });

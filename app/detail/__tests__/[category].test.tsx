@@ -242,6 +242,27 @@ describe('DetailScreen', () => {
       expect(screen.getByTestId('detail-row-oneBed').props.className).toContain('bg-orange');
     });
 
+    // PR #24 review 이슈 1 — Detail 의 selectedRow fallback 이 resolveRentChoice
+    // 정책 (share → studio → oneBed → twoBed) 을 따르는지. 단순 rows[0] fallback
+    // 이면 RENT_ROWS 정의 순서가 달라질 때 silently 어긋날 수 있다.
+    it('store=oneBed + city.oneBed=null → resolveRentChoice fallback 으로 share 선택 강조', async () => {
+      useRentChoiceStore.getState().setRentChoice('oneBed');
+      const cityWithNoOneBed = {
+        ...vancouverValid,
+        rent: { ...vancouverValid.rent, oneBed: null },
+      };
+      setupMocks({ category: 'rent', city: cityWithNoOneBed });
+      render(<DetailScreen />);
+      await flush();
+
+      const hero = screen.getByTestId('detail-hero');
+      expect(within(hero).getByText('35만원')).toBeTruthy();
+      expect(within(hero).getByText('93.1만원')).toBeTruthy();
+      expect(screen.getByTestId('detail-row-share').props.className).toContain('bg-orange');
+      // oneBed 행은 cRaw null 로 rows 에서 제외 (selectableSection.rows 빌드 단계)
+      expect(screen.queryByTestId('detail-row-oneBed')).toBeNull();
+    });
+
     it('store 에 oneBed 가 미리 박혀 있으면 hero 가 oneBed 기준으로 mount (영속화 — ADR-060)', async () => {
       useRentChoiceStore.getState().setRentChoice('oneBed');
       setupMocks({ category: 'rent' });
