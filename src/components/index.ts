@@ -39,6 +39,15 @@ export { ErrorBoundary } from './ErrorBoundary';
 export { ErrorView } from './ErrorView';
 export type { ErrorViewProps, ErrorViewVariant } from './ErrorView';
 
+export { BottomSheet } from './BottomSheet';
+export type { BottomSheetProps } from './BottomSheet';
+
+export { TuitionChoiceSheet } from './TuitionChoiceSheet';
+export type { TuitionChoiceSheetProps } from './TuitionChoiceSheet';
+
+export { TaxChoiceSheet } from './TaxChoiceSheet';
+export type { TaxChoiceSheetProps } from './TaxChoiceSheet';
+
 export {
   Body,
   Display,

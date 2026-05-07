@@ -1,11 +1,12 @@
 /**
  * Zustand 스토어의 단일 진입점.
  *
- * 5 도메인 store — 단일 거대 스토어 금지 (ARCHITECTURE.md §상태 관리, ADR-004).
- * 컴포넌트는 본 인덱스에서 import:
+ * 7 도메인 store (persona / favorites / recent / settings / rentChoice /
+ * tuitionChoice / taxChoice) — 단일 거대 스토어 금지 (ARCHITECTURE.md §상태
+ * 관리, ADR-004). 컴포넌트는 본 인덱스에서 import:
  *   import { usePersonaStore, useFavoritesStore } from '@/store';
  *
- * 부트로더 (app-shell phase) 는 5 store 의 hydration 을 동시 await:
+ * 부트로더 (app-shell phase) 는 7 store 의 hydration 을 동시 await:
  *   await waitForAllStoresHydrated();
  */
 
@@ -27,6 +28,26 @@ export type {
   RentChoiceActions,
   RentChoiceState,
 } from './rentChoice';
+export {
+  resolveTuitionChoice,
+  useTuitionChoiceStore,
+} from './tuitionChoice';
+export type {
+  ResolvedTuition,
+  TuitionChoice,
+  TuitionChoiceActions,
+  TuitionChoiceState,
+} from './tuitionChoice';
+export {
+  resolveTaxChoice,
+  useTaxChoiceStore,
+} from './taxChoice';
+export type {
+  ResolvedTax,
+  TaxChoice,
+  TaxChoiceActions,
+  TaxChoiceState,
+} from './taxChoice';
 
 export {
   DEFAULT_HYDRATION_TIMEOUT_MS,

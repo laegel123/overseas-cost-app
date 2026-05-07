@@ -29,8 +29,15 @@ import {
   isHot,
   loadAllCities,
 } from '@/lib';
-import { resolveRentChoice, useRentChoiceStore } from '@/store';
-import type { RentChoice } from '@/store';
+import {
+  resolveRentChoice,
+  resolveTaxChoice,
+  resolveTuitionChoice,
+  useRentChoiceStore,
+  useTaxChoiceStore,
+  useTuitionChoiceStore,
+} from '@/store';
+import type { RentChoice, TaxChoice, TuitionChoice } from '@/store';
 import { useFavoritesStore } from '@/store/favorites';
 import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
@@ -46,14 +53,17 @@ type CategoryConfig = {
   category: SourceCategory;
   label: string;
   /**
-   * 카테고리 월 비용 (KRW). rent 만 사용자 선택 (`rentChoice`) 에 따라 값이
-   * 바뀌고, 다른 카테고리는 인자를 무시한다. ADR-060 — Detail 에서 바꾼
-   * 주거 형태가 Compare hero / 월세 카드에도 같이 반영되도록 단일 출처화.
+   * 카테고리 월 비용 (KRW). 사용자 선택 (`rentChoice` / `tuitionChoice` /
+   * `taxChoice`) 에 따라 값이 바뀜 — Detail 의 단일 선택이 Compare hero / 카드
+   * 에도 그대로 반영되도록 단일 출처화 (ADR-060 / ADR-061). 다른 카테고리는
+   * 무시하는 인자도 항상 전달 — 호출부 일관성 유지.
    */
   getValue: (
     city: CityCostData,
     fx: ExchangeRates,
     rentChoice: RentChoice,
+    tuitionChoice: TuitionChoice | undefined,
+    taxChoice: TaxChoice | undefined,
   ) => number | null;
 };
 
@@ -107,24 +117,32 @@ const TRANSPORT_CONFIG: CategoryConfig = {
 const TUITION_CONFIG: CategoryConfig = {
   category: 'tuition',
   label: '학비',
-  getValue: (city, fx) => {
+  // ADR-061 — Detail 에서 선택한 학교 (preset) 또는 직접 입력값을 동일 단일
+  // 출처에서 적용. 미선택이면 첫 entry fallback. 도시 데이터 결측 → null.
+  // PR #25 3차 review — Compare 가 seoul 도 동일 호출에 통과하므로, entries 가
+  // 비어있으면 (서울 정책 + 도시 데이터 미보유) tuitionChoice 의 custom kind 가
+  // 의도치 않게 통과하지 않도록 짧게 null 반환. resolveTuitionChoice 자체는
+  // sheet 컨텍스트에서 custom 을 entries 와 무관하게 허용하는 의도가 있어
+  // 호출부에서 가드.
+  getValue: (city, fx, _rentChoice, tuitionChoice) => {
     if (!city.tuition || city.tuition.length === 0) return null;
-    const entry = city.tuition[0];
-    if (!entry) return null;
-    const monthly = entry.annual / 12;
-    return convertToKRW(monthly, city.currency, fx);
+    const resolved = resolveTuitionChoice(city.tuition, tuitionChoice);
+    if (resolved === null) return null;
+    return convertToKRW(resolved.annual / 12, city.currency, fx);
   },
 };
 
 const TAX_CONFIG: CategoryConfig = {
   category: 'tax',
   label: '세금',
-  getValue: (city, fx) => {
-    if (!city.tax || city.tax.length === 0) return null;
-    const entry = city.tax[0];
-    if (!entry) return null;
-    const monthlySalary = entry.annualSalary / 12;
-    const tax = monthlySalary * (1 - entry.takeHomePctApprox / 100);
+  // ADR-061 — Detail 에서 선택한 연봉 tier 또는 직접 입력값. 도시 첫 preset 의
+  // takeHomePctApprox 사용 (custom 일 때).
+  getValue: (city, fx, _rentChoice, _tuitionChoice, taxChoice) => {
+    const resolved = resolveTaxChoice(city.tax, taxChoice);
+    if (resolved === null) return null;
+    const monthlySalary = resolved.annualSalary / 12;
+    // takeHomePctApprox 는 [0,1] 소수 (citySchema 검증 — 0.74 = 74%). PR #25 review.
+    const tax = monthlySalary * (1 - resolved.takeHomePctApprox);
     return convertToKRW(tax, city.currency, fx);
   },
 };
@@ -177,6 +195,14 @@ export default function CompareScreen(): React.ReactElement {
   // ADR-060 — Detail 에서 바꾼 주거 형태 선택이 Compare hero / 월세 카드에도
   // 즉시 반영되도록 동일 store 구독.
   const rentChoice = useRentChoiceStore((s) => s.rentChoice);
+  // ADR-061 — 학비/세금 도시별 선택. cityId 미정 단계에선 undefined 반환 후
+  // resolveTuitionChoice / resolveTaxChoice 가 첫 entry fallback 처리.
+  const tuitionChoice = useTuitionChoiceStore((s) =>
+    cityId ? s.choices[cityId] : undefined,
+  );
+  const taxChoice = useTaxChoiceStore((s) =>
+    cityId ? s.choices[cityId] : undefined,
+  );
 
   const [state, setState] = React.useState<CompareState>({ status: 'loading' });
 
@@ -306,8 +332,8 @@ export default function CompareScreen(): React.ReactElement {
         cityVal = convertToKRW(resolvedRent.value, city.currency, fx);
       }
     } else {
-      seoulVal = cfg.getValue(seoul, fx, rentChoice);
-      cityVal = cfg.getValue(city, fx, rentChoice);
+      seoulVal = cfg.getValue(seoul, fx, rentChoice, tuitionChoice, taxChoice);
+      cityVal = cfg.getValue(city, fx, rentChoice, tuitionChoice, taxChoice);
     }
 
     const sVal = seoulVal ?? 0;
@@ -324,8 +350,18 @@ export default function CompareScreen(): React.ReactElement {
 
     const { swPct, cwPct } = computeBarPcts(sVal, cVal);
 
+    // PR #25 7차 review — 세금 custom 입력 시 takeHomePctApprox 는 entries[0]
+    // 의 값을 차용 (단순화). Compare 한 줄 카드라 사용자가 정확한 수치로 오해
+    // 하지 않도록 "(근사)" 표기. v1.x 에서 takeHomePct 보간 정밀화 후 표기
+    // 정책 재검토 (ADR-061 Deferred).
+    const displayLabel =
+      cfg.category === 'tax' && taxChoice?.kind === 'custom'
+        ? `${cfg.label} (근사)`
+        : cfg.label;
+
     return {
       ...cfg,
+      displayLabel,
       seoulVal: sVal,
       cityVal: cVal,
       mult,
@@ -380,7 +416,7 @@ export default function CompareScreen(): React.ReactElement {
             <ComparePair
               key={item.category}
               category={item.category}
-              label={item.label}
+              label={item.displayLabel}
               sLabel="서울"
               sValue={formatKRW(item.seoulVal)}
               cLabel={city.name.ko}

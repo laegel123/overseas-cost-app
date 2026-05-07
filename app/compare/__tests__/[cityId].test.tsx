@@ -16,6 +16,8 @@ import { useFavoritesStore } from '@/store/favorites';
 import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
 import { useRentChoiceStore } from '@/store/rentChoice';
+import { useTaxChoiceStore } from '@/store/taxChoice';
+import { useTuitionChoiceStore } from '@/store/tuitionChoice';
 
 import { seoulValid } from '../../../src/__fixtures__/cities/seoul-valid';
 import { vancouverValid } from '../../../src/__fixtures__/cities/vancouver-valid';
@@ -85,6 +87,9 @@ function resetStores() {
   useRecentStore.getState().clear();
   // ADR-060 — rent choice 도 영속 store. 테스트 격리.
   useRentChoiceStore.getState().reset();
+  // ADR-061 — tuition/tax 도시별 단일 선택 store.
+  useTuitionChoiceStore.getState().reset();
+  useTaxChoiceStore.getState().reset();
 }
 
 const flushPromises = () => new Promise((r) => setImmediate(r));
@@ -475,6 +480,161 @@ describe('CompareScreen', () => {
       rentCard = getByTestId('compare-pair-rent');
       expect(within(rentCard).getByText('120만원')).toBeTruthy();
       expect(within(rentCard).getByText('225.4만원')).toBeTruthy();
+    });
+  });
+
+  describe('tuition / tax — useTuitionChoiceStore / useTaxChoiceStore 연동 (ADR-061)', () => {
+    // Detail 화면에서 사용자가 바꾼 학교 / 연봉 선택이 Compare hero / 카드에도
+    // 같은 기준으로 반영되어야 도시 간 비교가 일관됨.
+
+    it('tuition: 미선택 → 첫 entry (UBC) 기준', async () => {
+      usePersonaStore.getState().setPersona('student');
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      // UBC annual 45000 CAD / 12 = 3750 CAD/월 = 367.5만원 (FX 980)
+      const tuitionCard = getByTestId('compare-pair-tuition');
+      expect(within(tuitionCard).getByText('367.5만원')).toBeTruthy();
+    });
+
+    it('tuition: store 에 SFU preset → SFU 기준 (35000/12*980 = 285.8만원)', async () => {
+      usePersonaStore.getState().setPersona('student');
+      useTuitionChoiceStore
+        .getState()
+        .setTuitionChoice('vancouver', { kind: 'preset', school: 'SFU' });
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const tuitionCard = getByTestId('compare-pair-tuition');
+      expect(within(tuitionCard).getByText('285.8만원')).toBeTruthy();
+    });
+
+    it('tuition: custom 18000 CAD/year → 월 1500 CAD = 147만원', async () => {
+      usePersonaStore.getState().setPersona('student');
+      useTuitionChoiceStore
+        .getState()
+        .setTuitionChoice('vancouver', { kind: 'custom', annual: 18000 });
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const tuitionCard = getByTestId('compare-pair-tuition');
+      expect(within(tuitionCard).getByText('147만원')).toBeTruthy();
+    });
+
+    it('tuition: 마운트된 상태에서 store 갱신 → 카드 실시간 갱신', async () => {
+      usePersonaStore.getState().setPersona('student');
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      // 초기 UBC
+      let card = getByTestId('compare-pair-tuition');
+      expect(within(card).getByText('367.5만원')).toBeTruthy();
+      // SFU 로 갱신
+      await act(async () => {
+        useTuitionChoiceStore
+          .getState()
+          .setTuitionChoice('vancouver', { kind: 'preset', school: 'SFU' });
+      });
+      card = getByTestId('compare-pair-tuition');
+      expect(within(card).getByText('285.8만원')).toBeTruthy();
+    });
+
+    // PR #25 3차 review — TUITION_CONFIG.getValue 가 seoul 도 동일 호출에 통과
+    // 하므로, custom choice 가 적용되면 seoulVal 이 1500원 등 의도치 않은 값으로
+    // 계산되는 버그 회귀 방지. seoul 정책상 학비 0원이라 카드는 "신규" 배지.
+    it('tuition: custom choice 적용 시에도 seoul 측은 null (0원 정책 유지) → 신규 배지', async () => {
+      usePersonaStore.getState().setPersona('student');
+      useTuitionChoiceStore
+        .getState()
+        .setTuitionChoice('vancouver', { kind: 'custom', annual: 18000 });
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const card = getByTestId('compare-pair-tuition');
+      // 도시 측은 custom 18000 / 12 * 980 = 147만원
+      expect(within(card).getByText('147만원')).toBeTruthy();
+      // 서울 측은 null → '신규' 배지 (visa 와 동일 패턴)
+      expect(within(card).getByText('신규')).toBeTruthy();
+    });
+
+    // PR #25 review — takeHomePctApprox 의 `/100` 버그 회귀 방지.
+    // 60000 * (1 - 0.74) / 12 * 980 = 1,274,000원 = 127.4만원.
+    it('tax: 미선택 → 첫 tier (60000, 0.74 takeHome) 월 세금 = 127.4만원', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const taxCard = getByTestId('compare-pair-tax');
+      expect(within(taxCard).getByText('127.4만원')).toBeTruthy();
+    });
+
+    // 80000 * (1 - 0.7) / 12 * 980 = 1,960,000원 = 196만원.
+    it('tax: store 80000 preset (0.7 takeHome) → 196만원 (60000 tier 와 다른 값)', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      useTaxChoiceStore
+        .getState()
+        .setTaxChoice('vancouver', { kind: 'preset', annualSalary: 80000 });
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const taxCard = getByTestId('compare-pair-tax');
+      expect(within(taxCard).getByText('196만원')).toBeTruthy();
+    });
+
+    it('tax: custom 100000 CAD/year → 카드 mount + 다른 값으로 갱신', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      useTaxChoiceStore
+        .getState()
+        .setTaxChoice('vancouver', { kind: 'custom', annualSalary: 100000 });
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      expect(getByTestId('compare-pair-tax')).toBeTruthy();
+    });
+
+    // PR #25 7차 review — tax custom 시 takeHomePctApprox 차용 한계를 사용자에게
+    // 가시화. preset 일 때는 일반 라벨, custom 일 때만 "(근사)" 표기.
+    it('tax: custom 입력 시 라벨에 "(근사)" 표기', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      useTaxChoiceStore
+        .getState()
+        .setTaxChoice('vancouver', { kind: 'custom', annualSalary: 100000 });
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const taxCard = getByTestId('compare-pair-tax');
+      expect(within(taxCard).getByText('세금 (근사)')).toBeTruthy();
+    });
+
+    it('tax: preset / 미선택 시 라벨은 "세금" (근사 표기 없음)', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      // 미선택 (default)
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const taxCard = getByTestId('compare-pair-tax');
+      expect(within(taxCard).getByText('세금')).toBeTruthy();
+      expect(within(taxCard).queryByText('세금 (근사)')).toBeNull();
     });
   });
 });
