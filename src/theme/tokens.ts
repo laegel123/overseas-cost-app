@@ -133,6 +133,13 @@ export const FAV_CARD_SUB_OPACITY = 0.7;
 export const FAV_CARD_LABEL_OPACITY = 0.6;
 
 /**
+ * ComparePair 의 제외 상태 카드 투명도 (ADR-062) — 사용자가 토글 OFF 한 카드는
+ * "한 달 예상 총비용" 합산에서 빠지지만 화면에서 숨기지 않고 약하게 표시. 색상에만
+ * 의존하지 않도록 opacity + "제외됨" 배지 + 토글 OFF 색상 = 3중 인코딩.
+ */
+export const EXCLUDED_CARD_OPACITY = 0.55;
+
+/**
  * `#RRGGBB` hex 를 `rgba(r, g, b, a)` 문자열로 변환. RN StyleSheet 가 alpha
  * 합성 유틸을 제공하지 않아 토큰 간 종속성 (alpha-prefixed color) 을 단일
  * 출처에서 파생하기 위함. PR #25 7차 review.

@@ -19,6 +19,10 @@
  */
 
 import {
+  INITIAL_STATE as CATEGORY_INCLUSION_INITIAL,
+  useCategoryInclusionStore,
+} from './categoryInclusion';
+import {
   INITIAL_STATE as FAVORITES_INITIAL,
   useFavoritesStore,
 } from './favorites';
@@ -67,6 +71,7 @@ export function waitForAllStoresHydrated(): Promise<void> {
     waitOne(useRentChoiceStore),
     waitOne(useTuitionChoiceStore),
     waitOne(useTaxChoiceStore),
+    waitOne(useCategoryInclusionStore),
   ]).then(() => undefined);
 }
 
@@ -136,5 +141,8 @@ function forceInitialOnUnhydratedStores(): void {
   }
   if (!useTaxChoiceStore.persist.hasHydrated()) {
     useTaxChoiceStore.setState(TAX_CHOICE_INITIAL);
+  }
+  if (!useCategoryInclusionStore.persist.hasHydrated()) {
+    useCategoryInclusionStore.setState(CATEGORY_INCLUSION_INITIAL);
   }
 }

@@ -12,6 +12,7 @@ import {
   fetchExchangeRates as mockFetchExchangeRates,
   getLastSync as mockGetLastSync,
 } from '@/lib';
+import { useCategoryInclusionStore } from '@/store/categoryInclusion';
 import { useFavoritesStore } from '@/store/favorites';
 import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
@@ -90,6 +91,8 @@ function resetStores() {
   // ADR-061 — tuition/tax 도시별 단일 선택 store.
   useTuitionChoiceStore.getState().reset();
   useTaxChoiceStore.getState().reset();
+  // ADR-062 — categoryInclusion 도시별 토글 store.
+  useCategoryInclusionStore.getState().reset();
 }
 
 const flushPromises = () => new Promise((r) => setImmediate(r));
@@ -635,6 +638,158 @@ describe('CompareScreen', () => {
       const taxCard = getByTestId('compare-pair-tax');
       expect(within(taxCard).getByText('세금')).toBeTruthy();
       expect(within(taxCard).queryByText('세금 (근사)')).toBeNull();
+    });
+  });
+
+  describe('inclusion (포함/제외 토글) — useCategoryInclusionStore 연동 (ADR-062)', () => {
+    it('worker default: rent/food/transport/tax ON, visa OFF — 토글/배지 시각 상태', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      setupMocks();
+      const { getByTestId, queryByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // ON 카테고리 — 토글 value=true, 배지 미렌더
+      ['rent', 'food', 'transport', 'tax'].forEach((cat) => {
+        const toggle = getByTestId(`compare-pair-${cat}-toggle`);
+        expect(toggle.props.value).toBe(true);
+        expect(queryByTestId(`compare-pair-${cat}-excluded-badge`)).toBeNull();
+      });
+
+      // visa default OFF — 토글 value=false + "제외됨" 배지
+      const visaToggle = getByTestId('compare-pair-visa-toggle');
+      expect(visaToggle.props.value).toBe(false);
+      expect(getByTestId('compare-pair-visa-excluded-badge')).toBeTruthy();
+    });
+
+    it('student default: tuition ON, visa OFF (worker 와 다른 default 분기)', async () => {
+      usePersonaStore.getState().setPersona('student');
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const tuitionToggle = getByTestId('compare-pair-tuition-toggle');
+      expect(tuitionToggle.props.value).toBe(true);
+
+      const visaToggle = getByTestId('compare-pair-visa-toggle');
+      expect(visaToggle.props.value).toBe(false);
+    });
+
+    it('default 합산 → visa OFF 상태로 hero 표시 + 토글 ON 시 hero 도시값 증가 (default 가 합산에 반영)', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // before — visa OFF (default)
+      const heroBefore = getByTestId('compare-hero');
+      const heroRightBefore = within(heroBefore).getAllByText(/만원$/);
+      const beforeRightValue = String(
+        heroRightBefore[heroRightBefore.length - 1].props.children,
+      );
+
+      // visa 토글 ON
+      act(() => {
+        useCategoryInclusionStore.getState().setInclusion('vancouver', 'visa', true);
+      });
+
+      // after — hero 도시값이 visa 비용만큼 증가
+      const heroAfter = getByTestId('compare-hero');
+      const heroRightAfter = within(heroAfter).getAllByText(/만원$/);
+      const afterRightValue = String(
+        heroRightAfter[heroRightAfter.length - 1].props.children,
+      );
+      expect(afterRightValue).not.toBe(beforeRightValue);
+
+      // visa 카드 자체도 토글 ON + 배지 미렌더로 갱신.
+      const visaToggle = getByTestId('compare-pair-visa-toggle');
+      expect(visaToggle.props.value).toBe(true);
+    });
+
+    it('서울합=0 케이스 → hero 가운데 mult 영역 미렌더 (ADR-062)', async () => {
+      // 학비 + 비자만 ON, 나머지 OFF — 학비/비자는 서울 측 0원 카테고리.
+      // → seoulTotal === 0 → centerMult undefined → mult 영역 미렌더.
+      usePersonaStore.getState().setPersona('student');
+      setupMocks();
+      const { getByTestId, queryByText } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      act(() => {
+        const set = useCategoryInclusionStore.getState().setInclusion;
+        set('vancouver', 'rent', false);
+        set('vancouver', 'food', false);
+        set('vancouver', 'transport', false);
+        set('vancouver', 'tuition', true);
+        set('vancouver', 'visa', true);
+      });
+
+      // hero 의 가운데 mult 텍스트 (`↑X.X×` 형식) 가 미렌더 — caption (차액) 만 표시.
+      // 직접 `compare-hero-center` 가 caption 만 갖고 mult 는 없어야 한다.
+      const hero = getByTestId('compare-hero');
+      // mult 텍스트는 보통 `↑1.9×` 형식 — `×` 문자가 없는지로 약식 검증.
+      const multTexts = within(hero).queryAllByText(/×$/);
+      expect(multTexts).toHaveLength(0);
+
+      // caption 은 여전히 표시 — `+N만원/월` 또는 `만원/월` 패턴.
+      const captionTexts = within(hero).queryAllByText(/만원\/월$/);
+      expect(captionTexts.length).toBeGreaterThan(0);
+
+      // 다시 한 카드라도 서울 측 양수 카테고리 (rent) ON 하면 mult 복구.
+      act(() => {
+        useCategoryInclusionStore.getState().setInclusion('vancouver', 'rent', true);
+      });
+      const heroAgain = getByTestId('compare-hero');
+      expect(within(heroAgain).queryAllByText(/×$/).length).toBeGreaterThan(0);
+
+      // queryByText 사용 (미사용 변수 lint 회피).
+      void queryByText;
+    });
+
+    it('store 사용자 토글 갱신 → ComparePair 시각 상태 즉시 갱신', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      setupMocks();
+      const { getByTestId, queryByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // before — rent default ON
+      expect(getByTestId('compare-pair-rent-toggle').props.value).toBe(true);
+      expect(queryByTestId('compare-pair-rent-excluded-badge')).toBeNull();
+
+      // 사용자가 rent OFF
+      act(() => {
+        useCategoryInclusionStore.getState().setInclusion('vancouver', 'rent', false);
+      });
+
+      expect(getByTestId('compare-pair-rent-toggle').props.value).toBe(false);
+      expect(getByTestId('compare-pair-rent-excluded-badge')).toBeTruthy();
+    });
+
+    it('도시별 inclusion 독립 — vancouver 의 토글이 osaka 에 영향 없음', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      // vancouver 의 visa 만 강제 ON (사전 설정).
+      useCategoryInclusionStore.getState().setInclusion('vancouver', 'visa', true);
+      // osaka 화면 진입 — osaka 의 visa 는 default (worker → false).
+      setupMocks({ cityId: 'osaka', city: vancouverValid });
+      // 위에선 vancouver fixture 를 osaka id 로 주입 (시각 검증만 — 도시별 inclusion
+      // 키 격리 보증).
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // osaka 의 visa default 는 OFF (worker default 정책) — vancouver 의 ON 토글에
+      // 영향받지 않음.
+      const visaToggle = getByTestId('compare-pair-visa-toggle');
+      expect(visaToggle.props.value).toBe(false);
     });
   });
 });

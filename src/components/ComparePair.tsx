@@ -3,18 +3,24 @@
  * design/README §3 + UI_GUIDE §ComparePair.
  *
  * Hot 판정은 isHot(mult) 단일 함수 사용 (CLAUDE.md CRITICAL).
+ *
+ * 포함/제외 토글 (ADR-062):
+ *   사용자가 카드별 Switch 로 hero 합산에 포함할지 결정. 미포함 카드는 화면에서
+ *   숨기지 않고 카드 전체 opacity + "제외됨" 배지 + 토글 OFF 색 = 3중 인코딩
+ *   으로 표시. 토글은 자체 native 터치 영역을 가지므로 부모 Pressable 의 onPress
+ *   (Detail 진입) 와 충돌하지 않는다.
  */
 
 import * as React from 'react';
 
-import { Pressable, View } from 'react-native';
+import { Pressable, Switch, View } from 'react-native';
 
 import { formatMultiplier, getMultColor, isHot } from '@/lib';
-import { colors } from '@/theme/tokens';
+import { colors, EXCLUDED_CARD_OPACITY } from '@/theme/tokens';
 import type { SourceCategory } from '@/types/city';
 
 import { Icon, type IconName } from './Icon';
-import { H3, Small } from './typography/Text';
+import { H3, Small, Tiny } from './typography/Text';
 
 export type ComparePairProps = {
   category: SourceCategory;
@@ -36,6 +42,16 @@ export type ComparePairProps = {
   cwPct: number;
   /** hot override — 미지정 시 isHot(mult) 자동 판정 */
   hot?: boolean;
+  /**
+   * 사용자가 hero 합산에 포함할지 여부 (ADR-062). 기본 true.
+   * false 면 카드 전체 opacity 약화 + "제외됨" 배지.
+   */
+  included?: boolean;
+  /**
+   * 토글 변경 콜백 — 미지정 시 Switch 자체를 렌더링하지 않음 (구 호출처 호환).
+   * 호출되면 next 가 다음 included 값.
+   */
+  onToggleInclude?: (next: boolean) => void;
   onPress?: () => void;
   testID?: string;
 };
@@ -73,6 +89,8 @@ export function ComparePair({
   swPct,
   cwPct,
   hot,
+  included = true,
+  onToggleInclude,
   onPress,
   testID,
 }: ComparePairProps): React.ReactElement {
@@ -86,12 +104,20 @@ export function ComparePair({
   const multText = formatMultiplier(mult);
   const multColor = getMultColor(mult, effectiveHot);
 
+  const handleToggle = React.useCallback(
+    (next: boolean) => {
+      onToggleInclude?.(next);
+    },
+    [onToggleInclude],
+  );
+
   const card = (
     <View
+      style={{ opacity: included ? 1 : EXCLUDED_CARD_OPACITY }}
       className="bg-white border border-line rounded-card p-3"
       testID={testID}
     >
-      {/* 헤더: 아이콘 박스 + 라벨 / 배수 */}
+      {/* 헤더: 아이콘 박스 + 라벨 (+ "제외됨" 배지) / 배수 + 토글 */}
       <View className="flex-row items-center justify-between mb-2 gap-2">
         <View className="flex-row items-center gap-2 flex-1 min-w-0">
           <View
@@ -107,15 +133,37 @@ export function ComparePair({
             />
           </View>
           <H3 numberOfLines={1}>{label}</H3>
+          {!included && (
+            <View
+              className="bg-light rounded-full px-2 py-0.5 shrink-0"
+              {...(testID !== undefined ? { testID: `${testID}-excluded-badge` } : {})}
+            >
+              <Tiny color="gray-2">제외됨</Tiny>
+            </View>
+          )}
         </View>
-        <H3
-          color={multColor}
-          numberOfLines={1}
-          className="shrink-0 font-manrope-extrabold"
-          {...(testID !== undefined ? { testID: `${testID}-mult` } : {})}
-        >
-          {multText}
-        </H3>
+        <View className="flex-row items-center gap-2 shrink-0">
+          <H3
+            color={multColor}
+            numberOfLines={1}
+            className="font-manrope-extrabold"
+            {...(testID !== undefined ? { testID: `${testID}-mult` } : {})}
+          >
+            {multText}
+          </H3>
+          {onToggleInclude !== undefined && (
+            <Switch
+              value={included}
+              onValueChange={handleToggle}
+              trackColor={{ false: colors.line, true: colors.orange }}
+              thumbColor={colors.white}
+              ios_backgroundColor={colors.line}
+              accessibilityRole="switch"
+              accessibilityLabel={`${label} 합산 포함`}
+              {...(testID !== undefined ? { testID: `${testID}-toggle` } : {})}
+            />
+          )}
+        </View>
       </View>
 
       {/* 막대 영역 */}
