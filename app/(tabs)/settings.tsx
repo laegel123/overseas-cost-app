@@ -87,7 +87,7 @@ export default function SettingsScreen(): React.ReactElement {
   }, [safeOpenURL]);
 
   const handleFeedback = React.useCallback(() => {
-    const subject = encodeURIComponent('해외 생활비 비교 앱 피드백');
+    const subject = encodeURIComponent('살까말까 피드백');
     void safeOpenURL(
       `mailto:${FEEDBACK_EMAIL}?subject=${subject}`,
       '이메일 앱을 찾을 수 없습니다.',

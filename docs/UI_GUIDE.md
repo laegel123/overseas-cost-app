@@ -606,7 +606,7 @@ Compare/Detail 푸터에 데이터 신선도 시각 강조.
 
 ## 스플래시 / 앱 아이콘
 
-- 스플래시: `assets/splash.png` — 흰 배경 + 글로브 아이콘(56×56) + "해외 생활비 비교" 워드마크. orange/navy 토큰으로만 구성, gradient 금지.
+- 스플래시: `assets/splash.png` — 흰 배경 + 글로브 아이콘(56×56) + "살까말까" 워드마크. orange/navy 토큰으로만 구성, gradient 금지.
 - 앱 아이콘: orange 정사각 1024×1024, 가운데 흰 글로브 또는 KR↔Globe 모티프. iOS round corner 처리는 시스템에 위임.
 - 다크 모드 변형: v1.0 미지원 (시스템에서 라이트 강제 — `app.json` userInterfaceStyle: "light").
 
