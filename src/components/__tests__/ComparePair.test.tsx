@@ -223,4 +223,70 @@ describe('ComparePair', () => {
       expect(screen.queryByTestId('compare-pair')).toBeNull();
     });
   });
+
+  describe('inclusion 토글 (ADR-062)', () => {
+    it('included 기본 true + onToggleInclude 미지정 → 토글 미렌더, opacity 1, 배지 없음', () => {
+      renderPair();
+      expect(screen.queryByTestId('compare-pair-toggle')).toBeNull();
+      expect(screen.queryByTestId('compare-pair-excluded-badge')).toBeNull();
+      const card = screen.getByTestId('compare-pair');
+      expect(card.props.style).toMatchObject({ opacity: 1 });
+    });
+
+    it('onToggleInclude 정의 + included=true → 토글 렌더 ON, 배지 미렌더, opacity 1', () => {
+      renderPair({ included: true, onToggleInclude: jest.fn() });
+      const toggle = screen.getByTestId('compare-pair-toggle');
+      expect(toggle.props.value).toBe(true);
+      expect(screen.queryByTestId('compare-pair-excluded-badge')).toBeNull();
+      const card = screen.getByTestId('compare-pair');
+      expect(card.props.style).toMatchObject({ opacity: 1 });
+    });
+
+    it('onToggleInclude 정의 + included=false → 토글 OFF + "제외됨" 배지 + opacity 약화', () => {
+      renderPair({ included: false, onToggleInclude: jest.fn() });
+      const toggle = screen.getByTestId('compare-pair-toggle');
+      expect(toggle.props.value).toBe(false);
+      const badge = screen.getByTestId('compare-pair-excluded-badge');
+      expect(badge).toBeTruthy();
+      const card = screen.getByTestId('compare-pair');
+      // EXCLUDED_CARD_OPACITY = 0.55 — 색상에만 의존하지 않는 정보 표기 정책
+      // (CLAUDE.md) — opacity + 배지 + 토글 OFF 색 = 3중 인코딩.
+      expect(card.props.style).toMatchObject({ opacity: 0.55 });
+    });
+
+    it('토글 탭 → onToggleInclude(next) 호출', () => {
+      const onToggleInclude = jest.fn();
+      renderPair({ included: true, onToggleInclude });
+      const toggle = screen.getByTestId('compare-pair-toggle');
+      fireEvent(toggle, 'valueChange', false);
+      expect(onToggleInclude).toHaveBeenCalledTimes(1);
+      expect(onToggleInclude).toHaveBeenCalledWith(false);
+    });
+
+    it('토글 탭 OFF → ON 도 동일하게 onToggleInclude(true) 호출', () => {
+      const onToggleInclude = jest.fn();
+      renderPair({ included: false, onToggleInclude });
+      const toggle = screen.getByTestId('compare-pair-toggle');
+      fireEvent(toggle, 'valueChange', true);
+      expect(onToggleInclude).toHaveBeenCalledWith(true);
+    });
+
+    it('토글 a11y — role=switch + label "${label} 합산 포함"', () => {
+      renderPair({ label: '학비', onToggleInclude: jest.fn() });
+      const toggle = screen.getByTestId('compare-pair-toggle');
+      expect(toggle.props.accessibilityRole).toBe('switch');
+      expect(toggle.props.accessibilityLabel).toBe('학비 합산 포함');
+    });
+
+    it('included=false + onToggleInclude 미지정 → 배지/opacity 적용은 되지만 토글 자체는 미렌더', () => {
+      // 호출부에서 included 만 넘기고 토글 핸들러를 빼는 케이스 (현 시점 호출 패턴엔
+      // 없지만 컴포넌트 레벨 정책 — included prop 만으로도 시각 상태는 표현 가능).
+      renderPair({ included: false });
+      expect(screen.queryByTestId('compare-pair-toggle')).toBeNull();
+      const badge = screen.getByTestId('compare-pair-excluded-badge');
+      expect(badge).toBeTruthy();
+      const card = screen.getByTestId('compare-pair');
+      expect(card.props.style).toMatchObject({ opacity: 0.55 });
+    });
+  });
 });

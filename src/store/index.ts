@@ -48,6 +48,16 @@ export type {
   TaxChoiceActions,
   TaxChoiceState,
 } from './taxChoice';
+export {
+  getDefaultInclusion,
+  resolveInclusion,
+  useCategoryInclusionStore,
+} from './categoryInclusion';
+export type {
+  CategoryInclusionActions,
+  CategoryInclusionMap,
+  CategoryInclusionState,
+} from './categoryInclusion';
 
 export {
   DEFAULT_HYDRATION_TIMEOUT_MS,

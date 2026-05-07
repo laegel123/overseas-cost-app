@@ -119,6 +119,42 @@ describe('HeroCard', () => {
       expect(screen.queryByText('+165만/월')).toBeNull();
     });
 
+    it('centerMult undefined → 가운데 mult 미렌더 + caption 만 표시 (ADR-062)', () => {
+      // Compare 의 서울합=0 케이스 — division by zero / `↑∞×` 회피 정책.
+      // caption 의 차액(+N만원/월) 만으로 비교 정보 전달.
+      const { centerMult: _, ...propsWithoutMult } = baseProps;
+      render(
+        <HeroCard
+          {...propsWithoutMult}
+          variant="orange"
+          centerCaption="+229.3만원/월"
+          testID="h"
+        />,
+      );
+      expect(screen.queryByText('↑1.9×')).toBeNull();
+      expect(screen.getByText('+229.3만원/월')).toBeTruthy();
+    });
+
+    it('centerMult + centerCaption 둘 다 undefined → 가운데 컬럼 자체 미렌더', () => {
+      // 시각 균형 — 가운데 빈 영역이 자리 차지하지 않도록.
+      const { centerMult: _, ...propsWithoutMult } = baseProps;
+      render(<HeroCard {...propsWithoutMult} variant="orange" testID="h" />);
+      expect(screen.queryByTestId('h-center')).toBeNull();
+    });
+
+    it('centerMult undefined + centerCaption 있음 → 가운데 컬럼은 렌더 (caption 만 노출)', () => {
+      const { centerMult: _, ...propsWithoutMult } = baseProps;
+      render(
+        <HeroCard
+          {...propsWithoutMult}
+          variant="orange"
+          centerCaption="+229.3만원/월"
+          testID="h"
+        />,
+      );
+      expect(screen.getByTestId('h-center')).toBeTruthy();
+    });
+
     it('footer 있을 때 → 렌더 + opacity 0.7 (design §3)', () => {
       render(
         <HeroCard

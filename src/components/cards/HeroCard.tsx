@@ -26,8 +26,15 @@ export type HeroCardProps = {
   leftLabel: string;
   /** 좌측 큰 값 — 예: "175만/월" */
   leftValue: string;
-  /** 가운데 큰 배수 — 예: "↑1.9×" */
-  centerMult: string;
+  /**
+   * 가운데 큰 배수 — 예: "↑1.9×". undefined 면 가운데 mult 미렌더 (ADR-062).
+   * Compare 의 서울합=0 케이스에서 division by zero / `↑∞×` 회피 — caption 의
+   * 차액(+N만원/월) 만으로 비교 정보 전달.
+   *
+   * `string | undefined` — exactOptionalPropertyTypes 가 활성화되어 있어
+   * 명시적 undefined 를 허용해야 호출부에서 conditional 값 바인딩 가능.
+   */
+  centerMult?: string | undefined;
   /** 가운데 caption — 예: "+165만/월" (슬래시 줄바꿈 방지) */
   centerCaption?: string;
   /** 우측 작은 라벨 — 예: "밴쿠버" */
@@ -159,22 +166,26 @@ export function HeroCard({
             {leftValue}
           </H2>
         </View>
-        <View
-          className="items-center px-2 shrink-0"
-          {...(testID !== undefined ? { testID: `${testID}-center` } : {})}
-        >
-          {/* shrink-0 — design §3 의 "flexShrink: 0 으로 squeeze 방지". 좌우
-              flex-1 의 grow 압력에도 가운데 mult / caption 폭 보존. */}
-          <Display color={v.multColor} numberOfLines={1}>
-            {centerMult}
-          </Display>
-          {centerCaption !== undefined && (
-            // numberOfLines={1} — design §3 의 "슬래시 줄바꿈 방지" (`+165만/월`)
-            <MonoLabel color="white" numberOfLines={1}>
-              {centerCaption}
-            </MonoLabel>
-          )}
-        </View>
+        {(centerMult !== undefined || centerCaption !== undefined) && (
+          <View
+            className="items-center px-2 shrink-0"
+            {...(testID !== undefined ? { testID: `${testID}-center` } : {})}
+          >
+            {/* shrink-0 — design §3 의 "flexShrink: 0 으로 squeeze 방지". 좌우
+                flex-1 의 grow 압력에도 가운데 mult / caption 폭 보존. */}
+            {centerMult !== undefined && (
+              <Display color={v.multColor} numberOfLines={1}>
+                {centerMult}
+              </Display>
+            )}
+            {centerCaption !== undefined && (
+              // numberOfLines={1} — design §3 의 "슬래시 줄바꿈 방지" (`+165만/월`)
+              <MonoLabel color="white" numberOfLines={1}>
+                {centerCaption}
+              </MonoLabel>
+            )}
+          </View>
+        )}
         <View className="flex-1 items-end">
           <Tiny color="white">{rightLabel}</Tiny>
           <H2

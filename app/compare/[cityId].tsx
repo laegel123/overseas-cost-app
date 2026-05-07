@@ -30,9 +30,11 @@ import {
   loadAllCities,
 } from '@/lib';
 import {
+  resolveInclusion,
   resolveRentChoice,
   resolveTaxChoice,
   resolveTuitionChoice,
+  useCategoryInclusionStore,
   useRentChoiceStore,
   useTaxChoiceStore,
   useTuitionChoiceStore,
@@ -203,6 +205,12 @@ export default function CompareScreen(): React.ReactElement {
   const taxChoice = useTaxChoiceStore((s) =>
     cityId ? s.choices[cityId] : undefined,
   );
+  // ADR-062 — 도시별 inclusion (포함/제외 토글). 미설정 카테고리는
+  // resolveInclusion 이 페르소나 default 적용. 도시 전체 map 을 구독하지만
+  // 사용자 토글은 같은 도시 내에서만 발생 → 다른 도시 변경에 의한 리렌더링
+  // 비용은 사실상 없음.
+  const inclusions = useCategoryInclusionStore((s) => s.inclusions);
+  const setInclusion = useCategoryInclusionStore((s) => s.setInclusion);
 
   const [state, setState] = React.useState<CompareState>({ status: 'loading' });
 
@@ -339,8 +347,18 @@ export default function CompareScreen(): React.ReactElement {
     const sVal = seoulVal ?? 0;
     const cVal = cityVal ?? 0;
 
-    seoulTotal += sVal;
-    cityTotal += cVal;
+    // ADR-062 — included 카테고리만 hero 합산에 누적. 카드 자체는 토글 OFF 라도
+    // 화면에 표시 (opacity + 배지) — 사용자가 다시 켤 동선 확보.
+    const included = resolveInclusion(
+      cityId ?? '',
+      cfg.category,
+      persona,
+      inclusions,
+    );
+    if (included) {
+      seoulTotal += sVal;
+      cityTotal += cVal;
+    }
 
     const mult: number | '신규' = seoulVal === null && cityVal !== null
       ? '신규'
@@ -367,10 +385,17 @@ export default function CompareScreen(): React.ReactElement {
       mult,
       swPct,
       cwPct,
+      included,
     };
   });
 
-  const totalMult = computeMultiplier(seoulTotal, cityTotal);
+  // ADR-062 — 서울 합 = 0 (예: 학비/비자 등 한국 0원 카테고리만 ON) 이면
+  // division by zero / `↑∞×` 회피 위해 hero 가운데 mult 영역 미표시. caption
+  // (차액) 만으로 비교 정보 전달.
+  const heroCenterMult: string | undefined =
+    seoulTotal > 0
+      ? formatMultiplier(computeMultiplier(seoulTotal, cityTotal))
+      : undefined;
   const { swPct: heroSwPct, cwPct: heroCwPct } = computeBarPcts(seoulTotal, cityTotal);
   const diff = cityTotal - seoulTotal;
   const diffSign = diff >= 0 ? '+' : '';
@@ -397,7 +422,7 @@ export default function CompareScreen(): React.ReactElement {
           variant="orange"
           leftLabel="서울"
           leftValue={formatKRW(seoulTotal)}
-          centerMult={formatMultiplier(totalMult)}
+          centerMult={heroCenterMult}
           centerCaption={centerCaption}
           rightLabel={city.name.ko}
           rightValue={formatKRW(cityTotal)}
@@ -425,6 +450,10 @@ export default function CompareScreen(): React.ReactElement {
               swPct={item.swPct}
               cwPct={item.cwPct}
               hot={typeof item.mult === 'number' ? isHot(item.mult) : false}
+              included={item.included}
+              onToggleInclude={(next) => {
+                if (cityId) setInclusion(cityId, item.category, next);
+              }}
               onPress={() => router.push(`/detail/${cityId}/${item.category}`)}
               testID={`compare-pair-${item.category}`}
             />
