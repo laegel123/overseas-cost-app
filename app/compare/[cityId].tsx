@@ -350,8 +350,18 @@ export default function CompareScreen(): React.ReactElement {
 
     const { swPct, cwPct } = computeBarPcts(sVal, cVal);
 
+    // PR #25 7차 review — 세금 custom 입력 시 takeHomePctApprox 는 entries[0]
+    // 의 값을 차용 (단순화). Compare 한 줄 카드라 사용자가 정확한 수치로 오해
+    // 하지 않도록 "(근사)" 표기. v1.x 에서 takeHomePct 보간 정밀화 후 표기
+    // 정책 재검토 (ADR-061 Deferred).
+    const displayLabel =
+      cfg.category === 'tax' && taxChoice?.kind === 'custom'
+        ? `${cfg.label} (근사)`
+        : cfg.label;
+
     return {
       ...cfg,
+      displayLabel,
       seoulVal: sVal,
       cityVal: cVal,
       mult,
@@ -406,7 +416,7 @@ export default function CompareScreen(): React.ReactElement {
             <ComparePair
               key={item.category}
               category={item.category}
-              label={item.label}
+              label={item.displayLabel}
               sLabel="서울"
               sValue={formatKRW(item.seoulVal)}
               cLabel={city.name.ko}

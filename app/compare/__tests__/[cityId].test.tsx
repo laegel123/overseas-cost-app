@@ -607,5 +607,34 @@ describe('CompareScreen', () => {
       });
       expect(getByTestId('compare-pair-tax')).toBeTruthy();
     });
+
+    // PR #25 7차 review — tax custom 시 takeHomePctApprox 차용 한계를 사용자에게
+    // 가시화. preset 일 때는 일반 라벨, custom 일 때만 "(근사)" 표기.
+    it('tax: custom 입력 시 라벨에 "(근사)" 표기', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      useTaxChoiceStore
+        .getState()
+        .setTaxChoice('vancouver', { kind: 'custom', annualSalary: 100000 });
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const taxCard = getByTestId('compare-pair-tax');
+      expect(within(taxCard).getByText('세금 (근사)')).toBeTruthy();
+    });
+
+    it('tax: preset / 미선택 시 라벨은 "세금" (근사 표기 없음)', async () => {
+      usePersonaStore.getState().setPersona('worker');
+      // 미선택 (default)
+      setupMocks();
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const taxCard = getByTestId('compare-pair-tax');
+      expect(within(taxCard).getByText('세금')).toBeTruthy();
+      expect(within(taxCard).queryByText('세금 (근사)')).toBeNull();
+    });
   });
 });

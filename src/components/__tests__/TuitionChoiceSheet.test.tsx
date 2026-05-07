@@ -147,7 +147,10 @@ describe('TuitionChoiceSheet', () => {
     expect(screen.queryByTestId('sheet-custom-input')).toBeNull();
   });
 
-  it('cityTuition undefined + custom 저장 → 정상 (도시에 학교 없어도 직접 입력 가능)', () => {
+  // PR #25 7차 review — entries=0 도시는 Compare TUITION_CONFIG 가 null 처리
+  // (서울 학비 0원 정책 보호) 하므로 sheet 단계에서 custom 진입 자체를 차단.
+  // TaxChoiceSheet 와 동일한 안내 + clear-stale 패턴 적용.
+  it('cityTuition undefined → custom 행 미렌더 + 안내 문구 노출', () => {
     render(
       <TuitionChoiceSheet
         visible
@@ -159,25 +162,15 @@ describe('TuitionChoiceSheet', () => {
         testID="sheet"
       />,
     );
-    // 빈 시트는 custom 행만 노출
     expect(screen.queryByTestId('sheet-preset-Sorbonne')).toBeNull();
-    fireEvent.press(screen.getByTestId('sheet-custom-row'));
-    fireEvent.changeText(screen.getByTestId('sheet-custom-input'), '5000');
-    fireEvent.press(screen.getByTestId('sheet-save'));
-    expect(useTuitionChoiceStore.getState().choices.paris).toEqual({
-      kind: 'custom',
-      annual: 5000,
-    });
+    expect(screen.queryByTestId('sheet-custom-row')).toBeNull();
+    expect(screen.getByTestId('sheet-custom-disabled')).toBeTruthy();
+    expect(
+      screen.getByText('이 도시는 학비 데이터가 없어 직접 입력이 지원되지 않아요.'),
+    ).toBeTruthy();
   });
 
-  // PR #25 2차 review — entries 없는 도시에서 custom 저장 후 초기화 시
-  // store entry 가 stale 로 남던 무한 custom 모드 진입 버그 회귀 방지.
-  it('cityTuition undefined + custom 저장 → 초기화 → store 에서 entry 제거', () => {
-    act(() => {
-      useTuitionChoiceStore
-        .getState()
-        .setTuitionChoice('paris', { kind: 'custom', annual: 9000 });
-    });
+  it('cityTuition 부재 → 구분선 미렌더', () => {
     render(
       <TuitionChoiceSheet
         visible
@@ -189,10 +182,71 @@ describe('TuitionChoiceSheet', () => {
         testID="sheet"
       />,
     );
-    // custom 모드로 진입
-    expect(screen.getByTestId('sheet-custom-input')).toBeTruthy();
-    fireEvent.press(screen.getByTestId('sheet-clear'));
-    expect(useTuitionChoiceStore.getState().choices.paris).toBeUndefined();
-    expect(screen.queryByTestId('sheet-custom-input')).toBeNull();
+    expect(screen.queryByTestId('sheet-divider')).toBeNull();
+  });
+
+  it('cityTuition entries 존재 → 구분선 렌더', () => {
+    renderSheet();
+    expect(screen.getByTestId('sheet-divider')).toBeTruthy();
+  });
+
+  describe('entries=0 + stale custom (PR #25 7차 review)', () => {
+    it('stale custom 이 있어도 list 모드 + 안내 섹션 진입 (custom 모드 차단)', () => {
+      act(() => {
+        useTuitionChoiceStore
+          .getState()
+          .setTuitionChoice('ghostCity', { kind: 'custom', annual: 9000 });
+      });
+      render(
+        <TuitionChoiceSheet
+          visible
+          onDismiss={jest.fn()}
+          cityId="ghostCity"
+          cityCurrency="EUR"
+          cityTuition={undefined}
+          fx={fx}
+          testID="sheet"
+        />,
+      );
+      expect(screen.queryByTestId('sheet-custom-input')).toBeNull();
+      expect(screen.getByTestId('sheet-custom-disabled')).toBeTruthy();
+      expect(screen.getByTestId('sheet-clear-stale')).toBeTruthy();
+    });
+
+    it('clear-stale 버튼 → store 에서 도시 entry 제거', () => {
+      act(() => {
+        useTuitionChoiceStore
+          .getState()
+          .setTuitionChoice('ghostCity', { kind: 'custom', annual: 9000 });
+      });
+      render(
+        <TuitionChoiceSheet
+          visible
+          onDismiss={jest.fn()}
+          cityId="ghostCity"
+          cityCurrency="EUR"
+          cityTuition={undefined}
+          fx={fx}
+          testID="sheet"
+        />,
+      );
+      fireEvent.press(screen.getByTestId('sheet-clear-stale'));
+      expect(useTuitionChoiceStore.getState().choices.ghostCity).toBeUndefined();
+    });
+
+    it('choice 미존재 + entries=0 → clear-stale 버튼 미렌더', () => {
+      render(
+        <TuitionChoiceSheet
+          visible
+          onDismiss={jest.fn()}
+          cityId="ghostCity"
+          cityCurrency="EUR"
+          cityTuition={undefined}
+          fx={fx}
+          testID="sheet"
+        />,
+      );
+      expect(screen.queryByTestId('sheet-clear-stale')).toBeNull();
+    });
   });
 });

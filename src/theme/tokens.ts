@@ -133,15 +133,33 @@ export const FAV_CARD_SUB_OPACITY = 0.7;
 export const FAV_CARD_LABEL_OPACITY = 0.6;
 
 /**
- * BottomSheet backdrop 색상 — `colors.navy` (#11263C) 의 RGB(17, 38, 60) 에
- * 0.4 alpha 적용. NativeWind className 으로 alpha 표현이 어려워 inline style
- * 로 적용. RN 표준 라이브러리에 hex→rgba 합성 유틸이 없어 RGB 값을 직접
- * 표기. ADR-061 (시트 컴포넌트 도입).
+ * `#RRGGBB` hex 를 `rgba(r, g, b, a)` 문자열로 변환. RN StyleSheet 가 alpha
+ * 합성 유틸을 제공하지 않아 토큰 간 종속성 (alpha-prefixed color) 을 단일
+ * 출처에서 파생하기 위함. PR #25 7차 review.
  *
- * **WARNING**: `colors.navy` 가 변경되면 본 상수의 RGB 값도 동시에 갱신해야
- * 한다 (단일 출처 정책의 예외 — 토큰 간 종속성). PR #25 6차 review.
+ * 입력 형식은 `#` + 6 hex chars 만 허용 (단축 `#RGB` 미지원). 잘못된 입력은
+ * 즉시 throw 해 토큰 정의 단계에서 발견되도록 한다 (silent fail 금지).
  */
-export const SHEET_BACKDROP_COLOR = 'rgba(17, 38, 60, 0.4)' as const;
+export function hexToRgba(hex: string, alpha: number): string {
+  if (!/^#[0-9A-Fa-f]{6}$/.test(hex)) {
+    throw new Error(`hexToRgba: invalid hex format "${hex}" (expected "#RRGGBB")`);
+  }
+  if (!Number.isFinite(alpha) || alpha < 0 || alpha > 1) {
+    throw new Error(`hexToRgba: invalid alpha ${alpha} (expected 0..1)`);
+  }
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+/**
+ * BottomSheet backdrop 색상 — `colors.navy` 에 0.4 alpha 적용. NativeWind
+ * className 으로 alpha 표현이 어려워 inline style 로 적용. `hexToRgba` 헬퍼
+ * 로 `colors.navy` 에서 파생해 단일 출처를 유지한다 (PR #25 7차 review).
+ * ADR-061 (시트 컴포넌트 도입).
+ */
+export const SHEET_BACKDROP_COLOR = hexToRgba(colors.navy, 0.4);
 
 /**
  * RN fontFamily raw 이름 — `useFonts` / `assets/fonts` / tailwind config 의

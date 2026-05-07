@@ -154,7 +154,17 @@ export const useTuitionChoiceStore = create<TuitionChoiceState & TuitionChoiceAc
       storage: createJSONStorage(() => AsyncStorage),
       version: PERSIST_VERSION,
       partialize: (state) => ({ choices: state.choices }),
-      migrate: (persistedState) => persistedState as TuitionChoiceState,
+      // PR #25 7차 review — v1 단계에선 의도적 no-op (단일 버전이라 변환 불필요).
+      // version > 1 으로 bump 시 반드시 v(version-1) → v(version) 의 실제 변환
+      // 분기를 본 함수에 추가해야 한다. 캐스팅만 두면 손상 캐시가
+      // onRehydrateStorage 검증보다 먼저 통과해 silent fail 위험.
+      // TODO(v2): version 분기 추가 — case 1: { ...persisted, ... } 형태 변환.
+      migrate: (persistedState, version) => {
+        if (version === PERSIST_VERSION) return persistedState as TuitionChoiceState;
+        // unknown version → 손상 가능. INITIAL_STATE 동치 객체 반환 — 후속
+        // onRehydrateStorage 가 isValidPersistedState 로 한 번 더 검증.
+        return INITIAL_STATE as TuitionChoiceState;
+      },
       onRehydrateStorage: () => (rehydratedState, error) => {
         if (error !== undefined && error !== null) {
           useTuitionChoiceStore.setState(INITIAL_STATE);

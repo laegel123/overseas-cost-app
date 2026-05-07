@@ -342,6 +342,23 @@ export default function DetailScreen(): React.ReactElement {
   // false 유지). Detail 화면은 한 카테고리 한 화면이라 동시 오픈 불가.
   const [sheetVisible, setSheetVisible] = React.useState(false);
 
+  // PR #25 7차 review — buildSections 는 카테고리·도시·환율·선택값에 의존하므로
+  // 입력 동일 시 동일 결과 (순수). 외부 store 갱신으로 컴포넌트 리렌더가 일어나도
+  // 의미 있는 입력 변화가 없으면 재계산 회피. ready 외 status 일 때는 빈 array
+  // 반환 — 후속 코드는 ready 분기 안에서만 sections 사용.
+  const sections = React.useMemo(() => {
+    if (state.status !== 'ready') return [];
+    if (!category || !isValidCategory(category)) return [];
+    return buildSections(
+      category as SourceCategory,
+      state.data.seoul,
+      state.data.city,
+      state.data.fx,
+      tuitionChoice,
+      taxChoice,
+    );
+  }, [state, category, tuitionChoice, taxChoice]);
+
   const handleBack = React.useCallback(() => {
     if (router.canGoBack()) {
       router.back();
@@ -423,9 +440,10 @@ export default function DetailScreen(): React.ReactElement {
   }
 
   // category 는 isValidCategory 통과 후라 SourceCategory 로 단언 가능.
+  // PR #25 7차 review — seoul 은 sections useMemo 안에서만 참조해 본 분기에선
+  // 미사용. fx/city/lastSync 는 환율 표기 / 시트 props / 헤더 동기화에 그대로 사용.
   const cat = category as SourceCategory;
-  const { seoul, city, fx, lastSync } = state.data;
-  const sections = buildSections(cat, seoul, city, fx, tuitionChoice, taxChoice);
+  const { city, fx, lastSync } = state.data;
 
   // 단일 선택 섹션 (rent / tuition / tax) — hero 가 "선택된 행 1 개 기준" 으로 비교.
   // rent: 인라인 행 탭으로 cycle. tuition/tax: 행 탭 → 시트 오픈.

@@ -58,21 +58,25 @@ export function TuitionChoiceSheet({
 
   const resolved = resolveTuitionChoice(cityTuition, choice);
 
+  const entries = cityTuition ?? [];
+  const hasEntries = entries.length > 0;
+
+  // PR #25 7차 review — Compare TUITION_CONFIG 가 entries=0 도시에서 custom 을
+  // null 처리하는 것과 sheet 동작 사이의 비대칭 (Detail 만 표시) 차단. seoul
+  // 호출에도 같은 tuitionChoice 가 패스되어 custom 우회 시 서울 학비 0원 정책
+  // 위배 위험이 있어 sheet 단계에서 차단 (TaxChoiceSheet 와 동일 패턴).
   const [mode, setMode] = React.useState<Mode>(
-    choice?.kind === 'custom' ? 'custom' : 'list',
+    choice?.kind === 'custom' && hasEntries ? 'custom' : 'list',
   );
   const [draft, setDraft] = React.useState<string>(
     choice?.kind === 'custom' ? String(choice.annual) : '',
   );
 
-  // visible 이 다시 열릴 때 mode/draft 초기화 — 닫혔을 때 상태가 stale 하지 않도록.
   React.useEffect(() => {
     if (!visible) return;
-    setMode(choice?.kind === 'custom' ? 'custom' : 'list');
+    setMode(choice?.kind === 'custom' && hasEntries ? 'custom' : 'list');
     setDraft(choice?.kind === 'custom' ? String(choice.annual) : '');
-  }, [visible, choice]);
-
-  const entries = cityTuition ?? [];
+  }, [visible, choice, hasEntries]);
 
   const handlePickPreset = (school: string) => {
     setChoice(cityId, { kind: 'preset', school });
@@ -152,44 +156,84 @@ export function TuitionChoiceSheet({
           })}
 
           {/* PR #25 4차 review — entries 없으면 구분선만 홀로 렌더되어 어색함. */}
-          {entries.length > 0 ? <View className="border-t border-line my-2" /> : null}
-
-          <Pressable
-            onPress={() => {
-              setMode('custom');
-              if (choice?.kind === 'custom') {
-                setDraft(String(choice.annual));
-              } else {
-                setDraft('');
-              }
-            }}
-            accessibilityRole="button"
-            className={`flex-row items-center gap-3 px-3 py-3 rounded-card ${
-              resolved !== null && resolved.isCustom ? 'bg-orange' : ''
-            }`}
-            testID={testID !== undefined ? `${testID}-custom-row` : undefined}
-          >
+          {entries.length > 0 ? (
             <View
-              className={`w-9 h-9 items-center justify-center rounded-[10px] ${
-                resolved !== null && resolved.isCustom ? 'bg-white' : 'bg-light'
-              }`}
+              className="border-t border-line my-2"
+              testID={testID !== undefined ? `${testID}-divider` : undefined}
+            />
+          ) : null}
+
+          {/*
+            PR #25 7차 review — entries=0 도시에서 custom 진입 차단. Compare
+            TUITION_CONFIG 가 entries 가드를 가지고 있어 (서울 학비 0원 정책
+            보호) Detail 에서만 표시되는 비대칭이 발생. TaxChoiceSheet 와 동일
+            패턴으로 안내 + stale clear 경로 제공.
+          */}
+          {entries.length === 0 ? (
+            <View
+              className="px-3 py-3 rounded-card bg-orange-tint"
+              testID={
+                testID !== undefined ? `${testID}-custom-disabled` : undefined
+              }
             >
-              <Text style={{ fontSize: 18 }}>✏️</Text>
-            </View>
-            <View className="flex-1 min-w-0">
-              <Body
-                color={resolved !== null && resolved.isCustom ? 'white' : 'navy'}
-                className="font-manrope-bold"
-              >
-                직접 입력
-              </Body>
-              <Tiny color={resolved !== null && resolved.isCustom ? 'white' : 'gray-2'}>
-                {resolved !== null && resolved.isCustom
-                  ? `연 ${resolved.annual.toLocaleString()} ${cityCurrency}`
-                  : '연 학비를 직접 입력해요'}
+              <Tiny color="orange">
+                이 도시는 학비 데이터가 없어 직접 입력이 지원되지 않아요.
               </Tiny>
+              {choice !== undefined ? (
+                <Pressable
+                  onPress={() => clearChoice(cityId)}
+                  accessibilityRole="button"
+                  className="mt-2"
+                  testID={
+                    testID !== undefined ? `${testID}-clear-stale` : undefined
+                  }
+                >
+                  <Tiny color="gray-2" className="underline">
+                    저장된 직접 입력값 초기화
+                  </Tiny>
+                </Pressable>
+              ) : null}
             </View>
-          </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => {
+                setMode('custom');
+                if (choice?.kind === 'custom') {
+                  setDraft(String(choice.annual));
+                } else {
+                  setDraft('');
+                }
+              }}
+              accessibilityRole="button"
+              className={`flex-row items-center gap-3 px-3 py-3 rounded-card ${
+                resolved !== null && resolved.isCustom ? 'bg-orange' : ''
+              }`}
+              testID={testID !== undefined ? `${testID}-custom-row` : undefined}
+            >
+              <View
+                className={`w-9 h-9 items-center justify-center rounded-[10px] ${
+                  resolved !== null && resolved.isCustom ? 'bg-white' : 'bg-light'
+                }`}
+              >
+                <Text style={{ fontSize: 18 }}>✏️</Text>
+              </View>
+              <View className="flex-1 min-w-0">
+                <Body
+                  color={resolved !== null && resolved.isCustom ? 'white' : 'navy'}
+                  className="font-manrope-bold"
+                >
+                  직접 입력
+                </Body>
+                <Tiny
+                  color={resolved !== null && resolved.isCustom ? 'white' : 'gray-2'}
+                >
+                  {resolved !== null && resolved.isCustom
+                    ? `연 ${resolved.annual.toLocaleString()} ${cityCurrency}`
+                    : '연 학비를 직접 입력해요'}
+                </Tiny>
+              </View>
+            </Pressable>
+          )}
         </ScrollView>
       ) : (
         <View className="gap-4">

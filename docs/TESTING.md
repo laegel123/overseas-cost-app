@@ -1704,7 +1704,12 @@ useTuitionChoiceStore 와 양방향 — 선택값에 따라 시트 진입 모드
 
 **도시 데이터 결측:**
 
-- [x] cityTuition undefined + custom 저장 → 정상 (preset 행 미노출, custom 만 가능)
+- [x] cityTuition undefined → custom 행 미렌더 + 안내 문구 노출 (PR #25 7차 review)
+- [x] cityTuition 부재 → 구분선 미렌더 (PR #25 7차 review)
+- [x] cityTuition entries 존재 → 구분선 렌더 (PR #25 7차 review)
+- [x] entries=0 + stale custom → list 모드 + 안내 섹션 진입 (custom 모드 차단) (PR #25 7차 review)
+- [x] entries=0 + stale custom → clear-stale 버튼 → store 도시 entry 제거 (PR #25 7차 review)
+- [x] entries=0 + choice 미존재 → clear-stale 버튼 미렌더 (PR #25 7차 review)
 
 ### 9.20.6 `src/components/TaxChoiceSheet.tsx` (ADR-061)
 
@@ -2133,6 +2138,15 @@ describe.each(errorCases)('%s', (Ctor, expectedCode) => {
 - [ ] gradient 토큰 (settings persona card)
 - [ ] type scale 존재 (display, h1, h2, h3, body, small, tiny, mono-label)
 - [ ] tailwind.config.js 의 colors 와 1:1 일치 (자동 검증 — `expect(tokens.orange).toBe(tailwindConfig.theme.colors.orange.DEFAULT)`)
+
+**hexToRgba / SHEET_BACKDROP_COLOR (PR #25 7차 review):**
+
+- [x] hexToRgba 정상 입력 → rgba 문자열
+- [x] hexToRgba 대소문자 혼용 hex 허용
+- [x] hexToRgba 잘못된 hex 형식 → throw (단축 #RGB / 비-hex char / 길이 오류 모두)
+- [x] hexToRgba alpha 범위 외 (음수/1초과/NaN/Infinity) → throw
+- [x] SHEET_BACKDROP_COLOR = hexToRgba(colors.navy, 0.4) 파생
+- [x] SHEET_BACKDROP_COLOR = 'rgba(17, 38, 60, 0.4)' (현재 navy 기준)
 
 #### WCAG AA 대비 검증
 
