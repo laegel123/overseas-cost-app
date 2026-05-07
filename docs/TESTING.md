@@ -1719,6 +1719,9 @@ useTuitionChoiceStore 와 양방향 — 선택값에 따라 시트 진입 모드
 - [x] cityTax 부재 → custom 행 미렌더 + 안내 문구 노출 (PR #25 3차 review)
 - [x] cityTax 부재 → 구분선 미렌더 (PR #25 5차 review)
 - [x] cityTax entries 존재 → 구분선 렌더 (PR #25 5차 review)
+- [x] entries=0 + stale custom → list 모드 + 안내 섹션 진입 (custom 모드 차단) (PR #25 6차 review)
+- [x] entries=0 + stale custom → clear-stale 버튼 → store 도시 entry 제거 (PR #25 6차 review)
+- [x] entries=0 + choice 미존재 → clear-stale 버튼 미렌더 (PR #25 6차 review)
 
 ### 9.20.3 `src/store/lastSyncBridge.ts` (app-shell phase step 4)
 

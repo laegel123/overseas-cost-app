@@ -137,4 +137,67 @@ describe('TaxChoiceSheet', () => {
     renderSheet();
     expect(screen.getByTestId('sheet-divider')).toBeTruthy();
   });
+
+  // PR #25 6차 review — 영속화된 stale custom + entries=0 도시에서 사용자가
+  // UI 로 stale 값을 제거할 수 있어야 한다 (resolveTaxChoice null 인 silent
+  // 상태에서도). custom 모드 진입 차단 + 안내 섹션의 clear 버튼.
+  describe('entries=0 + stale custom (PR #25 6차 review)', () => {
+    it('stale custom 이 있어도 list 모드 + 안내 섹션 진입 (custom 모드 차단)', () => {
+      act(() => {
+        useTaxChoiceStore
+          .getState()
+          .setTaxChoice('ghostCity', { kind: 'custom', annualSalary: 50000 });
+      });
+      render(
+        <TaxChoiceSheet
+          visible
+          onDismiss={jest.fn()}
+          cityId="ghostCity"
+          cityCurrency="USD"
+          cityTax={undefined}
+          fx={fx}
+          testID="sheet"
+        />,
+      );
+      expect(screen.queryByTestId('sheet-custom-input')).toBeNull();
+      expect(screen.getByTestId('sheet-custom-disabled')).toBeTruthy();
+      expect(screen.getByTestId('sheet-clear-stale')).toBeTruthy();
+    });
+
+    it('clear-stale 버튼 → store 에서 도시 entry 제거', () => {
+      act(() => {
+        useTaxChoiceStore
+          .getState()
+          .setTaxChoice('ghostCity', { kind: 'custom', annualSalary: 50000 });
+      });
+      render(
+        <TaxChoiceSheet
+          visible
+          onDismiss={jest.fn()}
+          cityId="ghostCity"
+          cityCurrency="USD"
+          cityTax={undefined}
+          fx={fx}
+          testID="sheet"
+        />,
+      );
+      fireEvent.press(screen.getByTestId('sheet-clear-stale'));
+      expect(useTaxChoiceStore.getState().choices.ghostCity).toBeUndefined();
+    });
+
+    it('choice 미존재 + entries=0 → clear-stale 버튼 미렌더', () => {
+      render(
+        <TaxChoiceSheet
+          visible
+          onDismiss={jest.fn()}
+          cityId="ghostCity"
+          cityCurrency="USD"
+          cityTax={undefined}
+          fx={fx}
+          testID="sheet"
+        />,
+      );
+      expect(screen.queryByTestId('sheet-clear-stale')).toBeNull();
+    });
+  });
 });

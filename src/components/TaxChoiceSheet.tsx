@@ -56,8 +56,15 @@ export function TaxChoiceSheet({
 
   const resolved = resolveTaxChoice(cityTax, choice);
 
+  const entries = cityTax ?? [];
+  const hasEntries = entries.length > 0;
+
+  // PR #25 6차 review — entries=0 + stale custom 도시에서 custom 모드 진입 차단.
+  // resolveTaxChoice 가 null 을 반환해 저장이 silent fail 인 상태에서 입력 폼만
+  // 보이는 혼란을 막는다. 안내 섹션 (custom-disabled) 에 clear 버튼 추가로 stale
+  // 값 제거 경로 제공.
   const [mode, setMode] = React.useState<Mode>(
-    choice?.kind === 'custom' ? 'custom' : 'list',
+    choice?.kind === 'custom' && hasEntries ? 'custom' : 'list',
   );
   const [draft, setDraft] = React.useState<string>(
     choice?.kind === 'custom' ? String(choice.annualSalary) : '',
@@ -65,11 +72,9 @@ export function TaxChoiceSheet({
 
   React.useEffect(() => {
     if (!visible) return;
-    setMode(choice?.kind === 'custom' ? 'custom' : 'list');
+    setMode(choice?.kind === 'custom' && hasEntries ? 'custom' : 'list');
     setDraft(choice?.kind === 'custom' ? String(choice.annualSalary) : '');
-  }, [visible, choice]);
-
-  const entries = cityTax ?? [];
+  }, [visible, choice, hasEntries]);
 
   const handlePickPreset = (annualSalary: number) => {
     setChoice(cityId, { kind: 'preset', annualSalary });
@@ -178,46 +183,66 @@ export function TaxChoiceSheet({
               <Tiny color="orange">
                 이 도시는 세율 데이터가 없어 직접 입력이 지원되지 않아요.
               </Tiny>
+              {/*
+                PR #25 6차 review — 영속화된 stale custom 이 남아 있으면 (e.g.
+                데이터 갱신으로 entries 가 비워진 경우) UI 에서 제거할 경로 제공.
+                resolveTaxChoice 는 null 이라 화면 영향은 없지만 저장 데이터를
+                사용자가 명시적으로 비울 수 있게 한다.
+              */}
+              {choice !== undefined ? (
+                <Pressable
+                  onPress={() => clearChoice(cityId)}
+                  accessibilityRole="button"
+                  className="mt-2"
+                  testID={
+                    testID !== undefined ? `${testID}-clear-stale` : undefined
+                  }
+                >
+                  <Tiny color="gray-2" className="underline">
+                    저장된 직접 입력값 초기화
+                  </Tiny>
+                </Pressable>
+              ) : null}
             </View>
           ) : (
-          <Pressable
-            onPress={() => {
-              setMode('custom');
-              if (choice?.kind === 'custom') {
-                setDraft(String(choice.annualSalary));
-              } else {
-                setDraft('');
-              }
-            }}
-            accessibilityRole="button"
-            className={`flex-row items-center gap-3 px-3 py-3 rounded-card ${
-              resolved !== null && resolved.isCustom ? 'bg-orange' : ''
-            }`}
-            testID={testID !== undefined ? `${testID}-custom-row` : undefined}
-          >
-            <View
-              className={`w-9 h-9 items-center justify-center rounded-[10px] ${
-                resolved !== null && resolved.isCustom ? 'bg-white' : 'bg-light'
+            <Pressable
+              onPress={() => {
+                setMode('custom');
+                if (choice?.kind === 'custom') {
+                  setDraft(String(choice.annualSalary));
+                } else {
+                  setDraft('');
+                }
+              }}
+              accessibilityRole="button"
+              className={`flex-row items-center gap-3 px-3 py-3 rounded-card ${
+                resolved !== null && resolved.isCustom ? 'bg-orange' : ''
               }`}
+              testID={testID !== undefined ? `${testID}-custom-row` : undefined}
             >
-              <Text style={{ fontSize: 18 }}>✏️</Text>
-            </View>
-            <View className="flex-1 min-w-0">
-              <Body
-                color={resolved !== null && resolved.isCustom ? 'white' : 'navy'}
-                className="font-manrope-bold"
+              <View
+                className={`w-9 h-9 items-center justify-center rounded-[10px] ${
+                  resolved !== null && resolved.isCustom ? 'bg-white' : 'bg-light'
+                }`}
               >
-                직접 입력
-              </Body>
-              <Tiny
-                color={resolved !== null && resolved.isCustom ? 'white' : 'gray-2'}
-              >
-                {resolved !== null && resolved.isCustom
-                  ? `연봉 ${resolved.annualSalary.toLocaleString()} ${cityCurrency}`
-                  : '연봉을 직접 입력해요'}
-              </Tiny>
-            </View>
-          </Pressable>
+                <Text style={{ fontSize: 18 }}>✏️</Text>
+              </View>
+              <View className="flex-1 min-w-0">
+                <Body
+                  color={resolved !== null && resolved.isCustom ? 'white' : 'navy'}
+                  className="font-manrope-bold"
+                >
+                  직접 입력
+                </Body>
+                <Tiny
+                  color={resolved !== null && resolved.isCustom ? 'white' : 'gray-2'}
+                >
+                  {resolved !== null && resolved.isCustom
+                    ? `연봉 ${resolved.annualSalary.toLocaleString()} ${cityCurrency}`
+                    : '연봉을 직접 입력해요'}
+                </Tiny>
+              </View>
+            </Pressable>
           )}
         </ScrollView>
       ) : (

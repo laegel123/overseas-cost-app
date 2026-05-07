@@ -133,8 +133,13 @@ export const FAV_CARD_SUB_OPACITY = 0.7;
 export const FAV_CARD_LABEL_OPACITY = 0.6;
 
 /**
- * BottomSheet backdrop 색상 — navy 0.4 alpha. NativeWind className 으로
- * alpha 표현이 어려워 inline style 로 적용. ADR-061 (시트 컴포넌트 도입).
+ * BottomSheet backdrop 색상 — `colors.navy` (#11263C) 의 RGB(17, 38, 60) 에
+ * 0.4 alpha 적용. NativeWind className 으로 alpha 표현이 어려워 inline style
+ * 로 적용. RN 표준 라이브러리에 hex→rgba 합성 유틸이 없어 RGB 값을 직접
+ * 표기. ADR-061 (시트 컴포넌트 도입).
+ *
+ * **WARNING**: `colors.navy` 가 변경되면 본 상수의 RGB 값도 동시에 갱신해야
+ * 한다 (단일 출처 정책의 예외 — 토큰 간 종속성). PR #25 6차 review.
  */
 export const SHEET_BACKDROP_COLOR = 'rgba(17, 38, 60, 0.4)' as const;
 

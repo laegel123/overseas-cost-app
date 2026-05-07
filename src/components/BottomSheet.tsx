@@ -65,8 +65,9 @@ export function BottomSheet({
         {/* 시트 본체 — backdrop 위에 absolute, 본체 탭은 dismiss 안 함 */}
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={{ flex: 1, justifyContent: 'flex-end' }}
-          pointerEvents="box-none"
+          // PR #25 6차 review — RN 0.71+ 에서 pointerEvents View prop deprecated.
+          // style.pointerEvents 권장 형식 사용.
+          style={{ flex: 1, justifyContent: 'flex-end', pointerEvents: 'box-none' }}
         >
           <Pressable
             // 본체 탭은 dismiss 없음 — 빈 onPress 로 backdrop 으로 이벤트
