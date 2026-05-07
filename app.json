@@ -23,8 +23,8 @@
     "android": {
       "package": "com.laegel.overseascostapp",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
-        "backgroundColor": "#FFFFFF"
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FC6011"
       }
     },
     "web": {
