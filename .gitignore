@@ -45,7 +45,7 @@ coverage/
 *.swo
 
 # Claude Code project local config
-.claude/settings.local.json
+.claude/
 
 # Generated data (build outputs from scripts/build_data.mjs)
 data/all.json.gz
