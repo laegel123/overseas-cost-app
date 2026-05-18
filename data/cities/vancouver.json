@@ -7,7 +7,7 @@
   "country": "CA",
   "currency": "CAD",
   "region": "na",
-  "lastUpdated": "2026-05-02",
+  "lastUpdated": "2026-05-18",
   "rent": {
     "share": 1203,
     "studio": 1850,
@@ -15,14 +15,14 @@
     "twoBed": 2800
   },
   "food": {
-    "restaurantMeal": 22,
-    "cafe": 6,
+    "restaurantMeal": 19.03,
+    "cafe": 5.36,
     "groceries": {
-      "milk1L": 3.25,
-      "eggs12": 4.5,
-      "rice1kg": 3.8,
-      "chicken1kg": 15,
-      "bread": 3.5,
+      "milk1L": 6.54,
+      "eggs12": 8.64,
+      "rice1kg": 6.67,
+      "chicken1kg": 31.46,
+      "bread": 7.88,
       "onion1kg": 2.8,
       "apple1kg": 4.5,
       "ramen": 1.5
@@ -85,6 +85,12 @@
       "name": "Government visa fee pages (static estimates)",
       "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "food",
+      "name": "Statistics Canada CPI",
+      "url": "https://www150.statcan.gc.ca/",
+      "accessedAt": "2026-05-18"
     }
   ]
 }
