@@ -7,7 +7,7 @@
   "country": "CA",
   "currency": "CAD",
   "region": "na",
-  "lastUpdated": "2026-05-02",
+  "lastUpdated": "2026-06-01",
   "rent": {
     "share": 1105,
     "studio": 1700,
@@ -16,7 +16,7 @@
   },
   "food": {
     "restaurantMeal": 19,
-    "cafe": 5.5,
+    "cafe": 9.24,
     "groceries": {
       "milk1L": 3.1,
       "eggs12": 4.2,
@@ -85,6 +85,12 @@
       "name": "Government visa fee pages (static estimates)",
       "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
       "accessedAt": "2026-05-02"
+    },
+    {
+      "category": "food",
+      "name": "Statistics Canada CPI",
+      "url": "https://www150.statcan.gc.ca/",
+      "accessedAt": "2026-06-01"
     }
   ]
 }
