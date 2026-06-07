@@ -24,6 +24,7 @@
     },
     "android": {
       "package": "com.laegel.overseascostapp",
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FC6011"
@@ -45,6 +46,9 @@
         "projectId": "d2ad95d3-48af-494e-9912-31e591b9644b"
       }
     },
-    "owner": "juno1001"
+    "owner": "juno1001",
+    "updates": {
+      "url": "https://u.expo.dev/d2ad95d3-48af-494e-9912-31e591b9644b"
+    }
   }
 }
