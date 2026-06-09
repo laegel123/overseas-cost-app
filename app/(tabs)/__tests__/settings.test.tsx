@@ -297,14 +297,14 @@ describe('SettingsScreen', () => {
       );
     });
 
-    it('개인정보 처리방침 → GitHub URL', () => {
+    it('개인정보 처리방침 → 출시 정본 Pages URL', () => {
       setupMocks();
 
       const { getByTestId } = render(<SettingsScreen />);
       fireEvent.press(getByTestId('menu-privacy'));
 
       expect(mockOpenURL).toHaveBeenCalledWith(
-        expect.stringContaining('PRIVACY.md'),
+        expect.stringContaining('privacy-policy.html'),
       );
     });
   });
