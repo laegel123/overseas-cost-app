@@ -9,6 +9,7 @@
  */
 export * from './errors';
 export { parseAllCitiesText, validateAllJson, validateCity } from './citySchema';
+export { DATA_SOURCES_COUNT } from './dataSources';
 export { convertToKRW, fetchExchangeRates, FX_BASELINE_2026Q2, refreshFx } from './currency';
 export { getAllCities, getCity, getLastSync, loadAllCities, refreshCache } from './data';
 export {

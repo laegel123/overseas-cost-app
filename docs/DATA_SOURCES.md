@@ -4,16 +4,16 @@
 
 수동 큐레이션은 **금지** (ADR-028 supersede). 자동화 한계가 있는 항목은 명시적으로 "static" 또는 "estimated" 마커.
 
-> ⚠️ **동기화 경고 (수동 카운트):**
+> ⚠️ **출처 유형 총수 (테스트 강제 동기화 — ADR-065):**
 >
+> <!-- DATA_SOURCES_COUNT: 12 -->
 > **출처 유형 총수: 12** — 정부 통계 / 공식 교통공사 / 공식 대학 페이지 / 환율 API 등 카테고리별 활용 출처.
 >
-> 본 파일에 출처를 추가/제거할 때 **반드시 함께 갱신**:
-> 1. 본 라인의 "출처 유형 총수" 숫자
-> 2. `app/(tabs)/settings.tsx` 의 `DATA_SOURCES_COUNT` 상수
-> 3. (선택) `docs/TESTING.md` §9.29 "출처 rightText" 케이스의 기대값
+> 위 `<!-- DATA_SOURCES_COUNT: N -->` 주석이 머신 판독용 **단일 출처**다. 출처 유형을 추가/제거할 때:
+> 1. 위 마커 숫자 + 본문 "출처 유형 총수" 숫자
+> 2. `src/lib/dataSources.ts` 의 `DATA_SOURCES_COUNT` 상수
 >
-> v1.x 빌드 타임 자동 카운트 도입 시 본 경고 제거 예정 (TODO 주석 참조).
+> 마커와 상수가 어긋나면 `src/lib/__tests__/dataSources.test.ts` 가 CI 에서 실패하므로 silent drift 는 불가능하다. 설정 화면 "데이터 출처 보기" rightText 와 `docs/TESTING.md` §9.29 기대값도 이 값을 따른다.
 
 ---
 

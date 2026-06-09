@@ -22,7 +22,7 @@ import { Icon } from '@/components/Icon';
 import { MenuRow } from '@/components/MenuRow';
 import { Screen } from '@/components/Screen';
 import { H1, H3, Tiny } from '@/components/typography/Text';
-import { formatShortDate, getAllCities, refreshCache } from '@/lib';
+import { DATA_SOURCES_COUNT, formatShortDate, getAllCities, refreshCache } from '@/lib';
 import { openURL } from '@/lib/linking';
 import { PERSONA_ICON, PERSONA_LABEL, PERSONA_SUB } from '@/lib/persona';
 import { useFavoritesStore } from '@/store/favorites';
@@ -32,10 +32,10 @@ import { useSettingsStore } from '@/store/settings';
 import { colors } from '@/theme/tokens';
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
-// TODO(v1.x): docs/DATA_SOURCES.md 섹션 수를 빌드 타임에 자동 카운트로 교체.
-// 현재는 수동 동기화 — 출처 추가 시 본 상수 갱신 필수. 누락 위험 추적용 TODO.
-const DATA_SOURCES_COUNT = 12;
-const PRIVACY_POLICY_URL = 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/PRIVACY.md';
+// DATA_SOURCES_COUNT 는 `src/lib/dataSources.ts` 단일 출처 (docs/DATA_SOURCES.md 마커와
+// 테스트가 동기화 강제). 개인정보 처리방침은 출시용 정본 GitHub Pages HTML — 스토어 등록
+// URL 과 동일 (RELEASE.md §7: privacy-policy.html 이 실제 노출 본문 단일 출처).
+const PRIVACY_POLICY_URL = 'https://laegel123.github.io/overseas-cost-app/privacy-policy.html';
 const DATA_SOURCES_URL = 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md';
 const FEEDBACK_EMAIL = 'laegel1@gmail.com';
 

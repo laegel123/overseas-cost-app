@@ -2355,7 +2355,7 @@ screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
 
 - [x] 5개 메뉴 모두 렌더링 (데이터 새로고침/출처/피드백/개인정보/앱 정보) (screens step 3)
 - [x] 앱 정보 rightText = v1.0.0 (expo-constants expoConfig.version) (screens step 3)
-- [x] 출처 rightText = 12개 (screens step 3) — `DATA_SOURCES_COUNT` 와 `docs/DATA_SOURCES.md` 헤더 카운트가 동기화 (PR #18 review round 9)
+- [x] 출처 rightText = 12개 — `DATA_SOURCES_COUNT` (`src/lib/dataSources.ts` 단일 출처) ↔ `docs/DATA_SOURCES.md` 마커 동기화는 §9.33 드리프트 테스트가 강제 (ADR-065; PR #18 round 9 의 수동 동기화 대체)
 
 **데이터 새로고침:**
 
@@ -2368,7 +2368,7 @@ screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
 
 - [x] 피드백 보내기 → mailto:laegel1@gmail.com 호출 (ADR-021) (screens step 3)
 - [x] 데이터 출처 보기 → GitHub DATA_SOURCES.md URL 호출 (screens step 3)
-- [x] 개인정보 처리방침 → GitHub PRIVACY.md URL 호출 (screens step 3)
+- [x] 개인정보 처리방침 → 출시 정본 GitHub Pages `privacy-policy.html` URL 호출 (ADR-065; 기존 GitHub PRIVACY.md 대체)
 
 **Footer:**
 
@@ -2427,6 +2427,14 @@ screens phase step 3 에 추가된 thin wrapper. `jest.mock('@/lib/linking')` �
 
 - [x] openURL 호출 시 Linking.openURL 로 위임 (PR #18 review round 5)
 - [x] mailto: scheme 도 변형 없이 그대로 전달 (PR #18 review round 5)
+
+### 9.33 `src/lib/dataSources.ts` — 출처 유형 총수 단일 출처
+
+v1.x DX 정리 (ADR-065). `DATA_SOURCES_COUNT` 를 `docs/DATA_SOURCES.md` 머신 마커와 동기화 강제 — settings.tsx 하드코딩 + 수동 동기화 제거.
+
+- [x] DATA_SOURCES_COUNT 는 양의 정수 (ADR-065)
+- [x] docs/DATA_SOURCES.md `<!-- DATA_SOURCES_COUNT: N -->` 마커와 일치 — 드리프트 가드 (ADR-065)
+- [x] 마커 부재 시 parseMarkerCount throw — silent fail 금지 (ADR-065)
 
 ### 9.34 `src/components/PersonaCard.tsx` — Onboarding 페르소나 선택 카드
 

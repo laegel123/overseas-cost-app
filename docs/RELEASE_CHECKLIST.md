@@ -3,7 +3,7 @@
 > **목적:** Google Play 출시까지 남은 단계를 한눈에 추적하는 living 문서. 진행하면서 상태를 갱신한다.
 > **상태 표기:** ⬜ 미시작 · 🔄 진행 중 · ✅ 완료 · ⏳ 대기(외부 요인)
 > **대상:** Google Play 우선 (iOS/App Store는 별도 진행). 계정: **신규 개인 계정** → 비공개 테스트 14일 게이트 적용.
-> **마지막 갱신:** 2026-06-07
+> **마지막 갱신:** 2026-06-09
 
 ---
 
@@ -16,11 +16,10 @@
 ## 진행 현황
 
 ### 단계 0 — 사전 점검
-- ⬜ 개인정보처리방침 URL이 브라우저에서 실제로 열리는지 확인
-  - 현재 본문: `docs/privacy-policy.html` (저장소에 존재)
-  - 등록 예정 URL: `https://laegel123.github.io/overseas-cost-app/privacy-policy.html`
-  - GitHub Pages 배포 워크플로가 없음 → repo Settings → Pages에서 `main` 브랜치 `/docs` 폴더 서빙 활성화 필요할 수 있음. (안 열리면 Play 심사 거절)
-  - GitHub 사용자명이 `laegel123` 맞는지 확인 (app.json owner는 `juno1001`).
+- ✅ 개인정보처리방침 URL이 브라우저에서 실제로 열림 — **2026-06-09 확인**
+  - 정본 본문: `docs/privacy-policy.html` → live: `https://laegel123.github.io/overseas-cost-app/privacy-policy.html` (정상 노출 — "개인정보 처리방침 · 살까말까")
+  - GitHub Pages 서빙 정상 (`laegel123` 계정 확인됨; app.json owner `juno1001` 은 EAS 계정이라 별개 — 무관)
+  - 인앱 "개인정보 처리방침" 메뉴 링크도 본 정본 URL 로 정렬됨 (ADR-065)
 - ✅ EAS 로그인 확인 (`eas whoami` → `juno1001`)
 
 ### 단계 1 — 설정 파일 수정 (코드)
@@ -41,6 +40,7 @@
 ### 단계 3 — 프로덕션 AAB 빌드  ✅ 완료
 - ✅ 빌드 완료 — ID `aaa0b047-645b-4a13-84fc-d1a764112092`, status `finished`, profile `production`, distribution `store`, versionCode 1
 - ✅ 산출물 AAB: `https://expo.dev/artifacts/eas/n53VyxbNKPHFYMXeUTA6eL.aab`
+- ✅ 실데이터 자동화 충족 (ADR-045 게이트) — `data/all.json` 이 fixture 아닌 실데이터(`generatedAt 2026-06-08`), GitHub Actions cron 가동 중(`data: weekly prices refresh` / `daily FX refresh`). 빌드 직전 fixture-시드 검출 게이트 통과.
 - keystore: 기존 것 재사용(`Build Credentials dV0daWyC0p`, EAS 관리).
 - 빌드 과정에서 `expo-updates`(~29.0.18) **자동 설치** + `app.json` `updates.url` 구성 + EAS Update 채널/브랜치 `production` 생성 (→ ADR-064).
 - ⚠️ **빌드 제출 명령은 사용자 터미널에서 실행한다.** 에이전트 샌드박스 셸에서는 `eas build` 제출 단계가 반복 hang됨(fingerprint / credentials). 읽기 전용 `eas build:list` 는 정상. 재빌드 시:
