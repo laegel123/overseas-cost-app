@@ -7,12 +7,12 @@
   "country": "GB",
   "currency": "GBP",
   "region": "eu",
-  "lastUpdated": "2026-05-03",
+  "lastUpdated": "2026-07-01",
   "rent": {
-    "share": 1105,
-    "studio": 1700,
-    "oneBed": 2100,
-    "twoBed": 2800
+    "share": null,
+    "studio": null,
+    "oneBed": null,
+    "twoBed": null
   },
   "food": {
     "restaurantMeal": 15,
@@ -20,9 +20,9 @@
     "groceries": {
       "milk1L": 1.5,
       "eggs12": 3.5,
-      "rice1kg": 2.2,
-      "chicken1kg": 6,
       "bread": 1.4,
+      "chicken1kg": 6,
+      "rice1kg": 2.2,
       "onion1kg": 1.5,
       "apple1kg": 2.8,
       "ramen": 1.2
@@ -60,13 +60,13 @@
       "category": "rent",
       "name": "ONS Private Rental Market Statistics",
       "url": "https://www.ons.gov.uk/peoplepopulationandcommunity/housing/datasets/privaterentalmarketsummarystatisticsinengland",
-      "accessedAt": "2026-05-03"
+      "accessedAt": "2026-07-01"
     },
     {
       "category": "food",
       "name": "ONS Consumer Price Inflation + static estimates",
       "url": "https://www.ons.gov.uk/economy/inflationandpriceindices",
-      "accessedAt": "2026-05-03"
+      "accessedAt": "2026-07-01"
     },
     {
       "category": "transport",
