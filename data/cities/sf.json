@@ -7,7 +7,7 @@
   "country": "US",
   "currency": "USD",
   "region": "na",
-  "lastUpdated": "2026-05-04",
+  "lastUpdated": "2026-07-02",
   "rent": {
     "share": 1560,
     "studio": 2400,
@@ -29,8 +29,8 @@
     }
   },
   "transport": {
-    "monthlyPass": 81,
-    "singleRide": 3,
+    "monthlyPass": 43,
+    "singleRide": 2.85,
     "taxiBase": 3.5
   },
   "tuition": [
@@ -72,7 +72,7 @@
       "category": "transport",
       "name": "SFMTA",
       "url": "https://www.sfmta.com/fares",
-      "accessedAt": "2026-05-03"
+      "accessedAt": "2026-07-02"
     },
     {
       "category": "tuition",

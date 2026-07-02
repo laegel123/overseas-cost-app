@@ -7,7 +7,7 @@
   "country": "US",
   "currency": "USD",
   "region": "na",
-  "lastUpdated": "2026-05-04",
+  "lastUpdated": "2026-07-02",
   "rent": {
     "share": 1170,
     "studio": 1800,
@@ -30,7 +30,7 @@
   },
   "transport": {
     "monthlyPass": 99,
-    "singleRide": 2.75,
+    "singleRide": 3,
     "taxiBase": 2.6
   },
   "tuition": [
@@ -67,7 +67,7 @@
       "category": "transport",
       "name": "King County Metro",
       "url": "https://kingcounty.gov/en/dept/metro/fares-and-payment",
-      "accessedAt": "2026-05-03"
+      "accessedAt": "2026-07-02"
     },
     {
       "category": "tuition",
