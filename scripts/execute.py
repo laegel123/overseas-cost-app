@@ -249,14 +249,17 @@ class StepExecutor:
             sys.exit(1)
 
         prompt = preamble + step_file.read_text()
-        cmd = ["claude", "--model", self._model, "-p", "--dangerously-skip-permissions", "--output-format", "json", prompt]
+        # 프롬프트(가드레일 포함 ~500KB)를 argv 로 넘기면 ARG_MAX(E2BIG)를 초과한다.
+        # stdin 으로 전달한다 — `claude -p` 는 인자가 없으면 stdin 에서 프롬프트를 읽는다.
+        cmd = ["claude", "--model", self._model, "-p", "--dangerously-skip-permissions", "--output-format", "json"]
 
         if self._verbose:
             stdout_buf = []
             stderr_buf = []
 
             proc = subprocess.Popen(
-                cmd, cwd=self._root, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                cmd, cwd=self._root, stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
             )
 
             def _read_stream(stream, buf, out):
@@ -265,8 +268,16 @@ class StepExecutor:
                     out.write(line)
                     out.flush()
 
+            def _write_stdin(stream, data):
+                try:
+                    stream.write(data)
+                finally:
+                    stream.close()
+
+            t_in = threading.Thread(target=_write_stdin, args=(proc.stdin, prompt), daemon=True)
             t_out = threading.Thread(target=_read_stream, args=(proc.stdout, stdout_buf, sys.stdout), daemon=True)
             t_err = threading.Thread(target=_read_stream, args=(proc.stderr, stderr_buf, sys.stderr), daemon=True)
+            t_in.start()
             t_out.start()
             t_err.start()
 
@@ -284,7 +295,7 @@ class StepExecutor:
             stderr_str = "".join(stderr_buf)
         else:
             result = subprocess.run(
-                cmd, cwd=self._root, capture_output=True, text=True, timeout=self._timeout,
+                cmd, cwd=self._root, input=prompt, capture_output=True, text=True, timeout=self._timeout,
             )
             returncode = result.returncode
             stdout_str = result.stdout
