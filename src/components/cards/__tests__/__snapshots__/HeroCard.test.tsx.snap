@@ -23,7 +23,7 @@ exports[`HeroCard snapshot navy variant — full props 1`] = `
       accessibilityRole="text"
       className="font-manrope-semibold text-mono-label text-white"
     >
-      한 달 예상 총비용
+      한눈에 보는 물가 비교
     </Text>
   </View>
   <View
@@ -138,7 +138,7 @@ exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
       accessibilityRole="text"
       className="font-manrope-semibold text-mono-label text-white"
     >
-      한 달 예상 총비용
+      한눈에 보는 물가 비교
     </Text>
   </View>
   <View

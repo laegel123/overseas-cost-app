@@ -1436,7 +1436,7 @@ phase 에서 재검토.
 - [x] centerCaption 있을 때 렌더 / 미제공 시 미렌더
 - [x] footer 있을 때 렌더 + wrapper opacity = `HERO_FOOTER_OPACITY` (0.7, design §3 본문 약화)
 - [x] footer 미제공 → wrapper 자체 미렌더
-- [x] 상단 고정 라벨 "한 달 예상 총비용" 렌더 (한국어는 MonoLabel uppercase 변환 없음)
+- [x] 상단 고정 라벨 "한눈에 보는 물가 비교" 렌더 (한국어는 MonoLabel uppercase 변환 없음)
 - [x] orange 합 = 1 → 흰 segment 0.5 / 1.0 대비 (`HERO_SEOUL_BAR_OPACITY.orange`, design §3)
 - [x] navy variant — 트랙 bg-white opacity 0.15 (`HERO_SEOUL_BAR_OPACITY.navy`) + 도시 막대 bg-orange (design §4 detail navy hero)
 - [x] sw=0, cw=1 → 도시 막대만 렌더 (서울 미렌더)

@@ -139,7 +139,7 @@ export function HeroCard({
     >
       {/* 상단 라벨 + ❓ info 아이콘 */}
       <View className="flex-row items-center justify-between">
-        <MonoLabel color="white">한 달 예상 총비용</MonoLabel>
+        <MonoLabel color="white">한눈에 보는 물가 비교</MonoLabel>
         {showInfoIcon && onInfoPress !== undefined && (
           <Pressable
             onPress={onInfoPress}

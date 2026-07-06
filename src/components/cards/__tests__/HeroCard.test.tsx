@@ -176,10 +176,10 @@ describe('HeroCard', () => {
       expect(screen.queryByTestId('h-footer')).toBeNull();
     });
 
-    it('상단 고정 라벨 "한 달 예상 총비용" 렌더 (mono-label uppercase)', () => {
+    it('상단 고정 라벨 "한눈에 보는 물가 비교" 렌더 (mono-label uppercase)', () => {
       render(<HeroCard {...baseProps} variant="orange" testID="h" />);
       // MonoLabel 은 한국어는 uppercase 변환 없이 그대로 렌더
-      expect(screen.getByText('한 달 예상 총비용')).toBeTruthy();
+      expect(screen.getByText('한눈에 보는 물가 비교')).toBeTruthy();
     });
 
     it('긴 값 → numberOfLines={1} (squeeze 방지)', () => {

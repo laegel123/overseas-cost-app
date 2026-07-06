@@ -134,7 +134,7 @@ export const FAV_CARD_LABEL_OPACITY = 0.6;
 
 /**
  * ComparePair 의 제외 상태 카드 투명도 (ADR-062) — 사용자가 토글 OFF 한 카드는
- * "한 달 예상 총비용" 합산에서 빠지지만 화면에서 숨기지 않고 약하게 표시. 색상에만
+ * "한눈에 보는 물가 비교" 합산에서 빠지지만 화면에서 숨기지 않고 약하게 표시. 색상에만
  * 의존하지 않도록 opacity + "제외됨" 배지 + 토글 OFF 색상 = 3중 인코딩.
  */
 export const EXCLUDED_CARD_OPACITY = 0.55;

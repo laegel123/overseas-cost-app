@@ -65,7 +65,7 @@ PRD 기준 5개 핵심 화면을 hi-fi로 mock한 상태입니다.
 - **Components**:
   - **Top bar**: 36×36 아이콘 버튼 두 개(좌 back / 우 star), 가운데 `서울 vs 밴쿠버` 14px Manrope 700 + `1 CAD = 980원 · 04-27` 10px tiny. **아이콘 버튼 색이 다름**: back = `#F0F5F9` light, star = `#FFE9DC` orange-soft.
   - **Hero card (orange fill)**: padding 18, border-radius 22px, background `#FC6011`, color white, shadow `0 12px 32px rgba(252,96,17,0.25)`. 우상단에 반투명 흰 원(120×120, opacity 0.08) decorative.
-    - 위 라벨: `한 달 예상 총비용` 11px uppercase letter-spacing 0.08em + info icon
+    - 위 라벨: `한눈에 보는 물가 비교` 11px uppercase letter-spacing 0.08em + info icon
     - 3-column row (모두 `whiteSpace: nowrap`, `flexShrink: 0`로 squeeze 방지):
       - 좌: `서울` 11px / `175만` 18px Manrope 700
       - 가운데: `↑1.9×` 30px Manrope 800 / `+165만/월` 10px (caption은 슬래시로 줄바꿈 방지)
