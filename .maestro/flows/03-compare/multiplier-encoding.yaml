@@ -7,10 +7,7 @@ tags:
   - compare
   - a11y
 ---
-- runFlow:
-    file: ../../common/onboard.yaml
-    env:
-      PERSONA: student
+- runFlow: ../../common/onboard.yaml
 - runFlow: ../../common/open-vancouver-compare.yaml
 - assertVisible:
     id: 'compare-hero'

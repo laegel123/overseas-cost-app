@@ -211,8 +211,8 @@ it('FX fetch 성공', async () => {
 
 ```ts
 beforeEach(async () => {
-  await usePersonaStore.persist.clearStorage();
-  usePersonaStore.setState({ persona: 'unknown', onboarded: false }, true);
+  await useOnboardingStore.persist.clearStorage();
+  useOnboardingStore.setState({ onboarded: false }, true);
 });
 ```
 
@@ -360,10 +360,10 @@ UI_GUIDE.md §카테고리별 상세 화면 사양 의 5개 카테고리에 대�
 // src/__test-utils__/render.tsx
 export function renderWithProviders(
   ui: ReactElement,
-  options?: { initialPersona?: Persona; initialFavorites?: string[] }
+  options?: { initialOnboarded?: boolean; initialFavorites?: string[] }
 ) {
-  if (options?.initialPersona) {
-    usePersonaStore.setState({ persona: options.initialPersona, onboarded: true });
+  if (options?.initialOnboarded !== undefined) {
+    useOnboardingStore.setState({ onboarded: options.initialOnboarded });
   }
   if (options?.initialFavorites) {
     useFavoritesStore.setState({ cityIds: options.initialFavorites });
@@ -807,6 +807,25 @@ PR #17 review 이슈 2 — 이전 compare 화면 로컬 정의가 Infinity 반�
 - [ ] `unknown` → `['rent', 'food', 'transport', 'tuition', 'tax', 'visa']` (합집합 6개, 순서 명시)
 - [ ] 잘못된 persona → TypeScript 차단, 런타임은 throws
 
+### 9.3.1 `src/lib/homeTotals.ts` (ADR-056, persona-removal step 3)
+
+Home 화면 (`app/(tabs)/index.tsx`) 에서 추출한 단순화 총비용/배수 계산 순수 함수.
+온보딩 도시 선택 화면과 공유하는 단일 출처. Compare 의 카테고리별 정밀 계산과
+의도적으로 다른 근사값 (ADR-056).
+
+#### `computeCityTotal(city, fx): number`
+
+- [x] 밴쿠버 (CAD) — rent share + food(외식 20일 + groceries 4종 4회) + monthlyPass 합산
+- [x] 서울 (KRW) — pass-through 합산 (fx 무관)
+- [x] groceries 는 milk/eggs/rice/chicken 4종만 — ramen·bread·onion·apple 제외
+- [x] rent 는 `share ?? studio ?? oneBed` 순 fallback
+- [x] rent 전부 null → 0 fallback (food + transport 만)
+
+#### `multFromTotals(city, seoulTotal, fx): number | '신규'`
+
+- [x] 도시 총비용 / 서울 총비용 배수 (`computeMultiplier` 위임)
+- [x] 서울 총비용 0 + 도시 총비용 > 0 → `'신규'`
+
 ### 9.4 `src/lib/data.ts` (단일 batch fetch)
 
 ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
@@ -1008,41 +1027,9 @@ INITIAL_STATE 강제 (정상 hydrated store 는 보존). dev 빌드 콘솔 warn.
 - [x] 정상 완료가 timeout 보다 먼저 → `'ok'`, setState 호출 없음 + warn 없음
 - [x] 인자 미제공 시 default 5000ms 적용
 
-### 9.5 `src/store/persona.ts`
+### 9.5 `src/store/persona.ts` (삭제됨 — ADR-067, persona-removal step 7)
 
-**기본 동작:**
-
-- [x] 초기 상태: `{ persona: 'unknown', onboarded: false }`
-- [x] `setPersona('student')` → state 변경
-- [x] `setPersona('worker')` → state 변경
-- [x] `setPersona('unknown')` → state 변경
-- [x] `setOnboarded(true)` → state 변경
-- [x] `reset()` → 초기 상태 복귀
-
-**영속화:**
-
-- [x] persist round-trip: setPersona('student') 후 새 hook 인스턴스에서 'student' 읽힘
-- [x] AsyncStorage 키: `persona:v1`
-- [x] hydration: `useStore.persist.hasHydrated()` 가 false → true 전이
-- [x] hydration 미완 시 read: 초기값 반환
-- [x] AsyncStorage 손상 (잘못된 JSON): 초기 상태 fallback + INITIAL 직렬화로 정리 (다음 부팅 시 정상 fallback)
-- [x] AsyncStorage 손상 (유효하지 않은 persona literal): isValidPersistedState 검증 후 초기 상태 fallback
-
-**Hydration race:**
-
-- [x] hydration 완료 전 `usePersonaStore.getState().persona` 호출 → 초기값
-- [x] hydration 완료 후 동일 호출 → 저장된 값
-- [x] subscribe 콜백: hydration 후 1회 호출 보장
-
-**마이그레이션:**
-
-- [x] v1 entry: version 일치 → migrate 함수 호출 안 됨 (rehydrate 정상 동작 검증)
-- [x] 미래 v0 entry (구버전) → migrate stub 이 state 통과 (v2 도입 시 본 케이스가 실 변환 검증으로 확장)
-- [ ] (v2 도입 시 추가) v1 → v2: 새 필드 기본값 채움 / migrate 함수 spy
-
-**Selector:**
-
-- [x] `usePersonaStore(s => s.persona)` 다른 컴포넌트 동시 사용 시 같은 값 → 동일 ref (불필요한 리렌더 방지)
+페르소나 개념 제거로 store 삭제. `onboarded` 플래그는 `src/store/onboarding.ts` (§9.8.5) 로 이전.
 
 ### 9.6 `src/store/favorites.ts`
 
@@ -1253,11 +1240,12 @@ hero / 학비 카드에도 즉시 반영.
 
 - [x] `waitForAllStoresHydrated` 동시 await + forceInitial 적용 cover
 
-### 9.8.4 `src/store/categoryInclusion.ts` (ADR-062)
+### 9.8.4 `src/store/categoryInclusion.ts` (ADR-062, ADR-067)
 
 카테고리 포함 토글 store — Compare 카드별 hero 합산 포함 여부를 도시별로 보존.
-사용자 명시 토글값 → persona-aware default fallback. 미설정 카테고리는
-페르소나 활성도 + 카테고리 성격(평상/일회성) 에 따라 default 분기.
+사용자 명시 토글값 → 고정 default fallback. 미설정 카테고리는 카테고리 성격
+(평상/일회성) 에 따라 **고정 default** 분기 — persona 인자는 제거됨 (ADR-067,
+통합 뷰. 기존 `'unknown'` 동작과 동일).
 
 **기본 동작:**
 
@@ -1284,25 +1272,67 @@ hero / 학비 카드에도 즉시 반영.
 - [x] boolean 아닌 값 → INITIAL
 - [x] city map 자체가 객체가 아님 → INITIAL
 
-**`getDefaultInclusion` (persona-aware default 단일 출처):**
+**`getDefaultInclusion(category)` (고정 default 단일 출처, ADR-067):**
 
-- [x] rent/food/transport: 모든 페르소나에서 항상 `true`
-- [x] tuition: student → true, worker/unknown → false
-- [x] tax: worker → true, student/unknown → false
-- [x] visa: 모든 페르소나에서 항상 `false` (일회성/조건부)
+- [x] rent/food/transport: 항상 `true`
+- [x] tuition: `false` (통합 뷰 기본 — 카드는 표시, hero 합산엔 미포함)
+- [x] tax: `false` (통합 뷰 기본 — 카드는 표시, hero 합산엔 미포함)
+- [x] visa: 항상 `false` (일회성/조건부)
+- [x] `never` exhaustiveness 가드 — 미지 카테고리 컴파일 차단
 
-**`resolveInclusion` (사용자 토글 우선 → default fallback):**
+**`resolveInclusion(cityId, category, inclusions)` (사용자 토글 우선 → default fallback):**
 
 - [x] 명시 토글값(true/false) → 그 값 반환
-- [x] 미설정 도시 → persona default 적용
+- [x] 미설정 도시 → 고정 default 적용
 - [x] 다른 도시의 토글이 현재 도시에 영향 없음
 - [x] 다른 카테고리의 토글이 현재 카테고리에 영향 없음
 - [x] 도시 entry 빈 객체 → default 적용
-- [x] default 매트릭스 (카테고리 × 페르소나) — 카테고리 6 × 페르소나 3 핵심 조합
+- [x] default 매트릭스 (카테고리 6종) — persona 인자 제거 (ADR-067)
 
 **Hydration:**
 
 - [x] `waitForAllStoresHydrated` 동시 await + forceInitial 적용 cover (8 store 합성)
+
+### 9.8.5 `src/store/onboarding.ts` (ADR-067)
+
+온보딩 완료 플래그 store — 페르소나 제거(ADR-067)로 persona store 에서 이전한
+`onboarded` 를 단일 목적 store 로 분리. `settings.ts` 형틀 미러 (단일 boolean
+필드 + persist + INITIAL fallback). persona store 삭제는 step 7 담당이라 본
+step 시점엔 persona/onboarding 두 store 가 공존.
+
+**기본 동작:**
+
+- [x] 초기 상태 `{ onboarded: false }`
+- [x] `setOnboarded(true)` → state 변경
+- [x] `setOnboarded(false)` → state 변경
+- [x] `reset()` → 초기 상태 복귀
+
+**영속화:**
+
+- [x] persist key 정확히 `onboarding:v1`
+- [x] partialize: 액션 미영속화, onboarded 만 저장
+- [x] round-trip: storage v1 entry → rehydrate 후 메모리 반영
+
+**손상 캐시 — INITIAL fallback (silent fail 금지, CLAUDE.md CRITICAL):**
+
+- [x] 잘못된 JSON → INITIAL + INITIAL 직렬화로 정리
+- [x] onboarded 가 boolean 아님 → INITIAL + 정리
+- [x] onboarded 누락 → INITIAL
+
+**Hydration race:**
+
+- [x] `hasHydrated()` 가 rehydrate 후 true
+- [x] hydration 진행 중 read 는 직전 setState 결과를 일관 반영
+- [x] `onFinishHydration` 콜백이 완료 후 1회 호출
+
+**마이그레이션 (deferred):**
+
+- [x] v1 entry → migrate 함수 미진입 (version 일치)
+- [x] 미래 v0 entry → migrate stub 통과 (v2 도입 시 실 변환 검증으로 확장)
+
+**Hydration boundary (step 2 wiring):**
+
+- [ ] (step 2) `waitForAllStoresHydrated` 가 본 store 도 동시 await + forceInitial 적용 cover
 
 ### 9.9 `src/components/typography/Text.tsx` (components phase step 0)
 
@@ -1807,8 +1837,8 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 - [x] 폰트 로딩 + 모든 스토어 hydration 완료 전: SplashScreen 유지 (app-shell step 0)
 - [x] 모두 완료 후: `SplashScreen.hideAsync()` 호출 1회 (app-shell step 0)
-- [x] persona.onboarded=false → `/onboarding` redirect (app-shell step 2)
-- [x] persona.onboarded=true + 초기 onboarding segment → `/(tabs)` redirect (app-shell step 2)
+- [x] onboarding.onboarded=false → `/onboarding` redirect (app-shell step 2, store 이전 persona-removal step 2)
+- [x] onboarding.onboarded=true + 초기 onboarding segment → `/(tabs)` redirect (app-shell step 2)
 - [x] 무한 redirect 방지: 이미 대상 segment 면 no-op (app-shell step 2)
 - [x] bootReady=false 동안 router.replace 호출 0회 (app-shell step 2)
 - [x] timeout fallback (INITIAL onboarded=false) → /onboarding 자연 redirect (app-shell step 2)
@@ -1880,16 +1910,14 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 
 - [x] HeroCard orange mount 검증 (screens step 0)
 - [x] 서울값 / 도시값 / 배수 표시 (screens step 0)
-- [ ] persona=student: 학비 별도 라인 (참고)
-- [ ] persona=worker: 학비 라인 미표시
+- [x] hero 합산 기본 포함: rent/food/transport (tuition/tax/visa 는 default OFF, ADR-067)
 - [ ] ❓ 탭: 가정값 시트 열림
 
-**카드 (페르소나별):**
+**카드 (통합 뷰 — 항상 6 카테고리, ADR-067):**
 
-- [x] persona=student: 5 카드 정확한 순서 (rent/food/transport/tuition/visa) (screens step 0)
-- [x] persona=worker: 5 카드 (rent/food/transport/tax/visa) (screens step 0)
-- [x] persona=unknown: 6 카드 (학비 + 세금 합집합) (screens step 0)
-- [ ] 페르소나 mid-session 변경: 카드 즉시 갱신 (스토어 reactive)
+- [x] rent/food/transport/tuition/tax/visa 6개 모두 표시 — 페르소나 분기 제거 (persona-removal step 4)
+- [x] ComparePair 각 카테고리별 1회 mount (persona-removal step 4)
+- [x] tuition/tax 카드는 항상 표시 (hero 합산엔 default 미포함, 사용자 토글로 ON 가능)
 
 **Hot 카드:**
 
@@ -1899,7 +1927,7 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 
 - [ ] mult='신규' 표기
 - [ ] 막대: 서울 0%, 도시 적정 폭
-- [ ] VISA_CONFIG fee 페르소나 분기 — 현재 `studentApplicationFee ?? workApplicationFee` fallback 으로 학생 페르소나가 워크 비자 수수료를 보거나 그 반대 케이스 가능 (v1.x 페르소나 분기 후속 PR 에서 정밀화). PR #17 review round 3 이슈 4.
+- [x] VISA_CONFIG fee — `studentApplicationFee ?? workApplicationFee` fallback 고정 (persona 분기 폐기, ADR-067). 모든 사용자가 동일 비자 수수료 표시. (원 이슈: PR #17 review round 3 이슈 4 — 페르소나 정밀화는 ADR-067 로 무효화.)
 
 **즐겨찾기:**
 
@@ -1933,7 +1961,7 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 
 **스냅샷 / 시각 회귀:**
 
-- [x] 핵심 contract (hero + 5 카드 mount + 도시명 노출) — worker 페르소나 1 케이스. 전체 트리 snapshot 은 §6.3·§6.4 위반 + ReactTestInstance fiber cyclic 직렬화 RangeError 발생 (PR #17 review 이슈 2) — 정밀 시각 회귀는 v2 스크린샷 도구 (ADR-035).
+- [x] 핵심 contract (hero + 6 카테고리 카드 mount + 도시명 노출) — 통합 뷰 1 케이스 (persona-removal step 4). 전체 트리 snapshot 은 §6.3·§6.4 위반 + ReactTestInstance fiber cyclic 직렬화 RangeError 발생 (PR #17 review 이슈 2) — 정밀 시각 회귀는 v2 스크린샷 도구 (ADR-035).
 
 **에러 분기 (Promise.all 모두 catch):**
 
@@ -1959,10 +1987,9 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 - [x] tax store 80000 preset → 카드 갱신 (다른 tier 기준)
 - [x] tax custom 100000 CAD/year → 카드 mount
 
-**inclusion (포함/제외 토글) — useCategoryInclusionStore 연동 (ADR-062):**
+**inclusion (포함/제외 토글) — useCategoryInclusionStore 연동 (ADR-062, ADR-067):**
 
-- [x] worker default: rent/food/transport/tax 카드 토글 ON (배지 미렌더), visa 카드 토글 OFF + "제외됨" 배지 (페르소나별 default)
-- [x] student default: tuition 카드 토글 ON, visa 카드 토글 OFF (worker 와 다른 default 분기)
+- [x] 고정 default: rent/food/transport 카드 토글 ON (배지 미렌더), tuition/tax/visa 카드 토글 OFF + "제외됨" 배지 (persona 인자 제거, ADR-067)
 - [x] visa 토글 OFF → ON: hero 도시값(우측) 이 visa 비용만큼 증가 + visa 카드 토글 value=true 로 갱신
 - [x] **서울합=0 케이스 → hero 가운데 mult 영역 미렌더** (ADR-062): 학비/비자만 ON (서울 0원 카테고리만) + 다른 카드 OFF → `centerMult=undefined` 로 HeroCard 호출 → mult 텍스트(`×` 형식) 0개, caption(`만원/월`) 만 표시. rent 추가 ON 하면 mult 복구.
 - [x] 사용자 토글 갱신 (`setInclusion('vancouver', 'rent', false)`) → ComparePair rent 카드 토글 value=false + 배지 즉시 갱신
@@ -2020,17 +2047,11 @@ ARCHITECTURE.md §검색 알고리즘 정확 검증.
 - [ ] 입력 1자 (영문): prefix 만
 - [ ] 입력 2자+: prefix → substring
 
-### 9.24.2 페르소나 변경 영향 (state effects)
+### 9.24.2 페르소나 변경 영향 (state effects) — 무효 (deprecated, ADR-067)
 
-ARCHITECTURE.md §페르소나 변경 시 영향 정책 검증.
-
-- [ ] persona=student → worker 변경: 즐겨찾기 유지 (length·내용 동일)
-- [ ] 동일 변경: 최근 본 도시 유지
-- [ ] 동일 변경: Compare 화면 카드 즉시 갱신 (학비 → 세금)
-- [ ] 동일 변경: 총비용 hero 가정 갱신 (셰어 → 1인 원룸)
-- [ ] worker → unknown 변경: 학비 + 세금 모두 표시 (합집합)
-- [ ] onboarded 플래그: 항상 true 유지 (변경 X)
-- [ ] 변경 후 토스트: "페르소나가 (취업자)로 변경되었어요"
+페르소나 개념이 제거되어(ADR-067, persona-removal) 페르소나 변경이라는 상태 전이
+자체가 사라졌다. 본 절의 검증 항목은 전부 무효. 모든 사용자는 통합 뷰(6 카테고리)를
+보며, Compare 는 페르소나로 분기하지 않는다. → §9.8.4(고정 default) / §9.24(통합 뷰) 참조.
 
 ### 9.25 `app/detail/[cityId]/[category].tsx` (상세)
 
@@ -2356,17 +2377,17 @@ UI_GUIDE.md §에러 메시지 한국어 표준 카탈로그 검증.
 
 ### 9.29 `app/(tabs)/settings.tsx` (설정 — 화면)
 
-screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
+screens phase step 3 구현 — 사용 통계 + 메뉴. 페르소나 배지는 **데이터 최신화 카드로 교체** (ADR-067, persona-removal step 6). 새로고침은 카드(`data-refresh-btn`)로 승격되며 기존 `menu-refresh` MenuRow 제거 (메뉴 5→4).
 
-**페르소나 표시:**
+**데이터 최신화 카드 (ADR-067):**
 
-- [x] student: "유학생 모드" + "서울에서 출발 · 학비 중심" 라벨 (screens step 3)
-- [x] worker: "취업자 모드" + "서울에서 출발 · 실수령 중심" 라벨 (screens step 3)
-- [x] unknown: "아직 모름 모드" + "둘 다 보여드려요" 라벨 (screens step 3)
-
-**변경 버튼:**
-
-- [x] 탭 → setOnboarded(false) + router.replace('/onboarding') (screens step 3)
+- [x] `data-refresh-card` + `data-refresh-btn` 렌더 + "데이터 최신화" 라벨 (persona-removal step 6)
+- [x] 새로고침 버튼 탭 → refreshCache 호출 (persona-removal step 6)
+- [x] 성공 → lastSync 갱신 (persona-removal step 6)
+- [x] 실패 → "갱신 실패" 텍스트 표시 (persona-removal step 6)
+- [x] 로딩 상태 — "갱신 중..." 텍스트 + 버튼 disabled (persona-removal step 6)
+- [x] null lastSync → "동기화 전" 표시 (persona-removal step 6)
+- [x] 날짜 lastSync → formatShortDate (UTC) 표시 (persona-removal step 6)
 
 **통계 카드:**
 
@@ -2375,16 +2396,9 @@ screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
 
 **메뉴 리스트:**
 
-- [x] 5개 메뉴 모두 렌더링 (데이터 새로고침/출처/피드백/개인정보/앱 정보) (screens step 3)
+- [x] 4개 메뉴 모두 렌더링 (출처/피드백/개인정보/앱 정보) — `menu-refresh` 는 카드로 승격되어 제거 (persona-removal step 6)
 - [x] 앱 정보 rightText = v1.0.0 (expo-constants expoConfig.version) (screens step 3)
 - [x] 출처 rightText = 12개 — `DATA_SOURCES_COUNT` (`src/lib/dataSources.ts` 단일 출처) ↔ `docs/DATA_SOURCES.md` 마커 동기화는 §9.33 드리프트 테스트가 강제 (ADR-065; PR #18 round 9 의 수동 동기화 대체)
-
-**데이터 새로고침:**
-
-- [x] 탭 → refreshCache 호출 (screens step 3)
-- [x] 성공 → lastSync 갱신 (screens step 3)
-- [x] 실패 → "갱신 실패" 텍스트 표시 (screens step 3)
-- [x] 로딩 상태 — "갱신 중..." 텍스트 + 버튼 disabled (PR #18 review round 2)
 
 **외부 링크:**
 
@@ -2398,50 +2412,51 @@ screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
 
 **스냅샷:**
 
-- [x] persona-card (worker) 부분 트리 — testID 만 (PR #18 review round 6, §6.6 100라인 정책)
+- [x] data-refresh-card 부분 트리 — testID 만 (persona-removal step 6, §6.6 100라인 정책)
 
-### 9.30 `app/onboarding.tsx` (온보딩 — 페르소나 선택)
+### 9.30 `app/onboarding.tsx` (온보딩 — 도시 선택)
 
-screens phase step 4 구현 — 설치 직후 1회 페르소나 선택 화면.
+persona-removal step 5 재작성 (ADR-067) — 설치 직후 1회 **도시 선택** 화면.
+도시를 고르면 즐겨찾기에 담고 서울 vs 그 도시 Compare 로 바로 이동한다.
+(옛 페르소나 3카드 선택 화면 대체.)
 
-**기본 UI:**
+**로딩 상태:**
 
-- [x] 3개 페르소나 카드 표시 (student/worker/unknown) (screens step 4)
-- [x] 페르소나 라벨 표시 — 단일 출처 `src/lib/persona.ts` (screens step 4)
-- [x] 페르소나 sub 표시 — 단일 출처 (screens step 4)
-- [x] 인사말 "안녕하세요" + "어디로 떠나시나요?" 표시 (screens step 4)
-- [x] 푸터 "설정에서 언제든 변경할 수 있어요" 표시 (screens step 4)
-- [x] 질문 라벨 "어떤 분이신가요?" 표시 (screens step 4)
+- [x] 데이터 로드 중 `onboarding-screen-loading` 스피너 표시 (persona-removal step 5)
 
-**카드 인터랙션:**
+**데이터 로드 완료 — hero + 리스트:**
 
-- [x] student 탭 → setPersona('student') + setOnboarded(true) + router.replace('/(tabs)') (screens step 4)
-- [x] worker 탭 → setPersona('worker') + setOnboarded(true) + router.replace('/(tabs)') (screens step 4)
-- [x] unknown 탭 → setPersona('unknown') + setOnboarded(true) + router.replace('/(tabs)') (screens step 4)
+- [x] hero 인사말 "안녕하세요" + "어디로 떠나시나요?" 표시 (persona-removal step 5)
+- [x] 설명 "서울 기준으로 해외 도시 생활비를 비교해 드려요." 표시 (persona-removal step 5)
+- [x] 리스트 라벨 "도시를 골라보세요" 표시 (persona-removal step 5)
+- [x] 도시 리스트 렌더 `onboarding-city-{id}` (persona-removal step 5)
+- [x] **서울 제외** — `onboarding-city-seoul` 미렌더 (persona-removal step 5)
+
+**권역 필터:**
+
+- [x] `onboarding-region-pills` 6개 (all/na/eu/asia/oceania/me) 렌더 (persona-removal step 5)
+- [x] 기본 active = 전체(`onboarding-region-all`) (persona-removal step 5)
+- [x] 권역 선택 시 해당 권역 도시만 노출 (예: eu → london 만) (persona-removal step 5)
+
+**도시 선택 흐름:**
+
+- [x] 도시 탭 → `add(cityId)` + `setOnboarded(true)` + `router.replace('/compare/{id}')` (persona-removal step 5)
+- [x] 순서 보장 — add → setOnboarded → replace (persona-removal step 5)
+- [x] `pushRecent` 미호출 — Compare 가 마운트 시 자체 실행 (중복 방지, persona-removal step 5)
 
 **연타 방어:**
 
-- [x] 같은 카드 빠른 연타 → 첫 탭만 실행 (isNavigatingRef 가드) (PR #18 review round 3)
-- [x] 서로 다른 카드 연타 → 첫 탭만 실행 (PR #18 review round 3)
+- [x] 같은 도시 빠른 연타 → 첫 탭만 실행 (isNavigatingRef 가드) (persona-removal step 5)
+- [x] 서로 다른 도시 연타 → 첫 탭만 실행 (persona-removal step 5)
 
-**접근성:**
+**에러 상태:**
 
-- [x] student 카드 accessibilityLabel "유학생 선택" (screens step 4)
-- [x] worker 카드 accessibilityLabel "취업자 선택" (screens step 4)
-- [x] unknown 카드 accessibilityLabel "아직 모름 선택" (screens step 4)
+- [x] 서울 데이터 없음 → `onboarding-screen-error` + "서울 데이터를 찾을 수 없습니다" (persona-removal step 5)
+- [x] 다시 시도 버튼(`onboarding-retry-btn`) → loading 전환 후 재로드 (persona-removal step 5)
 
-**스냅샷:**
+### 9.31 `src/lib/persona.ts` (삭제됨 — ADR-067, persona-removal step 7)
 
-- [x] persona-card-student (primary) + persona-card-unknown (tertiary) 부분 트리 (PR #18 review round 6, §6.6 100라인 정책)
-
-### 9.31 `src/lib/persona.ts` — 페르소나 라벨·아이콘 매핑
-
-screens phase step 3 에 추가된 단일 출처 모듈. Onboarding · Settings 에서 재사용.
-
-- [x] PERSONA_LABEL — 3종 모두 한글 라벨 (`유학생` / `취업자` / `아직 모름`) (PR #18 review round 5)
-- [x] PERSONA_SUB — 3종 모두 비어있지 않은 sub 텍스트 (PR #18 review round 5)
-- [x] PERSONA_ICON — 3종 모두 IconName 키 (`graduation` / `briefcase` / `user`) (PR #18 review round 5)
-- [x] 모든 매핑 객체의 키 일치 — student / worker / unknown 3종 (PR #18 review round 5)
+페르소나 라벨·아이콘 매핑 모듈. 페르소나 개념 제거로 삭제.
 
 ### 9.32 `src/lib/linking.ts` — Linking wrapper
 
@@ -2458,16 +2473,9 @@ v1.x DX 정리 (ADR-065). `DATA_SOURCES_COUNT` 를 `docs/DATA_SOURCES.md` 머신
 - [x] docs/DATA_SOURCES.md `<!-- DATA_SOURCES_COUNT: N -->` 마커와 일치 — 드리프트 가드 (ADR-065)
 - [x] 마커 부재 시 parseMarkerCount throw — silent fail 금지 (ADR-065)
 
-### 9.34 `src/components/PersonaCard.tsx` — Onboarding 페르소나 선택 카드
+### 9.34 `src/components/PersonaCard.tsx` (삭제됨 — ADR-067, persona-removal step 7)
 
-PR #18 review round 6 에서 `app/onboarding.tsx` 에서 추출 (1파일 1컴포넌트 원칙).
-
-- [x] persona 라벨/sub 렌더 — `src/lib/persona.ts` 단일 출처 (PR #18 review round 6)
-- [x] primary variant — icon box 렌더 (PR #18 review round 6)
-- [x] secondary variant — icon box 렌더 (PR #18 review round 6)
-- [x] tertiary variant — icon box 미렌더, Small 라벨 (PR #18 review round 6)
-- [x] 탭 → onPress 호출 (PR #18 review round 6)
-- [x] accessibilityLabel = "{label} 선택" (PR #18 review round 6)
+Onboarding 페르소나 선택 카드. 온보딩 도시 선택 전환으로 삭제.
 
 ### 9.35 `src/__test-utils__/snapshotByTestId.ts` — 부분 트리 스냅샷 헬퍼
 
@@ -3656,14 +3664,11 @@ it('비교 화면 모든 카드에 a11y label', () => {
 
 **smoke** (`.maestro/smoke.yaml`)
 
-- [x] 런치 → 온보딩 → 유학생 → 홈 (파이프라인 sanity, 통과 확인됨)
+- [x] 런치 → 온보딩 → 도시 선택(밴쿠버) → Compare 직행 (파이프라인 sanity, persona-removal step 8)
 
 **01-onboarding**
 
-- [x] `persona-student` — 유학생 온보딩 → 홈 → 설정 '유학생 모드'
-- [x] `persona-worker` — 취업자 온보딩 → 설정 '취업자 모드'
-- [x] `persona-unknown` — 아직 모름 온보딩 → 설정 '아직 모름 모드'
-- [x] `persona-change` — 설정→변경→온보딩 재진입→취업자 (구현은 Sheet 아님)
+- [x] `city-select` — 도시 선택 온보딩 → Compare 진입 + 즐겨찾기 반영 (persona-removal step 8; 옛 persona-student/worker/unknown/change 대체)
 - [x] `onboarding-once` — clearState 없이 재실행 시 온보딩 skip (onboarded 영속)
 
 **02-home**
@@ -3676,8 +3681,8 @@ it('비교 화면 모든 카드에 a11y label', () => {
 
 **03-compare**
 
-- [x] `open-and-hero` — Compare hero + student 카드(월세/식비/교통/학비/비자)
-- [x] `persona-card-diff` — student=학비 노출 / worker=학비 미노출
+- [x] `open-and-hero` — Compare hero + 통합 6 카테고리 카드(월세/식비/교통/학비/세금/비자, persona-removal step 8)
+- [x] `unified-categories` — 통합 뷰 6 카테고리 모두 표시 (persona-removal step 8; 옛 persona-card-diff 대체)
 - [x] `multiplier-encoding` — 배수 ↑+숫자+× 3중 인코딩(접근성)
 - [x] `back-nav` — 상단바 뒤로가기 → 홈
 
@@ -3698,7 +3703,7 @@ it('비교 화면 모든 카드에 a11y label', () => {
 
 **06-settings**
 
-- [x] `overview` — 페르소나 카드/통계/메뉴 5종/푸터 (버전 'v1.0.0' rightText 는 접근성 미노출 → menu-app-info 로 검증)
+- [x] `overview` — 데이터 최신화 카드/통계/메뉴 4종/푸터 (persona-removal step 8; 버전 'v1.0.0' rightText 는 접근성 미노출 → menu-app-info 로 검증)
 - [x] `data-refresh` — 새로고침 → '갱신 실패' 미노출(네트워크 의존)
 - [x] `external-links` — 개인정보 링크 탭 → 외부 이탈 후 launchApp 은 홈으로 복귀(브라우저 내용은 수동)
 

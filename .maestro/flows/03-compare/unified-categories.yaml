@@ -1,0 +1,24 @@
+# UC: 페르소나 제거(ADR-067) — Compare 는 페르소나로 분기하지 않고 항상 통합 카테고리를
+# 보여준다. 예전엔 학비(tuition)가 student 전용이었으나 이제 페르소나 무관하게 노출된다.
+# tax 는 데이터가 전무(21개 도시 모두)해 통합 뷰라도 카드 자체가 숨겨진다.
+appId: com.laegel.overseascostapp
+tags:
+  - compare
+---
+- runFlow: ../../common/onboard.yaml
+- runFlow: ../../common/open-vancouver-compare.yaml
+# 공통 3 카테고리
+- assertVisible:
+    id: 'compare-pair-rent'
+- assertVisible:
+    id: 'compare-pair-food'
+- assertVisible:
+    id: 'compare-pair-transport'
+# 페르소나 무관 노출 — 예전 student 전용 학비 + 공통 비자 모두 표시(분기 없음)
+- assertVisible:
+    id: 'compare-pair-tuition'
+- assertVisible:
+    id: 'compare-pair-visa'
+# tax 는 데이터 부재로 미표시(통합 뷰라도 데이터 없으면 카드 숨김)
+- assertNotVisible:
+    id: 'compare-pair-tax'

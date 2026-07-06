@@ -40,6 +40,11 @@
       "status": "completed",
       "started_at": "2026-05-02T21:41:58+0900",
       "completed_at": "2026-05-04T09:43:13+0900"
+    },
+    {
+      "dir": "persona-removal",
+      "status": "completed",
+      "completed_at": "2026-07-07T08:23:26+09:00"
     }
   ]
 }

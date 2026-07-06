@@ -9,10 +9,7 @@ tags:
   - detail
   - deeplink
 ---
-- runFlow:
-    file: ../../common/onboard.yaml
-    env:
-      PERSONA: worker
+- runFlow: ../../common/onboard.yaml
 - openLink: 'overseascost://detail/vancouver/tax'
 # 앱 실행 중 딥링크는 대화상자 없이 바로 라우팅되나, 혹시 'OO에서 열겠습니까?' 확인
 # 대화상자가 뜨면 확인한다 (콜드/런처 가로채기 대비 안전망 — 평소엔 SKIPPED).

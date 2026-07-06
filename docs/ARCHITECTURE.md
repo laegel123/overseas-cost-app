@@ -7,8 +7,8 @@
 ```
 overseas-cost-app/
 ├── app/                          # Expo Router — 파일 기반 라우팅
-│   ├── _layout.tsx               # 루트 레이아웃 (폰트 로딩, 페르소나 hydration, splash)
-│   ├── onboarding.tsx            # 1회성 페르소나 선택
+│   ├── _layout.tsx               # 루트 레이아웃 (폰트 로딩, store hydration, splash)
+│   ├── onboarding.tsx            # 1회성 도시 선택 (ADR-067)
 │   ├── (tabs)/                   # 하단 탭 그룹
 │   │   ├── _layout.tsx           # BottomTabBar (홈/비교/즐겨찾기/설정)
 │   │   ├── index.tsx             # 홈
@@ -34,7 +34,7 @@ overseas-cost-app/
 │   │   └── details/{Food,Rent,Transport,Tuition,Tax,Visa}Detail.tsx
 │   │
 │   ├── store/                    # Zustand + AsyncStorage 영속화
-│   │   ├── persona.ts
+│   │   ├── onboarding.ts
 │   │   ├── favorites.ts
 │   │   ├── recent.ts
 │   │   └── settings.ts
@@ -46,7 +46,7 @@ overseas-cost-app/
 │   │   └── compare.ts            # 카테고리 비교, 월 합계 계산 (PRD 부록 C)
 │   │
 │   ├── types/                    # TypeScript 타입
-│   │   ├── city.ts               # Persona, City, CityCostData, CategoryComparison, ItemComparison, ExchangeRates
+│   │   ├── city.ts               # City, CityCostData, CategoryComparison, ItemComparison, ExchangeRates
 │   │   └── index.ts              # re-export
 │   │
 │   └── theme/
@@ -84,11 +84,11 @@ overseas-cost-app/
 앱 콜드 스타트
   └─ app/_layout.tsx
         ├─ 폰트 로딩 (useFonts)
-        ├─ 페르소나 hydration (Zustand persist)
+        ├─ store hydration (Zustand persist — onboarding 포함)
         ├─ if (!onboarded) → router.replace('/onboarding')
         └─ else → router.replace('/(tabs)')
 
-/onboarding                     # 1회성, persona 저장 후 (tabs) 로 이동
+/onboarding                     # 1회성 도시 선택, 즐겨찾기 추가 + onboarded=true 후 /compare/[cityId] 로 이동 (ADR-067)
 /(tabs)/index                   # 홈 (즐겨찾기·검색·최근)
 /(tabs)/settings                # 설정
 /compare/[cityId]               # 비교 (서울 vs city)
@@ -129,11 +129,11 @@ overseas-cost-app/
 ```
 [비교 계산]
   컴포넌트 (Compare 화면)
-    ─(useStore)→ persona, favorites, recent
+    ─(useStore)→ favorites, recent, rentChoice/tuitionChoice/taxChoice/categoryInclusion
     ─(getAllCities)→ data.ts → 메모리에서 cities 맵 즉시 반환 (fetch 없음)
-    ─(compute)→ src/lib/compare.ts
-                ├─ computeCategoryComparison(cat, seoul, city, fx)
-                └─ computeMonthlyTotal(persona, seoul, city, fx)  // PRD 부록 C
+    ─(compute)→ CategoryConfig 6개 (rent/food/transport/tuition/tax/visa) — 페르소나 분기 없음 (ADR-067)
+                ├─ 카테고리별 비교값 (seoul vs city, fx)
+                └─ hero 월 합계 = inclusion ON 카테고리만 누적 (기본 rent/food/transport)
     ─(format)→ src/lib/format.ts → "↑1.9×", "175만"
     ─(render)→ <ComparePair /> 등
 ```
@@ -164,10 +164,12 @@ export async function refreshCache(): Promise<{ ok: boolean; lastSync: string }>
 
 | 스토어              | 데이터                                                              | 영속화 | 사용처                            |
 | ------------------- | ------------------------------------------------------------------- | ------ | --------------------------------- |
-| `usePersonaStore`   | `persona: 'student' \| 'worker' \| 'unknown'`, `onboarded: boolean` | ✅     | 라우팅 가드, Compare 카드 분기    |
+| `useOnboardingStore`| `onboarded: boolean`                                               | ✅     | 라우팅 가드 (ADR-067)             |
 | `useFavoritesStore` | `cityIds: string[]`                                                 | ✅     | 홈 즐겨찾기 카드, Compare ⭐ 토글 |
 | `useRecentStore`    | `cityIds: string[]` (max 5, FIFO)                                   | ✅     | 홈 최근 본 도시                   |
 | `useSettingsStore`  | `lastSync: ISOString \| null`                                       | ✅     | 설정 화면, 데이터 새로고침 표시   |
+
+위 4개가 부팅 hydration 합성(`waitForAllStoresHydrated`)에 참여하는 코어 store. 이 외에 Compare/Detail 상호작용용 도시별 선택 store (`useRentChoiceStore` / `useTuitionChoiceStore` / `useTaxChoiceStore` / `useCategoryInclusionStore` — ADR-060~062) 도 동일 hydration 합성에 포함된다.
 
 모두 `zustand/middleware` 의 `persist` + AsyncStorage 어댑터 사용. 첫 렌더 전 hydration 보장 위해 `_layout.tsx` 에서 `useStore.persist.onFinishHydration` 으로 splash 유지.
 
@@ -192,17 +194,15 @@ export async function refreshCache(): Promise<{ ok: boolean; lastSync: string }>
 
 화면은 도메인 컴포넌트를 **조립**할 뿐 새 시각 컴포넌트를 만들지 않는다. 디자인 변경은 위 단계 중 가장 낮은 층에서 시작.
 
-## 페르소나에 따른 카드 분기 (Compare 화면)
+## Compare 카테고리 카드 (통합 뷰 — ADR-067)
+
+페르소나 분기 없이 **항상 6개 카테고리 카드**를 렌더한다.
 
 ```ts
-const cards = {
-  student: ['rent', 'food', 'transport', 'tuition', 'visa'],
-  worker: ['rent', 'food', 'transport', 'tax', 'visa'],
-  unknown: ['rent', 'food', 'transport', 'tuition', 'tax', 'visa'], // 합집합
-}[persona];
+const COMPARE_CATEGORIES = ['rent', 'food', 'transport', 'tuition', 'tax', 'visa'];
 ```
 
-`unknown` 은 후보를 모두 보여주어 페르소나 결정을 돕는다 — 이후 사용자가 설정에서 페르소나를 정하면 카드가 정리된다.
+hero 월 합계의 기본 포함(inclusion) 은 `rent/food/transport = ON`, `tuition/tax/visa = OFF` 로 고정한다 (`getDefaultInclusion`, ADR-062→ADR-067). 카드는 6개 모두 표시되며, 사용자가 카드별 토글로 합산 포함 여부를 도시별로 바꿀 수 있다 (`useCategoryInclusionStore`). 이는 페르소나 제거 이전의 `'unknown'`(합집합) 동작과 동일하다.
 
 ## 캐시·오프라인 전략
 
@@ -220,7 +220,7 @@ const cards = {
   ├─ Expo splash 표시 (system)
   ├─ app/_layout.tsx mount
   │    ├─ useFonts(Manrope, Mulish, Pretendard)        ─ Promise A
-  │    ├─ usePersonaStore.persist.hasHydrated()        ─ Promise B
+  │    ├─ useOnboardingStore.persist.hasHydrated()     ─ Promise B  (+ rentChoice/tuitionChoice/taxChoice/categoryInclusion)
   │    ├─ useFavoritesStore.persist.hasHydrated()      ─ Promise C
   │    ├─ useRecentStore.persist.hasHydrated()         ─ Promise D
   │    └─ useSettingsStore.persist.hasHydrated()       ─ Promise E
@@ -330,7 +330,7 @@ export class AppError extends Error {
 | Compare                     | 홈으로 (또는 이전 도시 비교) | 활성           |
 | Detail                      | Compare 로                   | 활성           |
 | 설정                        | 홈으로                       | 활성           |
-| 시트 (가정값/페르소나/출처) | 시트 dismiss (스택 영향 X)   | swipe-down     |
+| 시트 (학비/연봉 선택 등)    | 시트 dismiss (스택 영향 X)   | swipe-down     |
 
 즐겨찾기 토글 후 뒤로 → 홈: 스토어 기반이라 자연스럽게 반영.
 
@@ -436,23 +436,20 @@ export function useNetworkStatus(): { isOnline: boolean; isSlow: boolean };
 - 변경 시 reactive: 오프라인 → 온라인 전환 시 자동으로 stale 캐시 갱신 트리거 (백그라운드 fetch)
 - OfflineBadge 컴포넌트가 이 hook 구독
 
-## 페르소나 변경 시 영향 정책
+## 카테고리 포함(inclusion) 변경 시 영향 정책 (ADR-067)
 
-설정 화면 또는 페르소나 시트에서 페르소나 변경 시:
+페르소나 개념이 제거되어(ADR-067) 페르소나 변경 흐름 자체가 없다. 대신 사용자는 Compare 화면에서 카드별 **합산 포함(inclusion) 토글**로 hero 월 합계 구성을 도시별로 조정한다.
 
-| 영향받는 항목           | 정책                                      |
-| ----------------------- | ----------------------------------------- |
-| 즐겨찾기                | **유지** (도시 자체는 페르소나와 무관)    |
-| 최근 본 도시            | **유지**                                  |
-| Compare 카드 구성       | 즉시 변경 (reactive)                      |
-| 총비용 카드 가정        | 변경 (자취 비율·월세 카테고리 등 §부록 C) |
-| 학비 카드 표시 여부     | 변경 (student → 표시, worker → 숨김)      |
-| 세금 카드 표시 여부     | 변경 (worker → 표시, student → 숨김)      |
-| 의료 카드 (v1.0 미사용) | N/A                                       |
-| onboarded 플래그        | 유지 (true 그대로)                        |
-| 사용자 토스트           | "페르소나가 (취업자)로 변경되었어요"      |
+| 영향받는 항목       | 정책                                                          |
+| ------------------- | ------------------------------------------------------------- |
+| 즐겨찾기            | **유지** (inclusion 토글과 무관)                              |
+| 최근 본 도시        | **유지**                                                      |
+| Compare 카드 구성   | **항상 6개** (rent/food/transport/tuition/tax/visa) — 불변    |
+| hero 월 합계        | inclusion ON 카테고리만 즉시 재계산 (reactive)                |
+| inclusion 영속화    | 도시별 `useCategoryInclusionStore` (`categoryInclusion:v1`)   |
+| onboarded 플래그    | 유지 (true 그대로)                                            |
 
-페르소나 변경은 **mid-session reactive** — 별도 새로고침 불필요.
+inclusion 토글은 **mid-session reactive** — 별도 새로고침 불필요. 기본값은 rent/food/transport ON, tuition/tax/visa OFF 고정.
 
 ## 성능 예산
 

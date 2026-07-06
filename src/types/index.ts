@@ -3,7 +3,6 @@
  */
 
 export type {
-  Persona,
   Region,
   TuitionLevel,
   SourceCategory,

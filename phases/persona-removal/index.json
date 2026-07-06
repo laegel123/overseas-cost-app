@@ -1,0 +1,87 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "persona-removal",
+  "steps": [
+    {
+      "step": 0,
+      "name": "decision-of-record",
+      "status": "completed",
+      "started_at": "2026-07-06T21:27:18+0900",
+      "summary": "결정 기록(ADR-067 전문 + ADR-062 부분 supersede + CLAUDE.md 전환기 문구) 실재·정합 확인 완료. 코드/문서 변경 없음, typecheck·lint·test(1941 pass) 그린 유지.",
+      "completed_at": "2026-07-06T21:37:25+0900"
+    },
+    {
+      "step": 1,
+      "name": "onboarding-store",
+      "status": "completed",
+      "started_at": "2026-07-06T21:37:25+0900",
+      "summary": "src/store/onboarding.ts 신규 (useOnboardingStore + INITIAL_STATE named export, persist key onboarding:v1, settings.ts 형틀 미러). 배럴에 onboarding export 추가(persona export 유지 — 삭제는 step 7). onboarding.test.ts 15 케이스 신규 + TESTING §9.8.5 인벤토리 추가. typecheck·lint·test(1956 pass) 그린.",
+      "completed_at": "2026-07-06T21:43:03+0900"
+    },
+    {
+      "step": 2,
+      "name": "boot-wiring",
+      "status": "completed",
+      "started_at": "2026-07-06T21:43:04+0900",
+      "summary": "부트 경로 persona→onboarding store 재배선: _layout.tsx 게이트 selector + hydration.ts (waitOne 첫 위치·forceInitial 블록) 를 useOnboardingStore/ONBOARDING_INITIAL 로 교체. _layout.test.tsx·hydration.test.ts 스왑(대표 store 첫 배열 위치 유지 → setStateSpies[0] 인덱싱 그대로). 게이트 로직·배열 순서·배럴 usePersonaStore export 무변경. typecheck·lint·test(1956 pass) 그린.",
+      "completed_at": "2026-07-06T21:50:42+0900"
+    },
+    {
+      "step": 3,
+      "name": "home-totals",
+      "status": "completed",
+      "started_at": "2026-07-06T21:50:42+0900",
+      "summary": "src/lib/homeTotals.ts export: computeCityTotal, multFromTotals (다음 step 온보딩 화면이 재사용). app/(tabs)/index.tsx 로컬 정의 삭제 후 @/lib import 교체 — 순수 추출, 로직 무변경. homeTotals.test.ts 7 케이스 + 배럴 export + TESTING §9.3.1 인벤토리 추가. typecheck·lint·test(1963 pass) 그린.",
+      "completed_at": "2026-07-06T21:57:38+0900"
+    },
+    {
+      "step": 4,
+      "name": "compare-inclusion",
+      "status": "completed",
+      "started_at": "2026-07-06T21:57:38+0900",
+      "summary": "categoryInclusion.ts + compare/[cityId].tsx 한 커밋: getDefaultInclusion(category)·resolveInclusion(cityId,category,inclusions) persona 인자 제거 → 고정 default(rent/food/transport ON, tuition/tax/visa OFF, ADR-067). Compare 는 getCategoriesForPersona 삭제 후 COMPARE_CATEGORIES 상수(항상 6 카테고리) + usePersonaStore/Persona 참조 0. 테스트: categoryInclusion 매트릭스 persona 제거, compare 페르소나 분기 3→1 케이스·inclusion 기대값 tuition/tax OFF 수정. typecheck·lint·test(1950 pass) 그린.",
+      "completed_at": "2026-07-06T22:07:39+0900"
+    },
+    {
+      "step": 5,
+      "name": "onboarding-screen",
+      "status": "completed",
+      "started_at": "2026-07-06T22:07:39+0900",
+      "summary": "app/onboarding.tsx 페르소나 3카드 → 도시 선택 전면 재작성: Home 패턴(loading/error/ready + Promise.all[loadAllCities, fetchExchangeRates] + RegionPill 권역 필터 + RecentRow 리스트, multFromTotals 배수) 이식, 검색바 생략. 도시 탭 → add(cityId)+setOnboarded(true)+router.replace('/compare/{id}'), pushRecent 미호출(Compare 중복 방지), seoul 제외, 연타 가드 isNavigatingRef 유지. onboarding.test.tsx 11 케이스 재작성 + 옛 스냅샷 삭제. typecheck·lint·test(1945 pass) 그린.",
+      "completed_at": "2026-07-06T22:14:12+0900"
+    },
+    {
+      "step": 6,
+      "name": "settings-refresh-card",
+      "status": "completed",
+      "started_at": "2026-07-06T22:14:12+0900",
+      "summary": "settings.tsx 페르소나 배지 → 데이터 최신화 카드(data-refresh-card): 좌 orange refresh 아이콘 + 중 'H3 데이터 최신화'/'Tiny formatLastSync()' + 우 data-refresh-btn(handleRefresh, loading 시 disabled). menu-refresh MenuRow 제거(메뉴 5→4) — 새로고침이 카드로 승격. usePersonaStore/PERSONA_*/handleChangePersona/useRouter 제거(참조 0), handleRefresh/refreshState/formatLastSync 재사용(신규 로직 없음). settings.test.tsx 페르소나/변경버튼 describe 삭제·데이터 최신화 카드 describe 추가·메뉴 5→4·스냅샷 persona-card→data-refresh-card 재생성. TESTING §9.29 갱신. menu-refresh testID → data-refresh-btn 로 승격(E2E 재조준은 step 8). typecheck·lint·test(1944 pass) 그린.",
+      "completed_at": "2026-07-06T22:21:17+0900"
+    },
+    {
+      "step": 7,
+      "name": "persona-cleanup",
+      "status": "completed",
+      "started_at": "2026-07-06T22:21:17+0900",
+      "summary": "페르소나 소스 3 + 테스트 3 파일 삭제(PersonaCard·store/persona·lib/persona). 배럴(store/index.ts) usePersonaStore·PersonaState·PersonaActions export 제거 + docstring persona→onboarding, types/city.ts·types/index.ts 의 Persona 타입 제거, tailwind.config.js persona-icon(borderRadius)·1.5(borderWidth 유일 항목→블록 전체) 제거(grep 으로 PersonaCard 단독 사용 재확인 후). TESTING.md §9.5/§9.31/§9.34 인벤토리 삭제 마킹. grep 게이트: 살아있는 persona 참조 0(\\bPersonaCard\\b·usePersonaStore·getCategoriesForPersona·type Persona 모두 0건). navyPersonaCard(theme/tokens.ts, 기존 데드·소비처 0)는 계획 §F·전역 가이드라인대로 보존—리터럴 grep 의 PersonaCard 매치는 이 식별자의 부분 문자열 충돌(false positive). typecheck·lint·test(88 suites, 1916 pass) 그린.",
+      "completed_at": "2026-07-06T22:26:40+0900"
+    },
+    {
+      "step": 8,
+      "name": "maestro-e2e",
+      "status": "completed",
+      "started_at": "2026-07-06T22:26:40+0900",
+      "summary": "common/onboard.yaml 계약을 페르소나 탭→home 에서 도시 탭(밴쿠버·시드 보장)→compare→뒤로→home 으로 재작성; onboard.yaml 호출 다운스트림 18개 플로우에서 죽은 env:PERSONA 블록 일괄 제거; persona-{student,worker,unknown,change}.yaml·persona-card-diff.yaml 삭제, onboarding-once 재작성 + city-select·unified-categories 신규; 06-settings overview/data-refresh 를 persona-card/menu-refresh → data-refresh-card/-btn 로 재조준; smoke·07-visual-a11y screenshots 인라인 persona 앵커 → 도시 선택 앵커; README/PLAN/GOTCHAS persona 앵커·PERSONA env 설명 갱신(+빈-상태 플로우 재작성 필요 격차 기록). grep 플로우 앵커 0(README 이력 설명 1줄만 잔존), typecheck·lint·test(88 suites,1916 pass) 그린.",
+      "completed_at": "2026-07-06T22:42:34+0900"
+    },
+    {
+      "step": 9,
+      "name": "docs-reconcile",
+      "status": "completed",
+      "started_at": "2026-07-06T22:42:35+0900",
+      "summary": "문서 정합화. 하네스 sub-session 이 CLAUDE.md(완료형)·ARCHITECTURE.md·DATA.md 를 커밋(eca413d) 후 월 지출 한도로 중단 → 나머지 TESTING.md §9 는 메인 세션이 마무리. 정합화: §5.5/§8.1 모킹(usePersonaStore→useOnboardingStore), §9.8.4 categoryInclusion(persona-aware→고정 default, persona 인자 제거), §9.21 _layout(persona.onboarded→onboarding.onboarded), §9.24 compare(항상 6 카테고리 통합 뷰 + tuition/tax default OFF), §9.24.2 페르소나 변경 영향(deprecated 무효), §9.30 온보딩(페르소나 선택→도시 선택 전면), §18-A.3 Maestro 인벤토리(persona 플로우→city-select/unified-categories/overview 4메뉴). 잔존 persona 참조는 pre-existing speculative 부채(src/lib/compare.ts·PersonaTag.tsx 미존재 모듈, [ ] 미구현 미래 기능, 디자인 참조표) — 전역 가이드라인상 요청 없이 대량 삭제 안 함, 별도 보고. typecheck·lint·test(88 suites, 1916 pass) 그린.",
+      "completed_at": "2026-07-07T08:23:26+09:00"
+    }
+  ],
+  "created_at": "2026-07-06T21:27:18+0900"
+}

@@ -35,7 +35,7 @@ npm run e2e:smoke      # 스모크만
 ├── config.yaml       # 워크스페이스 (smoke + flows/** 만 실행 대상)
 ├── smoke.yaml        # 파이프라인 sanity
 ├── common/           # runFlow 전용 재사용 서브플로우 (단독 실행 X)
-│   ├── onboard.yaml              # clearState → 온보딩 → PERSONA 선택 → 홈
+│   ├── onboard.yaml              # clearState → 도시 선택 온보딩 → compare → 뒤로 → 홈
 │   └── open-vancouver-compare.yaml
 └── flows/            # 유스케이스 배치
     ├── 01-onboarding/   02-home/         03-compare/
@@ -56,5 +56,8 @@ maestro test .maestro/flows/05-detail/tuition-sheet.yaml  # 단일 flow
 ## 앵커 규약
 
 플로우는 텍스트가 아닌 **`testID`(iOS accessibilityIdentifier)** 를 우선 사용한다.
-주요 앵커: `onboarding-screen`, `persona-card-{student|worker|unknown}`, `home-screen`,
+주요 앵커: `onboarding-screen`, `onboarding-city-{cityId}`, `compare-screen`, `home-screen`,
 `home-search-input`, `home-search-result-{cityId}`.
+
+> ADR-067: 온보딩은 페르소나 선택이 아니라 **도시 선택**이다. 도시를 고르면 서울 vs 그 도시
+> Compare 로 직행하고, 그 도시가 즐겨찾기에 담긴다. 옛 `persona-card-*` 앵커는 더 이상 없다.

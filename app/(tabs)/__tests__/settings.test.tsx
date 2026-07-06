@@ -1,12 +1,11 @@
 /**
- * Settings 화면 테스트 — step3.md 요구사항.
+ * Settings 화면 테스트 — 데이터 최신화 카드 (ADR-067 페르소나 제거).
  *
- * - 페르소나 3 분기 라벨 / sub
+ * - 데이터 최신화 카드: 렌더 + 새로고침 버튼 탭 → refreshCache 호출
  * - 통계 카드 0건 / N건
- * - 메뉴 5개 모두 mount + 라벨 일치
- * - 데이터 새로고침 탭 → refreshCache 호출
- * - 변경 버튼 → setOnboarded(false) + router.replace('/onboarding')
- * - snapshot 1 케이스 (worker 페르소나 + 통계 비어있음)
+ * - 메뉴 4개 모두 mount + 라벨 일치 (menu-refresh 는 카드로 승격되어 제거)
+ * - formatLastSync (loading / error / null / 날짜) 카드에 표시
+ * - snapshot 1 케이스 (data-refresh-card + 통계 비어있음)
  */
 
 import * as React from 'react';
@@ -20,7 +19,6 @@ import {
 } from '@/lib';
 import { openURL as mockOpenURL } from '@/lib/linking';
 import { useFavoritesStore } from '@/store/favorites';
-import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
 import { useSettingsStore } from '@/store/settings';
 
@@ -28,14 +26,6 @@ import SettingsScreen from '../settings';
 
 jest.mock('@/lib/linking', () => ({
   openURL: jest.fn(() => Promise.resolve(true)),
-}));
-
-const mockReplace = jest.fn();
-
-jest.mock('expo-router', () => ({
-  useRouter: () => ({
-    replace: mockReplace,
-  }),
 }));
 
 jest.mock('expo-constants', () => ({
@@ -72,7 +62,6 @@ function setupMocks(opts?: { cities?: Record<string, unknown> }) {
 }
 
 function resetStores() {
-  usePersonaStore.setState({ persona: 'unknown', onboarded: true });
   useFavoritesStore.setState({ cityIds: [] });
   useRecentStore.setState({ cityIds: [] });
   useSettingsStore.setState({ lastSync: null });
@@ -84,59 +73,100 @@ describe('SettingsScreen', () => {
     resetStores();
   });
 
-  describe('페르소나 표시', () => {
-    it('student — 유학생 모드', () => {
+  describe('데이터 최신화 카드', () => {
+    it('카드 + 새로고침 버튼 렌더', () => {
       setupMocks();
-      usePersonaStore.setState({ persona: 'student' });
 
-      const { getByTestId } = render(<SettingsScreen />);
+      const { getByTestId, getByText } = render(<SettingsScreen />);
 
-      expect(getByTestId('persona-label').props.children).toContain('유학생');
-      expect(getByTestId('persona-sub').props.children).toContain('학비 중심');
+      expect(getByTestId('data-refresh-card')).toBeTruthy();
+      expect(getByTestId('data-refresh-btn')).toBeTruthy();
+      expect(getByText('데이터 최신화')).toBeTruthy();
     });
 
-    it('worker — 취업자 모드', () => {
+    it('새로고침 버튼 탭 → refreshCache 호출', async () => {
       setupMocks();
-      usePersonaStore.setState({ persona: 'worker' });
 
       const { getByTestId } = render(<SettingsScreen />);
+      fireEvent.press(getByTestId('data-refresh-btn'));
 
-      expect(getByTestId('persona-label').props.children).toContain('취업자');
-      expect(getByTestId('persona-sub').props.children).toContain('실수령 중심');
-    });
-
-    it('unknown — 아직 모름 모드', () => {
-      setupMocks();
-      usePersonaStore.setState({ persona: 'unknown' });
-
-      const { getByTestId } = render(<SettingsScreen />);
-
-      expect(getByTestId('persona-label').props.children).toContain('아직 모름');
-      expect(getByTestId('persona-sub').props.children).toContain('둘 다');
-    });
-  });
-
-  describe('변경 버튼', () => {
-    it('탭 → setOnboarded(false) → router.replace(/onboarding) (순서 보장)', () => {
-      setupMocks();
-      // 호출 순서 추적 — 순서가 바뀌면 onboarded=true 인 채로 onboarding 진입 시
-      // app-shell 의 redirect 가 다시 (tabs) 로 보내는 무한 루프 위험.
-      const callOrder: string[] = [];
-      const setOnboarded = jest.fn(() => {
-        callOrder.push('setOnboarded');
+      await waitFor(() => {
+        expect(mockRefreshCache).toHaveBeenCalled();
       });
-      mockReplace.mockImplementation(() => {
-        callOrder.push('replace');
-      });
-      usePersonaStore.setState({ persona: 'student', setOnboarded });
+    });
+
+    it('null lastSync — "동기화 전" 표시', () => {
+      setupMocks();
+      useSettingsStore.setState({ lastSync: null });
 
       const { getByTestId } = render(<SettingsScreen />);
-      const changeBtn = getByTestId('persona-change-btn');
-      fireEvent.press(changeBtn);
 
-      expect(setOnboarded).toHaveBeenCalledWith(false);
-      expect(mockReplace).toHaveBeenCalledWith('/onboarding');
-      expect(callOrder).toEqual(['setOnboarded', 'replace']);
+      expect(getByTestId('data-refresh-last-sync').props.children).toBe('동기화 전');
+    });
+
+    it('날짜 lastSync — formatShortDate 표시', () => {
+      setupMocks();
+      useSettingsStore.setState({ lastSync: '2026-04-27T00:00:00Z' });
+
+      const { getByTestId } = render(<SettingsScreen />);
+
+      expect(getByTestId('data-refresh-last-sync').props.children).toBe('04-27');
+    });
+
+    it('로딩 중 — "갱신 중..." 텍스트 + 버튼 disabled', async () => {
+      let resolveRefresh: ((v: { ok: boolean; lastSync: string }) => void) | undefined;
+      (mockRefreshCache as jest.Mock).mockReturnValue(
+        new Promise<{ ok: boolean; lastSync: string }>((resolve) => {
+          resolveRefresh = resolve;
+        }),
+      );
+
+      const { getByTestId, getByText } = render(<SettingsScreen />);
+      const refreshBtn = getByTestId('data-refresh-btn');
+
+      await act(async () => {
+        fireEvent.press(refreshBtn);
+      });
+
+      expect(getByText('갱신 중...')).toBeTruthy();
+      expect(refreshBtn.props.accessibilityState).toMatchObject({ disabled: true });
+
+      await act(async () => {
+        resolveRefresh?.({ ok: true, lastSync: new Date().toISOString() });
+      });
+    });
+
+    it('성공 → lastSync 갱신', async () => {
+      setupMocks();
+      const updateLastSync = jest.fn();
+      useSettingsStore.setState({ lastSync: null, updateLastSync });
+
+      const { getByTestId } = render(<SettingsScreen />);
+
+      await act(async () => {
+        fireEvent.press(getByTestId('data-refresh-btn'));
+      });
+
+      await waitFor(() => {
+        expect(updateLastSync).toHaveBeenCalled();
+      });
+    });
+
+    it('실패 → "갱신 실패" 텍스트', async () => {
+      (mockRefreshCache as jest.Mock).mockResolvedValue({
+        ok: false,
+        reason: 'network',
+      });
+
+      const { getByTestId, getByText } = render(<SettingsScreen />);
+
+      await act(async () => {
+        fireEvent.press(getByTestId('data-refresh-btn'));
+      });
+
+      await waitFor(() => {
+        expect(getByText('갱신 실패')).toBeTruthy();
+      });
     });
   });
 
@@ -167,18 +197,17 @@ describe('SettingsScreen', () => {
   });
 
   describe('메뉴 리스트', () => {
-    it('5개 메뉴 모두 렌더링', () => {
+    it('4개 메뉴 모두 렌더링 (menu-refresh 는 카드로 승격되어 제거)', () => {
       setupMocks();
 
-      const { getByTestId, getByText } = render(<SettingsScreen />);
+      const { getByTestId, getByText, queryByTestId } = render(<SettingsScreen />);
 
-      expect(getByTestId('menu-refresh')).toBeTruthy();
+      expect(queryByTestId('menu-refresh')).toBeNull();
       expect(getByTestId('menu-sources')).toBeTruthy();
       expect(getByTestId('menu-feedback')).toBeTruthy();
       expect(getByTestId('menu-privacy')).toBeTruthy();
       expect(getByTestId('menu-app-info')).toBeTruthy();
 
-      expect(getByText('데이터 새로고침')).toBeTruthy();
       expect(getByText('데이터 출처 보기')).toBeTruthy();
       expect(getByText('피드백 보내기')).toBeTruthy();
       expect(getByText('개인정보 처리방침')).toBeTruthy();
@@ -199,78 +228,6 @@ describe('SettingsScreen', () => {
       const { getByText } = render(<SettingsScreen />);
 
       expect(getByText('12개')).toBeTruthy();
-    });
-  });
-
-  describe('데이터 새로고침', () => {
-    it('탭 → refreshCache 호출', async () => {
-      setupMocks();
-
-      const { getByTestId } = render(<SettingsScreen />);
-      const refreshRow = getByTestId('menu-refresh');
-      fireEvent.press(refreshRow);
-
-      await waitFor(() => {
-        expect(mockRefreshCache).toHaveBeenCalled();
-      });
-    });
-
-    it('성공 → lastSync 갱신', async () => {
-      setupMocks();
-      const updateLastSync = jest.fn();
-      useSettingsStore.setState({ lastSync: null, updateLastSync });
-
-      const { getByTestId } = render(<SettingsScreen />);
-      const refreshRow = getByTestId('menu-refresh');
-
-      await act(async () => {
-        fireEvent.press(refreshRow);
-      });
-
-      await waitFor(() => {
-        expect(updateLastSync).toHaveBeenCalled();
-      });
-    });
-
-    it('로딩 중 — "갱신 중..." 텍스트 + 버튼 disabled', async () => {
-      let resolveRefresh: ((v: { ok: boolean; lastSync: string }) => void) | undefined;
-      (mockRefreshCache as jest.Mock).mockReturnValue(
-        new Promise<{ ok: boolean; lastSync: string }>((resolve) => {
-          resolveRefresh = resolve;
-        }),
-      );
-
-      const { getByTestId, getByText } = render(<SettingsScreen />);
-      const refreshRow = getByTestId('menu-refresh');
-
-      await act(async () => {
-        fireEvent.press(refreshRow);
-      });
-
-      expect(getByText('갱신 중...')).toBeTruthy();
-      expect(refreshRow.props.accessibilityState).toMatchObject({ disabled: true });
-
-      await act(async () => {
-        resolveRefresh?.({ ok: true, lastSync: new Date().toISOString() });
-      });
-    });
-
-    it('실패 → 갱신 실패 텍스트', async () => {
-      (mockRefreshCache as jest.Mock).mockResolvedValue({
-        ok: false,
-        reason: 'network',
-      });
-
-      const { getByTestId, getByText } = render(<SettingsScreen />);
-      const refreshRow = getByTestId('menu-refresh');
-
-      await act(async () => {
-        fireEvent.press(refreshRow);
-      });
-
-      await waitFor(() => {
-        expect(getByText('갱신 실패')).toBeTruthy();
-      });
     });
   });
 
@@ -320,17 +277,16 @@ describe('SettingsScreen', () => {
   });
 
   describe('스냅샷', () => {
-    // TESTING.md §6.6 — 100라인 정책. 화면 전체 대신 페르소나 카드 영역만.
-    it('persona-card (worker) — 회귀 감지', () => {
+    // TESTING.md §6.6 — 100라인 정책. 화면 전체 대신 데이터 최신화 카드 영역만.
+    it('data-refresh-card — 회귀 감지', () => {
       setupMocks({ cities: {} });
-      usePersonaStore.setState({ persona: 'worker', onboarded: true });
       useFavoritesStore.setState({ cityIds: [] });
       useRecentStore.setState({ cityIds: [] });
       useSettingsStore.setState({ lastSync: null });
 
       const tree = render(<SettingsScreen />);
 
-      expect(jsonByTestId(tree.toJSON(), 'persona-card')).toMatchSnapshot();
+      expect(jsonByTestId(tree.toJSON(), 'data-refresh-card')).toMatchSnapshot();
     });
   });
 });

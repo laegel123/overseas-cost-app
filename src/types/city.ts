@@ -3,8 +3,6 @@
  * docs/DATA.md §2 의 v1.0 정식 스키마와 1:1 일치.
  */
 
-export type Persona = 'student' | 'worker' | 'unknown';
-
 export type Region = 'na' | 'eu' | 'asia' | 'oceania' | 'me';
 
 export type TuitionLevel = 'undergrad' | 'graduate' | 'language';

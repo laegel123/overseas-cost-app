@@ -1,15 +1,22 @@
 /**
- * Onboarding 화면 테스트 — screens step 4.
+ * Onboarding 화면 테스트 — persona-removal step 5 (ADR-067).
  *
- * 페르소나 3종 카드 표시 + 탭 시 persona store + router.replace.
+ * 도시 선택 온보딩: 도시 리스트 렌더(seoul 제외) + 권역 필터 + 도시 탭 시
+ * add(cityId) + setOnboarded(true) + router.replace('/compare/{id}') + 연타 가드.
  */
 
 import * as React from 'react';
 
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 
-import { jsonByTestId } from '@/__test-utils__/snapshotByTestId';
+import {
+  fetchExchangeRates as mockFetchExchangeRates,
+  getAllCities as mockGetAllCities,
+  loadAllCities as mockLoadAllCities,
+} from '@/lib';
 
+import { seoulValid } from '../../src/__fixtures__/cities/seoul-valid';
+import { vancouverValid } from '../../src/__fixtures__/cities/vancouver-valid';
 import OnboardingScreen from '../onboarding';
 
 const mockReplace = jest.fn();
@@ -17,155 +24,301 @@ jest.mock('expo-router', () => ({
   useRouter: () => ({ replace: mockReplace }),
 }));
 
-const mockSetPersona = jest.fn();
+const mockAdd = jest.fn();
 const mockSetOnboarded = jest.fn();
 jest.mock('@/store', () => ({
-  usePersonaStore: (selector: (s: { setPersona: jest.Mock; setOnboarded: jest.Mock }) => unknown) =>
-    selector({ setPersona: mockSetPersona, setOnboarded: mockSetOnboarded }),
+  useFavoritesStore: (selector: (s: { add: jest.Mock }) => unknown) => selector({ add: mockAdd }),
+  useOnboardingStore: (selector: (s: { setOnboarded: jest.Mock }) => unknown) =>
+    selector({ setOnboarded: mockSetOnboarded }),
 }));
 
-jest.mock('react-native-safe-area-context', () => ({
-  SafeAreaView: ({ children }: { children: React.ReactNode }) => children,
-  SafeAreaProvider: ({ children }: { children: React.ReactNode }) => children,
-}));
+jest.mock('@/lib', () => {
+  const actual = jest.requireActual('@/lib');
+  return {
+    ...actual,
+    loadAllCities: jest.fn(),
+    getAllCities: jest.fn(),
+    fetchExchangeRates: jest.fn(),
+  };
+});
 
+const tokyoValid = {
+  ...vancouverValid,
+  id: 'tokyo',
+  name: { ko: '도쿄', en: 'Tokyo' },
+  country: 'JP',
+  currency: 'JPY',
+  region: 'asia' as const,
+};
+
+const londonValid = {
+  ...vancouverValid,
+  id: 'london',
+  name: { ko: '런던', en: 'London' },
+  country: 'GB',
+  currency: 'GBP',
+  region: 'eu' as const,
+};
+
+const sydneyValid = {
+  ...vancouverValid,
+  id: 'sydney',
+  name: { ko: '시드니', en: 'Sydney' },
+  country: 'AU',
+  currency: 'AUD',
+  region: 'oceania' as const,
+};
+
+const defaultFx = { KRW: 1, CAD: 980, USD: 1380, JPY: 9, GBP: 1750, AUD: 900 };
+
+const citiesMap = {
+  seoul: seoulValid,
+  vancouver: vancouverValid,
+  tokyo: tokyoValid,
+  london: londonValid,
+  sydney: sydneyValid,
+};
+
+function setupMocks(overrides?: {
+  cities?: typeof citiesMap | Record<string, never>;
+  fx?: typeof defaultFx;
+}) {
+  const opts = {
+    cities: citiesMap,
+    fx: defaultFx,
+    ...overrides,
+  };
+
+  (mockLoadAllCities as jest.Mock).mockResolvedValue(opts.cities);
+  (mockGetAllCities as jest.Mock).mockReturnValue(opts.cities);
+  (mockFetchExchangeRates as jest.Mock).mockResolvedValue(opts.fx);
+}
+
+const flushPromises = () => new Promise((r) => setImmediate(r));
+
+// 타이머 역전 패턴 — jest.setup.js 가 fakeTimers 를 전역 기본값으로 설정.
+// 비동기 load() 가 setImmediate flush 에 의존하므로 본 파일에서만 realTimers 사용.
 describe('OnboardingScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useRealTimers();
+  });
+
+  afterEach(() => {
+    jest.useFakeTimers();
+  });
+
+  // ─── 로딩 상태 ────────────────────────────────────────────────────────────
+
+  describe('로딩 상태', () => {
+    it('로딩 중 스피너 표시', () => {
+      (mockLoadAllCities as jest.Mock).mockReturnValue(new Promise(() => {}));
+      (mockFetchExchangeRates as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+      const { getByTestId } = render(<OnboardingScreen />);
+
+      expect(getByTestId('onboarding-screen-loading')).toBeTruthy();
+    });
   });
 
   // ─── UI 표시 ────────────────────────────────────────────────────────────
 
-  it('3개 페르소나 카드 표시', () => {
-    render(<OnboardingScreen />);
+  describe('데이터 로드 완료', () => {
+    it('hero 인사말 + 설명 표시', async () => {
+      setupMocks();
 
-    expect(screen.getByTestId('persona-card-student')).toBeTruthy();
-    expect(screen.getByTestId('persona-card-worker')).toBeTruthy();
-    expect(screen.getByTestId('persona-card-unknown')).toBeTruthy();
+      const { getByTestId, getByText } = render(<OnboardingScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('onboarding-screen')).toBeTruthy();
+      expect(getByText('안녕하세요')).toBeTruthy();
+      expect(getByText('어디로 떠나시나요?')).toBeTruthy();
+      expect(getByText('서울 기준으로 해외 도시 생활비를 비교해 드려요.')).toBeTruthy();
+      expect(getByText('도시를 골라보세요')).toBeTruthy();
+    });
+
+    it('도시 리스트 렌더 (서울 제외)', async () => {
+      setupMocks();
+
+      const { getByTestId, queryByTestId } = render(<OnboardingScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('onboarding-city-list')).toBeTruthy();
+      expect(getByTestId('onboarding-city-tokyo')).toBeTruthy();
+      expect(getByTestId('onboarding-city-london')).toBeTruthy();
+      expect(getByTestId('onboarding-city-vancouver')).toBeTruthy();
+      expect(getByTestId('onboarding-city-sydney')).toBeTruthy();
+      expect(queryByTestId('onboarding-city-seoul')).toBeNull();
+    });
   });
 
-  it('페르소나 라벨 표시 (단일 출처)', () => {
-    render(<OnboardingScreen />);
+  // ─── 권역 필터 ────────────────────────────────────────────────────────────
 
-    expect(screen.getByText('유학생')).toBeTruthy();
-    expect(screen.getByText('취업자')).toBeTruthy();
-    expect(screen.getByText('아직 모름')).toBeTruthy();
+  describe('권역 필터', () => {
+    it('RegionPill 6개 렌더 + 기본 active = 전체', async () => {
+      setupMocks();
+
+      const { getByTestId } = render(<OnboardingScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('onboarding-region-pills')).toBeTruthy();
+      expect(getByTestId('onboarding-region-all')).toBeTruthy();
+      expect(getByTestId('onboarding-region-na')).toBeTruthy();
+      expect(getByTestId('onboarding-region-eu')).toBeTruthy();
+      expect(getByTestId('onboarding-region-asia')).toBeTruthy();
+      expect(getByTestId('onboarding-region-oceania')).toBeTruthy();
+      expect(getByTestId('onboarding-region-me')).toBeTruthy();
+      expect(getByTestId('onboarding-region-all').props.accessibilityState.selected).toBe(true);
+    });
+
+    it('권역 선택 시 해당 권역 도시만 노출', async () => {
+      setupMocks();
+
+      const { getByTestId, queryByTestId } = render(<OnboardingScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.press(getByTestId('onboarding-region-eu'));
+
+      await waitFor(() => {
+        expect(getByTestId('onboarding-region-eu').props.accessibilityState.selected).toBe(true);
+        expect(getByTestId('onboarding-city-london')).toBeTruthy();
+        expect(queryByTestId('onboarding-city-tokyo')).toBeNull();
+        expect(queryByTestId('onboarding-city-vancouver')).toBeNull();
+        expect(queryByTestId('onboarding-city-sydney')).toBeNull();
+      });
+    });
   });
 
-  it('페르소나 sub 표시 (단일 출처)', () => {
-    render(<OnboardingScreen />);
+  // ─── 도시 선택 흐름 ──────────────────────────────────────────────────────
 
-    expect(screen.getByText('서울에서 출발 · 학비 중심')).toBeTruthy();
-    expect(screen.getByText('서울에서 출발 · 실수령 중심')).toBeTruthy();
-    expect(screen.getByText('둘 다 보여드려요')).toBeTruthy();
-  });
+  describe('도시 선택', () => {
+    it('도시 탭 → add(cityId) + setOnboarded(true) + router.replace("/compare/{id}")', async () => {
+      setupMocks();
 
-  it('인사말 표시', () => {
-    render(<OnboardingScreen />);
+      const { getByTestId } = render(<OnboardingScreen />);
 
-    expect(screen.getByText('안녕하세요')).toBeTruthy();
-    expect(screen.getByText('어디로 떠나시나요?')).toBeTruthy();
-  });
+      await act(async () => {
+        await flushPromises();
+      });
 
-  it('푸터 안내문 표시', () => {
-    render(<OnboardingScreen />);
+      fireEvent.press(getByTestId('onboarding-city-tokyo'));
 
-    expect(screen.getByText('설정에서 언제든 변경할 수 있어요')).toBeTruthy();
-  });
+      expect(mockAdd).toHaveBeenCalledWith('tokyo');
+      expect(mockSetOnboarded).toHaveBeenCalledWith(true);
+      expect(mockReplace).toHaveBeenCalledWith('/compare/tokyo');
+    });
 
-  it('질문 라벨 표시', () => {
-    render(<OnboardingScreen />);
+    it('선택 순서 보장 — add → setOnboarded → replace', async () => {
+      setupMocks();
 
-    expect(screen.getByText('어떤 분이신가요?')).toBeTruthy();
-  });
+      const order: string[] = [];
+      mockAdd.mockImplementation(() => order.push('add'));
+      mockSetOnboarded.mockImplementation(() => order.push('setOnboarded'));
+      mockReplace.mockImplementation(() => order.push('replace'));
 
-  // ─── 인터랙션 ────────────────────────────────────────────────────────────
+      const { getByTestId } = render(<OnboardingScreen />);
 
-  it('student 카드 탭 → setPersona("student") + setOnboarded(true) + router.replace("/(tabs)")', () => {
-    render(<OnboardingScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
 
-    fireEvent.press(screen.getByTestId('persona-card-student'));
+      fireEvent.press(getByTestId('onboarding-city-vancouver'));
 
-    expect(mockSetPersona).toHaveBeenCalledWith('student');
-    expect(mockSetOnboarded).toHaveBeenCalledWith(true);
-    expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
-  });
-
-  it('worker 카드 탭 → setPersona("worker") + setOnboarded(true) + router.replace("/(tabs)")', () => {
-    render(<OnboardingScreen />);
-
-    fireEvent.press(screen.getByTestId('persona-card-worker'));
-
-    expect(mockSetPersona).toHaveBeenCalledWith('worker');
-    expect(mockSetOnboarded).toHaveBeenCalledWith(true);
-    expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
-  });
-
-  it('unknown 카드 탭 → setPersona("unknown") + setOnboarded(true) + router.replace("/(tabs)")', () => {
-    render(<OnboardingScreen />);
-
-    fireEvent.press(screen.getByTestId('persona-card-unknown'));
-
-    expect(mockSetPersona).toHaveBeenCalledWith('unknown');
-    expect(mockSetOnboarded).toHaveBeenCalledWith(true);
-    expect(mockReplace).toHaveBeenCalledWith('/(tabs)');
-  });
-
-  // ─── 접근성 ────────────────────────────────────────────────────────────
-
-  it('student 카드 accessibilityLabel', () => {
-    render(<OnboardingScreen />);
-
-    expect(screen.getByLabelText('유학생 선택')).toBeTruthy();
-  });
-
-  it('worker 카드 accessibilityLabel', () => {
-    render(<OnboardingScreen />);
-
-    expect(screen.getByLabelText('취업자 선택')).toBeTruthy();
-  });
-
-  it('unknown 카드 accessibilityLabel', () => {
-    render(<OnboardingScreen />);
-
-    expect(screen.getByLabelText('아직 모름 선택')).toBeTruthy();
+      expect(order).toEqual(['add', 'setOnboarded', 'replace']);
+    });
   });
 
   // ─── 연타 방어 ────────────────────────────────────────────────────────
 
-  it('카드 빠른 연타 → 첫 탭만 실행 (가드)', () => {
-    render(<OnboardingScreen />);
+  describe('연타 방어', () => {
+    it('같은 도시 빠른 연타 → 첫 탭만 실행 (가드)', async () => {
+      setupMocks();
 
-    const card = screen.getByTestId('persona-card-student');
-    fireEvent.press(card);
-    fireEvent.press(card);
-    fireEvent.press(card);
+      const { getByTestId } = render(<OnboardingScreen />);
 
-    expect(mockSetPersona).toHaveBeenCalledTimes(1);
-    expect(mockSetOnboarded).toHaveBeenCalledTimes(1);
-    expect(mockReplace).toHaveBeenCalledTimes(1);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const row = getByTestId('onboarding-city-vancouver');
+      fireEvent.press(row);
+      fireEvent.press(row);
+      fireEvent.press(row);
+
+      expect(mockAdd).toHaveBeenCalledTimes(1);
+      expect(mockSetOnboarded).toHaveBeenCalledTimes(1);
+      expect(mockReplace).toHaveBeenCalledTimes(1);
+    });
+
+    it('서로 다른 도시 연타 → 첫 탭만 실행 (가드)', async () => {
+      setupMocks();
+
+      const { getByTestId } = render(<OnboardingScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.press(getByTestId('onboarding-city-vancouver'));
+      fireEvent.press(getByTestId('onboarding-city-tokyo'));
+
+      expect(mockAdd).toHaveBeenCalledTimes(1);
+      expect(mockAdd).toHaveBeenCalledWith('vancouver');
+    });
   });
 
-  it('서로 다른 카드 연타 → 첫 탭만 실행 (가드)', () => {
-    render(<OnboardingScreen />);
+  // ─── 에러 상태 ────────────────────────────────────────────────────────
 
-    fireEvent.press(screen.getByTestId('persona-card-student'));
-    fireEvent.press(screen.getByTestId('persona-card-worker'));
+  describe('에러 상태', () => {
+    it('서울 데이터 없음 — 에러 메시지 + 다시 시도', async () => {
+      setupMocks({ cities: {} });
 
-    expect(mockSetPersona).toHaveBeenCalledTimes(1);
-    expect(mockSetPersona).toHaveBeenCalledWith('student');
-  });
+      const { getByTestId, getByText } = render(<OnboardingScreen />);
 
-  // ─── 스냅샷 ────────────────────────────────────────────────────────────
-  // TESTING.md §6.6 — 100라인 정책. 화면 전체 대신 카드별 핵심 영역만.
+      await act(async () => {
+        await flushPromises();
+      });
 
-  it('snapshot — student 카드 (primary)', () => {
-    const tree = render(<OnboardingScreen />);
-    expect(jsonByTestId(tree.toJSON(), 'persona-card-student')).toMatchSnapshot();
-  });
+      expect(getByTestId('onboarding-screen-error')).toBeTruthy();
+      expect(getByText('서울 데이터를 찾을 수 없습니다')).toBeTruthy();
+    });
 
-  it('snapshot — unknown 카드 (tertiary, dashed)', () => {
-    const tree = render(<OnboardingScreen />);
-    expect(jsonByTestId(tree.toJSON(), 'persona-card-unknown')).toMatchSnapshot();
+    it('다시 시도 버튼 → loading 전환 후 재로드', async () => {
+      let callCount = 0;
+      (mockGetAllCities as jest.Mock).mockImplementation(() => {
+        callCount += 1;
+        return callCount === 1 ? {} : citiesMap;
+      });
+      (mockLoadAllCities as jest.Mock).mockResolvedValue(undefined);
+      (mockFetchExchangeRates as jest.Mock).mockResolvedValue(defaultFx);
+
+      const { getByTestId, queryByTestId } = render(<OnboardingScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('onboarding-screen-error')).toBeTruthy();
+      fireEvent.press(getByTestId('onboarding-retry-btn'));
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(queryByTestId('onboarding-screen-error')).toBeNull();
+      expect(getByTestId('onboarding-screen')).toBeTruthy();
+    });
   });
 });

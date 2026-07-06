@@ -3,10 +3,7 @@ appId: com.laegel.overseascostapp
 tags:
   - home
 ---
-- runFlow:
-    file: ../../common/onboard.yaml
-    env:
-      PERSONA: student
+- runFlow: ../../common/onboard.yaml
 - assertVisible:
     id: 'home-favorites-empty'
 # 실제 문구는 '아직 즐겨찾기가 없어요.\n도시를 탭해 ⭐ 추가해보세요' 한 덩어리 —

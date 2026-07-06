@@ -21,3 +21,4 @@ export {
   getMultColor,
   isHot,
 } from './format';
+export { computeCityTotal, multFromTotals } from './homeTotals';

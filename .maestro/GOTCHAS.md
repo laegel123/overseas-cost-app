@@ -49,8 +49,9 @@ ScrollView(`Screen scroll`)·BottomSheet 는 키보드가 떠 있을 때 **첫 �
 - **BottomSheet**(`TuitionChoiceSheet`/`TaxChoiceSheet`): `testID` 를 자식에 접두사로 전개한다.
   `detail-tuition-sheet` 라는 노드는 **없고** `-backdrop` / `-body` / `-preset-UBC` 등만 있다.
   → 시트 오픈은 `…-body`(내용 있는 시트) 또는 `…-backdrop`(내용이 접근성 미노출인 시트, §5)로 검증.
-- **RecentRow / TopBar / PersonaCard**: 터치 핸들러가 있는 `Pressable` 에 testID 가 직접 붙는지 확인.
-  (RecentRow 는 testID 가 내부 View 에 있지만 좌표 탭이 Pressable 에 닿아 동작 — 단, 키보드 흡수(§2)는 별개.)
+- **RecentRow / TopBar**: 터치 핸들러가 있는 `Pressable` 에 testID 가 직접 붙는지 확인.
+  (RecentRow 는 testID 가 내부 View 에 있지만 좌표 탭이 Pressable 에 닿아 동작 — 단, 키보드 흡수(§2)는 별개.
+  온보딩 도시 행도 RecentRow 라 동일 — `onboarding-city-{cityId}` testID 로 탭.)
 
 ## 4. `accessibilityRole="button"` 은 자식 텍스트를 라벨로 병합한다
 

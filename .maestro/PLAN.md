@@ -25,7 +25,7 @@ npm run dev
 ```bash
 npm run e2e:smoke                         # 스모크만 (파이프라인 확인)
 maestro test .maestro/flows/01-onboarding # 배치 하나
-maestro test .maestro/flows/03-compare/persona-card-diff.yaml  # 단일 flow
+maestro test .maestro/flows/03-compare/unified-categories.yaml  # 단일 flow
 maestro test --include-tags compare       # 태그로 선택
 npm run e2e                               # 전체 (smoke + flows/**)
 ```
@@ -41,15 +41,15 @@ npm run e2e                               # 전체 (smoke + flows/**)
 파이프라인(Maestro↔dev build↔Metro) sanity. 실패 시 이후 전부 무의미하니 항상 먼저.
 
 ### 01-onboarding
-- **관찰:** 3개 페르소나 각각 온보딩→홈, 설정에 '{페르소나} 모드' 반영, 페르소나 변경, 1회성(재실행 skip).
-- **리스크:** `persona-change` 는 구현상 **온보딩 화면 재진입**(문서의 Sheet B 아님). `onboarding-once` 는 두 번째 `launchApp` 이 clearState 없이 상태를 유지해야 통과.
+- **관찰(ADR-067):** 온보딩은 **도시 선택**이다. `city-select` — 도시 탭 → 서울 vs 그 도시 Compare 직행 + 즐겨찾기 반영. `onboarding-once` — 1회 통과 후 재실행 시 온보딩 skip(`onboarding:v1` 영속).
+- **리스크:** 도시 선택 온보딩은 **즐겨찾기를 반드시 1건 남긴다** → '빈 상태' 전제 플로우(empty-states / tabs-empty-alert / favorite-toggle 말미)와 근본적으로 양립 불가. onboard.yaml 공통 전제는 밴쿠버(시드 보장)로 고정 — 별도 로컬 검증 세션에서 빈-상태 플로우 재작성 필요(아래 §3).
 
 ### 02-home
 - **관찰:** 한글/영문 검색, 빈 결과, 검색어 clear, 권역 필터, 빈 상태 문구.
 - **리스크:** 검색·필터는 밴쿠버(시드 보장)로만 단정. 다른 도시는 네트워크 의존이라 assert 대상에서 제외함.
 
 ### 03-compare
-- **관찰:** hero, 페르소나별 카드 집합, 배수 3중 인코딩, 뒤로가기.
+- **관찰(ADR-067):** hero, **통합 6 카테고리**(페르소나 분기 없음 — `unified-categories`: 학비·비자 항상 노출, tax 는 데이터 부재로 숨김), 배수 3중 인코딩, 뒤로가기.
 - **리스크:** `multiplier-encoding` 은 정규식 `↑\d.*×` — 밴쿠버 총비용>서울이라 방향(↑)은 고정이나, **환율 로드 완료 후**라야 hero 에 배수가 렌더된다(로딩 넘어갈 시간 필요, Maestro 기본 대기로 흡수).
 
 ### 04-favorites-recent
@@ -90,17 +90,22 @@ npm run e2e                               # 전체 (smoke + flows/**)
 flow 는 **실제 구현 기준**으로 작성했다. 아래는 PRD/UI_GUIDE 스펙에는 있으나 현재 빌드에
 **미구현이거나 다른** 항목 — 스펙 갱신 또는 구현으로 후속 정합 필요(별도 작업, 본 E2E 범위 밖):
 
+> **ADR-067(페르소나 제거):** 페르소나 개념 자체가 삭제됐다. 온보딩=도시 선택, Compare=통합
+> 6 카테고리, 설정=데이터 최신화 카드. 아래 페르소나 관련 행은 "폐기"로 갱신. 다만 도시 선택
+> 온보딩은 즐겨찾기를 1건 남겨 **빈-상태 전제 플로우(empty-states / tabs-empty-alert /
+> favorite-toggle 말미)와 양립 불가** → 별도 로컬 검증 세션에서 재작성 필요(신규 격차).
+
 | 스펙(PRD/UI_GUIDE) | 현재 구현 | E2E 처리 |
 | --- | --- | --- |
-| 토스트(즐겨찾기/새로고침/페르소나) | 토스트 컴포넌트 없음. 탭 redirect 안내만 네이티브 Alert | 상태 변화로 검증, 토스트 assert 안 함 |
-| 페르소나 변경 = Sheet B(취소/변경) | `persona-change-btn` → 온보딩 화면 재진입 | 온보딩 재진입으로 검증 |
+| 토스트(즐겨찾기/새로고침) | 토스트 컴포넌트 없음. 탭 redirect 안내만 네이티브 Alert | 상태 변화로 검증, 토스트 assert 안 함 |
+| 페르소나 개념 전반(ADR-067로 폐기) | 온보딩=도시 선택 · Compare=통합 6 카테고리 · 설정=데이터 최신화 카드 | 도시 선택/통합 카테고리로 검증 |
 | hero ❓ '가정' 시트(Sheet A) | Compare hero 에 ❓ 없음(footer '평균 가정 기준'만) | 미검증(구현 없음) |
 | '출처 보기' 모달(Sheet C) | Compare 는 비활성('준비 중'), 상세는 인라인 텍스트 | 상세 인라인 출처만 검증 |
-| 페르소나 mismatch 가드 뷰(worker→tuition 등) | 상세는 페르소나 가드 없음(카테고리 그대로 렌더) | 미검증(가드 없음) |
-| 의료 카테고리(worker) | 코드에 의료 카테고리 없음 | 미검증 |
+| 의료 카테고리 | 코드에 의료 카테고리 없음 | 미검증 |
 | 세금/실수령 해피패스 | tax 데이터 전무(21개 도시 모두) → 카드 숨김 | no-data 경로만(deep link) |
 | 오프라인/신선도 배지 | 화면에 배지 미구현 | 미검증 |
 | 빈 상태/검색 문구 리터럴 | 문서와 다른 실제 문구 사용 | 구현 문구로 assert |
+| 빈-상태 전제 플로우(신규) | 도시 선택 온보딩이 즐겨찾기 1건 강제 → 빈 상태 도달 불가 | 로컬 검증 세션에서 재작성 |
 
 > 이 표는 "테스트가 약하다"가 아니라 **"구현이 스펙보다 단순하다"**는 사실의 기록이다.
 > 정합 방향(스펙을 구현에 맞춰 내릴지, 구현을 스펙까지 올릴지)은 제품 결정 사항.

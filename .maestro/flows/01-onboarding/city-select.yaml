@@ -1,0 +1,26 @@
+# UC: 최초 실행 → '도시 선택' 온보딩(ADR-067). 도시를 고르면 서울 vs 그 도시 Compare 로
+# 직행하고, 그 도시가 즐겨찾기에 담긴다(뒤로가 홈에서 즐겨찾기 카드로 반영). 페르소나 선택은
+# 도시 선택으로 대체됐다.
+appId: com.laegel.overseascostapp
+tags:
+  - onboarding
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: 'onboarding-screen'
+- assertVisible: '어디로 떠나시나요?'
+- assertVisible: '도시를 골라보세요'
+# 도시 선택 → 서울 vs 밴쿠버 Compare 직행
+- tapOn:
+    id: 'onboarding-city-vancouver'
+- assertVisible:
+    id: 'compare-screen'
+- assertVisible: '서울 vs 밴쿠버'
+# 뒤로 → 홈. 온보딩에서 담은 즐겨찾기가 홈 카드로 반영되는지 확인.
+- tapOn:
+    id: 'compare-topbar-back'
+- assertVisible:
+    id: 'home-screen'
+- assertVisible:
+    id: 'home-favcard-vancouver'

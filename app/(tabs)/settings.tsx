@@ -1,10 +1,11 @@
 /**
- * Settings 화면 — 페르소나 표시 + 사용 통계 + 메뉴.
+ * Settings 화면 — 데이터 최신화 카드 + 사용 통계 + 메뉴.
  *
- * design/README.md §5 (Settings) 구현.
- * - Persona card: navy 단색 (gradient 는 v2, 본 step 에서 expo-linear-gradient 설치 금지)
+ * design/README.md §5 (Settings) 구현. 페르소나 개념 제거 (ADR-067) — 기존 페르소나
+ * 배지 대신 데이터 최신화 카드로 교체.
+ * - Data refresh card: navy 히어로 시각 + 마지막 동기화 시각 + 새로고침 버튼
  * - Stat cards: 즐겨찾기 / 최근 본 / 도시 DB count
- * - Menu list: MenuRow 5개 (데이터 새로고침 hot, 앱 정보 dim)
+ * - Menu list: MenuRow 4개 (출처 / 피드백 / 개인정보 / 앱 정보 dim)
  * - Footer: Made with ♥ in Seoul · 2026
  *
  * 외부 링크는 모두 Linking.openURL 경유. 데이터 새로고침은 refreshCache (내부에서 refreshFx 포함).
@@ -16,7 +17,6 @@ import { Alert, Pressable, View } from 'react-native';
 
 // eslint-disable-next-line import/no-named-as-default
 import Constants from 'expo-constants';
-import { useRouter } from 'expo-router';
 
 import { Icon } from '@/components/Icon';
 import { MenuRow } from '@/components/MenuRow';
@@ -24,9 +24,7 @@ import { Screen } from '@/components/Screen';
 import { H1, H3, Tiny } from '@/components/typography/Text';
 import { DATA_SOURCES_COUNT, formatShortDate, getAllCities, refreshCache } from '@/lib';
 import { openURL } from '@/lib/linking';
-import { PERSONA_ICON, PERSONA_LABEL, PERSONA_SUB } from '@/lib/persona';
 import { useFavoritesStore } from '@/store/favorites';
-import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
 import { useSettingsStore } from '@/store/settings';
 import { colors } from '@/theme/tokens';
@@ -42,9 +40,6 @@ const FEEDBACK_EMAIL = 'laegel1@gmail.com';
 type RefreshState = 'idle' | 'loading' | 'error';
 
 export default function SettingsScreen(): React.ReactElement {
-  const router = useRouter();
-  const persona = usePersonaStore((s) => s.persona);
-  const setOnboarded = usePersonaStore((s) => s.setOnboarded);
   const favoriteIds = useFavoritesStore((s) => s.cityIds);
   const recentIds = useRecentStore((s) => s.cityIds);
   const lastSync = useSettingsStore((s) => s.lastSync);
@@ -57,11 +52,6 @@ export default function SettingsScreen(): React.ReactElement {
   // lastSync 를 dep 으로 명시하고 경고를 의도적으로 무시.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const citiesCount = React.useMemo(() => Object.keys(getAllCities()).length, [lastSync]);
-
-  const handleChangePersona = React.useCallback(() => {
-    setOnboarded(false);
-    router.replace('/onboarding');
-  }, [setOnboarded, router]);
 
   const handleRefresh = React.useCallback(async () => {
     setRefreshState('loading');
@@ -127,36 +117,37 @@ export default function SettingsScreen(): React.ReactElement {
         </View>
       </View>
 
-      {/* Persona Card */}
+      {/* Data Refresh Card — 마지막 동기화 시각 + 새로고침 (ADR-067) */}
       <View
         className="bg-navy rounded-hero-lg p-hero-pad mb-4"
-        testID="persona-card"
+        testID="data-refresh-card"
       >
         <View className="flex-row items-center gap-3">
           <View className="w-14 h-14 rounded-hero-icon bg-orange items-center justify-center">
             <Icon
-              name={PERSONA_ICON[persona]}
+              name="refresh"
               size={28}
               color={colors.white}
-              testID="persona-icon"
+              testID="data-refresh-icon"
             />
           </View>
           <View className="flex-1">
-            <H3 color="white" testID="persona-label">
-              {PERSONA_LABEL[persona]} 모드
+            <H3 color="white" testID="data-refresh-title">
+              데이터 최신화
             </H3>
-            <Tiny color="white" className="opacity-70" testID="persona-sub">
-              {PERSONA_SUB[persona]}
+            <Tiny color="white" className="opacity-70" testID="data-refresh-last-sync">
+              {formatLastSync()}
             </Tiny>
           </View>
           <Pressable
-            onPress={handleChangePersona}
+            onPress={handleRefresh}
+            disabled={refreshState === 'loading'}
             className="px-3 py-1.5 rounded-btn bg-white/10 border border-white/20"
             accessibilityRole="button"
-            accessibilityLabel="페르소나 변경"
-            testID="persona-change-btn"
+            accessibilityLabel="데이터 새로고침"
+            testID="data-refresh-btn"
           >
-            <Tiny color="white">변경</Tiny>
+            <Tiny color="white">새로고침</Tiny>
           </Pressable>
         </View>
       </View>
@@ -170,15 +161,6 @@ export default function SettingsScreen(): React.ReactElement {
 
       {/* Menu List */}
       <View className="rounded-card-lg overflow-hidden bg-white border border-line mb-4">
-        <MenuRow
-          icon="refresh"
-          label="데이터 새로고침"
-          rightText={formatLastSync()}
-          variant="hot"
-          onPress={handleRefresh}
-          disabled={refreshState === 'loading'}
-          testID="menu-refresh"
-        />
         <MenuRow
           icon="book"
           label="데이터 출처 보기"

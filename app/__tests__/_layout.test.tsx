@@ -4,7 +4,7 @@
  * step 0~2 책임 검증:
  *   - step 0: 폰트 + 4 store hydration 동시 await + null 렌더 + hideAsync 1회 호출
  *   - step 1: timeout fallback (ADR-052) 도 bootReady 진입
- *   - step 2: persona.onboarded 기반 router.replace redirect (무한 redirect 방지)
+ *   - step 2: onboarding.onboarded 기반 router.replace redirect (무한 redirect 방지)
  *
  * ErrorBoundary·lastSync bridge 는 step 3~4.
  */
@@ -19,7 +19,7 @@ import RootLayout from '../_layout';
 
 jest.mock('@/store', () => ({
   waitForStoresOrTimeout: jest.fn(),
-  usePersonaStore: jest.fn(),
+  useOnboardingStore: jest.fn(),
   bridgeLastSyncFromMeta: jest.fn(),
 }));
 
@@ -39,7 +39,7 @@ jest.mock('expo-router', () => ({
 const mockedUseAppFonts = jest.requireMock('@/theme/fonts').useAppFonts as jest.Mock;
 const mockedWaitForStoresOrTimeout = jest.requireMock('@/store')
   .waitForStoresOrTimeout as jest.Mock;
-const mockedUsePersonaStore = jest.requireMock('@/store').usePersonaStore as jest.Mock;
+const mockedUseOnboardingStore = jest.requireMock('@/store').useOnboardingStore as jest.Mock;
 const mockedBridgeLastSync = jest.requireMock('@/store')
   .bridgeLastSyncFromMeta as jest.Mock;
 const mockedUseRouter = jest.requireMock('expo-router').useRouter as jest.Mock;
@@ -57,11 +57,11 @@ function deferred<T>(): { promise: Promise<T>; resolve: (value: T) => void } {
 
 type HydrationResult = 'ok' | 'timeout';
 
-type PersonaSlice = { onboarded: boolean };
+type OnboardingSlice = { onboarded: boolean };
 
-function setPersona(onboarded: boolean): void {
-  mockedUsePersonaStore.mockImplementation(
-    (selector: (state: PersonaSlice) => unknown) => selector({ onboarded }),
+function setOnboarded(onboarded: boolean): void {
+  mockedUseOnboardingStore.mockImplementation(
+    (selector: (state: OnboardingSlice) => unknown) => selector({ onboarded }),
   );
 }
 
@@ -77,7 +77,7 @@ describe('RootLayout 부트로더', () => {
     replaceMock = jest.fn();
     mockedUseRouter.mockReturnValue({ replace: replaceMock, push: jest.fn(), back: jest.fn() });
     mockedUseSegments.mockReturnValue([]);
-    setPersona(true); // 기본: onboarded=true → step 2 의 redirect 가 트리거되지 않음
+    setOnboarded(true); // 기본: onboarded=true → step 2 의 redirect 가 트리거되지 않음
     mockedBridgeLastSync.mockResolvedValue(undefined);
   });
 
@@ -180,7 +180,7 @@ describe('RootLayout 부트로더', () => {
   it('!onboarded + 초기 segment (tabs) → router.replace("/onboarding")', async () => {
     mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
     mockedWaitForStoresOrTimeout.mockResolvedValue('ok');
-    setPersona(false);
+    setOnboarded(false);
     mockedUseSegments.mockReturnValue(['(tabs)']);
 
     render(<RootLayout />);
@@ -195,7 +195,7 @@ describe('RootLayout 부트로더', () => {
   it('onboarded + 초기 segment onboarding → router.replace("/(tabs)")', async () => {
     mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
     mockedWaitForStoresOrTimeout.mockResolvedValue('ok');
-    setPersona(true);
+    setOnboarded(true);
     mockedUseSegments.mockReturnValue(['onboarding']);
 
     render(<RootLayout />);
@@ -210,7 +210,7 @@ describe('RootLayout 부트로더', () => {
   it('!onboarded + 이미 onboarding segment → no-op (무한 redirect 방지)', async () => {
     mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
     mockedWaitForStoresOrTimeout.mockResolvedValue('ok');
-    setPersona(false);
+    setOnboarded(false);
     mockedUseSegments.mockReturnValue(['onboarding']);
 
     render(<RootLayout />);
@@ -224,7 +224,7 @@ describe('RootLayout 부트로더', () => {
   it('onboarded + 이미 (tabs) segment → no-op (무한 redirect 방지)', async () => {
     mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
     mockedWaitForStoresOrTimeout.mockResolvedValue('ok');
-    setPersona(true);
+    setOnboarded(true);
     mockedUseSegments.mockReturnValue(['(tabs)']);
 
     render(<RootLayout />);
@@ -238,7 +238,7 @@ describe('RootLayout 부트로더', () => {
   it('bootReady 가 false 인 동안 router.replace 호출 0회', async () => {
     mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
     mockedWaitForStoresOrTimeout.mockReturnValue(new Promise(() => undefined));
-    setPersona(false);
+    setOnboarded(false);
     mockedUseSegments.mockReturnValue(['(tabs)']);
 
     render(<RootLayout />);
@@ -267,7 +267,7 @@ describe('RootLayout 부트로더', () => {
     mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
     mockedWaitForStoresOrTimeout.mockResolvedValue('ok');
     mockedBridgeLastSync.mockRejectedValue(new Error('bridge boom'));
-    setPersona(false);
+    setOnboarded(false);
     mockedUseSegments.mockReturnValue(['(tabs)']);
 
     render(<RootLayout />);
@@ -302,7 +302,7 @@ describe('RootLayout 부트로더', () => {
     mockedWaitForStoresOrTimeout.mockResolvedValue('timeout');
     // timeout fallback 은 미완 store 에 INITIAL_STATE 강제 → onboarded=false.
     // 본 테스트에서는 그 결과를 시뮬레이트.
-    setPersona(false);
+    setOnboarded(false);
     mockedUseSegments.mockReturnValue(['(tabs)']);
 
     render(<RootLayout />);

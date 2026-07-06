@@ -26,7 +26,10 @@ import {
   INITIAL_STATE as FAVORITES_INITIAL,
   useFavoritesStore,
 } from './favorites';
-import { INITIAL_STATE as PERSONA_INITIAL, usePersonaStore } from './persona';
+import {
+  INITIAL_STATE as ONBOARDING_INITIAL,
+  useOnboardingStore,
+} from './onboarding';
 import { INITIAL_STATE as RECENT_INITIAL, useRecentStore } from './recent';
 import {
   INITIAL_STATE as RENT_CHOICE_INITIAL,
@@ -64,7 +67,7 @@ function waitOne<S>(store: PersistStoreLike<S>): Promise<void> {
 
 export function waitForAllStoresHydrated(): Promise<void> {
   return Promise.all([
-    waitOne(usePersonaStore),
+    waitOne(useOnboardingStore),
     waitOne(useFavoritesStore),
     waitOne(useRecentStore),
     waitOne(useSettingsStore),
@@ -121,8 +124,8 @@ export async function waitForStoresOrTimeout(
  * store 는 사용자 데이터 보존 위해 건드리지 않는다.
  */
 function forceInitialOnUnhydratedStores(): void {
-  if (!usePersonaStore.persist.hasHydrated()) {
-    usePersonaStore.setState(PERSONA_INITIAL);
+  if (!useOnboardingStore.persist.hasHydrated()) {
+    useOnboardingStore.setState(ONBOARDING_INITIAL);
   }
   if (!useFavoritesStore.persist.hasHydrated()) {
     useFavoritesStore.setState(FAVORITES_INITIAL);

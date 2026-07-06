@@ -1,18 +1,14 @@
-# UC-4: 온보딩은 1회성. 온보딩 완료 후 clearState 없이 재실행하면 온보딩을 건너뛰고
-# 곧바로 홈으로 진입한다 (persona.onboarded=true 영속).
+# UC-4: 온보딩은 1회성. '도시 선택' 온보딩(ADR-067)을 1회 통과하면 onboarded=true 가
+# 영속(onboarding:v1)돼, clearState 없이 재실행 시 온보딩을 건너뛰고 곧바로 홈으로 진입한다.
 appId: com.laegel.overseascostapp
 tags:
   - onboarding
 ---
-- launchApp:
-    clearState: true
-- assertVisible:
-    id: 'onboarding-screen'
-- tapOn:
-    id: 'persona-card-student'
+# onboard.yaml 이 clearState 런치 → 도시 선택 → compare → 뒤로 → home 까지 통과시킨다.
+- runFlow: ../../common/onboard.yaml
 - assertVisible:
     id: 'home-screen'
-# clearState 없이 재실행 — 온보딩 미표시
+# clearState 없이 재실행 — 온보딩 미표시(onboarded 영속)
 - launchApp
 - assertVisible:
     id: 'home-screen'

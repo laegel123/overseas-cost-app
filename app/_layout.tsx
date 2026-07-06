@@ -9,7 +9,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ErrorBoundary } from '@/components';
-import { bridgeLastSyncFromMeta, usePersonaStore, waitForStoresOrTimeout } from '@/store';
+import { bridgeLastSyncFromMeta, useOnboardingStore, waitForStoresOrTimeout } from '@/store';
 import { useAppFonts } from '@/theme/fonts';
 import { colors } from '@/theme/tokens';
 
@@ -22,7 +22,7 @@ export default function RootLayout() {
   const [storesHydrated, setStoresHydrated] = useState(false);
   const router = useRouter();
   const segments = useSegments();
-  const onboarded = usePersonaStore((s) => s.onboarded);
+  const onboarded = useOnboardingStore((s) => s.onboarded);
 
   useEffect(() => {
     let cancelled = false;

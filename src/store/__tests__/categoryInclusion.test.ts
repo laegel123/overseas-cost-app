@@ -1,13 +1,13 @@
 /**
  * docs/TESTING.md §9.8.4 매트릭스 — useCategoryInclusionStore + resolveInclusion +
- * getDefaultInclusion (ADR-062).
+ * getDefaultInclusion (ADR-062, ADR-067).
  *
- * 카테고리: 기본 동작 / 영속화 / 손상 캐시 / Default 페르소나 분기 / Resolver.
+ * 카테고리: 기본 동작 / 영속화 / 손상 캐시 / 고정 default / Resolver.
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type { Persona, SourceCategory } from '@/types/city';
+import type { SourceCategory } from '@/types/city';
 
 import {
   getDefaultInclusion,
@@ -185,42 +185,24 @@ describe('손상 캐시 — INITIAL fallback (silent fail 금지)', () => {
   });
 });
 
-describe('getDefaultInclusion — persona-aware default 매트릭스', () => {
-  const ALL_PERSONAS: Persona[] = ['student', 'worker', 'unknown'];
-
-  it.each(ALL_PERSONAS)(
-    'rent/food/transport 는 페르소나 %s 와 무관하게 항상 true',
-    (persona) => {
-      expect(getDefaultInclusion('rent', persona)).toBe(true);
-      expect(getDefaultInclusion('food', persona)).toBe(true);
-      expect(getDefaultInclusion('transport', persona)).toBe(true);
-    },
-  );
-
-  it('tuition: student → true, worker/unknown → false', () => {
-    expect(getDefaultInclusion('tuition', 'student')).toBe(true);
-    expect(getDefaultInclusion('tuition', 'worker')).toBe(false);
-    expect(getDefaultInclusion('tuition', 'unknown')).toBe(false);
+describe('getDefaultInclusion — 고정 기본값 (통합 뷰, ADR-067)', () => {
+  it('rent/food/transport → true (기본 평상 비용)', () => {
+    expect(getDefaultInclusion('rent')).toBe(true);
+    expect(getDefaultInclusion('food')).toBe(true);
+    expect(getDefaultInclusion('transport')).toBe(true);
   });
 
-  it('tax: worker → true, student/unknown → false', () => {
-    expect(getDefaultInclusion('tax', 'worker')).toBe(true);
-    expect(getDefaultInclusion('tax', 'student')).toBe(false);
-    expect(getDefaultInclusion('tax', 'unknown')).toBe(false);
+  it('tuition/tax/visa → false (일회성/조건부 비용)', () => {
+    expect(getDefaultInclusion('tuition')).toBe(false);
+    expect(getDefaultInclusion('tax')).toBe(false);
+    expect(getDefaultInclusion('visa')).toBe(false);
   });
-
-  it.each(ALL_PERSONAS)(
-    'visa 는 페르소나 %s 와 무관하게 항상 false (일회성/조건부)',
-    (persona) => {
-      expect(getDefaultInclusion('visa', persona)).toBe(false);
-    },
-  );
 });
 
 describe('resolveInclusion (사용자 토글 우선 → default fallback)', () => {
   it('명시 토글값(true) → 그 값 반환', () => {
     expect(
-      resolveInclusion('osaka', 'visa', 'unknown', {
+      resolveInclusion('osaka', 'visa', {
         osaka: { visa: true },
       }),
     ).toBe(true);
@@ -228,20 +210,20 @@ describe('resolveInclusion (사용자 토글 우선 → default fallback)', () =
 
   it('명시 토글값(false) → 그 값 반환 (rent default true 위에 false override)', () => {
     expect(
-      resolveInclusion('osaka', 'rent', 'student', {
+      resolveInclusion('osaka', 'rent', {
         osaka: { rent: false },
       }),
     ).toBe(false);
   });
 
-  it('미설정 도시 → persona default 적용', () => {
-    expect(resolveInclusion('osaka', 'rent', 'student', {})).toBe(true);
-    expect(resolveInclusion('osaka', 'tuition', 'worker', {})).toBe(false);
+  it('미설정 도시 → 고정 default 적용', () => {
+    expect(resolveInclusion('osaka', 'rent', {})).toBe(true);
+    expect(resolveInclusion('osaka', 'tuition', {})).toBe(false);
   });
 
   it('다른 도시의 토글이 현재 도시에 영향 없음', () => {
     expect(
-      resolveInclusion('osaka', 'tuition', 'worker', {
+      resolveInclusion('osaka', 'tuition', {
         vancouver: { tuition: true },
       }),
     ).toBe(false);
@@ -249,31 +231,24 @@ describe('resolveInclusion (사용자 토글 우선 → default fallback)', () =
 
   it('다른 카테고리의 토글이 현재 카테고리에 영향 없음', () => {
     expect(
-      resolveInclusion('osaka', 'tuition', 'student', {
+      resolveInclusion('osaka', 'rent', {
         osaka: { visa: true },
       }),
     ).toBe(true);
   });
 
   it('도시 entry 빈 객체 → default 적용', () => {
-    expect(resolveInclusion('osaka', 'rent', 'student', { osaka: {} })).toBe(true);
+    expect(resolveInclusion('osaka', 'rent', { osaka: {} })).toBe(true);
   });
 
-  it.each<[SourceCategory, Persona, boolean]>([
-    ['rent', 'student', true],
-    ['food', 'worker', true],
-    ['transport', 'unknown', true],
-    ['tuition', 'student', true],
-    ['tuition', 'worker', false],
-    ['tax', 'worker', true],
-    ['tax', 'student', false],
-    ['visa', 'student', false],
-    ['visa', 'worker', false],
-    ['visa', 'unknown', false],
-  ])(
-    'default 매트릭스: %s × %s → %s',
-    (category, persona, expected) => {
-      expect(resolveInclusion('any-city', category, persona, {})).toBe(expected);
-    },
-  );
+  it.each<[SourceCategory, boolean]>([
+    ['rent', true],
+    ['food', true],
+    ['transport', true],
+    ['tuition', false],
+    ['tax', false],
+    ['visa', false],
+  ])('default 매트릭스: %s → %s', (category, expected) => {
+    expect(resolveInclusion('any-city', category, {})).toBe(expected);
+  });
 });

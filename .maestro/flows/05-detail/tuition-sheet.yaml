@@ -5,10 +5,7 @@ tags:
   - detail
   - sheet
 ---
-- runFlow:
-    file: ../../common/onboard.yaml
-    env:
-      PERSONA: student
+- runFlow: ../../common/onboard.yaml
 - runFlow: ../../common/open-vancouver-compare.yaml
 - tapOn:
     id: 'compare-pair-tuition'

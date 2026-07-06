@@ -8,10 +8,7 @@ tags:
   - settings
   - external
 ---
-- runFlow:
-    file: ../../common/onboard.yaml
-    env:
-      PERSONA: student
+- runFlow: ../../common/onboard.yaml
 - tapOn:
     id: 'home-avatar'
 - tapOn:
