@@ -1,0 +1,16 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "persona-removal",
+  "steps": [
+    { "step": 0, "name": "decision-of-record", "status": "pending" },
+    { "step": 1, "name": "onboarding-store", "status": "pending" },
+    { "step": 2, "name": "boot-wiring", "status": "pending" },
+    { "step": 3, "name": "home-totals", "status": "pending" },
+    { "step": 4, "name": "compare-inclusion", "status": "pending" },
+    { "step": 5, "name": "onboarding-screen", "status": "pending" },
+    { "step": 6, "name": "settings-refresh-card", "status": "pending" },
+    { "step": 7, "name": "persona-cleanup", "status": "pending" },
+    { "step": 8, "name": "maestro-e2e", "status": "pending" },
+    { "step": 9, "name": "docs-reconcile", "status": "pending" }
+  ]
+}
