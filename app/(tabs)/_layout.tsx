@@ -13,12 +13,31 @@ import { Alert } from 'react-native';
 
 import { Tabs, useRouter } from 'expo-router';
 
+import { Icon, type IconName } from '@/components/Icon';
 import { useFavoritesStore } from '@/store/favorites';
 import { useRecentStore } from '@/store/recent';
+import { colors } from '@/theme/tokens';
 
 type TabPressEvent = {
   preventDefault: () => void;
 };
+
+// design/README.md §125: 하단 탭 바 아이콘 22px, active=orange / inactive=gray-2.
+const TAB_ICON_SIZE = 22;
+
+// tabBarIcon 은 focused 로만 색을 고르므로 Icon 의 ColorToken 타입을 유지한다
+// (React Navigation 이 넘겨주는 color 문자열은 매직 hex 라 쓰지 않음).
+function tabIcon(name: IconName) {
+  const TabBarIcon = ({ focused }: { focused: boolean }): React.ReactElement => (
+    <Icon
+      name={name}
+      size={TAB_ICON_SIZE}
+      color={focused ? colors.orange : colors.gray2}
+    />
+  );
+  TabBarIcon.displayName = `TabBarIcon(${name})`;
+  return TabBarIcon;
+}
 
 export default function TabsLayout(): React.ReactElement {
   const router = useRouter();
@@ -59,19 +78,25 @@ export default function TabsLayout(): React.ReactElement {
   );
 
   return (
-    <Tabs screenOptions={{ headerShown: false }}>
-      <Tabs.Screen name="index" options={{ title: '홈' }} />
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: colors.orange,
+        tabBarInactiveTintColor: colors.gray2,
+      }}
+    >
+      <Tabs.Screen name="index" options={{ title: '홈', tabBarIcon: tabIcon('home') }} />
       <Tabs.Screen
         name="compare"
-        options={{ title: '비교' }}
+        options={{ title: '비교', tabBarIcon: tabIcon('compare') }}
         listeners={{ tabPress: handleCompareTabPress }}
       />
       <Tabs.Screen
         name="favorites"
-        options={{ title: '즐겨찾기' }}
+        options={{ title: '즐겨찾기', tabBarIcon: tabIcon('star') }}
         listeners={{ tabPress: handleFavoritesTabPress }}
       />
-      <Tabs.Screen name="settings" options={{ title: '설정' }} />
+      <Tabs.Screen name="settings" options={{ title: '설정', tabBarIcon: tabIcon('settings') }} />
     </Tabs>
   );
 }
