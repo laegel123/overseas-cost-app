@@ -64,7 +64,7 @@
       "status": "completed",
       "started_at": "2026-07-06T22:21:17+0900",
       "summary": "페르소나 소스 3 + 테스트 3 파일 삭제(PersonaCard·store/persona·lib/persona). 배럴(store/index.ts) usePersonaStore·PersonaState·PersonaActions export 제거 + docstring persona→onboarding, types/city.ts·types/index.ts 의 Persona 타입 제거, tailwind.config.js persona-icon(borderRadius)·1.5(borderWidth 유일 항목→블록 전체) 제거(grep 으로 PersonaCard 단독 사용 재확인 후). TESTING.md §9.5/§9.31/§9.34 인벤토리 삭제 마킹. grep 게이트: 살아있는 persona 참조 0(\\bPersonaCard\\b·usePersonaStore·getCategoriesForPersona·type Persona 모두 0건). navyPersonaCard(theme/tokens.ts, 기존 데드·소비처 0)는 계획 §F·전역 가이드라인대로 보존—리터럴 grep 의 PersonaCard 매치는 이 식별자의 부분 문자열 충돌(false positive). typecheck·lint·test(88 suites, 1916 pass) 그린.",
-      "completed_at": "2026-07-06T22:32:00+0900"
+      "completed_at": "2026-07-06T22:26:40+0900"
     },
     {
       "step": 8,
