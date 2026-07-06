@@ -483,13 +483,15 @@ v1.0 은 항목별 신고 없음(ADR-010). v1.1:
 
 | 위치         | 키              | 내용                                                                   | TTL  | 용도                       |
 | ------------ | --------------- | ---------------------------------------------------------------------- | ---- | -------------------------- |
-| AsyncStorage | `persona:v1`    | `{ persona, onboarded }`                                               | 영구 | 페르소나·온보딩 플래그     |
+| AsyncStorage | `onboarding:v1` | `{ onboarded: boolean }`                                               | 영구 | 온보딩 완료 플래그         |
 | AsyncStorage | `favorites:v1`  | `{ cityIds: string[] }`                                                | 영구 | 즐겨찾기 (max 50)          |
 | AsyncStorage | `recent:v1`     | `{ cityIds: string[] }`                                                | 영구 | 최근 본 도시 (max 5, FIFO) |
 | AsyncStorage | `settings:v1`   | `{ lastSync: ISOString \| null }`                                      | 영구 | 설정                       |
 | AsyncStorage | `data:all:v1`   | `{ schemaVersion, generatedAt, fxBaseDate, cities: {...}, _cachedAt }` | 24h  | 도시 batch 캐시            |
 | AsyncStorage | `fx:v1`         | `{ rates: {...}, _cachedAt }`                                          | 24h  | 환율 캐시                  |
 | AsyncStorage | `meta:lastSync` | ISOString                                                              | 영구 | 마지막 성공 fetch 시각     |
+
+> **`onboarding:v1` (ADR-067):** 온보딩 완료 플래그는 원래 `persona:v1` store 소유였으나, 페르소나 제거로 단일 목적 store `useOnboardingStore` 로 이전됐다. 기존 사용자 기기에 남는 고아 `persona:v1` 키는 무해하며 읽히지 않는다 (선택적 정리만 가능). 도시별 선택 store (`rentChoice:v1` / `tuitionChoice:v1` / `taxChoice:v1` / `categoryInclusion:v1`) 는 ADR-060~062 참조.
 
 **디바이스당 총 사용량 추정**: 50KB ~ 200KB (대부분 `data:all:v1` 캐시).
 **iOS/Android AsyncStorage 한계**: iOS 무제한 (디스크 공간 의존), Android 6MB 기본 (충분).

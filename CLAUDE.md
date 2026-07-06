@@ -19,7 +19,7 @@
 - **CRITICAL**: 모든 디자인 토큰(색·폰트·간격·라운드·shadow)은 `tailwind.config.js` + `src/theme/tokens.ts` 단일 출처에서만 정의한다. 컴포넌트에 매직 넘버 색상값을 직접 박지 않는다.
 - **CRITICAL**: 외부 데이터(도시 JSON, 환율)는 반드시 `src/lib/data.ts` / `src/lib/currency.ts` 를 경유한다. 컴포넌트가 `fetch` 를 직접 호출하지 않는다.
 - **CRITICAL**: 데이터는 **공공 출처에서 자동으로** 만 갱신한다 (ADR-032). 정부 통계 API·공식 정부 페이지·공식 교통공사·공식 대학 페이지 외 출처 (Numbeo·Expatistan·Zillow·Kijiji·Yelp 등 상업 플랫폼) 사용 금지. 자동 fetch 는 `scripts/refresh/<source>.mjs` + GitHub Actions cron 으로만 (수동 큐레이션 금지).
-- **CRITICAL**: 페르소나(유학생/취업자/모름) 개념은 **제거하기로 결정** (ADR-067). 목표 상태 — 모든 사용자가 통합 뷰(rent·food·transport·tuition·tax·visa 6 카테고리)를 보고, Compare 는 페르소나로 분기하지 않으며, 온보딩은 페르소나 선택이 아니라 **도시 선택**이다. 구현은 다음 세션 하네스에서 진행 예정이라 **코드에는 아직 페르소나가 남아 있을 수 있다** — 새 코드는 페르소나를 되살리지 말 것. 전환 스펙: `docs/plans/persona-removal-city-onboarding.md`.
+- **CRITICAL**: 페르소나(유학생/취업자/모름) 개념은 **제거됨** (ADR-067). 모든 사용자가 통합 뷰(rent·food·transport·tuition·tax·visa 6 카테고리)를 본다. Compare 는 페르소나로 분기하지 않고, 온보딩은 페르소나 선택이 아니라 **도시 선택**이다. hero 합산 기본 포함은 rent/food/transport = ON, tuition/tax/visa = OFF 고정 (사용자가 카드 토글로 변경 가능). 새 코드는 페르소나를 되살리지 말 것. 이력: ADR-067(ADR-062 부분 supersede), `docs/plans/persona-removal-city-onboarding.md`.
 - **CRITICAL**: Hot 규칙 — 배수 ≥ 2.0× 면 `hot=true` (아이콘 박스 orange tint, 배수 텍스트 orange). 단일 함수 `isHot(mult)` 로 일관 판정.
 - **CRITICAL**: TypeScript `strict` 모드 유지. `any` 사용 금지(불가피하면 ADR 추가). 외부 라이브러리 타입은 `unknown` + 타입 가드로 처리.
 - **CRITICAL**: 에러는 삼키지 않는다. 네트워크·파싱·검증 실패는 명시적 에러 타입(`UnknownCurrencyError`, `CityParseError`, `CitySchemaError` 등)으로 throw 하고 화면 단에서 ErrorView 또는 inline 배지로 노출. silent fail 금지.
