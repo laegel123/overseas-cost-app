@@ -7,7 +7,8 @@
       "name": "decision-of-record",
       "status": "completed",
       "started_at": "2026-07-06T21:27:18+0900",
-      "summary": "결정 기록(ADR-067 전문 + ADR-062 부분 supersede + CLAUDE.md 전환기 문구) 실재·정합 확인 완료. 코드/문서 변경 없음, typecheck·lint·test(1941 pass) 그린 유지."
+      "summary": "결정 기록(ADR-067 전문 + ADR-062 부분 supersede + CLAUDE.md 전환기 문구) 실재·정합 확인 완료. 코드/문서 변경 없음, typecheck·lint·test(1941 pass) 그린 유지.",
+      "completed_at": "2026-07-06T21:37:25+0900"
     },
     {
       "step": 1,
