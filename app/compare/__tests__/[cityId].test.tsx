@@ -14,7 +14,6 @@ import {
 } from '@/lib';
 import { useCategoryInclusionStore } from '@/store/categoryInclusion';
 import { useFavoritesStore } from '@/store/favorites';
-import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
 import { useRentChoiceStore } from '@/store/rentChoice';
 import { useTaxChoiceStore } from '@/store/taxChoice';
@@ -83,7 +82,6 @@ function setupMocks(overrides?: {
 }
 
 function resetStores() {
-  usePersonaStore.getState().reset();
   useFavoritesStore.getState().clear();
   useRecentStore.getState().clear();
   // ADR-060 — rent choice 도 영속 store. 테스트 격리.
@@ -122,49 +120,9 @@ describe('CompareScreen', () => {
     expect(mockGetCity).toHaveBeenCalledWith('vancouver');
   });
 
-  describe('페르소나별 카테고리 카드 분기', () => {
-    it('student 페르소나: rent, food, transport, tuition, visa 5개', async () => {
+  describe('카테고리 카드 (통합 뷰 — 항상 6 카테고리, ADR-067)', () => {
+    it('rent, food, transport, tuition, tax, visa 6개 모두 표시', async () => {
       setupMocks();
-      usePersonaStore.setState({ persona: 'student', onboarded: true });
-
-      const { getByTestId, queryByTestId } = render(<CompareScreen />);
-
-      await act(async () => {
-        await flushPromises();
-      });
-
-      expect(getByTestId('compare-screen')).toBeTruthy();
-
-      expect(getByTestId('compare-pair-rent')).toBeTruthy();
-      expect(getByTestId('compare-pair-food')).toBeTruthy();
-      expect(getByTestId('compare-pair-transport')).toBeTruthy();
-      expect(getByTestId('compare-pair-tuition')).toBeTruthy();
-      expect(getByTestId('compare-pair-visa')).toBeTruthy();
-      expect(queryByTestId('compare-pair-tax')).toBeNull();
-    });
-
-    it('worker 페르소나: rent, food, transport, tax, visa 5개', async () => {
-      setupMocks();
-      usePersonaStore.setState({ persona: 'worker', onboarded: true });
-
-      const { getByTestId, queryByTestId } = render(<CompareScreen />);
-
-      await act(async () => {
-        await flushPromises();
-      });
-
-      expect(getByTestId('compare-screen')).toBeTruthy();
-      expect(getByTestId('compare-pair-rent')).toBeTruthy();
-      expect(getByTestId('compare-pair-food')).toBeTruthy();
-      expect(getByTestId('compare-pair-transport')).toBeTruthy();
-      expect(getByTestId('compare-pair-tax')).toBeTruthy();
-      expect(getByTestId('compare-pair-visa')).toBeTruthy();
-      expect(queryByTestId('compare-pair-tuition')).toBeNull();
-    });
-
-    it('unknown 페르소나: rent, food, transport, tuition, tax, visa 6개 (합집합)', async () => {
-      setupMocks();
-      usePersonaStore.setState({ persona: 'unknown', onboarded: true });
 
       const { getByTestId } = render(<CompareScreen />);
 
@@ -197,7 +155,6 @@ describe('CompareScreen', () => {
 
     it('ComparePair 각 카테고리별 1회 mount', async () => {
       setupMocks();
-      usePersonaStore.setState({ persona: 'worker', onboarded: true });
 
       const { getByTestId } = render(<CompareScreen />);
 
@@ -214,7 +171,6 @@ describe('CompareScreen', () => {
 
     it('ComparePair cLabel 은 도시명 (한글) — 국가코드 아님 (PR #17 review 이슈 1)', async () => {
       setupMocks();
-      usePersonaStore.setState({ persona: 'worker', onboarded: true });
 
       render(<CompareScreen />);
 
@@ -365,9 +321,8 @@ describe('CompareScreen', () => {
     // 문제도 회피. 시각 회귀 정밀 검증은 v2 시각 회귀 테스트 도구 (스크린샷)
     // 도입 후로 미룸 (ADR-035).
 
-    it('vancouver + worker — hero / 카테고리 카드 mount + 핵심 텍스트 노출', async () => {
+    it('vancouver — hero / 카테고리 카드 mount + 핵심 텍스트 노출', async () => {
       setupMocks();
-      usePersonaStore.setState({ persona: 'worker', onboarded: true });
 
       const { getByTestId } = render(<CompareScreen />);
 
@@ -378,7 +333,7 @@ describe('CompareScreen', () => {
       // hero 노드 존재 + variant 확인 (props.testID)
       expect(getByTestId('compare-hero')).toBeTruthy();
 
-      // 핵심 카테고리 카드 모두 노출 (worker 페르소나 = 5 카드)
+      // 핵심 카테고리 카드 노출 (통합 뷰 = 6 카드)
       expect(getByTestId('compare-pair-rent')).toBeTruthy();
       expect(getByTestId('compare-pair-food')).toBeTruthy();
       expect(getByTestId('compare-pair-transport')).toBeTruthy();
@@ -491,7 +446,6 @@ describe('CompareScreen', () => {
     // 같은 기준으로 반영되어야 도시 간 비교가 일관됨.
 
     it('tuition: 미선택 → 첫 entry (UBC) 기준', async () => {
-      usePersonaStore.getState().setPersona('student');
       setupMocks();
       const { getByTestId } = render(<CompareScreen />);
       await act(async () => {
@@ -503,7 +457,6 @@ describe('CompareScreen', () => {
     });
 
     it('tuition: store 에 SFU preset → SFU 기준 (35000/12*980 = 285.8만원)', async () => {
-      usePersonaStore.getState().setPersona('student');
       useTuitionChoiceStore
         .getState()
         .setTuitionChoice('vancouver', { kind: 'preset', school: 'SFU' });
@@ -517,7 +470,6 @@ describe('CompareScreen', () => {
     });
 
     it('tuition: custom 18000 CAD/year → 월 1500 CAD = 147만원', async () => {
-      usePersonaStore.getState().setPersona('student');
       useTuitionChoiceStore
         .getState()
         .setTuitionChoice('vancouver', { kind: 'custom', annual: 18000 });
@@ -531,7 +483,6 @@ describe('CompareScreen', () => {
     });
 
     it('tuition: 마운트된 상태에서 store 갱신 → 카드 실시간 갱신', async () => {
-      usePersonaStore.getState().setPersona('student');
       setupMocks();
       const { getByTestId } = render(<CompareScreen />);
       await act(async () => {
@@ -554,7 +505,6 @@ describe('CompareScreen', () => {
     // 하므로, custom choice 가 적용되면 seoulVal 이 1500원 등 의도치 않은 값으로
     // 계산되는 버그 회귀 방지. seoul 정책상 학비 0원이라 카드는 "신규" 배지.
     it('tuition: custom choice 적용 시에도 seoul 측은 null (0원 정책 유지) → 신규 배지', async () => {
-      usePersonaStore.getState().setPersona('student');
       useTuitionChoiceStore
         .getState()
         .setTuitionChoice('vancouver', { kind: 'custom', annual: 18000 });
@@ -573,7 +523,6 @@ describe('CompareScreen', () => {
     // PR #25 review — takeHomePctApprox 의 `/100` 버그 회귀 방지.
     // 60000 * (1 - 0.74) / 12 * 980 = 1,274,000원 = 127.4만원.
     it('tax: 미선택 → 첫 tier (60000, 0.74 takeHome) 월 세금 = 127.4만원', async () => {
-      usePersonaStore.getState().setPersona('worker');
       setupMocks();
       const { getByTestId } = render(<CompareScreen />);
       await act(async () => {
@@ -585,7 +534,6 @@ describe('CompareScreen', () => {
 
     // 80000 * (1 - 0.7) / 12 * 980 = 1,960,000원 = 196만원.
     it('tax: store 80000 preset (0.7 takeHome) → 196만원 (60000 tier 와 다른 값)', async () => {
-      usePersonaStore.getState().setPersona('worker');
       useTaxChoiceStore
         .getState()
         .setTaxChoice('vancouver', { kind: 'preset', annualSalary: 80000 });
@@ -599,7 +547,6 @@ describe('CompareScreen', () => {
     });
 
     it('tax: custom 100000 CAD/year → 카드 mount + 다른 값으로 갱신', async () => {
-      usePersonaStore.getState().setPersona('worker');
       useTaxChoiceStore
         .getState()
         .setTaxChoice('vancouver', { kind: 'custom', annualSalary: 100000 });
@@ -614,7 +561,6 @@ describe('CompareScreen', () => {
     // PR #25 7차 review — tax custom 시 takeHomePctApprox 차용 한계를 사용자에게
     // 가시화. preset 일 때는 일반 라벨, custom 일 때만 "(근사)" 표기.
     it('tax: custom 입력 시 라벨에 "(근사)" 표기', async () => {
-      usePersonaStore.getState().setPersona('worker');
       useTaxChoiceStore
         .getState()
         .setTaxChoice('vancouver', { kind: 'custom', annualSalary: 100000 });
@@ -628,7 +574,6 @@ describe('CompareScreen', () => {
     });
 
     it('tax: preset / 미선택 시 라벨은 "세금" (근사 표기 없음)', async () => {
-      usePersonaStore.getState().setPersona('worker');
       // 미선택 (default)
       setupMocks();
       const { getByTestId } = render(<CompareScreen />);
@@ -641,9 +586,8 @@ describe('CompareScreen', () => {
     });
   });
 
-  describe('inclusion (포함/제외 토글) — useCategoryInclusionStore 연동 (ADR-062)', () => {
-    it('worker default: rent/food/transport/tax ON, visa OFF — 토글/배지 시각 상태', async () => {
-      usePersonaStore.getState().setPersona('worker');
+  describe('inclusion (포함/제외 토글) — useCategoryInclusionStore 연동 (ADR-062, ADR-067)', () => {
+    it('고정 default: rent/food/transport ON, tuition/tax/visa OFF — 토글/배지 시각 상태', async () => {
       setupMocks();
       const { getByTestId, queryByTestId } = render(<CompareScreen />);
       await act(async () => {
@@ -651,35 +595,21 @@ describe('CompareScreen', () => {
       });
 
       // ON 카테고리 — 토글 value=true, 배지 미렌더
-      ['rent', 'food', 'transport', 'tax'].forEach((cat) => {
+      ['rent', 'food', 'transport'].forEach((cat) => {
         const toggle = getByTestId(`compare-pair-${cat}-toggle`);
         expect(toggle.props.value).toBe(true);
         expect(queryByTestId(`compare-pair-${cat}-excluded-badge`)).toBeNull();
       });
 
-      // visa default OFF — 토글 value=false + "제외됨" 배지
-      const visaToggle = getByTestId('compare-pair-visa-toggle');
-      expect(visaToggle.props.value).toBe(false);
-      expect(getByTestId('compare-pair-visa-excluded-badge')).toBeTruthy();
-    });
-
-    it('student default: tuition ON, visa OFF (worker 와 다른 default 분기)', async () => {
-      usePersonaStore.getState().setPersona('student');
-      setupMocks();
-      const { getByTestId } = render(<CompareScreen />);
-      await act(async () => {
-        await flushPromises();
+      // OFF 카테고리 — 토글 value=false + "제외됨" 배지 (일회성/조건부)
+      ['tuition', 'tax', 'visa'].forEach((cat) => {
+        const toggle = getByTestId(`compare-pair-${cat}-toggle`);
+        expect(toggle.props.value).toBe(false);
+        expect(getByTestId(`compare-pair-${cat}-excluded-badge`)).toBeTruthy();
       });
-
-      const tuitionToggle = getByTestId('compare-pair-tuition-toggle');
-      expect(tuitionToggle.props.value).toBe(true);
-
-      const visaToggle = getByTestId('compare-pair-visa-toggle');
-      expect(visaToggle.props.value).toBe(false);
     });
 
     it('default 합산 → visa OFF 상태로 hero 표시 + 토글 ON 시 hero 도시값 증가 (default 가 합산에 반영)', async () => {
-      usePersonaStore.getState().setPersona('worker');
       setupMocks();
       const { getByTestId } = render(<CompareScreen />);
       await act(async () => {
@@ -714,7 +644,6 @@ describe('CompareScreen', () => {
     it('서울합=0 케이스 → hero 가운데 mult 영역 미렌더 (ADR-062)', async () => {
       // 학비 + 비자만 ON, 나머지 OFF — 학비/비자는 서울 측 0원 카테고리.
       // → seoulTotal === 0 → centerMult undefined → mult 영역 미렌더.
-      usePersonaStore.getState().setPersona('student');
       setupMocks();
       const { getByTestId, queryByText } = render(<CompareScreen />);
       await act(async () => {
@@ -753,7 +682,6 @@ describe('CompareScreen', () => {
     });
 
     it('store 사용자 토글 갱신 → ComparePair 시각 상태 즉시 갱신', async () => {
-      usePersonaStore.getState().setPersona('worker');
       setupMocks();
       const { getByTestId, queryByTestId } = render(<CompareScreen />);
       await act(async () => {
@@ -774,10 +702,9 @@ describe('CompareScreen', () => {
     });
 
     it('도시별 inclusion 독립 — vancouver 의 토글이 osaka 에 영향 없음', async () => {
-      usePersonaStore.getState().setPersona('worker');
       // vancouver 의 visa 만 강제 ON (사전 설정).
       useCategoryInclusionStore.getState().setInclusion('vancouver', 'visa', true);
-      // osaka 화면 진입 — osaka 의 visa 는 default (worker → false).
+      // osaka 화면 진입 — osaka 의 visa 는 고정 default (OFF).
       setupMocks({ cityId: 'osaka', city: vancouverValid });
       // 위에선 vancouver fixture 를 osaka id 로 주입 (시각 검증만 — 도시별 inclusion
       // 키 격리 보증).
@@ -786,7 +713,7 @@ describe('CompareScreen', () => {
         await flushPromises();
       });
 
-      // osaka 의 visa default 는 OFF (worker default 정책) — vancouver 의 ON 토글에
+      // osaka 의 visa default 는 OFF (고정 default 정책) — vancouver 의 ON 토글에
       // 영향받지 않음.
       const visaToggle = getByTestId('compare-pair-visa-toggle');
       expect(visaToggle.props.value).toBe(false);

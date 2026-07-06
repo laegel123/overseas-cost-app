@@ -37,7 +37,10 @@
     {
       "step": 4,
       "name": "compare-inclusion",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-07-06T21:57:38+0900",
+      "summary": "categoryInclusion.ts + compare/[cityId].tsx 한 커밋: getDefaultInclusion(category)·resolveInclusion(cityId,category,inclusions) persona 인자 제거 → 고정 default(rent/food/transport ON, tuition/tax/visa OFF, ADR-067). Compare 는 getCategoriesForPersona 삭제 후 COMPARE_CATEGORIES 상수(항상 6 카테고리) + usePersonaStore/Persona 참조 0. 테스트: categoryInclusion 매트릭스 persona 제거, compare 페르소나 분기 3→1 케이스·inclusion 기대값 tuition/tax OFF 수정. typecheck·lint·test(1950 pass) 그린.",
+      "completed_at": "2026-07-06T22:05:00+0900"
     },
     {
       "step": 5,

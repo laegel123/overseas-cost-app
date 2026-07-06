@@ -41,13 +41,11 @@ import {
 } from '@/store';
 import type { RentChoice, TaxChoice, TuitionChoice } from '@/store';
 import { useFavoritesStore } from '@/store/favorites';
-import { usePersonaStore } from '@/store/persona';
 import { useRecentStore } from '@/store/recent';
 import { colors } from '@/theme/tokens';
 import type {
   CityCostData,
   ExchangeRates,
-  Persona,
   SourceCategory,
 } from '@/types/city';
 
@@ -162,17 +160,15 @@ const VISA_CONFIG: CategoryConfig = {
   },
 };
 
-function getCategoriesForPersona(persona: Persona): CategoryConfig[] {
-  const base = [RENT_CONFIG, FOOD_CONFIG, TRANSPORT_CONFIG];
-
-  if (persona === 'student') {
-    return [...base, TUITION_CONFIG, VISA_CONFIG];
-  }
-  if (persona === 'worker') {
-    return [...base, TAX_CONFIG, VISA_CONFIG];
-  }
-  return [...base, TUITION_CONFIG, TAX_CONFIG, VISA_CONFIG];
-}
+// ADR-067 — 페르소나 제거로 Compare 는 항상 6 카테고리 (통합 뷰).
+const COMPARE_CATEGORIES: CategoryConfig[] = [
+  RENT_CONFIG,
+  FOOD_CONFIG,
+  TRANSPORT_CONFIG,
+  TUITION_CONFIG,
+  TAX_CONFIG,
+  VISA_CONFIG,
+];
 
 type CompareData = {
   seoul: CityCostData;
@@ -190,7 +186,6 @@ export default function CompareScreen(): React.ReactElement {
   const { cityId } = useLocalSearchParams<{ cityId: string }>();
   const router = useRouter();
 
-  const persona = usePersonaStore((s) => s.persona);
   const isFavorite = useFavoritesStore((s) => s.has(cityId ?? ''));
   const toggleFavorite = useFavoritesStore((s) => s.toggle);
   const pushRecent = useRecentStore((s) => s.push);
@@ -205,8 +200,8 @@ export default function CompareScreen(): React.ReactElement {
   const taxChoice = useTaxChoiceStore((s) =>
     cityId ? s.choices[cityId] : undefined,
   );
-  // ADR-062 — 도시별 inclusion (포함/제외 토글). 미설정 카테고리는
-  // resolveInclusion 이 페르소나 default 적용. 도시 전체 map 을 구독하지만
+  // ADR-062 / ADR-067 — 도시별 inclusion (포함/제외 토글). 미설정 카테고리는
+  // resolveInclusion 이 고정 default 적용. 도시 전체 map 을 구독하지만
   // 사용자 토글은 같은 도시 내에서만 발생 → 다른 도시 변경에 의한 리렌더링
   // 비용은 사실상 없음.
   const inclusions = useCategoryInclusionStore((s) => s.inclusions);
@@ -276,9 +271,8 @@ export default function CompareScreen(): React.ReactElement {
     }
   }, [cityId, toggleFavorite]);
 
-  // 페르소나가 바뀔 때만 카테고리 배열 재생성 (PR #17 review 이슈 7).
-  // 모든 hook 은 early return 보다 위에 있어야 한다 (rules-of-hooks).
-  const categories = React.useMemo(() => getCategoriesForPersona(persona), [persona]);
+  // ADR-067 — 항상 6 카테고리 (통합 뷰). 정적 상수라 memo 불필요.
+  const categories = COMPARE_CATEGORIES;
 
   if (state.status === 'loading') {
     return (
@@ -349,12 +343,7 @@ export default function CompareScreen(): React.ReactElement {
 
     // ADR-062 — included 카테고리만 hero 합산에 누적. 카드 자체는 토글 OFF 라도
     // 화면에 표시 (opacity + 배지) — 사용자가 다시 켤 동선 확보.
-    const included = resolveInclusion(
-      cityId ?? '',
-      cfg.category,
-      persona,
-      inclusions,
-    );
+    const included = resolveInclusion(cityId ?? '', cfg.category, inclusions);
     if (included) {
       seoulTotal += sVal;
       cityTotal += cVal;
