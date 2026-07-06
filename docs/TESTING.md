@@ -1304,6 +1304,47 @@ hero / 학비 카드에도 즉시 반영.
 
 - [x] `waitForAllStoresHydrated` 동시 await + forceInitial 적용 cover (8 store 합성)
 
+### 9.8.5 `src/store/onboarding.ts` (ADR-067)
+
+온보딩 완료 플래그 store — 페르소나 제거(ADR-067)로 persona store 에서 이전한
+`onboarded` 를 단일 목적 store 로 분리. `settings.ts` 형틀 미러 (단일 boolean
+필드 + persist + INITIAL fallback). persona store 삭제는 step 7 담당이라 본
+step 시점엔 persona/onboarding 두 store 가 공존.
+
+**기본 동작:**
+
+- [x] 초기 상태 `{ onboarded: false }`
+- [x] `setOnboarded(true)` → state 변경
+- [x] `setOnboarded(false)` → state 변경
+- [x] `reset()` → 초기 상태 복귀
+
+**영속화:**
+
+- [x] persist key 정확히 `onboarding:v1`
+- [x] partialize: 액션 미영속화, onboarded 만 저장
+- [x] round-trip: storage v1 entry → rehydrate 후 메모리 반영
+
+**손상 캐시 — INITIAL fallback (silent fail 금지, CLAUDE.md CRITICAL):**
+
+- [x] 잘못된 JSON → INITIAL + INITIAL 직렬화로 정리
+- [x] onboarded 가 boolean 아님 → INITIAL + 정리
+- [x] onboarded 누락 → INITIAL
+
+**Hydration race:**
+
+- [x] `hasHydrated()` 가 rehydrate 후 true
+- [x] hydration 진행 중 read 는 직전 setState 결과를 일관 반영
+- [x] `onFinishHydration` 콜백이 완료 후 1회 호출
+
+**마이그레이션 (deferred):**
+
+- [x] v1 entry → migrate 함수 미진입 (version 일치)
+- [x] 미래 v0 entry → migrate stub 통과 (v2 도입 시 실 변환 검증으로 확장)
+
+**Hydration boundary (step 2 wiring):**
+
+- [ ] (step 2) `waitForAllStoresHydrated` 가 본 store 도 동시 await + forceInitial 적용 cover
+
 ### 9.9 `src/components/typography/Text.tsx` (components phase step 0)
 
 8 variant — Display / H1 / H2 / H3 / Body / Small / Tiny / MonoLabel. 단일 base

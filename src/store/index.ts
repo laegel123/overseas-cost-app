@@ -12,6 +12,9 @@
 
 export { usePersonaStore } from './persona';
 export type { PersonaActions, PersonaState } from './persona';
+// ADR-067: onboarded 플래그를 persona store 에서 이전 (persona 삭제는 step 7).
+export { useOnboardingStore } from './onboarding';
+export type { OnboardingActions, OnboardingState } from './onboarding';
 export { MAX_FAVORITES, useFavoritesStore } from './favorites';
 export type { AddResult, FavoritesActions, FavoritesState } from './favorites';
 export { MAX_RECENT, useRecentStore } from './recent';
