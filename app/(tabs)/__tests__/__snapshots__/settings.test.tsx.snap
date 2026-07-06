@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SettingsScreen 스냅샷 persona-card (worker) — 회귀 감지 1`] = `
+exports[`SettingsScreen 스냅샷 data-refresh-card — 회귀 감지 1`] = `
 <View
   className="bg-navy rounded-hero-lg p-hero-pad mb-4"
-  testID="persona-card"
+  testID="data-refresh-card"
 >
   <View
     className="flex-row items-center gap-3"
@@ -20,7 +20,7 @@ exports[`SettingsScreen 스냅샷 persona-card (worker) — 회귀 감지 1`] = 
             "width": 28,
           }
         }
-        testID="persona-icon"
+        testID="data-refresh-icon"
       >
         <svg
           fill="none"
@@ -34,24 +34,36 @@ exports[`SettingsScreen 스냅샷 persona-card (worker) — 회귀 감지 1`] = 
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"
+            d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
             fill="none"
             stroke="#FFFFFF"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={2}
           />
-          <rect
+          <path
+            d="M21 3v5h-5"
             fill="none"
-            height="14"
-            rx="2"
             stroke="#FFFFFF"
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={2}
-            width="20"
-            x="2"
-            y="6"
+          />
+          <path
+            d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+          />
+          <path
+            d="M8 16H3v5"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
           />
         </svg>
       </View>
@@ -62,27 +74,26 @@ exports[`SettingsScreen 스냅샷 persona-card (worker) — 회귀 감지 1`] = 
       <Text
         accessibilityRole="header"
         className="font-manrope-bold text-h3 text-white"
-        testID="persona-label"
+        testID="data-refresh-title"
       >
-        취업자
-         모드
+        데이터 최신화
       </Text>
       <Text
         accessibilityRole="text"
         className="font-mulish text-tiny text-white opacity-70"
-        testID="persona-sub"
+        testID="data-refresh-last-sync"
       >
-        서울에서 출발 · 실수령 중심
+        동기화 전
       </Text>
     </View>
     <View
-      accessibilityLabel="페르소나 변경"
+      accessibilityLabel="데이터 새로고침"
       accessibilityRole="button"
       accessibilityState={
         {
           "busy": undefined,
           "checked": undefined,
-          "disabled": undefined,
+          "disabled": false,
           "expanded": undefined,
           "selected": undefined,
         }
@@ -108,13 +119,13 @@ exports[`SettingsScreen 스냅샷 persona-card (worker) — 회귀 감지 1`] = 
       onResponderTerminate={[Function]}
       onResponderTerminationRequest={[Function]}
       onStartShouldSetResponder={[Function]}
-      testID="persona-change-btn"
+      testID="data-refresh-btn"
     >
       <Text
         accessibilityRole="text"
         className="font-mulish text-tiny text-white"
       >
-        변경
+        새로고침
       </Text>
     </View>
   </View>

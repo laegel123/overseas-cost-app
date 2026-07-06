@@ -2416,17 +2416,17 @@ UI_GUIDE.md §에러 메시지 한국어 표준 카탈로그 검증.
 
 ### 9.29 `app/(tabs)/settings.tsx` (설정 — 화면)
 
-screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
+screens phase step 3 구현 — 사용 통계 + 메뉴. 페르소나 배지는 **데이터 최신화 카드로 교체** (ADR-067, persona-removal step 6). 새로고침은 카드(`data-refresh-btn`)로 승격되며 기존 `menu-refresh` MenuRow 제거 (메뉴 5→4).
 
-**페르소나 표시:**
+**데이터 최신화 카드 (ADR-067):**
 
-- [x] student: "유학생 모드" + "서울에서 출발 · 학비 중심" 라벨 (screens step 3)
-- [x] worker: "취업자 모드" + "서울에서 출발 · 실수령 중심" 라벨 (screens step 3)
-- [x] unknown: "아직 모름 모드" + "둘 다 보여드려요" 라벨 (screens step 3)
-
-**변경 버튼:**
-
-- [x] 탭 → setOnboarded(false) + router.replace('/onboarding') (screens step 3)
+- [x] `data-refresh-card` + `data-refresh-btn` 렌더 + "데이터 최신화" 라벨 (persona-removal step 6)
+- [x] 새로고침 버튼 탭 → refreshCache 호출 (persona-removal step 6)
+- [x] 성공 → lastSync 갱신 (persona-removal step 6)
+- [x] 실패 → "갱신 실패" 텍스트 표시 (persona-removal step 6)
+- [x] 로딩 상태 — "갱신 중..." 텍스트 + 버튼 disabled (persona-removal step 6)
+- [x] null lastSync → "동기화 전" 표시 (persona-removal step 6)
+- [x] 날짜 lastSync → formatShortDate (UTC) 표시 (persona-removal step 6)
 
 **통계 카드:**
 
@@ -2435,16 +2435,9 @@ screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
 
 **메뉴 리스트:**
 
-- [x] 5개 메뉴 모두 렌더링 (데이터 새로고침/출처/피드백/개인정보/앱 정보) (screens step 3)
+- [x] 4개 메뉴 모두 렌더링 (출처/피드백/개인정보/앱 정보) — `menu-refresh` 는 카드로 승격되어 제거 (persona-removal step 6)
 - [x] 앱 정보 rightText = v1.0.0 (expo-constants expoConfig.version) (screens step 3)
 - [x] 출처 rightText = 12개 — `DATA_SOURCES_COUNT` (`src/lib/dataSources.ts` 단일 출처) ↔ `docs/DATA_SOURCES.md` 마커 동기화는 §9.33 드리프트 테스트가 강제 (ADR-065; PR #18 round 9 의 수동 동기화 대체)
-
-**데이터 새로고침:**
-
-- [x] 탭 → refreshCache 호출 (screens step 3)
-- [x] 성공 → lastSync 갱신 (screens step 3)
-- [x] 실패 → "갱신 실패" 텍스트 표시 (screens step 3)
-- [x] 로딩 상태 — "갱신 중..." 텍스트 + 버튼 disabled (PR #18 review round 2)
 
 **외부 링크:**
 
@@ -2458,7 +2451,7 @@ screens phase step 3 구현 — 페르소나 표시 + 사용 통계 + 메뉴.
 
 **스냅샷:**
 
-- [x] persona-card (worker) 부분 트리 — testID 만 (PR #18 review round 6, §6.6 100라인 정책)
+- [x] data-refresh-card 부분 트리 — testID 만 (persona-removal step 6, §6.6 100라인 정책)
 
 ### 9.30 `app/onboarding.tsx` (온보딩 — 페르소나 선택)
 
