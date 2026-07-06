@@ -1,0 +1,16 @@
+# 스모크 테스트 — Maestro ↔ 앱 구동 파이프라인 검증용.
+# clearState 로 온보딩이 항상 뜨므로 네트워크/데이터에 의존하지 않고 결정적으로 통과한다.
+appId: com.laegel.overseascostapp
+tags:
+  - smoke
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: 'onboarding-screen'
+- assertVisible: '어디로 떠나시나요?'
+# 페르소나 선택 → 탭 내비게이션까지 최소 인터랙션 검증
+- tapOn:
+    id: 'persona-card-student'
+- assertVisible:
+    id: 'home-screen'

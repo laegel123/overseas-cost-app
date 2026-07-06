@@ -1,0 +1,19 @@
+# UC: 최근 본 도시가 있으면 '비교' 탭이 곧바로 그 도시 Compare 로 redirect.
+appId: com.laegel.overseascostapp
+tags:
+  - tabs
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- runFlow: ../../common/open-vancouver-compare.yaml
+- tapOn:
+    id: 'compare-topbar-back'
+- assertVisible:
+    id: 'home-screen'
+# 비교 탭 → recent[0]=vancouver 로 redirect
+- tapOn: '비교'
+- assertVisible:
+    id: 'compare-screen'
+- assertVisible: '서울 vs 밴쿠버'

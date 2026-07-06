@@ -1,0 +1,18 @@
+# UC/접근성: 배수는 색 단독이 아니라 '화살표(↑/↓) + 숫자 + ×' 3중 인코딩.
+# 밴쿠버 총비용은 서울보다 크므로 hero 배수에 ↑ 가 확실히 나타난다(FX 무관하게 방향 고정).
+# 색은 Maestro 로 직접 검증 불가 → 화살표+숫자 텍스트 존재로 접근성 인코딩 검증.
+# (정확한 배수 값은 실시간 환율 의존이라 단정하지 않고 패턴만 확인.)
+appId: com.laegel.overseascostapp
+tags:
+  - compare
+  - a11y
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- runFlow: ../../common/open-vancouver-compare.yaml
+- assertVisible:
+    id: 'compare-hero'
+# 정규식: 위 화살표 + 숫자 + × (예: ↑3.4×)
+- assertVisible: '↑\d.*×'

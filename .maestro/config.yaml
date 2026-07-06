@@ -1,0 +1,11 @@
+# Maestro 워크스페이스 설정
+# docs: https://docs.maestro.dev/advanced/configuring-maestro
+#
+# `maestro test .maestro` 실행 시 아래 flows 글롭에 매칭되는 플로우만 대상으로 한다.
+#   - smoke.yaml         : 파이프라인 스모크
+#   - flows/**           : 유스케이스 배치 (01~07)
+# common/** 은 runFlow 로만 호출되는 재사용 서브플로우라 글롭에서 제외한다
+# (단독 실행 대상 아님).
+flows:
+  - 'smoke.yaml'
+  - 'flows/**'

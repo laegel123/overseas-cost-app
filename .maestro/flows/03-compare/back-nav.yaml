@@ -1,0 +1,14 @@
+# UC: Compare 상단바 뒤로가기 → 홈 복귀.
+appId: com.laegel.overseascostapp
+tags:
+  - compare
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- runFlow: ../../common/open-vancouver-compare.yaml
+- tapOn:
+    id: 'compare-topbar-back'
+- assertVisible:
+    id: 'home-screen'

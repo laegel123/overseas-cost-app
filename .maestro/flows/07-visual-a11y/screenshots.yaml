@@ -1,0 +1,49 @@
+# UI/UX 시각 검증용 — 주요 화면 상태를 스크린샷으로 캡처한다(자동 assert 로는
+# 색/레이아웃/그림자/hot tint 를 못 잡으므로 다른 세션에서 눈으로 리뷰).
+# 산출물: 실행 디렉터리에 01~07 png. Hot 카드(월세), 3중 인코딩 배수, 시트 등 포함.
+appId: com.laegel.overseascostapp
+tags:
+  - visual
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: 'onboarding-screen'
+- takeScreenshot: '01-onboarding'
+- tapOn:
+    id: 'persona-card-student'
+- assertVisible:
+    id: 'home-screen'
+- takeScreenshot: '02-home-empty'
+- runFlow: ../../common/open-vancouver-compare.yaml
+- takeScreenshot: '03-compare'
+- tapOn:
+    id: 'compare-pair-food'
+- assertVisible:
+    id: 'detail-screen'
+- takeScreenshot: '04-detail-food'
+- tapOn:
+    id: 'detail-topbar-back'
+- tapOn:
+    id: 'compare-pair-tuition'
+- assertVisible:
+    id: 'detail-screen'
+- takeScreenshot: '05-detail-tuition'
+- tapOn:
+    id: 'detail-picker-change-tuition'
+- assertVisible:
+    id: 'detail-tuition-sheet'
+- takeScreenshot: '06-tuition-sheet'
+- tapOn:
+    id: 'detail-tuition-sheet-backdrop'
+- tapOn:
+    id: 'detail-topbar-back'
+- tapOn:
+    id: 'compare-topbar-back'
+- assertVisible:
+    id: 'home-screen'
+- tapOn:
+    id: 'home-avatar'
+- assertVisible:
+    id: 'settings-screen'
+- takeScreenshot: '07-settings'

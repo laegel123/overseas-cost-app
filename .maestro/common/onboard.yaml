@@ -1,0 +1,13 @@
+# 재사용 서브플로우 — clearState 런치 후 온보딩을 지나 홈까지 진입.
+# runFlow 로 호출하며 PERSONA env(student|worker|unknown) 를 넘긴다.
+# 예)  - runFlow: { file: ../../common/onboard.yaml, env: { PERSONA: student } }
+appId: com.laegel.overseascostapp
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: 'onboarding-screen'
+- tapOn:
+    id: 'persona-card-${PERSONA}'
+- assertVisible:
+    id: 'home-screen'

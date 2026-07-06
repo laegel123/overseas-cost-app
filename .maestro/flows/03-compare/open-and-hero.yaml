@@ -1,0 +1,25 @@
+# UC-1: 도시 선택 → Compare 화면. hero + 페르소나별 카테고리 카드 존재 확인.
+# student 카드 구성: 월세/식비/교통/학비/비자 (tax 는 worker 전용 + 데이터 없어 미노출).
+appId: com.laegel.overseascostapp
+tags:
+  - compare
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- runFlow: ../../common/open-vancouver-compare.yaml
+- assertVisible:
+    id: 'compare-topbar'
+- assertVisible:
+    id: 'compare-hero'
+- assertVisible:
+    id: 'compare-pair-rent'
+- assertVisible:
+    id: 'compare-pair-food'
+- assertVisible:
+    id: 'compare-pair-transport'
+- assertVisible:
+    id: 'compare-pair-tuition'
+- assertVisible:
+    id: 'compare-pair-visa'

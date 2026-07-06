@@ -5,8 +5,8 @@
   "main": "expo-router/entry",
   "scripts": {
     "dev": "expo start",
-    "ios": "expo start --ios",
-    "android": "expo start --android",
+    "ios": "expo run:ios",
+    "android": "expo run:android",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --max-warnings 0",
     "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
@@ -14,6 +14,8 @@
     "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,md}\"",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
+    "e2e": "maestro test .maestro",
+    "e2e:smoke": "maestro test .maestro/smoke.yaml",
     "build": "eas build"
   },
   "dependencies": {

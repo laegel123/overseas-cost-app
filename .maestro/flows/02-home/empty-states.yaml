@@ -1,0 +1,15 @@
+# UC: 최초 상태(즐겨찾기/최근 없음)의 빈 상태 문구. 실제 구현 리터럴 기준.
+appId: com.laegel.overseascostapp
+tags:
+  - home
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- assertVisible:
+    id: 'home-favorites-empty'
+- assertVisible: '아직 즐겨찾기가 없어요'
+- assertVisible:
+    id: 'home-recent-empty'
+- assertVisible: '최근 본 도시가 없어요'

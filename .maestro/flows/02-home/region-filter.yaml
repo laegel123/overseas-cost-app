@@ -1,0 +1,24 @@
+# UC-8: 권역 필터 pill. 북미 → 밴쿠버(na) 노출, 유럽 → 밴쿠버 미노출, 전체 → 재노출.
+# 밴쿠버는 번들 시드에 항상 존재하므로 네트워크와 무관하게 결정적.
+appId: com.laegel.overseascostapp
+tags:
+  - home
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- assertVisible:
+    id: 'home-region-pills'
+- tapOn:
+    id: 'home-region-na'
+- assertVisible:
+    id: 'home-region-city-vancouver'
+- tapOn:
+    id: 'home-region-eu'
+- assertNotVisible:
+    id: 'home-region-city-vancouver'
+- tapOn:
+    id: 'home-region-all'
+- assertVisible:
+    id: 'home-region-city-vancouver'

@@ -1,0 +1,23 @@
+# UC(ADR-060): 월세 상세는 행을 탭해 4 주거형태(셰어/원룸/1베드/2베드)를 단일 선택.
+# 선택이 hero 캡션('월세 · {형태}')에 즉시 반영. 서울·밴쿠버 모두 4행 데이터 보유 → 결정적.
+appId: com.laegel.overseascostapp
+tags:
+  - detail
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- runFlow: ../../common/open-vancouver-compare.yaml
+- tapOn:
+    id: 'compare-pair-rent'
+- assertVisible:
+    id: 'detail-section-주거 형태'
+# 1베드룸 선택 → hero 캡션 반영
+- tapOn:
+    id: 'detail-row-oneBed'
+- assertVisible: '월세 · 1베드룸'
+# 셰어하우스로 변경 → hero 캡션 반영
+- tapOn:
+    id: 'detail-row-share'
+- assertVisible: '월세 · 셰어하우스'

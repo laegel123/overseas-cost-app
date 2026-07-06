@@ -1,0 +1,22 @@
+# UC-6: 외부 링크(개인정보 처리방침) 탭 → 외부 브라우저 오픈. 핸들러가 크래시 없이
+# 동작하고 앱으로 복귀 가능한지까지만 자동 검증한다.
+#
+# 주의: 실제 브라우저에 열린 페이지 내용/메일 컴포저는 Maestro 자동 검증 범위 밖 →
+# '수동 관찰' 항목(PLAN.md). menu-feedback(mailto)/menu-sources(github) 도 동일 성격.
+appId: com.laegel.overseascostapp
+tags:
+  - settings
+  - external
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- tapOn:
+    id: 'home-avatar'
+- tapOn:
+    id: 'menu-privacy'
+# 외부 브라우저로 이탈 → 앱 재포그라운드 후 설정 화면 복귀 확인
+- launchApp
+- assertVisible:
+    id: 'settings-screen'

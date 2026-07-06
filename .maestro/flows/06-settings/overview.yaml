@@ -1,0 +1,34 @@
+# UC: 설정 화면 구성 — 페르소나 카드/통계/메뉴 5종/푸터.
+appId: com.laegel.overseascostapp
+tags:
+  - settings
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- tapOn:
+    id: 'home-avatar'
+- assertVisible:
+    id: 'settings-screen'
+- assertVisible:
+    id: 'persona-card'
+- assertVisible: '유학생 모드'
+- assertVisible:
+    id: 'stat-favorites'
+- assertVisible:
+    id: 'stat-recent'
+- assertVisible:
+    id: 'stat-cities'
+- assertVisible:
+    id: 'menu-refresh'
+- assertVisible:
+    id: 'menu-sources'
+- assertVisible:
+    id: 'menu-feedback'
+- assertVisible:
+    id: 'menu-privacy'
+- assertVisible:
+    id: 'menu-app-info'
+- assertVisible: 'v1.0.0'
+- assertVisible: 'Made with ♥ in Seoul · 2026'

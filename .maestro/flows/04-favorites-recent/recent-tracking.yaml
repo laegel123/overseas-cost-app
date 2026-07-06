@@ -1,0 +1,21 @@
+# UC-10: 도시 Compare 진입 시 '최근 본 도시'에 자동 누적(홈 + 설정 통계).
+appId: com.laegel.overseascostapp
+tags:
+  - recent
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- runFlow: ../../common/open-vancouver-compare.yaml
+- tapOn:
+    id: 'compare-topbar-back'
+- assertVisible:
+    id: 'home-recent-list'
+- assertVisible:
+    id: 'home-recentrow-vancouver'
+# 설정 통계에도 '최근 본' 반영
+- tapOn:
+    id: 'home-avatar'
+- assertVisible:
+    id: 'stat-recent'

@@ -1,0 +1,22 @@
+# UC-7: 한글 도시명 검색 → 결과 → 탭하면 Compare 진입.
+appId: com.laegel.overseascostapp
+tags:
+  - home
+  - search
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- tapOn:
+    id: 'home-search-input'
+- inputText: '밴쿠버'
+- assertVisible:
+    id: 'home-search-results'
+- assertVisible:
+    id: 'home-search-result-vancouver'
+- tapOn:
+    id: 'home-search-result-vancouver'
+- assertVisible:
+    id: 'compare-screen'
+- assertVisible: '서울 vs 밴쿠버'

@@ -1,0 +1,43 @@
+# UC(ADR-061): 학비 상세 → 학교 선택 시트. preset(UBC/SFU/BCIT) 선택 + 직접 입력.
+# 밴쿠버 tuition: UBC/SFU/BCIT (data/all.json 기준).
+appId: com.laegel.overseascostapp
+tags:
+  - detail
+  - sheet
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- runFlow: ../../common/open-vancouver-compare.yaml
+- tapOn:
+    id: 'compare-pair-tuition'
+- assertVisible:
+    id: 'detail-section-학교 (월 환산)'
+# 시트 열기 → preset 선택
+- tapOn:
+    id: 'detail-picker-change-tuition'
+- assertVisible:
+    id: 'detail-tuition-sheet'
+- assertVisible: '학교 선택'
+- assertVisible: 'UBC'
+- assertVisible: 'SFU'
+- tapOn:
+    id: 'detail-tuition-sheet-preset-SFU'
+- assertNotVisible:
+    id: 'detail-tuition-sheet'
+- assertVisible: '학비 · SFU'
+# 다시 열어 직접 입력
+- tapOn:
+    id: 'detail-picker-change-tuition'
+- tapOn:
+    id: 'detail-tuition-sheet-custom-row'
+- tapOn:
+    id: 'detail-tuition-sheet-custom-input'
+- inputText: '20000'
+- tapOn:
+    id: 'detail-tuition-sheet-save'
+- assertNotVisible:
+    id: 'detail-tuition-sheet'
+- assertVisible:
+    id: 'detail-screen'

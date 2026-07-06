@@ -1,0 +1,22 @@
+# UC-7: 영문(부분) 검색도 매칭(name.en). 검색어 지우기(clear)로 결과 리셋.
+appId: com.laegel.overseascostapp
+tags:
+  - home
+  - search
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- tapOn:
+    id: 'home-search-input'
+- inputText: 'van'
+- assertVisible:
+    id: 'home-search-result-vancouver'
+# clear 버튼 → 검색 종료 → 기본 섹션(권역) 복귀
+- tapOn:
+    id: 'home-search-clear'
+- assertNotVisible:
+    id: 'home-search-results'
+- assertVisible:
+    id: 'home-region-pills'
