@@ -38,6 +38,9 @@ coverage/
 .env.local
 .env.*.local
 
+# Maestro E2E 산출물 (07-visual-a11y screenshots.yaml 캡처 등)
+.maestro/.artifacts/
+
 # Editor / IDE
 .vscode/
 .idea/

@@ -12,8 +12,10 @@ tags:
     id: 'compare-topbar-back'
 - assertVisible:
     id: 'home-screen'
-# 비교 탭 → recent[0]=vancouver 로 redirect
-- tapOn: '비교'
+# 비교 탭 → recent[0]=vancouver 로 redirect.
+# Expo Router 기본 탭바 접근성 라벨은 '비교, tab, 2 of 4' 형식 — maestro 는 전체 매칭이라
+# '비교' 만으로는 안 잡힌다. ', tab' 한정으로 홈의 섹션 헤더 등과 충돌도 피한다.
+- tapOn: '비교, tab.*'
 - assertVisible:
     id: 'compare-screen'
 - assertVisible: '서울 vs 밴쿠버'

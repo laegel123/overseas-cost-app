@@ -9,7 +9,9 @@ tags:
       PERSONA: student
 - assertVisible:
     id: 'home-favorites-empty'
-- assertVisible: '아직 즐겨찾기가 없어요'
+# 실제 문구는 '아직 즐겨찾기가 없어요.\n도시를 탭해 ⭐ 추가해보세요' 한 덩어리 —
+# maestro 는 전체 매칭이므로 DOTALL(?s) 정규식으로 개행 이후까지 포함해 매칭한다.
+- assertVisible: '(?s)아직 즐겨찾기가 없어요.*'
 - assertVisible:
     id: 'home-recent-empty'
 - assertVisible: '최근 본 도시가 없어요'

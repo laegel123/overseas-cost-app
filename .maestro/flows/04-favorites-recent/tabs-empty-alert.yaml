@@ -8,11 +8,12 @@ tags:
     file: ../../common/onboard.yaml
     env:
       PERSONA: student
-# 비교 탭 (대상 도시 없음)
-- tapOn: '비교'
-- assertVisible: '최근 본 도시나 즐겨찾기가 없어요'
+# 비교 탭 (대상 도시 없음). 탭바 라벨은 '비교, tab, 2 of 4' 형식 — ', tab' 로 한정 매칭.
+- tapOn: '비교, tab.*'
+# Alert 메시지는 '...없어요.\n홈에서...' 다중 라인 — DOTALL(?s) 로 개행 이후까지 전체 매칭.
+- assertVisible: '(?s)최근 본 도시나 즐겨찾기가 없어요.*'
 - tapOn: '확인|OK'
-# 즐겨찾기 탭 (대상 없음)
-- tapOn: '즐겨찾기'
-- assertVisible: '즐겨찾기가 없어요'
+# 즐겨찾기 탭 (대상 없음). '즐겨찾기, tab' 한정 — 홈의 '즐겨찾기' 섹션 헤더와 충돌 회피.
+- tapOn: '즐겨찾기, tab.*'
+- assertVisible: '(?s)즐겨찾기가 없어요.*'
 - tapOn: '확인|OK'

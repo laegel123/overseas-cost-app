@@ -20,5 +20,9 @@ tags:
     id: 'home-region-city-vancouver'
 - tapOn:
     id: 'home-region-all'
-- assertVisible:
-    id: 'home-region-city-vancouver'
+# '전체' 는 네트워크 로드 시 20여 개 도시라 밴쿠버가 화면 밖(스크롤 아래)일 수 있다.
+# scrollUntilVisible 로 스크롤하며 재노출을 검증한다 (assertVisible 겸용).
+- scrollUntilVisible:
+    element:
+      id: 'home-region-city-vancouver'
+    direction: DOWN

@@ -14,11 +14,20 @@ tags:
     env:
       PERSONA: worker
 - openLink: 'overseascost://detail/vancouver/tax'
+# 앱 실행 중 딥링크는 대화상자 없이 바로 라우팅되나, 혹시 'OO에서 열겠습니까?' 확인
+# 대화상자가 뜨면 확인한다 (콜드/런처 가로채기 대비 안전망 — 평소엔 SKIPPED).
+- runFlow:
+    when:
+      visible: '열기'
+    commands:
+      - tapOn: '열기'
 - assertVisible:
     id: 'detail-screen'
-- assertVisible: '세금 데이터가 아직 준비되지 않았어요'
+# 상세 화면의 no-data 문구는 실제로 끝에 마침표가 있다 — 전체 매칭 위해 .* 로 포함.
+- assertVisible: '세금 데이터가 아직 준비되지 않았어요.*'
 - tapOn:
     id: 'detail-picker-empty-tax'
+# 시트 본문(정적 안내 텍스트)은 iOS 접근성 트리에 노출되지 않아(backdrop 만 노출됨) 본문
+# 텍스트는 maestro 로 단정 불가 — 시트 오픈만 backdrop 으로 검증한다 (접근성 갭 별도 보고).
 - assertVisible:
-    id: 'detail-tax-sheet'
-- assertVisible: '이 도시는 세율 데이터가 없어'
+    id: 'detail-tax-sheet-backdrop'

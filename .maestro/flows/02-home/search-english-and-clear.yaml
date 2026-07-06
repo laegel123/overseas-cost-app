@@ -11,6 +11,8 @@ tags:
 - tapOn:
     id: 'home-search-input'
 - inputText: 'van'
+# 키보드를 내려야 clear 버튼 탭이 흡수되지 않는다 (ScrollView keyboardShouldPersistTaps 기본).
+- hideKeyboard
 - assertVisible:
     id: 'home-search-result-vancouver'
 # clear 버튼 → 검색 종료 → 기본 섹션(권역) 복귀

@@ -12,20 +12,25 @@ tags:
 - runFlow: ../../common/open-vancouver-compare.yaml
 - tapOn:
     id: 'compare-pair-tuition'
+# testID 는 정규식으로 매칭되므로 라벨의 괄호를 이스케이프한다 (실제 id: '학교 (월 환산)').
 - assertVisible:
-    id: 'detail-section-학교 (월 환산)'
+    id: 'detail-section-학교 \(월 환산\)'
 # 시트 열기 → preset 선택
 - tapOn:
     id: 'detail-picker-change-tuition'
 - assertVisible:
-    id: 'detail-tuition-sheet'
+    id: 'detail-tuition-sheet-body'
 - assertVisible: '학교 선택'
-- assertVisible: 'UBC'
-- assertVisible: 'SFU'
+# preset 행은 accessibilityRole=button 으로 자식 텍스트가 라벨에 병합돼 순수 'UBC'/'SFU'
+# 텍스트 노드가 없다 — 행 testID 로 학교 목록 노출을 검증한다 (README 앵커 규약: testID 우선).
+- assertVisible:
+    id: 'detail-tuition-sheet-preset-UBC'
+- assertVisible:
+    id: 'detail-tuition-sheet-preset-SFU'
 - tapOn:
     id: 'detail-tuition-sheet-preset-SFU'
 - assertNotVisible:
-    id: 'detail-tuition-sheet'
+    id: 'detail-tuition-sheet-body'
 - assertVisible: '학비 · SFU'
 # 다시 열어 직접 입력
 - tapOn:
@@ -35,9 +40,18 @@ tags:
 - tapOn:
     id: 'detail-tuition-sheet-custom-input'
 - inputText: '20000'
+# 숫자 키보드는 maestro hideKeyboard 로 못 내린다(return 키 부재). BottomSheet 는 키보드가
+# 떠 있을 때 첫 탭을 키보드 닫기로 흡수하므로, 시트가 남아 있으면 한 번 더 눌러 저장을 확정한다.
 - tapOn:
     id: 'detail-tuition-sheet-save'
+- runFlow:
+    when:
+      visible:
+        id: 'detail-tuition-sheet-save'
+    commands:
+      - tapOn:
+          id: 'detail-tuition-sheet-save'
 - assertNotVisible:
-    id: 'detail-tuition-sheet'
+    id: 'detail-tuition-sheet-body'
 - assertVisible:
     id: 'detail-screen'
