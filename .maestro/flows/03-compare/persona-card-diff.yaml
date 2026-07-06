@@ -1,0 +1,29 @@
+# UC: 페르소나에 따라 Compare 카드 구성이 달라진다.
+#   student → 학비(tuition) 카드 노출
+#   worker  → 학비 카드 미노출 (worker 는 tax 이지만 tax 데이터가 전무해 카드 자체 숨김)
+# 두 페르소나를 한 플로우에서 재온보딩으로 비교.
+appId: com.laegel.overseascostapp
+tags:
+  - compare
+  - persona
+---
+# ── student ──
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- runFlow: ../../common/open-vancouver-compare.yaml
+- assertVisible:
+    id: 'compare-pair-tuition'
+- assertNotVisible:
+    id: 'compare-pair-tax'
+# ── worker (clearState 재온보딩) ──
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: worker
+- runFlow: ../../common/open-vancouver-compare.yaml
+- assertNotVisible:
+    id: 'compare-pair-tuition'
+- assertVisible:
+    id: 'compare-pair-visa'

@@ -1,0 +1,26 @@
+# UC-3: 페르소나 전환. 실제 구현은 '시트'가 아니라 온보딩 화면 재진입이다
+# (settings persona-change-btn → setOnboarded(false) → /onboarding). 문서(Sheet B)와 다름.
+appId: com.laegel.overseascostapp
+tags:
+  - onboarding
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+# 설정 → 페르소나 변경 → 온보딩 재진입 → 취업자 선택
+- tapOn:
+    id: 'home-avatar'
+- assertVisible: '유학생 모드'
+- tapOn:
+    id: 'persona-change-btn'
+- assertVisible:
+    id: 'onboarding-screen'
+- tapOn:
+    id: 'persona-card-worker'
+- assertVisible:
+    id: 'home-screen'
+# 변경이 반영됐는지 설정에서 확인
+- tapOn:
+    id: 'home-avatar'
+- assertVisible: '취업자 모드'

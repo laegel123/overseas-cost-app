@@ -1,0 +1,20 @@
+# UC-4: 온보딩은 1회성. 온보딩 완료 후 clearState 없이 재실행하면 온보딩을 건너뛰고
+# 곧바로 홈으로 진입한다 (persona.onboarded=true 영속).
+appId: com.laegel.overseascostapp
+tags:
+  - onboarding
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: 'onboarding-screen'
+- tapOn:
+    id: 'persona-card-student'
+- assertVisible:
+    id: 'home-screen'
+# clearState 없이 재실행 — 온보딩 미표시
+- launchApp
+- assertVisible:
+    id: 'home-screen'
+- assertNotVisible:
+    id: 'onboarding-screen'

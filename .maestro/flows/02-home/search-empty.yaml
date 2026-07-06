@@ -1,0 +1,16 @@
+# UC-7: 매칭 0건 → 빈 결과 안내('검색 결과가 없어요'). 실제 구현 리터럴 기준.
+appId: com.laegel.overseascostapp
+tags:
+  - home
+  - search
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- tapOn:
+    id: 'home-search-input'
+- inputText: 'zzzxxx없는도시'
+- assertVisible:
+    id: 'home-search-empty'
+- assertVisible: '검색 결과가 없어요'

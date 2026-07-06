@@ -1,0 +1,17 @@
+# UC: 최초 실행 → '아직 모름' 선택 → 홈. 설정에서 '아직 모름 모드'로 반영.
+# unknown 은 student+worker 합집합 모드 (CLAUDE.md CRITICAL).
+appId: com.laegel.overseascostapp
+tags:
+  - onboarding
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: 'onboarding-screen'
+- tapOn:
+    id: 'persona-card-unknown'
+- assertVisible:
+    id: 'home-screen'
+- tapOn:
+    id: 'home-avatar'
+- assertVisible: '아직 모름 모드'

@@ -3612,6 +3612,80 @@ it('비교 화면 모든 카드에 a11y label', () => {
 
 ---
 
+## 18-A. 자동 E2E (Maestro)
+
+시뮬레이터에서 앱을 실제 구동하는 end-to-end 층. dev build(`expo run:ios`) + Maestro 로 번들 ID launch, 플로우 YAML 구동. **러너 설정·전제**는 `.maestro/README.md`, **배치별 실행 런북·문서-구현 격차**는 `.maestro/PLAN.md`. 도입 근거 ADR-066.
+
+### 18-A.1 정책
+
+- **앵커·리터럴 단일 출처 = 실제 구현 코드**(PRD/UI_GUIDE 스펙 아님). 스펙과 구현이 갈리는 항목은 구현 기준으로 검증하고 격차는 PLAN.md 로 추적.
+- **결정성:** 실시간 환율 의존 값(정확한 배수·KRW)은 단정 금지 — 방향(↑/↓)·정규식 패턴·testID 구조만 검증. 도시는 번들 시드 보장 도시(`seoul`/`vancouver`) 우선.
+- **독립성:** 각 flow 는 `launchApp: clearState` 로 시작해 독립. 온보딩·Compare 진입은 `common/` 서브플로우(runFlow 전용, 워크스페이스 글롭 제외) 재사용.
+- **자동 검증 밖(한계):** 색 토큰/그림자/애니메이션/햅틱/폰트 → §18(수동) + `07-visual-a11y` screenshot 수동 리뷰로 보완. `tax` 카테고리는 데이터 부재로 no-data 경로만 검증 가능.
+
+### 18-A.2 재사용 서브플로우 (`.maestro/common/`)
+
+- [x] `onboard.yaml` — clearState 런치 → 온보딩 → `PERSONA` env 선택 → 홈 (runFlow 전용)
+- [x] `open-vancouver-compare.yaml` — 홈 검색으로 밴쿠버 Compare 진입 (runFlow 전용)
+
+### 18-A.3 인벤토리 (배치별)
+
+각 flow 는 저작 완료(작성), 검증은 다른 세션에서 하나씩 수행 → 통과 시 `[x]`.
+
+**smoke** (`.maestro/smoke.yaml`)
+
+- [x] 런치 → 온보딩 → 유학생 → 홈 (파이프라인 sanity, 통과 확인됨)
+
+**01-onboarding**
+
+- [ ] `persona-student` — 유학생 온보딩 → 홈 → 설정 '유학생 모드'
+- [ ] `persona-worker` — 취업자 온보딩 → 설정 '취업자 모드'
+- [ ] `persona-unknown` — 아직 모름 온보딩 → 설정 '아직 모름 모드'
+- [ ] `persona-change` — 설정→변경→온보딩 재진입→취업자 (구현은 Sheet 아님)
+- [ ] `onboarding-once` — clearState 없이 재실행 시 온보딩 skip (onboarded 영속)
+
+**02-home**
+
+- [ ] `search-hangul` — '밴쿠버' 검색 → 결과 → Compare 진입
+- [ ] `search-english-and-clear` — 'van'(name.en) 매칭 + clear 로 리셋
+- [ ] `search-empty` — 무매칭 → '검색 결과가 없어요'
+- [ ] `region-filter` — 북미/유럽/전체 pill 로 밴쿠버 노출/미노출 토글
+- [ ] `empty-states` — 즐겨찾기/최근 빈 상태 문구
+
+**03-compare**
+
+- [ ] `open-and-hero` — Compare hero + student 카드(월세/식비/교통/학비/비자)
+- [ ] `persona-card-diff` — student=학비 노출 / worker=학비 미노출
+- [ ] `multiplier-encoding` — 배수 ↑+숫자+× 3중 인코딩(접근성)
+- [ ] `back-nav` — 상단바 뒤로가기 → 홈
+
+**04-favorites-recent**
+
+- [ ] `favorite-toggle` — ⭐ 추가/제거 → 홈 즐겨찾기 카드 반영
+- [ ] `recent-tracking` — Compare 진입 → 최근 본 목록 + 설정 통계
+- [ ] `tabs-empty-alert` — 최근/즐겨찾기 없을 때 탭 → 네이티브 Alert
+- [ ] `tabs-populated-redirect` — 최근 있으면 비교 탭이 Compare 로 redirect
+
+**05-detail**
+
+- [ ] `category-food` — 식비 상세: 외식/식재료 섹션 + 출처 + 뒤로
+- [ ] `rent-inline-cycle` — 월세 행 탭으로 주거형태 단일 선택(hero 반영, ADR-060)
+- [ ] `tuition-sheet` — 학교 시트: preset(UBC/SFU/BCIT) + 직접 입력 (ADR-061)
+- [ ] `tax-nodata` — deep link 진입 → 세금 데이터 없음/직접입력 비활성 (딥링크 의존)
+- [ ] `sources` — 상세 하단 '출처 N개' 표기
+
+**06-settings**
+
+- [ ] `overview` — 페르소나 카드/통계/메뉴 5종/푸터
+- [ ] `data-refresh` — 새로고침 → '갱신 실패' 미노출(네트워크 의존)
+- [ ] `external-links` — 개인정보 링크 탭 → 외부 이탈 후 복귀(브라우저 내용은 수동)
+
+**07-visual-a11y**
+
+- [ ] `screenshots` — 온보딩/홈/Compare/상세/시트/설정 7컷 캡처(시각 수동 리뷰)
+
+---
+
 ## 19. CI 고려사항
 
 v1.0: 로컬 `npm test` 만. 매 step 의 AC 가 검증.

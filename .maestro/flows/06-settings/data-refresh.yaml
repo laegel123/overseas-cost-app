@@ -1,0 +1,21 @@
+# UC-11: 데이터 새로고침. 탭 → refreshCache 실행. 네트워크가 있으면 성공(갱신일 표시),
+# 실패 시 '갱신 실패'. 실시간 네트워크 의존이라 성공 값은 단정하지 않고, '갱신 실패'가
+# 뜨지 않는지로 검증(Maestro assert 는 기본 재시도/대기 → 완료까지 기다림).
+appId: com.laegel.overseascostapp
+tags:
+  - settings
+  - data
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- tapOn:
+    id: 'home-avatar'
+- assertVisible:
+    id: 'menu-refresh'
+- tapOn:
+    id: 'menu-refresh'
+- assertVisible:
+    id: 'menu-refresh'
+- assertNotVisible: '갱신 실패'

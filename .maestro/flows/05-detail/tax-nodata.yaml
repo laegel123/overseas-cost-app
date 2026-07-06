@@ -1,0 +1,24 @@
+# UC-12: 세금은 현재 데이터셋에 전무. Compare 에도 카드가 안 뜨므로 UI 로는 도달 불가 →
+# deep link 로 직접 진입해 '데이터 없음' + '직접 입력 비활성' 경로를 검증한다.
+#
+# 주의: deep link 라우팅은 dev client + expo-router 환경 의존. 만약 openLink 가
+# 앱 내부 라우팅으로 이어지지 않으면(런처 가로채기 등), 이 배치는 '데이터 추가 전
+# 검증 보류'로 처리한다 (PLAN.md 참조). 온보딩을 먼저 지나야 RootLayout redirect 회피.
+appId: com.laegel.overseascostapp
+tags:
+  - detail
+  - deeplink
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: worker
+- openLink: 'overseascost://detail/vancouver/tax'
+- assertVisible:
+    id: 'detail-screen'
+- assertVisible: '세금 데이터가 아직 준비되지 않았어요'
+- tapOn:
+    id: 'detail-picker-empty-tax'
+- assertVisible:
+    id: 'detail-tax-sheet'
+- assertVisible: '이 도시는 세율 데이터가 없어'

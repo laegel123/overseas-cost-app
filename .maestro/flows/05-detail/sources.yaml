@@ -1,0 +1,16 @@
+# UC-6(부분): 상세 하단 출처 표기('출처 N개'). 출처 항목 노출 확인.
+# (Compare 의 '출처 보기 →' 는 v1.0 비활성 — 별도 검증 없음.)
+appId: com.laegel.overseascostapp
+tags:
+  - detail
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- runFlow: ../../common/open-vancouver-compare.yaml
+- tapOn:
+    id: 'compare-pair-food'
+- assertVisible:
+    id: 'detail-sources'
+- assertVisible: '출처 \d+개'

@@ -1,0 +1,27 @@
+# UC-1: Compare 식비 카드 → 항목 단위 상세. 외식/식재료 섹션 + 행 + 출처.
+appId: com.laegel.overseascostapp
+tags:
+  - detail
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+- runFlow: ../../common/open-vancouver-compare.yaml
+- tapOn:
+    id: 'compare-pair-food'
+- assertVisible:
+    id: 'detail-screen'
+- assertVisible:
+    id: 'detail-hero'
+- assertVisible:
+    id: 'detail-section-외식'
+- assertVisible:
+    id: 'detail-section-식재료'
+- assertVisible:
+    id: 'detail-sources'
+# 뒤로가기 → Compare 복귀
+- tapOn:
+    id: 'detail-topbar-back'
+- assertVisible:
+    id: 'compare-screen'

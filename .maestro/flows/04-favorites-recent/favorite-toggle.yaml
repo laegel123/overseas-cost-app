@@ -1,0 +1,28 @@
+# UC-9: Compare 상단 ⭐ 토글 → 즐겨찾기 추가/제거. 홈 즐겨찾기 카드로 결과 관찰.
+# (실제 구현엔 토스트가 없음 — 문서와 달리 상태 변화로만 검증.)
+appId: com.laegel.overseascostapp
+tags:
+  - favorites
+---
+- runFlow:
+    file: ../../common/onboard.yaml
+    env:
+      PERSONA: student
+# 추가
+- runFlow: ../../common/open-vancouver-compare.yaml
+- tapOn:
+    id: 'compare-topbar-right'
+- tapOn:
+    id: 'compare-topbar-back'
+- assertVisible:
+    id: 'home-favcard-vancouver'
+# 제거
+- runFlow: ../../common/open-vancouver-compare.yaml
+- tapOn:
+    id: 'compare-topbar-right'
+- tapOn:
+    id: 'compare-topbar-back'
+- assertNotVisible:
+    id: 'home-favcard-vancouver'
+- assertVisible:
+    id: 'home-favorites-empty'

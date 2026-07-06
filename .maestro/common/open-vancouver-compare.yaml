@@ -1,0 +1,11 @@
+# 재사용 서브플로우 — 홈에서 검색으로 밴쿠버를 열어 Compare 화면 진입.
+# 전제: 이미 home-screen 상태. vancouver 는 번들 시드에도 포함돼 오프라인에서도 존재.
+appId: com.laegel.overseascostapp
+---
+- tapOn:
+    id: 'home-search-input'
+- inputText: '밴쿠버'
+- tapOn:
+    id: 'home-search-result-vancouver'
+- assertVisible:
+    id: 'compare-screen'
