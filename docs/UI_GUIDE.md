@@ -2,6 +2,35 @@
 
 해외 생활비 비교 앱의 시각·인터랙션 단일 출처. 픽셀 수준 명세는 `docs/design/README.md` 와 `docs/design/hifi/*.jsx` 를 1차 참조하고, 본 문서는 그 명세를 코드로 옮길 때의 규칙·우선순위·금지 사항을 정리한다.
 
+## v1.0 구현 현황 · 스펙 편차
+
+> **본 문서의 일부 명세는 v1.0 빌드에 미구현이거나 다르게 구현돼 있다.** 아래 표가 현재 빌드 기준 정본이며, 본문 각 섹션과 상충하면 **이 표(및 각 섹션의 `⚠ v1.0 현황` 주석)를 우선**한다. 미구현 항목은 로드맵 의도 보존을 위해 삭제하지 않고 표기만 유지한다 (ADR-066, "스펙을 구현에 맞춰 하향" 결정).
+>
+> `docs/PRD.md` 는 수정 금지(단일 출처)라, PRD 기반 편차(의료 카테고리·세금 해피패스·배수 "배" 표기)도 본 표에 함께 기록한다. 근거는 실제 구현 코드(E2E 인벤토리 `docs/TESTING.md §18-A`, 배치 런북 `.maestro/PLAN.md §3`).
+
+| 영역 | 문서 명세 | v1.0 실제 구현 | 근거 |
+| --- | --- | --- | --- |
+| 토스트 | success/error/info 하단 토스트 (§토스트) | 토스트 없음. 탭 redirect 안내만 네이티브 `Alert` | `app/(tabs)/_layout.tsx` |
+| 페르소나 변경 | Sheet B (라디오 + 취소/변경) (§Sheet B) | 시트 아님 — `persona-change-btn` → `setOnboarded(false)` → `/onboarding` 재진입 | `settings.tsx`, `onboarding.tsx` |
+| 가정값 ❓ 시트 | Compare hero ❓ → Sheet A | Compare hero 에 ❓ 없음. footer "평균 가정 기준"만 | `compare/[cityId].tsx` |
+| 출처 보기 모달 | 전체화면 Sheet C | Compare "출처 보기 →" **비활성**. Detail 은 인라인 텍스트 목록 | `compare/[cityId].tsx`, `detail/…/[category].tsx` |
+| PersonaTag | subtitle `🎓 유학생 · 환율 · 기준일` | subtitle `1 CAD = 980원 · 04-27` (페르소나 미표기) | `compare/[cityId].tsx` |
+| Offline/Freshness 배지 | 오프라인·신선도 inline 배지 | 미구현 (배지 없음) | 화면 코드 전반 |
+| 페르소나 mismatch 가드 | worker→tuition 등 진입 차단 뷰 | 가드 없음 — Detail 은 페르소나 무관 렌더 | `detail/…/[category].tsx` |
+| 의료 카테고리 (worker) | 취업자 카드에 의료 포함 (PRD §6) | 의료 없음. worker = 월세/식비/교통/세금/비자 | `compare/[cityId].tsx` |
+| 세금 해피패스 | 연봉대별 실수령 카드/상세 (§tax) | 21개 도시 모두 tax 데이터 없음 → 카드 숨김·상세 no-data | `data/all.json` |
+| rent 상세 | student=share / worker=oneBed 고정 | 행 탭으로 4형태 순환 단일 선택 (ADR-060) | `detail/…/[category].tsx` |
+| tuition/tax 상세 | 목록 정적 표시 | 선택 시트(preset + 직접 입력) 단일 선택 (ADR-061) | `TuitionChoiceSheet.tsx`, `TaxChoiceSheet.tsx` |
+| Detail hero 라벨 | "월 임차료 (메디안)"·"연간 학비 (국제학생)" 등 | `{카테고리} · {선택 항목}` 캡션 (예: "월세 · 셰어하우스") | `detail/…/[category].tsx` |
+| Compare hero 라벨 | "한 달 예상 총비용" + "❓ 자세히" | HeroCard 좌/우 라벨 + footer "평균 가정 기준" | `compare/[cityId].tsx` |
+| 홈 빈 즐겨찾기 | "관심 있는 도시를 골라보세요" | "아직 즐겨찾기가 없어요.\n도시를 탭해 ⭐ 추가해보세요" | `(tabs)/index.tsx` |
+| 홈 최근 0개 | 섹션 미표시 | "최근 본 도시가 없어요" 빈 상태 표시 | `(tabs)/index.tsx` |
+| 홈 검색 0건 | "'○○'에 해당하는 도시가 없어요…" | "검색 결과가 없어요" | `(tabs)/index.tsx` |
+| 홈 "전체 보기" | 즐겨찾기 우측 "전체 보기" (시각만) | 미구현 (렌더 안 함) | `(tabs)/index.tsx` |
+| 검색 debounce | 300ms debounce | debounce 없음 (입력 즉시 필터) | `(tabs)/index.tsx` |
+| 설정 unknown 라벨 | "미선택" | "아직 모름 모드" (`PERSONA_LABEL.unknown`) | `src/lib/persona.ts` |
+| 배수 단위 | PRD 산문 "↑1.9배" | 화면 표기 "↑1.9×" (구현 = UI_GUIDE) | `src/lib/format.ts` |
+
 ## 디자인 원칙
 
 1. **도구다, 마케팅 사이트가 아니다.** 매일 쓰는 가계부처럼 정보 위계가 명확하고, 장식이 적어야 한다. 데이터를 가리는 모든 요소는 제거.
@@ -125,6 +154,8 @@ border-radius
 
 ## 카테고리별 상세 화면 사양
 
+> ⚠ **v1.0 현황:** 아래 hero 라벨·섹션·행 구성은 구현과 다르다. Detail hero 는 카테고리 전용 라벨 대신 `{카테고리} · {선택 항목}` 캡션을 쓰고, rent 는 행 탭 순환(ADR-060), tuition/tax 는 시트 단일 선택(ADR-061)이며, **페르소나 전용 진입 가드는 없다**. tax 는 데이터 부재로 no-data 경로만. (전체 편차: 상단 §v1.0 구현 현황)
+
 식비(food) 외 5개 카테고리. 모두 동일 골격: navy hero(카테고리 합계) → 섹션 라벨 → 항목 행 → 출처. 섹션·행 구성만 카테고리별로 다름.
 
 ### 🏠 rent (월세) 상세
@@ -176,6 +207,8 @@ border-radius
 - `padding 10×0`, `border-bottom 1px #E4ECF2` (마지막 제외).
 
 ## 시트 콘텐츠 사양
+
+> ⚠ **v1.0 현황:** Sheet A(가정 ❓)·Sheet B(페르소나 변경)·Sheet C(출처 모달)는 이 형태로 **미구현**이다. 페르소나 변경은 온보딩 재진입, 출처는 Compare 비활성·Detail 인라인. 실제 존재하는 시트는 Detail 의 **학비/연봉 선택 시트**(`TuitionChoiceSheet`/`TaxChoiceSheet`) 뿐이다. (상단 §v1.0 구현 현황)
 
 ARCHITECTURE.md 의 라우팅 디테일 + UI_GUIDE.md §시트·모달 의 골격을 정확한 텍스트로.
 
@@ -311,7 +344,11 @@ press out:
 - 매칭 0건: "검색 결과 없음 · '도쿄', '밴쿠버' 등으로 검색해 보세요" 안내
 - 결과 정렬: prefix 매칭 우선, 그 다음 substring 매칭
 
+> ⚠ **v1.0 현황:** 구현엔 **debounce 가 없다**(입력 즉시 필터). 0건 문구는 **"검색 결과가 없어요"**, 결과 정렬은 도시명 가나다순. (상단 §v1.0 구현 현황)
+
 ## 빈 상태 CTA 텍스트 정확
+
+> ⚠ **v1.0 현황:** 아래 표의 여러 문구·동작이 구현과 다르다 — 홈 빈 즐겨찾기/최근/검색 0건 문구가 상이하고, **페르소나 mismatch 가드 행(worker→tuition 등)은 미구현**, 새로고침 성공/실패는 **토스트가 아니라** rightText 상태 변화다. 실제 문구는 상단 §v1.0 구현 현황.
 
 | 화면·상태                                                    | 안내 + CTA                                                                                   |
 | ------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
@@ -327,6 +364,8 @@ press out:
 | 설정 — 데이터 새로고침 성공                                  | 토스트 "최신 데이터로 업데이트했어요"                                                        |
 
 ## UI 텍스트 한국어 표준 (디자인 검증된 정확 텍스트)
+
+> ⚠ **v1.0 현황:** 온보딩/설정 대부분은 일치하나 다음이 구현과 다르다 — 홈 `emptyFavorites`/`emptySearch`/`favoritesViewAll`, Compare `compareHeroLabel`/`compareHeroFooter`(❓), 설정 `personaModeUnknown`("미선택"→"아직 모름 모드"). 실제 문구는 상단 §v1.0 구현 현황.
 
 `src/i18n/strings.ko.ts` 에 박제하여 컴포넌트는 키 참조. 디자인 mock 의 실제 텍스트와 자동 검증 (TESTING.md §9.27.2).
 
@@ -517,6 +556,8 @@ v1.0 한국어 강제 (ADR-016). 향후 마찰 줄이기 위해:
 
 ### 페르소나 태그 (PersonaTag)
 
+> ⚠ **v1.0 현황:** PersonaTag 미구현. Compare/Detail subtitle 은 페르소나 없이 `1 {통화} = {환율}원 · {기준일}` 만 노출하고, subtitle 탭(Sheet B) 동작도 없다. (상단 §v1.0 구현 현황)
+
 비교·상세 화면에서 사용자가 현재 페르소나를 항상 인식하도록 헤더에 작은 태그 노출.
 
 ```
@@ -533,6 +574,8 @@ v1.0 한국어 강제 (ADR-016). 향후 마찰 줄이기 위해:
 - 탭: 페르소나 변경 시트 (Sheet B) 즉시 열림 — 빠른 전환 경로
 
 ### 네트워크 상태 인디케이터 (OfflineBadge)
+
+> ⚠ **v1.0 현황:** OfflineBadge 미구현. 오프라인 시 시드 fallback 은 동작하나(에러 삼키지 않음) 상단 배지 노출은 없다. (상단 §v1.0 구현 현황)
 
 오프라인이거나 데이터 갱신 실패 시 화면 상단(safe area 바로 아래)에 inline 배지 표시.
 
@@ -557,6 +600,8 @@ v1.0 한국어 강제 (ADR-016). 향후 마찰 줄이기 위해:
 - inline 배지는 모든 화면 (Onboarding 제외) 공통
 
 ### 데이터 신선도 배지 (FreshnessBadge)
+
+> ⚠ **v1.0 현황:** FreshnessBadge 미구현. 푸터는 텍스트만 — Compare `출처 N개 · 갱신 YYYY-MM-DD`, Detail `출처 N개`. 분기(Q1~Q4) 색 강조 없음. (상단 §v1.0 구현 현황)
 
 Compare/Detail 푸터에 데이터 신선도 시각 강조.
 
@@ -591,12 +636,16 @@ Compare/Detail 푸터에 데이터 신선도 시각 강조.
 
 ## 시트·모달
 
+> ⚠ **v1.0 현황:** 이 절의 세 시트는 미구현/상이(§시트 콘텐츠 사양 주석·상단 편차표 참조). 특히 "페르소나 변경 시트: 선택 즉시 적용 + 자동 닫기"는 사실과 다르다 — 실제는 **온보딩 화면 재진입**. 실제 존재 시트는 Detail 학비/연봉 선택 시트뿐.
+
 - **❓ 가정값 시트** (Compare hero 우측 ❓ 탭): bottom sheet, 라운드 22 top corners, navy text on white. 평균 가정 본문 + 닫기 버튼.
 - **페르소나 변경 시트** (설정 "변경" 탭): 3개 옵션 라디오, 선택 즉시 적용 + 자동 닫기 + 토스트.
 - **출처 보기**: full-screen modal (Stack.Screen `presentation: 'modal'`). 출처 카드 리스트(이름·URL·접근일).
 - 모든 시트는 swipe-to-dismiss + 명시적 닫기 버튼 둘 다 제공.
 
 ## 토스트
+
+> ⚠ **v1.0 현황:** 토스트 컴포넌트 미구현. 명시된 사용처 중 실제 화면 피드백은 새로고침 rightText 상태('갱신 중…'/'갱신 실패'/갱신일)와, 최근/즐겨찾기 없는 탭 진입 시 네이티브 `Alert` 뿐. 즐겨찾기/페르소나 변경 토스트는 없다. (상단 §v1.0 구현 현황)
 
 - 위치: 화면 상단 (status bar 아래) 또는 하단 (탭 바 위) — 일관 정책: **하단** (사용자 손가락 가까움).
 - 타입: `success` (orange), `error` (navy + 빨강 텍스트 미사용 — 우리 팔레트 안에서 dim navy), `info` (light bg).
