@@ -2,15 +2,59 @@
   "project": "overseas-cost-app",
   "phase": "persona-removal",
   "steps": [
-    { "step": 0, "name": "decision-of-record", "status": "pending" },
-    { "step": 1, "name": "onboarding-store", "status": "pending" },
-    { "step": 2, "name": "boot-wiring", "status": "pending" },
-    { "step": 3, "name": "home-totals", "status": "pending" },
-    { "step": 4, "name": "compare-inclusion", "status": "pending" },
-    { "step": 5, "name": "onboarding-screen", "status": "pending" },
-    { "step": 6, "name": "settings-refresh-card", "status": "pending" },
-    { "step": 7, "name": "persona-cleanup", "status": "pending" },
-    { "step": 8, "name": "maestro-e2e", "status": "pending" },
-    { "step": 9, "name": "docs-reconcile", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "decision-of-record",
+      "status": "error",
+      "started_at": "2026-07-06T21:27:18+0900",
+      "error_message": "[3회 시도 후 실패] Step did not update status",
+      "failed_at": "2026-07-06T21:27:20+0900"
+    },
+    {
+      "step": 1,
+      "name": "onboarding-store",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "boot-wiring",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "home-totals",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "compare-inclusion",
+      "status": "pending"
+    },
+    {
+      "step": 5,
+      "name": "onboarding-screen",
+      "status": "pending"
+    },
+    {
+      "step": 6,
+      "name": "settings-refresh-card",
+      "status": "pending"
+    },
+    {
+      "step": 7,
+      "name": "persona-cleanup",
+      "status": "pending"
+    },
+    {
+      "step": 8,
+      "name": "maestro-e2e",
+      "status": "pending"
+    },
+    {
+      "step": 9,
+      "name": "docs-reconcile",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-07-06T21:27:18+0900"
 }

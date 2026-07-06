@@ -1,0 +1,7 @@
+{
+  "step": 0,
+  "name": "decision-of-record",
+  "exitCode": 1,
+  "stdout": "",
+  "stderr": "/Applications/cmux.app/Contents/Resources/bin/cmux-claude-wrapper: line 802: /opt/homebrew/bin/claude: Argument list too long\n/Applications/cmux.app/Contents/Resources/bin/cmux-claude-wrapper: line 802: /opt/homebrew/bin/claude: Undefined error: 0\n"
+}
