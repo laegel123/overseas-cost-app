@@ -85,6 +85,10 @@ export default function TabsLayout(): React.ReactElement {
   // (redirect 로직 단일 출처 유지). 그 외(home/settings)는 기본 navigate.
   const renderTabBar = React.useCallback(
     ({ state, navigation }: BottomTabBarProps): React.ReactElement => {
+      // noUncheckedIndexedAccess: 인덱스 접근 결과가 `T | undefined` 라 두 fallback
+      // 이 타입상 필수. 4개 라우트가 고정이라 state.index 는 항상 유효 route 를
+      // 가리키고 name 은 항상 ROUTE_TO_TAB 키 → fallback('index'/'home')은 런타임
+      // 도달 불가(타입 충족용).
       const activeRoute = state.routes[state.index]?.name ?? 'index';
       const active = ROUTE_TO_TAB[activeRoute] ?? 'home';
 
