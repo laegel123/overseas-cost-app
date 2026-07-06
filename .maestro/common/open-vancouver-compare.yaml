@@ -5,6 +5,9 @@ appId: com.laegel.overseascostapp
 - tapOn:
     id: 'home-search-input'
 - inputText: '밴쿠버'
+# 키보드가 떠 있으면 ScrollView(keyboardShouldPersistTaps 기본 'never')가 첫 탭을
+# 키보드 닫기로 흡수해 결과 행 onPress 가 발화하지 않는다. 먼저 키보드를 내린다.
+- hideKeyboard
 - tapOn:
     id: 'home-search-result-vancouver'
 - assertVisible:

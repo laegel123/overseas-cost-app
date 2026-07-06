@@ -10,6 +10,9 @@ tags:
 - runFlow: ../../common/open-vancouver-compare.yaml
 - tapOn:
     id: 'compare-topbar-back'
+# 검색어가 남아 홈이 검색 결과 모드로 유지된다 — clear 해야 최근/즐겨찾기 섹션이 보인다.
+- tapOn:
+    id: 'home-search-clear'
 - assertVisible:
     id: 'home-recent-list'
 - assertVisible:

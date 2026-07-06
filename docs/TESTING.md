@@ -3638,51 +3638,51 @@ it('비교 화면 모든 카드에 a11y label', () => {
 
 **01-onboarding**
 
-- [ ] `persona-student` — 유학생 온보딩 → 홈 → 설정 '유학생 모드'
-- [ ] `persona-worker` — 취업자 온보딩 → 설정 '취업자 모드'
-- [ ] `persona-unknown` — 아직 모름 온보딩 → 설정 '아직 모름 모드'
-- [ ] `persona-change` — 설정→변경→온보딩 재진입→취업자 (구현은 Sheet 아님)
-- [ ] `onboarding-once` — clearState 없이 재실행 시 온보딩 skip (onboarded 영속)
+- [x] `persona-student` — 유학생 온보딩 → 홈 → 설정 '유학생 모드'
+- [x] `persona-worker` — 취업자 온보딩 → 설정 '취업자 모드'
+- [x] `persona-unknown` — 아직 모름 온보딩 → 설정 '아직 모름 모드'
+- [x] `persona-change` — 설정→변경→온보딩 재진입→취업자 (구현은 Sheet 아님)
+- [x] `onboarding-once` — clearState 없이 재실행 시 온보딩 skip (onboarded 영속)
 
 **02-home**
 
-- [ ] `search-hangul` — '밴쿠버' 검색 → 결과 → Compare 진입
-- [ ] `search-english-and-clear` — 'van'(name.en) 매칭 + clear 로 리셋
-- [ ] `search-empty` — 무매칭 → '검색 결과가 없어요'
-- [ ] `region-filter` — 북미/유럽/전체 pill 로 밴쿠버 노출/미노출 토글
-- [ ] `empty-states` — 즐겨찾기/최근 빈 상태 문구
+- [x] `search-hangul` — '밴쿠버' 검색 → 결과 → Compare 진입 (검색 후 hideKeyboard 필요)
+- [x] `search-english-and-clear` — 'van'(name.en) 매칭 + clear 로 리셋 (hideKeyboard 필요)
+- [x] `search-empty` — 무매칭 → '검색 결과가 없어요'
+- [x] `region-filter` — 북미/유럽/전체 pill 로 밴쿠버 노출/미노출 토글 (전체는 scrollUntilVisible)
+- [x] `empty-states` — 즐겨찾기/최근 빈 상태 문구 (다중 라인 → DOTALL 정규식)
 
 **03-compare**
 
-- [ ] `open-and-hero` — Compare hero + student 카드(월세/식비/교통/학비/비자)
-- [ ] `persona-card-diff` — student=학비 노출 / worker=학비 미노출
-- [ ] `multiplier-encoding` — 배수 ↑+숫자+× 3중 인코딩(접근성)
-- [ ] `back-nav` — 상단바 뒤로가기 → 홈
+- [x] `open-and-hero` — Compare hero + student 카드(월세/식비/교통/학비/비자)
+- [x] `persona-card-diff` — student=학비 노출 / worker=학비 미노출
+- [x] `multiplier-encoding` — 배수 ↑+숫자+× 3중 인코딩(접근성)
+- [x] `back-nav` — 상단바 뒤로가기 → 홈
 
 **04-favorites-recent**
 
-- [ ] `favorite-toggle` — ⭐ 추가/제거 → 홈 즐겨찾기 카드 반영
-- [ ] `recent-tracking` — Compare 진입 → 최근 본 목록 + 설정 통계
-- [ ] `tabs-empty-alert` — 최근/즐겨찾기 없을 때 탭 → 네이티브 Alert
-- [ ] `tabs-populated-redirect` — 최근 있으면 비교 탭이 Compare 로 redirect
+- [x] `favorite-toggle` — ⭐ 추가/제거 → 홈 즐겨찾기 카드 반영 (복귀 후 검색어 clear 필요)
+- [x] `recent-tracking` — Compare 진입 → 최근 본 목록 + 설정 통계 (복귀 후 검색어 clear 필요)
+- [x] `tabs-empty-alert` — 최근/즐겨찾기 없을 때 탭 → 네이티브 Alert (탭 라벨 '비교, tab.*')
+- [x] `tabs-populated-redirect` — 최근 있으면 비교 탭이 Compare 로 redirect (탭 라벨 '비교, tab.*')
 
 **05-detail**
 
-- [ ] `category-food` — 식비 상세: 외식/식재료 섹션 + 출처 + 뒤로
-- [ ] `rent-inline-cycle` — 월세 행 탭으로 주거형태 단일 선택(hero 반영, ADR-060)
-- [ ] `tuition-sheet` — 학교 시트: preset(UBC/SFU/BCIT) + 직접 입력 (ADR-061)
-- [ ] `tax-nodata` — deep link 진입 → 세금 데이터 없음/직접입력 비활성 (딥링크 의존)
-- [ ] `sources` — 상세 하단 '출처 N개' 표기
+- [x] `category-food` — 식비 상세: 외식/식재료 섹션 + 출처 + 뒤로
+- [x] `rent-inline-cycle` — 월세 행 탭으로 주거형태 단일 선택(hero 반영, ADR-060)
+- [x] `tuition-sheet` — 학교 시트: preset(UBC/SFU/BCIT) + 직접 입력 (ADR-061; 저장은 조건부 재탭)
+- [x] `tax-nodata` — deep link 진입 → 세금 데이터 없음 검증. **시트 본문 텍스트는 접근성 미노출로 backdrop 오픈만 검증** (딥링크 의존)
+- [x] `sources` — 상세 하단 '출처 N개' 표기
 
 **06-settings**
 
-- [ ] `overview` — 페르소나 카드/통계/메뉴 5종/푸터
-- [ ] `data-refresh` — 새로고침 → '갱신 실패' 미노출(네트워크 의존)
-- [ ] `external-links` — 개인정보 링크 탭 → 외부 이탈 후 복귀(브라우저 내용은 수동)
+- [x] `overview` — 페르소나 카드/통계/메뉴 5종/푸터 (버전 'v1.0.0' rightText 는 접근성 미노출 → menu-app-info 로 검증)
+- [x] `data-refresh` — 새로고침 → '갱신 실패' 미노출(네트워크 의존)
+- [x] `external-links` — 개인정보 링크 탭 → 외부 이탈 후 launchApp 은 홈으로 복귀(브라우저 내용은 수동)
 
 **07-visual-a11y**
 
-- [ ] `screenshots` — 온보딩/홈/Compare/상세/시트/설정 7컷 캡처(시각 수동 리뷰)
+- [x] `screenshots` — 온보딩/홈/Compare/상세/시트/설정 7컷 캡처(시각 수동 리뷰; takeScreenshot 직후 탭은 조건부 재탭 가드)
 
 ---
 

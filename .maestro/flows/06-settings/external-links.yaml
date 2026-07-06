@@ -16,7 +16,8 @@ tags:
     id: 'home-avatar'
 - tapOn:
     id: 'menu-privacy'
-# 외부 브라우저로 이탈 → 앱 재포그라운드 후 설정 화면 복귀 확인
+# 외부 브라우저로 이탈 → launchApp 은 홈 루트로 콜드스타트한다(설정 상태 미보존).
+# 크래시 없이 앱으로 복귀(재기동)됨을 홈 화면으로 검증한다 (브라우저 내용은 수동 관찰).
 - launchApp
 - assertVisible:
-    id: 'settings-screen'
+    id: 'home-screen'

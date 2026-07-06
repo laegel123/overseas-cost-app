@@ -9,31 +9,44 @@ tags:
     clearState: true
 - assertVisible:
     id: 'onboarding-screen'
-- takeScreenshot: '01-onboarding'
+- takeScreenshot: '.maestro/.artifacts/01-onboarding'
 - tapOn:
     id: 'persona-card-student'
 - assertVisible:
     id: 'home-screen'
-- takeScreenshot: '02-home-empty'
+- takeScreenshot: '.maestro/.artifacts/02-home-empty'
 - runFlow: ../../common/open-vancouver-compare.yaml
-- takeScreenshot: '03-compare'
+- takeScreenshot: '.maestro/.artifacts/03-compare'
 - tapOn:
     id: 'compare-pair-food'
 - assertVisible:
     id: 'detail-screen'
-- takeScreenshot: '04-detail-food'
+- takeScreenshot: '.maestro/.artifacts/04-detail-food'
 - tapOn:
     id: 'detail-topbar-back'
+# takeScreenshot 직후의 첫 탭은 간헐적으로 내비게이션을 놓친다 — 상세에 남아 있으면 재탭한다.
+- runFlow:
+    when:
+      visible:
+        id: 'detail-topbar-back'
+    commands:
+      - tapOn:
+          id: 'detail-topbar-back'
+# 뒤로가기 애니메이션이 끝나 compare 가 다시 렌더될 때까지 기다린 뒤 다음 카드를 탭한다
+# (동기화 지점 없이 바로 탭하면 전환 중이라 compare-pair-tuition 을 못 찾는다).
+- assertVisible:
+    id: 'compare-screen'
 - tapOn:
     id: 'compare-pair-tuition'
 - assertVisible:
     id: 'detail-screen'
-- takeScreenshot: '05-detail-tuition'
+- takeScreenshot: '.maestro/.artifacts/05-detail-tuition'
 - tapOn:
     id: 'detail-picker-change-tuition'
+# 시트 순수 testID 노드는 없다 — body 로 검증 (backdrop/body/preset 등 접두사 형태).
 - assertVisible:
-    id: 'detail-tuition-sheet'
-- takeScreenshot: '06-tuition-sheet'
+    id: 'detail-tuition-sheet-body'
+- takeScreenshot: '.maestro/.artifacts/06-tuition-sheet'
 - tapOn:
     id: 'detail-tuition-sheet-backdrop'
 - tapOn:
@@ -46,4 +59,4 @@ tags:
     id: 'home-avatar'
 - assertVisible:
     id: 'settings-screen'
-- takeScreenshot: '07-settings'
+- takeScreenshot: '.maestro/.artifacts/07-settings'

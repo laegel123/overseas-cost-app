@@ -11,6 +11,8 @@ tags:
 - tapOn:
     id: 'home-search-input'
 - inputText: '밴쿠버'
+# 키보드를 내려야 결과 행 탭이 흡수되지 않는다 (ScrollView keyboardShouldPersistTaps 기본).
+- hideKeyboard
 - assertVisible:
     id: 'home-search-results'
 - assertVisible:

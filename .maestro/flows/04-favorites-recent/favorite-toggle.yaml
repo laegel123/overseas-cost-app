@@ -14,6 +14,10 @@ tags:
     id: 'compare-topbar-right'
 - tapOn:
     id: 'compare-topbar-back'
+# 검색어가 남아 홈이 검색 모드다 — clear 해야 즐겨찾기 카드 섹션이 보이고,
+# 다음 open-vancouver-compare 의 검색 입력도 깨끗한 상태에서 시작한다.
+- tapOn:
+    id: 'home-search-clear'
 - assertVisible:
     id: 'home-favcard-vancouver'
 # 제거
@@ -22,6 +26,8 @@ tags:
     id: 'compare-topbar-right'
 - tapOn:
     id: 'compare-topbar-back'
+- tapOn:
+    id: 'home-search-clear'
 - assertNotVisible:
     id: 'home-favcard-vancouver'
 - assertVisible:
