@@ -1,18 +1,16 @@
 /**
  * Zustand 스토어의 단일 진입점.
  *
- * 7 도메인 store (persona / favorites / recent / settings / rentChoice /
+ * 7 도메인 store (onboarding / favorites / recent / settings / rentChoice /
  * tuitionChoice / taxChoice) — 단일 거대 스토어 금지 (ARCHITECTURE.md §상태
  * 관리, ADR-004). 컴포넌트는 본 인덱스에서 import:
- *   import { usePersonaStore, useFavoritesStore } from '@/store';
+ *   import { useOnboardingStore, useFavoritesStore } from '@/store';
  *
  * 부트로더 (app-shell phase) 는 7 store 의 hydration 을 동시 await:
  *   await waitForAllStoresHydrated();
  */
 
-export { usePersonaStore } from './persona';
-export type { PersonaActions, PersonaState } from './persona';
-// ADR-067: onboarded 플래그를 persona store 에서 이전 (persona 삭제는 step 7).
+// ADR-067: onboarded 플래그를 persona store 에서 이전.
 export { useOnboardingStore } from './onboarding';
 export type { OnboardingActions, OnboardingState } from './onboarding';
 export { MAX_FAVORITES, useFavoritesStore } from './favorites';

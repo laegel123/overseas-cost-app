@@ -1027,41 +1027,9 @@ INITIAL_STATE 강제 (정상 hydrated store 는 보존). dev 빌드 콘솔 warn.
 - [x] 정상 완료가 timeout 보다 먼저 → `'ok'`, setState 호출 없음 + warn 없음
 - [x] 인자 미제공 시 default 5000ms 적용
 
-### 9.5 `src/store/persona.ts`
+### 9.5 `src/store/persona.ts` (삭제됨 — ADR-067, persona-removal step 7)
 
-**기본 동작:**
-
-- [x] 초기 상태: `{ persona: 'unknown', onboarded: false }`
-- [x] `setPersona('student')` → state 변경
-- [x] `setPersona('worker')` → state 변경
-- [x] `setPersona('unknown')` → state 변경
-- [x] `setOnboarded(true)` → state 변경
-- [x] `reset()` → 초기 상태 복귀
-
-**영속화:**
-
-- [x] persist round-trip: setPersona('student') 후 새 hook 인스턴스에서 'student' 읽힘
-- [x] AsyncStorage 키: `persona:v1`
-- [x] hydration: `useStore.persist.hasHydrated()` 가 false → true 전이
-- [x] hydration 미완 시 read: 초기값 반환
-- [x] AsyncStorage 손상 (잘못된 JSON): 초기 상태 fallback + INITIAL 직렬화로 정리 (다음 부팅 시 정상 fallback)
-- [x] AsyncStorage 손상 (유효하지 않은 persona literal): isValidPersistedState 검증 후 초기 상태 fallback
-
-**Hydration race:**
-
-- [x] hydration 완료 전 `usePersonaStore.getState().persona` 호출 → 초기값
-- [x] hydration 완료 후 동일 호출 → 저장된 값
-- [x] subscribe 콜백: hydration 후 1회 호출 보장
-
-**마이그레이션:**
-
-- [x] v1 entry: version 일치 → migrate 함수 호출 안 됨 (rehydrate 정상 동작 검증)
-- [x] 미래 v0 entry (구버전) → migrate stub 이 state 통과 (v2 도입 시 본 케이스가 실 변환 검증으로 확장)
-- [ ] (v2 도입 시 추가) v1 → v2: 새 필드 기본값 채움 / migrate 함수 spy
-
-**Selector:**
-
-- [x] `usePersonaStore(s => s.persona)` 다른 컴포넌트 동시 사용 시 같은 값 → 동일 ref (불필요한 리렌더 방지)
+페르소나 개념 제거로 store 삭제. `onboarded` 플래그는 `src/store/onboarding.ts` (§9.8.5) 로 이전.
 
 ### 9.6 `src/store/favorites.ts`
 
@@ -2487,14 +2455,9 @@ screens phase step 4 구현 — 설치 직후 1회 페르소나 선택 화면.
 
 - [x] persona-card-student (primary) + persona-card-unknown (tertiary) 부분 트리 (PR #18 review round 6, §6.6 100라인 정책)
 
-### 9.31 `src/lib/persona.ts` — 페르소나 라벨·아이콘 매핑
+### 9.31 `src/lib/persona.ts` (삭제됨 — ADR-067, persona-removal step 7)
 
-screens phase step 3 에 추가된 단일 출처 모듈. Onboarding · Settings 에서 재사용.
-
-- [x] PERSONA_LABEL — 3종 모두 한글 라벨 (`유학생` / `취업자` / `아직 모름`) (PR #18 review round 5)
-- [x] PERSONA_SUB — 3종 모두 비어있지 않은 sub 텍스트 (PR #18 review round 5)
-- [x] PERSONA_ICON — 3종 모두 IconName 키 (`graduation` / `briefcase` / `user`) (PR #18 review round 5)
-- [x] 모든 매핑 객체의 키 일치 — student / worker / unknown 3종 (PR #18 review round 5)
+페르소나 라벨·아이콘 매핑 모듈. 페르소나 개념 제거로 삭제.
 
 ### 9.32 `src/lib/linking.ts` — Linking wrapper
 
@@ -2511,16 +2474,9 @@ v1.x DX 정리 (ADR-065). `DATA_SOURCES_COUNT` 를 `docs/DATA_SOURCES.md` 머신
 - [x] docs/DATA_SOURCES.md `<!-- DATA_SOURCES_COUNT: N -->` 마커와 일치 — 드리프트 가드 (ADR-065)
 - [x] 마커 부재 시 parseMarkerCount throw — silent fail 금지 (ADR-065)
 
-### 9.34 `src/components/PersonaCard.tsx` — Onboarding 페르소나 선택 카드
+### 9.34 `src/components/PersonaCard.tsx` (삭제됨 — ADR-067, persona-removal step 7)
 
-PR #18 review round 6 에서 `app/onboarding.tsx` 에서 추출 (1파일 1컴포넌트 원칙).
-
-- [x] persona 라벨/sub 렌더 — `src/lib/persona.ts` 단일 출처 (PR #18 review round 6)
-- [x] primary variant — icon box 렌더 (PR #18 review round 6)
-- [x] secondary variant — icon box 렌더 (PR #18 review round 6)
-- [x] tertiary variant — icon box 미렌더, Small 라벨 (PR #18 review round 6)
-- [x] 탭 → onPress 호출 (PR #18 review round 6)
-- [x] accessibilityLabel = "{label} 선택" (PR #18 review round 6)
+Onboarding 페르소나 선택 카드. 온보딩 도시 선택 전환으로 삭제.
 
 ### 9.35 `src/__test-utils__/snapshotByTestId.ts` — 부분 트리 스냅샷 헬퍼
 
