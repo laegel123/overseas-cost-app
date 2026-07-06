@@ -1,21 +1,20 @@
-# UC-11: 데이터 새로고침. 탭 → refreshCache 실행. 네트워크가 있으면 성공(갱신일 표시),
-# 실패 시 '갱신 실패'. 실시간 네트워크 의존이라 성공 값은 단정하지 않고, '갱신 실패'가
-# 뜨지 않는지로 검증(Maestro assert 는 기본 재시도/대기 → 완료까지 기다림).
+# UC-11: 데이터 새로고침. 데이터 최신화 카드의 새로고침 버튼(data-refresh-btn) 탭 →
+# refreshCache 실행. 네트워크가 있으면 성공(갱신일 표시), 실패 시 '갱신 실패'. 실시간
+# 네트워크 의존이라 성공 값은 단정하지 않고, '갱신 실패'가 뜨지 않는지로 검증
+# (Maestro assert 는 기본 재시도/대기 → 완료까지 기다림).
+# ADR-067: 기존 '데이터 새로고침' 메뉴 행이 데이터 최신화 카드로 승격됨.
 appId: com.laegel.overseascostapp
 tags:
   - settings
   - data
 ---
-- runFlow:
-    file: ../../common/onboard.yaml
-    env:
-      PERSONA: student
+- runFlow: ../../common/onboard.yaml
 - tapOn:
     id: 'home-avatar'
 - assertVisible:
-    id: 'menu-refresh'
+    id: 'data-refresh-btn'
 - tapOn:
-    id: 'menu-refresh'
+    id: 'data-refresh-btn'
 - assertVisible:
-    id: 'menu-refresh'
+    id: 'data-refresh-btn'
 - assertNotVisible: '갱신 실패'

@@ -69,7 +69,9 @@
     {
       "step": 8,
       "name": "maestro-e2e",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-07-06T22:26:40+0900",
+      "summary": "common/onboard.yaml 계약을 페르소나 탭→home 에서 도시 탭(밴쿠버·시드 보장)→compare→뒤로→home 으로 재작성; onboard.yaml 호출 다운스트림 18개 플로우에서 죽은 env:PERSONA 블록 일괄 제거; persona-{student,worker,unknown,change}.yaml·persona-card-diff.yaml 삭제, onboarding-once 재작성 + city-select·unified-categories 신규; 06-settings overview/data-refresh 를 persona-card/menu-refresh → data-refresh-card/-btn 로 재조준; smoke·07-visual-a11y screenshots 인라인 persona 앵커 → 도시 선택 앵커; README/PLAN/GOTCHAS persona 앵커·PERSONA env 설명 갱신(+빈-상태 플로우 재작성 필요 격차 기록). grep 플로우 앵커 0(README 이력 설명 1줄만 잔존), typecheck·lint·test(88 suites,1916 pass) 그린."
     },
     {
       "step": 9,

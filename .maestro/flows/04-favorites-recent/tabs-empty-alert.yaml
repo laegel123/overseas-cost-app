@@ -4,10 +4,7 @@ appId: com.laegel.overseascostapp
 tags:
   - tabs
 ---
-- runFlow:
-    file: ../../common/onboard.yaml
-    env:
-      PERSONA: student
+- runFlow: ../../common/onboard.yaml
 # 비교 탭 (대상 도시 없음). 탭바 라벨은 '비교, tab, 2 of 4' 형식 — ', tab' 로 한정 매칭.
 - tapOn: '비교, tab.*'
 # Alert 메시지는 '...없어요.\n홈에서...' 다중 라인 — DOTALL(?s) 로 개행 이후까지 전체 매칭.

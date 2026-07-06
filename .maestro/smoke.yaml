@@ -1,5 +1,6 @@
 # 스모크 테스트 — Maestro ↔ 앱 구동 파이프라인 검증용.
-# clearState 로 온보딩이 항상 뜨므로 네트워크/데이터에 의존하지 않고 결정적으로 통과한다.
+# clearState 로 '도시 선택' 온보딩(ADR-067)이 항상 뜨고, 밴쿠버는 번들 시드 보장이라
+# 네트워크/데이터에 의존하지 않고 결정적으로 통과한다.
 appId: com.laegel.overseascostapp
 tags:
   - smoke
@@ -9,8 +10,8 @@ tags:
 - assertVisible:
     id: 'onboarding-screen'
 - assertVisible: '어디로 떠나시나요?'
-# 페르소나 선택 → 탭 내비게이션까지 최소 인터랙션 검증
+# 도시 선택 → Compare 직행까지 최소 인터랙션 검증
 - tapOn:
-    id: 'persona-card-student'
+    id: 'onboarding-city-vancouver'
 - assertVisible:
-    id: 'home-screen'
+    id: 'compare-screen'

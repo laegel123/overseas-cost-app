@@ -1,6 +1,16 @@
-# 재사용 서브플로우 — clearState 런치 후 온보딩을 지나 홈까지 진입.
-# runFlow 로 호출하며 PERSONA env(student|worker|unknown) 를 넘긴다.
-# 예)  - runFlow: { file: ../../common/onboard.yaml, env: { PERSONA: student } }
+# 재사용 서브플로우 — clearState 런치 후 '도시 선택' 온보딩(ADR-067)을 지나 홈까지 진입.
+# 새 온보딩은 페르소나가 아니라 도시 선택이다. 도시를 고르면 즐겨찾기에 담고 서울 vs 그
+# 도시 Compare 로 직행하므로(app/onboarding.tsx → router.replace('/compare/{id}')),
+# 홈으로 돌아오려면 Compare 상단 뒤로가기를 한 번 눌러야 한다.
+#
+# 도시는 밴쿠버 고정 — 번들 시드(seoul+vancouver)에 포함돼 오프라인에서도 존재한다.
+# 이 서브플로우는 ~20개 downstream 플로우의 공통 전제라 네트워크 비의존이 중요하다
+# (smoke.yaml / open-vancouver-compare.yaml 과 동일한 시드 보장 정책).
+#
+# 부작용: 온보딩이 밴쿠버를 즐겨찾기+최근에 1건 남긴다. '빈 상태' 를 전제하는 플로우
+# (empty-states / tabs-empty-alert / favorite-toggle 말미)는 도시 선택 온보딩과 근본적으로
+# 양립 불가하며(온보딩을 통과하면 즐겨찾기가 반드시 1건 생김), 별도 로컬 검증 세션에서
+# 재작성한다 — ADR-067 파급, PLAN.md 참조.
 appId: com.laegel.overseascostapp
 ---
 - launchApp:
@@ -8,6 +18,13 @@ appId: com.laegel.overseascostapp
 - assertVisible:
     id: 'onboarding-screen'
 - tapOn:
-    id: 'persona-card-${PERSONA}'
+    id: 'onboarding-city-vancouver'
+# 도시 선택 → 서울 vs 밴쿠버 Compare 로 직행
+- assertVisible:
+    id: 'compare-screen'
+# 뒤로가기 → 홈. 온보딩이 router.replace 로 진입했어도 compare 의 handleBack 이
+# canGoBack=false 시 router.replace('/') 로 홈에 착지시킨다(app/compare/[cityId].tsx).
+- tapOn:
+    id: 'compare-topbar-back'
 - assertVisible:
     id: 'home-screen'

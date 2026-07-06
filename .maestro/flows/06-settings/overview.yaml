@@ -1,27 +1,28 @@
-# UC: 설정 화면 구성 — 페르소나 카드/통계/메뉴 5종/푸터.
+# UC: 설정 화면 구성 — 데이터 최신화 카드/통계/메뉴 4종/푸터.
+# ADR-067: 페르소나 카드 제거 → 데이터 최신화 카드로 교체, '데이터 새로고침' MenuRow 는
+# 카드로 승격돼 메뉴가 5종 → 4종으로 줄었다.
 appId: com.laegel.overseascostapp
 tags:
   - settings
 ---
-- runFlow:
-    file: ../../common/onboard.yaml
-    env:
-      PERSONA: student
+- runFlow: ../../common/onboard.yaml
 - tapOn:
     id: 'home-avatar'
 - assertVisible:
     id: 'settings-screen'
+# 페르소나 카드 → 데이터 최신화 카드 (ADR-067)
 - assertVisible:
-    id: 'persona-card'
-- assertVisible: '유학생 모드'
+    id: 'data-refresh-card'
+- assertVisible:
+    id: 'data-refresh-btn'
+- assertVisible: '데이터 최신화'
 - assertVisible:
     id: 'stat-favorites'
 - assertVisible:
     id: 'stat-recent'
 - assertVisible:
     id: 'stat-cities'
-- assertVisible:
-    id: 'menu-refresh'
+# 메뉴 4종 (새로고침은 데이터 최신화 카드로 승격 — 새로고침 메뉴 행 없음)
 - assertVisible:
     id: 'menu-sources'
 - assertVisible:

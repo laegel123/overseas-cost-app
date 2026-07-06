@@ -4,10 +4,7 @@ appId: com.laegel.overseascostapp
 tags:
   - home
 ---
-- runFlow:
-    file: ../../common/onboard.yaml
-    env:
-      PERSONA: student
+- runFlow: ../../common/onboard.yaml
 - assertVisible:
     id: 'home-region-pills'
 - tapOn:
