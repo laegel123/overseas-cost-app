@@ -48,7 +48,7 @@
       "status": "completed",
       "started_at": "2026-07-06T22:07:39+0900",
       "summary": "app/onboarding.tsx 페르소나 3카드 → 도시 선택 전면 재작성: Home 패턴(loading/error/ready + Promise.all[loadAllCities, fetchExchangeRates] + RegionPill 권역 필터 + RecentRow 리스트, multFromTotals 배수) 이식, 검색바 생략. 도시 탭 → add(cityId)+setOnboarded(true)+router.replace('/compare/{id}'), pushRecent 미호출(Compare 중복 방지), seoul 제외, 연타 가드 isNavigatingRef 유지. onboarding.test.tsx 11 케이스 재작성 + 옛 스냅샷 삭제. typecheck·lint·test(1945 pass) 그린.",
-      "completed_at": "2026-07-06T22:20:00+0900"
+      "completed_at": "2026-07-06T22:14:12+0900"
     },
     {
       "step": 6,
