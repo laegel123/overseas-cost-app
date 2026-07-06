@@ -1,6 +1,11 @@
 /**
  * 하단 탭 레이아웃 — 4탭 (홈/비교/즐겨찾기/설정).
  *
+ * 탭 바 UI 는 `src/components/BottomTabBar.tsx`(제어형) 를 expo-router Tabs 의
+ * `tabBar` prop 에 어댑터로 연결해 렌더한다 (ARCHITECTURE.md §Shell). §125 스펙
+ * (active=orange / inactive=gray-2, icon 22px, label 10px Mulish) 은 BottomTabBar
+ * 단일 출처 — _layout 에 중복 구현하지 않는다.
+ *
  * ADR-041: v1.0 비교·즐겨찾기 탭은 라우팅 단축으로 동작.
  * - 비교 탭 = recent[0] 또는 favorites[0]으로 redirect
  * - 즐겨찾기 탭 = favorites[0]으로 redirect
@@ -13,31 +18,29 @@ import { Alert } from 'react-native';
 
 import { Tabs, useRouter } from 'expo-router';
 
-import { Icon, type IconName } from '@/components/Icon';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+
+import { BottomTabBar, type Tab } from '@/components/BottomTabBar';
 import { useFavoritesStore } from '@/store/favorites';
 import { useRecentStore } from '@/store/recent';
-import { colors } from '@/theme/tokens';
 
 type TabPressEvent = {
   preventDefault: () => void;
 };
 
-// design/README.md §125: 하단 탭 바 아이콘 22px, active=orange / inactive=gray-2.
-const TAB_ICON_SIZE = 22;
-
-// tabBarIcon 은 focused 로만 색을 고르므로 Icon 의 ColorToken 타입을 유지한다
-// (React Navigation 이 넘겨주는 color 문자열은 매직 hex 라 쓰지 않음).
-function tabIcon(name: IconName) {
-  const TabBarIcon = ({ focused }: { focused: boolean }): React.ReactElement => (
-    <Icon
-      name={name}
-      size={TAB_ICON_SIZE}
-      color={focused ? colors.orange : colors.gray2}
-    />
-  );
-  TabBarIcon.displayName = `TabBarIcon(${name})`;
-  return TabBarIcon;
-}
+// expo-router route name ↔ BottomTabBar Tab 매핑 (index 스크린 = 'home' 탭).
+const ROUTE_TO_TAB: Record<string, Tab> = {
+  index: 'home',
+  compare: 'compare',
+  favorites: 'favorites',
+  settings: 'settings',
+};
+const TAB_TO_ROUTE: Record<Tab, string> = {
+  home: 'index',
+  compare: 'compare',
+  favorites: 'favorites',
+  settings: 'settings',
+};
 
 export default function TabsLayout(): React.ReactElement {
   const router = useRouter();
@@ -77,26 +80,49 @@ export default function TabsLayout(): React.ReactElement {
     [router, favoriteIds],
   );
 
+  // BottomTabBar 를 Tabs 에 어댑터로 연결. onSelect → 대상 라우트로 tabPress emit →
+  // compare/favorites 의 listeners 가 preventDefault + redirect 를 그대로 수행
+  // (redirect 로직 단일 출처 유지). 그 외(home/settings)는 기본 navigate.
+  const renderTabBar = React.useCallback(
+    ({ state, navigation }: BottomTabBarProps): React.ReactElement => {
+      const activeRoute = state.routes[state.index]?.name ?? 'index';
+      const active = ROUTE_TO_TAB[activeRoute] ?? 'home';
+
+      const handleSelect = (tab: Tab): void => {
+        const route = state.routes.find((r) => r.name === TAB_TO_ROUTE[tab]);
+        if (!route) return;
+
+        const isFocused = route.key === state.routes[state.index]?.key;
+        const event = navigation.emit({
+          type: 'tabPress',
+          target: route.key,
+          canPreventDefault: true,
+        });
+
+        if (!isFocused && !event.defaultPrevented) {
+          navigation.navigate(route.name);
+        }
+      };
+
+      return <BottomTabBar active={active} onSelect={handleSelect} />;
+    },
+    [],
+  );
+
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: colors.orange,
-        tabBarInactiveTintColor: colors.gray2,
-      }}
-    >
-      <Tabs.Screen name="index" options={{ title: '홈', tabBarIcon: tabIcon('home') }} />
+    <Tabs screenOptions={{ headerShown: false }} tabBar={renderTabBar}>
+      <Tabs.Screen name="index" options={{ title: '홈' }} />
       <Tabs.Screen
         name="compare"
-        options={{ title: '비교', tabBarIcon: tabIcon('compare') }}
+        options={{ title: '비교' }}
         listeners={{ tabPress: handleCompareTabPress }}
       />
       <Tabs.Screen
         name="favorites"
-        options={{ title: '즐겨찾기', tabBarIcon: tabIcon('star') }}
+        options={{ title: '즐겨찾기' }}
         listeners={{ tabPress: handleFavoritesTabPress }}
       />
-      <Tabs.Screen name="settings" options={{ title: '설정', tabBarIcon: tabIcon('settings') }} />
+      <Tabs.Screen name="settings" options={{ title: '설정' }} />
     </Tabs>
   );
 }
