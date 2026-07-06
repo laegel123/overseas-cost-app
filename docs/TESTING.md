@@ -1821,6 +1821,25 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 - [x] meta:lastSync → useSettingsStore.lastSync 단방향 sync (app-shell step 4)
 - [x] bridge 실패 → 부팅 흐름 차단 안 함 + dev 콘솔 로그 (app-shell step 4)
 
+### 9.21.1 `app/(tabs)/_layout.tsx` (하단 탭 레이아웃 — BottomTabBar 어댑터)
+
+BottomTabBar(제어형, §9.13)를 expo-router Tabs 의 `tabBar` prop 에 어댑터로 연결.
+§125 스펙(active=orange / inactive=gray-2, icon 22px, label 10px Mulish)은
+BottomTabBar 단일 출처 — `_layout` 에 중복 구현하지 않는다. 리다이렉트 정책은 §9.27.3.
+
+wiring 계약: `onSelect(tab)` → 대상 route 로 `tabPress` emit → screen `listeners` 가
+`preventDefault` 시 기본 `navigate` 억제(`event.defaultPrevented`), 아니면 navigate.
+
+- [x] route name ↔ Tab 매핑 — index 스크린 active → 홈 탭 `selected` 파생
+- [x] settings 스크린 active → 설정 탭 `selected`
+- [x] 비focus 탭 선택 → `navigation.navigate(<routeName>)` (home=`index` / settings)
+- [x] 이미 focus 된 탭 재선택 → navigate no-op (중복 push 방지)
+- [x] compare 선택 → `tabPress` emit → listener preventDefault + redirect → 기본 navigate 억제
+- [x] compare 타깃 = `recent[0] ?? favorites[0]` (recent 우선, 없으면 favorites fallback)
+- [x] compare + 도시 0개 → `router.replace('/')` + Alert
+- [x] favorites 선택 → `/compare/<favorites[0]>` (recent 무시)
+- [x] favorites + 즐겨찾기 0개 → `router.replace('/')` + Alert
+
 ### 9.22 `app/onboarding.tsx` — placeholder spec (deprecated)
 
 screens phase step 4 에서 본 화면이 실제 구현됐고 테스트 인벤토리도 **§9.30** 으로 이전됐다.
@@ -2316,6 +2335,9 @@ UI_GUIDE.md §에러 메시지 한국어 표준 카탈로그 검증.
 - [ ] 자동 검증 스크립트: `scripts/validate_strings.mjs` — 디자인 JSX 에서 한국어 추출 + strings.ko 의 값과 비교
 
 ### 9.27.3 하단 탭 동작 정책 (ARCHITECTURE.md §하단 탭)
+
+> 어댑터 wiring(route↔Tab 매핑, `tabPress` emit 계약, focus 시 navigate 억제) 테스트는 §9.21.1.
+> 아래는 정책 명세이며, 토스트 문구는 v1.0 에서 네이티브 `Alert` 로 대체(ADR-041).
 
 - [ ] 홈 탭 → `/(tabs)/index`
 - [ ] 비교 탭 + 최근 본 ≥1 → `/compare/<recent[0]>`
