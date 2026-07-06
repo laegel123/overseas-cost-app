@@ -22,7 +22,7 @@
 | rent 상세 | student=share / worker=oneBed 고정 | 행 탭으로 4형태 순환 단일 선택 (ADR-060) | `detail/…/[category].tsx` |
 | tuition/tax 상세 | 목록 정적 표시 | 선택 시트(preset + 직접 입력) 단일 선택 (ADR-061) | `TuitionChoiceSheet.tsx`, `TaxChoiceSheet.tsx` |
 | Detail hero 라벨 | "월 임차료 (메디안)"·"연간 학비 (국제학생)" 등 | `{카테고리} · {선택 항목}` 캡션 (예: "월세 · 셰어하우스") | `detail/…/[category].tsx` |
-| Compare hero 라벨 | "한 달 예상 총비용" + "❓ 자세히" | HeroCard 좌/우 라벨 + footer "평균 가정 기준" | `compare/[cityId].tsx` |
+| Compare hero 라벨 | "한눈에 보는 물가 비교" + "❓ 자세히" | HeroCard 좌/우 라벨 + footer "평균 가정 기준" | `compare/[cityId].tsx` |
 | 홈 빈 즐겨찾기 | "관심 있는 도시를 골라보세요" | "아직 즐겨찾기가 없어요.\n도시를 탭해 ⭐ 추가해보세요" | `(tabs)/index.tsx` |
 | 홈 최근 0개 | 섹션 미표시 | "최근 본 도시가 없어요" 빈 상태 표시 | `(tabs)/index.tsx` |
 | 홈 검색 0건 | "'○○'에 해당하는 도시가 없어요…" | "검색 결과가 없어요" | `(tabs)/index.tsx` |
@@ -403,7 +403,7 @@ emptySearch: (q: string) => `'${q}'에 해당하는 도시가 없어요\n다른 
 ### Compare/Detail (`compare.jsx`, `detail.jsx`)
 
 ```ts
-compareHeroLabel: '한 달 예상 총비용',
+compareHeroLabel: '한눈에 보는 물가 비교',
 compareHeroFooter: '평균 가정 기준 · ❓ 자세히',
 compareSourcesFooter: (n: number, date: string) => `출처 ${n}개 · 갱신 ${date}`,
 compareSourcesLink: '출처 보기 →',
