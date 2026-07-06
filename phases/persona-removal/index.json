@@ -56,7 +56,7 @@
       "status": "completed",
       "started_at": "2026-07-06T22:14:12+0900",
       "summary": "settings.tsx 페르소나 배지 → 데이터 최신화 카드(data-refresh-card): 좌 orange refresh 아이콘 + 중 'H3 데이터 최신화'/'Tiny formatLastSync()' + 우 data-refresh-btn(handleRefresh, loading 시 disabled). menu-refresh MenuRow 제거(메뉴 5→4) — 새로고침이 카드로 승격. usePersonaStore/PERSONA_*/handleChangePersona/useRouter 제거(참조 0), handleRefresh/refreshState/formatLastSync 재사용(신규 로직 없음). settings.test.tsx 페르소나/변경버튼 describe 삭제·데이터 최신화 카드 describe 추가·메뉴 5→4·스냅샷 persona-card→data-refresh-card 재생성. TESTING §9.29 갱신. menu-refresh testID → data-refresh-btn 로 승격(E2E 재조준은 step 8). typecheck·lint·test(1944 pass) 그린.",
-      "completed_at": "2026-07-06T22:22:00+0900"
+      "completed_at": "2026-07-06T22:21:17+0900"
     },
     {
       "step": 7,
