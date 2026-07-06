@@ -807,6 +807,25 @@ PR #17 review 이슈 2 — 이전 compare 화면 로컬 정의가 Infinity 반�
 - [ ] `unknown` → `['rent', 'food', 'transport', 'tuition', 'tax', 'visa']` (합집합 6개, 순서 명시)
 - [ ] 잘못된 persona → TypeScript 차단, 런타임은 throws
 
+### 9.3.1 `src/lib/homeTotals.ts` (ADR-056, persona-removal step 3)
+
+Home 화면 (`app/(tabs)/index.tsx`) 에서 추출한 단순화 총비용/배수 계산 순수 함수.
+온보딩 도시 선택 화면과 공유하는 단일 출처. Compare 의 페르소나별 정밀 계산과
+의도적으로 다른 근사값 (ADR-056).
+
+#### `computeCityTotal(city, fx): number`
+
+- [x] 밴쿠버 (CAD) — rent share + food(외식 20일 + groceries 4종 4회) + monthlyPass 합산
+- [x] 서울 (KRW) — pass-through 합산 (fx 무관)
+- [x] groceries 는 milk/eggs/rice/chicken 4종만 — ramen·bread·onion·apple 제외
+- [x] rent 는 `share ?? studio ?? oneBed` 순 fallback
+- [x] rent 전부 null → 0 fallback (food + transport 만)
+
+#### `multFromTotals(city, seoulTotal, fx): number | '신규'`
+
+- [x] 도시 총비용 / 서울 총비용 배수 (`computeMultiplier` 위임)
+- [x] 서울 총비용 0 + 도시 총비용 > 0 → `'신규'`
+
 ### 9.4 `src/lib/data.ts` (단일 batch fetch)
 
 ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.

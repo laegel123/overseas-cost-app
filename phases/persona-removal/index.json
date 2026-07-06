@@ -29,7 +29,10 @@
     {
       "step": 3,
       "name": "home-totals",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-07-06T21:50:42+0900",
+      "summary": "src/lib/homeTotals.ts export: computeCityTotal, multFromTotals (다음 step 온보딩 화면이 재사용). app/(tabs)/index.tsx 로컬 정의 삭제 후 @/lib import 교체 — 순수 추출, 로직 무변경. homeTotals.test.ts 7 케이스 + 배럴 export + TESTING §9.3.1 인벤토리 추가. typecheck·lint·test(1963 pass) 그린.",
+      "completed_at": "2026-07-06T21:56:06+0900"
     },
     {
       "step": 4,
