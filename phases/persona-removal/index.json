@@ -21,7 +21,10 @@
     {
       "step": 2,
       "name": "boot-wiring",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-07-06T21:43:04+0900",
+      "summary": "부트 경로 persona→onboarding store 재배선: _layout.tsx 게이트 selector + hydration.ts (waitOne 첫 위치·forceInitial 블록) 를 useOnboardingStore/ONBOARDING_INITIAL 로 교체. _layout.test.tsx·hydration.test.ts 스왑(대표 store 첫 배열 위치 유지 → setStateSpies[0] 인덱싱 그대로). 게이트 로직·배열 순서·배럴 usePersonaStore export 무변경. typecheck·lint·test(1956 pass) 그린.",
+      "completed_at": "2026-07-06T21:47:00+0900"
     },
     {
       "step": 3,

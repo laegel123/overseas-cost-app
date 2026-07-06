@@ -20,7 +20,10 @@ import {
   waitForAllStoresHydrated,
   waitForStoresOrTimeout,
 } from '../hydration';
-import { INITIAL_STATE as PERSONA_INITIAL, usePersonaStore } from '../persona';
+import {
+  INITIAL_STATE as ONBOARDING_INITIAL,
+  useOnboardingStore,
+} from '../onboarding';
 import { INITIAL_STATE as RECENT_INITIAL, useRecentStore } from '../recent';
 import {
   INITIAL_STATE as RENT_CHOICE_INITIAL,
@@ -37,7 +40,7 @@ import {
 } from '../tuitionChoice';
 
 const ALL_STORES = [
-  usePersonaStore,
+  useOnboardingStore,
   useFavoritesStore,
   useRecentStore,
   useSettingsStore,
@@ -69,13 +72,13 @@ describe('waitForAllStoresHydrated', () => {
   });
 
   it('한 store 만 미완 → 그 store 의 콜백 발화 후 resolve', async () => {
-    // persona store 만 미완 상태로 mock — 나머지 3개는 이미 hydrated.
-    jest.spyOn(usePersonaStore.persist, 'hasHydrated').mockReturnValue(false);
+    // onboarding store 만 미완 상태로 mock — 나머지 store 는 이미 hydrated.
+    jest.spyOn(useOnboardingStore.persist, 'hasHydrated').mockReturnValue(false);
     let captured: (() => void) | undefined;
-    jest.spyOn(usePersonaStore.persist, 'onFinishHydration').mockImplementation((fn) => {
-      // fn 은 PersistListener<PersonaState & PersonaActions> — 헬퍼는 state 인자
+    jest.spyOn(useOnboardingStore.persist, 'onFinishHydration').mockImplementation((fn) => {
+      // fn 은 PersistListener<OnboardingState & OnboardingActions> — 헬퍼는 state 인자
       // 사용 X 라 getState() 를 채워서 no-arg trigger 로 wrap.
-      captured = () => fn(usePersonaStore.getState());
+      captured = () => fn(useOnboardingStore.getState());
       return () => {};
     });
 
@@ -96,7 +99,7 @@ describe('waitForAllStoresHydrated', () => {
   });
 
   it('8 store 모두 미완 → 모두 완료 후에야 resolve', async () => {
-    let personaCb: (() => void) | undefined;
+    let onboardingCb: (() => void) | undefined;
     let favoritesCb: (() => void) | undefined;
     let recentCb: (() => void) | undefined;
     let settingsCb: (() => void) | undefined;
@@ -105,9 +108,9 @@ describe('waitForAllStoresHydrated', () => {
     let taxCb: (() => void) | undefined;
     let inclusionCb: (() => void) | undefined;
 
-    jest.spyOn(usePersonaStore.persist, 'hasHydrated').mockReturnValue(false);
-    jest.spyOn(usePersonaStore.persist, 'onFinishHydration').mockImplementation((fn) => {
-      personaCb = () => fn(usePersonaStore.getState());
+    jest.spyOn(useOnboardingStore.persist, 'hasHydrated').mockReturnValue(false);
+    jest.spyOn(useOnboardingStore.persist, 'onFinishHydration').mockImplementation((fn) => {
+      onboardingCb = () => fn(useOnboardingStore.getState());
       return () => {};
     });
 
@@ -165,7 +168,7 @@ describe('waitForAllStoresHydrated', () => {
     await Promise.resolve();
     await Promise.resolve();
     expect(resolved).toBe(false);
-    expect(personaCb).toBeDefined();
+    expect(onboardingCb).toBeDefined();
     expect(favoritesCb).toBeDefined();
     expect(recentCb).toBeDefined();
     expect(settingsCb).toBeDefined();
@@ -175,7 +178,7 @@ describe('waitForAllStoresHydrated', () => {
     expect(inclusionCb).toBeDefined();
 
     // 7개 완료 — 아직 resolve 안 됨
-    personaCb?.();
+    onboardingCb?.();
     favoritesCb?.();
     recentCb?.();
     settingsCb?.();
@@ -194,10 +197,10 @@ describe('waitForAllStoresHydrated', () => {
 
   it('resolve 후 unsubscribe 호출 (콜백 누수 방지)', async () => {
     const unsubMock = jest.fn();
-    jest.spyOn(usePersonaStore.persist, 'hasHydrated').mockReturnValue(false);
+    jest.spyOn(useOnboardingStore.persist, 'hasHydrated').mockReturnValue(false);
     let captured: (() => void) | undefined;
-    jest.spyOn(usePersonaStore.persist, 'onFinishHydration').mockImplementation((fn) => {
-      captured = () => fn(usePersonaStore.getState());
+    jest.spyOn(useOnboardingStore.persist, 'onFinishHydration').mockImplementation((fn) => {
+      captured = () => fn(useOnboardingStore.getState());
       return unsubMock;
     });
 
@@ -247,7 +250,7 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
   beforeEach(() => {
     warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
     setStateSpies = [
-      jest.spyOn(usePersonaStore, 'setState'),
+      jest.spyOn(useOnboardingStore, 'setState'),
       jest.spyOn(useFavoritesStore, 'setState'),
       jest.spyOn(useRecentStore, 'setState'),
       jest.spyOn(useSettingsStore, 'setState'),
@@ -271,10 +274,10 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
   });
 
   it('한 store 만 미완 + timeout → timeout, 그 store 만 INITIAL_STATE 강제', async () => {
-    // persona 만 영구 미완 — onFinishHydration 콜백을 절대 발화하지 않음.
-    jest.spyOn(usePersonaStore.persist, 'hasHydrated').mockReturnValue(false);
+    // onboarding 만 영구 미완 — onFinishHydration 콜백을 절대 발화하지 않음.
+    jest.spyOn(useOnboardingStore.persist, 'hasHydrated').mockReturnValue(false);
     jest
-      .spyOn(usePersonaStore.persist, 'onFinishHydration')
+      .spyOn(useOnboardingStore.persist, 'onFinishHydration')
       .mockImplementation(() => () => {});
 
     const promise = waitForStoresOrTimeout(100);
@@ -282,15 +285,15 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
     const result = await promise;
 
     expect(result).toBe('timeout');
-    const personaSpy = setStateSpies[0];
-    expect(personaSpy).toHaveBeenCalledTimes(1);
-    expect(personaSpy).toHaveBeenCalledWith(PERSONA_INITIAL);
+    const onboardingSpy = setStateSpies[0];
+    expect(onboardingSpy).toHaveBeenCalledTimes(1);
+    expect(onboardingSpy).toHaveBeenCalledWith(ONBOARDING_INITIAL);
     setStateSpies.slice(1).forEach((spy) => expect(spy).not.toHaveBeenCalled());
   });
 
   it('8 store 모두 미완 + timeout → 8 store 모두 INITIAL_STATE 강제', async () => {
     [
-      usePersonaStore,
+      useOnboardingStore,
       useFavoritesStore,
       useRecentStore,
       useSettingsStore,
@@ -310,7 +313,7 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
     const result = await promise;
 
     expect(result).toBe('timeout');
-    expect(setStateSpies[0]).toHaveBeenCalledWith(PERSONA_INITIAL);
+    expect(setStateSpies[0]).toHaveBeenCalledWith(ONBOARDING_INITIAL);
     expect(setStateSpies[1]).toHaveBeenCalledWith(FAVORITES_INITIAL);
     expect(setStateSpies[2]).toHaveBeenCalledWith(RECENT_INITIAL);
     expect(setStateSpies[3]).toHaveBeenCalledWith(SETTINGS_INITIAL);
@@ -321,11 +324,11 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
   });
 
   it('timeout 만료 후에도 정상 hydrated store 는 fallback 에서 보존', async () => {
-    // persona 만 미완. 다른 3개는 정상 hydrated 상태로 두고 timeout 만료시켜
+    // onboarding 만 미완. 다른 store 는 정상 hydrated 상태로 두고 timeout 만료시켜
     // forceInitial 가 그 3개는 건드리지 않는지 검증.
-    jest.spyOn(usePersonaStore.persist, 'hasHydrated').mockReturnValue(false);
+    jest.spyOn(useOnboardingStore.persist, 'hasHydrated').mockReturnValue(false);
     jest
-      .spyOn(usePersonaStore.persist, 'onFinishHydration')
+      .spyOn(useOnboardingStore.persist, 'onFinishHydration')
       .mockImplementation(() => () => {});
 
     const promise = waitForStoresOrTimeout(100);
@@ -339,9 +342,9 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
   });
 
   it('timeout 만료 시 dev 빌드 콘솔 warn 1회 (ADR-052 참조 문구)', async () => {
-    jest.spyOn(usePersonaStore.persist, 'hasHydrated').mockReturnValue(false);
+    jest.spyOn(useOnboardingStore.persist, 'hasHydrated').mockReturnValue(false);
     jest
-      .spyOn(usePersonaStore.persist, 'onFinishHydration')
+      .spyOn(useOnboardingStore.persist, 'onFinishHydration')
       .mockImplementation(() => () => {});
 
     const promise = waitForStoresOrTimeout(100);
@@ -353,9 +356,9 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
     expect(warnSpy.mock.calls[0][0]).toContain('100ms');
   });
 
-  it('forceInitial — favorites/settings 만 미완 + persona/recent 보존', async () => {
+  it('forceInitial — favorites/settings 만 미완 + onboarding/recent 보존', async () => {
     // forceInitialOnUnhydratedStores 의 4 store 분기 모두 (true + false) 를 cover.
-    // 앞 테스트에서 persona/recent 의 false 분기가 안 잡혀 branch coverage 부족.
+    // 앞 테스트에서 onboarding/recent 의 false 분기가 안 잡혀 branch coverage 부족.
     [useFavoritesStore, useSettingsStore].forEach((store) => {
       jest.spyOn(store.persist, 'hasHydrated').mockReturnValue(false);
       jest
@@ -367,7 +370,7 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
     await jest.advanceTimersByTimeAsync(150);
     await promise;
 
-    expect(setStateSpies[0]).not.toHaveBeenCalled(); // persona — 보존
+    expect(setStateSpies[0]).not.toHaveBeenCalled(); // onboarding — 보존
     expect(setStateSpies[1]).toHaveBeenCalledWith(FAVORITES_INITIAL); // favorites — fallback
     expect(setStateSpies[2]).not.toHaveBeenCalled(); // recent — 보존
     expect(setStateSpies[3]).toHaveBeenCalledWith(SETTINGS_INITIAL); // settings — fallback
@@ -375,7 +378,7 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
 
   it('default timeout (인자 미제공) → DEFAULT_HYDRATION_TIMEOUT_MS 적용', async () => {
     [
-      usePersonaStore,
+      useOnboardingStore,
       useFavoritesStore,
       useRecentStore,
       useSettingsStore,
@@ -397,9 +400,9 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
 
   it('정상 완료가 timeout 보다 먼저 → ok, setState fallback 호출 없음 + warn 없음', async () => {
     let captured: (() => void) | undefined;
-    jest.spyOn(usePersonaStore.persist, 'hasHydrated').mockReturnValue(false);
-    jest.spyOn(usePersonaStore.persist, 'onFinishHydration').mockImplementation((fn) => {
-      captured = () => fn(usePersonaStore.getState());
+    jest.spyOn(useOnboardingStore.persist, 'hasHydrated').mockReturnValue(false);
+    jest.spyOn(useOnboardingStore.persist, 'onFinishHydration').mockImplementation((fn) => {
+      captured = () => fn(useOnboardingStore.getState());
       return () => {};
     });
 
