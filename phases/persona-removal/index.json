@@ -77,10 +77,10 @@
     {
       "step": 9,
       "name": "docs-reconcile",
-      "status": "error",
+      "status": "completed",
       "started_at": "2026-07-06T22:42:35+0900",
-      "error_message": "[3회 시도 후 실패] Step did not update status",
-      "failed_at": "2026-07-06T23:44:13+0900"
+      "summary": "문서 정합화. 하네스 sub-session 이 CLAUDE.md(완료형)·ARCHITECTURE.md·DATA.md 를 커밋(eca413d) 후 월 지출 한도로 중단 → 나머지 TESTING.md §9 는 메인 세션이 마무리. 정합화: §5.5/§8.1 모킹(usePersonaStore→useOnboardingStore), §9.8.4 categoryInclusion(persona-aware→고정 default, persona 인자 제거), §9.21 _layout(persona.onboarded→onboarding.onboarded), §9.24 compare(항상 6 카테고리 통합 뷰 + tuition/tax default OFF), §9.24.2 페르소나 변경 영향(deprecated 무효), §9.30 온보딩(페르소나 선택→도시 선택 전면), §18-A.3 Maestro 인벤토리(persona 플로우→city-select/unified-categories/overview 4메뉴). 잔존 persona 참조는 pre-existing speculative 부채(src/lib/compare.ts·PersonaTag.tsx 미존재 모듈, [ ] 미구현 미래 기능, 디자인 참조표) — 전역 가이드라인상 요청 없이 대량 삭제 안 함, 별도 보고. typecheck·lint·test(88 suites, 1916 pass) 그린.",
+      "completed_at": "2026-07-07T08:23:26+09:00"
     }
   ],
   "created_at": "2026-07-06T21:27:18+0900"
