@@ -192,7 +192,10 @@ describe('RootLayout 부트로더', () => {
     expect(replaceMock).toHaveBeenCalledWith('/onboarding');
   });
 
-  it('onboarded + 초기 segment onboarding → router.replace("/(tabs)")', async () => {
+  it('onboarded + onboarding segment → 게이트 미개입 (온보딩 화면이 스스로 compare 로 탈출, ADR-067)', async () => {
+    // 게이트가 /(tabs) 로 재라우팅하면 온보딩→compare 직행을 덮어쓰는 경쟁 조건이
+    // 발생하므로(onboarded 커밋과 세그먼트 커밋 사이 전이 렌더), 이 케이스는 no-op.
+    // 온보딩 탈출 네비게이션은 app/onboarding.tsx 의 handleSelect 소유.
     mockedUseAppFonts.mockReturnValue({ ready: true, error: null });
     mockedWaitForStoresOrTimeout.mockResolvedValue('ok');
     setOnboarded(true);
@@ -203,8 +206,7 @@ describe('RootLayout 부트로더', () => {
       await Promise.resolve();
     });
 
-    expect(replaceMock).toHaveBeenCalledTimes(1);
-    expect(replaceMock).toHaveBeenCalledWith('/(tabs)');
+    expect(replaceMock).not.toHaveBeenCalled();
   });
 
   it('!onboarded + 이미 onboarding segment → no-op (무한 redirect 방지)', async () => {

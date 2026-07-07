@@ -61,6 +61,15 @@ tags:
 - takeScreenshot: '.maestro/.artifacts/02-home'
 - tapOn:
     id: 'home-avatar'
+# takeScreenshot(02-home) 직후의 첫 탭은 간헐적으로 내비게이션을 놓친다 — detail-topbar-back
+# 과 동일 패턴으로, 홈에 남아 있으면(home-avatar 가 여전히 보이면) 재탭한다.
+- runFlow:
+    when:
+      visible:
+        id: 'home-avatar'
+    commands:
+      - tapOn:
+          id: 'home-avatar'
 - assertVisible:
     id: 'settings-screen'
 - takeScreenshot: '.maestro/.artifacts/07-settings'

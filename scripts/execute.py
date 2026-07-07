@@ -259,7 +259,7 @@ class StepExecutor:
 
             proc = subprocess.Popen(
                 cmd, cwd=self._root, stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, encoding="utf-8",
             )
 
             def _read_stream(stream, buf, out):
@@ -269,10 +269,18 @@ class StepExecutor:
                     out.flush()
 
             def _write_stdin(stream, data):
+                # 자식이 프롬프트를 다 읽기 전에 종료/timeout kill 되면 파이프가 닫혀
+                # BrokenPipeError/OSError 가 난다. 데몬 스레드에서 traceback 이 새지
+                # 않도록 삼킨다 — 치명적 아님(자식은 이미 죽었고 returncode 로 처리됨).
                 try:
                     stream.write(data)
+                except (BrokenPipeError, OSError, ValueError):
+                    pass
                 finally:
-                    stream.close()
+                    try:
+                        stream.close()
+                    except (BrokenPipeError, OSError):
+                        pass
 
             t_in = threading.Thread(target=_write_stdin, args=(proc.stdin, prompt), daemon=True)
             t_out = threading.Thread(target=_read_stream, args=(proc.stdout, stdout_buf, sys.stdout), daemon=True)
@@ -289,13 +297,14 @@ class StepExecutor:
 
             t_out.join()
             t_err.join()
+            t_in.join()
 
             returncode = proc.returncode
             stdout_str = "".join(stdout_buf)
             stderr_str = "".join(stderr_buf)
         else:
             result = subprocess.run(
-                cmd, cwd=self._root, input=prompt, capture_output=True, text=True, timeout=self._timeout,
+                cmd, cwd=self._root, input=prompt, capture_output=True, text=True, encoding="utf-8", timeout=self._timeout,
             )
             returncode = result.returncode
             stdout_str = result.stdout

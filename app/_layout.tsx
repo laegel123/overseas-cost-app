@@ -63,9 +63,13 @@ export default function RootLayout() {
     const isOnAuthFlow = segments[0] === 'onboarding';
     if (!onboarded && !isOnAuthFlow) {
       router.replace('/onboarding');
-    } else if (onboarded && isOnAuthFlow) {
-      router.replace('/(tabs)');
     }
+    // onboarded && isOnAuthFlow 는 게이트가 처리하지 않는다: 온보딩 화면(app/
+    // onboarding.tsx)이 도시 선택 후 setOnboarded(true) + router.replace('/compare/
+    // {id}') 로 스스로 탈출한다. 여기서 /(tabs) 로 재라우팅하면 onboarded 커밋과
+    // useSegments 커밋 사이의 전이 렌더에서 그 compare 네비게이션을 덮어써 사용자를
+    // 홈에 착지시킬 수 있다(경쟁 조건, ADR-067). 온보딩 세그먼트는 온보딩 완료
+    // 사용자에게 도달 불가하므로(진입은 위의 !onboarded 분기뿐) 개입 불필요.
   }, [bootReady, onboarded, segments, router]);
 
   // meta:lastSync ↔ useSettingsStore.lastSync 단방향 sync (DATA.md §269).
