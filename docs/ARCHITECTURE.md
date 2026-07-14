@@ -485,4 +485,4 @@ inclusion 토글은 **mid-session reactive** — 별도 새로고침 불필요. 
 3. 필요 시 `src/components/` 에 도메인 컴포넌트
 4. `app/...` 에 화면 (도메인 컴포넌트 조립만)
 5. 데이터 스키마 변경이면 `data/seed/*.json` 동시 갱신 + `scripts/validate_cities.mjs` 통과
-6. 결정이 비가역적이면 `docs/ADR.md` 에 새 ADR 추가
+6. 결정이 비가역적이면 `docs/adr/NNN-<slug>.md` 새 파일 + `docs/ADR.md` 인덱스 행 추가

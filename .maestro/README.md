@@ -45,7 +45,7 @@ npm run e2e:smoke      # 스모크만
 
 - **배치별 실행 런북 + 리스크 + 문서-구현 격차:** `.maestro/PLAN.md`
 - **정식 인벤토리(체크리스트):** `docs/TESTING.md §18-A`
-- **도입 근거:** `docs/ADR.md ADR-066`
+- **도입 근거:** `docs/adr/066-maestro-e2e.md`
 
 ```bash
 maestro test .maestro/flows/01-onboarding        # 배치 하나

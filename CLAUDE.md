@@ -40,7 +40,7 @@
 
 - **CRITICAL**: 새 lib·컴포넌트·화면 추가 시 같은 step 안에서 **테스트를 함께 작성**한다 (TDD 지향). 신규 모듈은 반드시 `docs/TESTING.md` §7 인벤토리에 항목을 추가. 인벤토리 누락 = step 미완.
 - **CRITICAL**: 커밋 메시지는 conventional commits — `feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`. 하네스가 자동 생성하는 메시지 (`feat(<phase>): step N — <name>`) 도 이 규칙을 따른다.
-- **CRITICAL**: 새 외부 의존성·결정 사항은 `docs/ADR.md` 에 ADR-N 추가 후 도입.
+- **CRITICAL**: 새 외부 의존성·결정 사항은 `docs/adr/NNN-<slug>.md` 새 파일 추가 + `docs/ADR.md` 인덱스 행 추가 후 도입.
 - 각 step (하네스 framework) 종료 시 `phases/<phase>/index.json` 의 해당 step status 를 `completed` / `error` / `blocked` 로 업데이트한다. 자세한 규칙은 `README.md` 와 `phases/improve-harness-dx/step{0,1}.md` 의 모범 사례 참고.
 - 디자인 1차 출처는 `docs/design/README.md` 의 토큰·타이포·컴포넌트 명세. JSX hifi 파일들은 시각·구조 참고용이며 **웹 React 코드라 그대로 가져다 쓸 수 없다**(div/className → View/Text + NativeWind 포팅 필요).
 - 데이터 추가/갱신은 `docs/DATA.md` 의 큐레이션 절차를 따른다. 출처 미기재 데이터 추가 금지.
@@ -75,7 +75,7 @@ python3 scripts/execute.py init <phase> --steps N --project overseas-cost-app
 - `docs/DATA_SOURCES.md` — **21개 도시 × 카테고리별 공공 출처 매핑** (자동화 actionable 가이드)
 - `docs/AUTOMATION.md` — **GitHub Actions 인프라, scripts/refresh 명세, 워크플로우, secrets, 변동 검증, 알림**
 - `docs/RELEASE.md` — 버전·브랜치·EAS·스토어 제출·개인정보·고객지원·재해복구·마케팅
-- `docs/ADR.md` — 아키텍처 결정 기록 (신규 결정은 새 ADR 추가)
+- `docs/ADR.md` — ADR 인덱스 (개별 결정은 `docs/adr/NNN-*.md`, 신규 결정은 새 파일 + 인덱스 행)
 - `docs/design/README.md` — 디자인 토큰·5개 화면 명세 (구현 시 1차 참조)
 - `docs/design/hifi/*.jsx` — 화면별 hi-fi mock (참고용, RN 포팅 필요)
 - `phases/` — 하네스 phase 디렉터리. 모범 예시는 `phases/improve-harness-dx/`
