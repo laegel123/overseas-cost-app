@@ -57,6 +57,12 @@ class StepExecutor:
     FEAT_MSG = "feat({phase}): step {num} — {name}"
     CHORE_MSG = "chore({phase}): step {num} output"
     TZ = timezone(timedelta(hours=9))
+    # 가드레일에 본문을 통째로 실을 문서의 크기 상한(bytes). 이보다 큰 문서
+    # (예: docs/ADR.md·docs/TESTING.md)를 매 step 프롬프트에 넣으면 헤드리스
+    # 세션의 컨텍스트 한도(200K 토큰)를 넘겨 즉시 400(prompt_too_long)이 난다.
+    # 상한 초과 문서는 본문을 생략하고 경로만 남긴다 — 세션은 필요 시 step 파일의
+    # "읽어야 할 파일" 지시에 따라 직접 Read 한다.
+    GUARDRAIL_DOC_MAX_BYTES = 100_000
 
     def __init__(
         self,
@@ -196,6 +202,14 @@ class StepExecutor:
         docs_dir = ROOT / "docs"
         if docs_dir.is_dir():
             for doc in sorted(docs_dir.glob("*.md")):
+                size = doc.stat().st_size
+                if size > self.GUARDRAIL_DOC_MAX_BYTES:
+                    sections.append(
+                        f"## {doc.stem}\n\n"
+                        f"(본문 생략 — {size // 1024}KB 로 가드레일 크기 상한 초과. "
+                        f"필요하면 `docs/{doc.name}` 를 직접 Read 하라.)"
+                    )
+                    continue
                 sections.append(f"## {doc.stem}\n\n{doc.read_text()}")
         return "\n\n---\n\n".join(sections) if sections else ""
 
