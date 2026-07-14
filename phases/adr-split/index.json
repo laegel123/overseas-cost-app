@@ -31,7 +31,7 @@
       "name": "verify-gate",
       "status": "completed",
       "started_at": "2026-07-14T10:09:55+0900",
-      "completed_at": "2026-07-14T10:22:00+0900",
+      "completed_at": "2026-07-14T10:12:19+0900",
       "summary": "bijection 68 + 인덱스↔파일 1:1 + 백링크 유효 + 잔존참조 유효 + green, 파일 변경 없음"
     }
   ],
