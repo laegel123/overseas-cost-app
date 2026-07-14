@@ -15,7 +15,7 @@
       "name": "adr-068-and-index",
       "status": "completed",
       "started_at": "2026-07-14T10:01:57+0900",
-      "completed_at": "2026-07-14T10:25:00+0900",
+      "completed_at": "2026-07-14T10:07:28+0900",
       "summary": "ADR-068 신규 + docs/ADR.md 68행 인덱스 재작성(본문 전량 파일 이동), green"
     },
     {
