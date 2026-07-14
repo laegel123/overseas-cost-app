@@ -681,5 +681,5 @@ Compare/Detail 푸터에 데이터 신선도 시각 강조.
 토큰·타이포·인터랙션 룰 변경은 디자인 의도가 바뀌는 일이다. 다음 절차로:
 
 1. `docs/design/README.md` 와 정합성 확인 (그쪽이 1차 출처)
-2. 변경이 의도적이면 `docs/ADR.md` 에 새 ADR 추가 + 본 문서 갱신
+2. 변경이 의도적이면 `docs/adr/NNN-<slug>.md` 새 파일 + `docs/ADR.md` 인덱스 행 추가 + 본 문서 갱신
 3. 영향받는 컴포넌트 테스트 동시 갱신 (snapshot)

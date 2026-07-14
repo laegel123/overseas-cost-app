@@ -98,9 +98,9 @@ class StepExecutor:
         self._check_blockers()
         self._preflight_check()
         self._checkout_branch()
-        guardrails = self._load_guardrails()
+        doc_index = self._build_doc_index()
         self._ensure_created_at()
-        self._execute_all_steps(guardrails)
+        self._execute_all_steps(doc_index)
         self._finalize()
 
     # --- timestamps ---
@@ -186,18 +186,26 @@ class StepExecutor:
                 break
         self._write_json(self._top_index_file, top)
 
-    # --- guardrails & context ---
+    # --- doc index & context ---
 
-    def _load_guardrails(self) -> str:
-        sections = []
-        claude_md = ROOT / "CLAUDE.md"
-        if claude_md.exists():
-            sections.append(f"## 프로젝트 규칙 (CLAUDE.md)\n\n{claude_md.read_text()}")
+    def _build_doc_index(self) -> str:
+        """참고 문서의 경로 색인만 반환한다 (pull 모델, ADR-069).
+
+        문서 본문은 프롬프트에 인라인하지 않는다 — 프로젝트 규칙(CLAUDE.md)은
+        헤드리스 세션이 자동 로드하고, docs/ 문서는 step 파일의 "읽어야 할 파일"
+        지시에 따라 세션이 필요한 것만 직접 Read 한다.
+        """
         docs_dir = ROOT / "docs"
-        if docs_dir.is_dir():
-            for doc in sorted(docs_dir.glob("*.md")):
-                sections.append(f"## {doc.stem}\n\n{doc.read_text()}")
-        return "\n\n---\n\n".join(sections) if sections else ""
+        if not docs_dir.is_dir():
+            return ""
+        lines = [f"- `docs/{doc.name}`" for doc in sorted(docs_dir.glob("*.md"))]
+        return (
+            "## 참고 문서 색인\n\n"
+            "아래 문서들의 본문은 이 프롬프트에 포함되지 않는다. "
+            "step 의 \"읽어야 할 파일\" 목록과 작업에 필요한 문서만 직접 Read 하라. "
+            "각 문서의 용도는 CLAUDE.md 의 '문서 색인' 참조.\n\n"
+            + "\n".join(lines)
+        )
 
     @staticmethod
     def _build_step_context(index: dict) -> str:
@@ -210,7 +218,7 @@ class StepExecutor:
             return ""
         return "## 이전 Step 산출물\n\n" + "\n".join(lines) + "\n\n"
 
-    def _build_preamble(self, guardrails: str, step_context: str,
+    def _build_preamble(self, doc_index: str, step_context: str,
                         prev_error: Optional[str] = None) -> str:
         commit_example = self.FEAT_MSG.format(
             phase=self._phase_name, num="N", name="<step-name>"
@@ -223,7 +231,7 @@ class StepExecutor:
             )
         return (
             f"당신은 {self._project} 프로젝트의 개발자입니다. 아래 step을 수행하세요.\n\n"
-            f"{guardrails}\n\n---\n\n"
+            f"{doc_index}\n\n---\n\n"
             f"{step_context}{retry_section}"
             f"## 작업 규칙\n\n"
             f"1. 이전 step에서 작성된 코드를 확인하고 일관성을 유지하라.\n"
@@ -249,8 +257,8 @@ class StepExecutor:
             sys.exit(1)
 
         prompt = preamble + step_file.read_text()
-        # 프롬프트(가드레일 포함 ~500KB)를 argv 로 넘기면 ARG_MAX(E2BIG)를 초과한다.
-        # stdin 으로 전달한다 — `claude -p` 는 인자가 없으면 stdin 에서 프롬프트를 읽는다.
+        # 프롬프트는 stdin 으로 전달한다 — argv 는 ARG_MAX(E2BIG) 제약이 있고,
+        # `claude -p` 는 인자가 없으면 stdin 에서 프롬프트를 읽는다.
         cmd = ["claude", "--model", self._model, "-p", "--dangerously-skip-permissions", "--output-format", "json"]
 
         if self._verbose:
@@ -391,7 +399,7 @@ class StepExecutor:
 
     # --- 실행 루프 ---
 
-    def _execute_single_step(self, step: dict, guardrails: str) -> bool:
+    def _execute_single_step(self, step: dict, doc_index: str) -> bool:
         """단일 step 실행 (재시도 포함). 완료되면 True, 실패/차단이면 False."""
         step_num, step_name = step["step"], step["name"]
         done = sum(1 for s in self._read_json(self._index_file)["steps"] if s["status"] == "completed")
@@ -400,7 +408,7 @@ class StepExecutor:
         for attempt in range(1, self.MAX_RETRIES + 1):
             index = self._read_json(self._index_file)
             step_context = self._build_step_context(index)
-            preamble = self._build_preamble(guardrails, step_context, prev_error)
+            preamble = self._build_preamble(doc_index, step_context, prev_error)
 
             tag = f"Step {step_num}/{self._total - 1} ({done} done): {step_name}"
             if attempt > 1:
@@ -462,7 +470,7 @@ class StepExecutor:
 
         return False  # unreachable
 
-    def _execute_all_steps(self, guardrails: str):
+    def _execute_all_steps(self, doc_index: str):
         if self._from_step > 0:
             print(f"  WARN: --from-step {self._from_step} 지정됨. Step {self._from_step} 이전은 건너뜁니다.")
 
@@ -484,7 +492,7 @@ class StepExecutor:
                     self._write_json(self._index_file, index)
                     break
 
-            self._execute_single_step(pending, guardrails)
+            self._execute_single_step(pending, doc_index)
 
     def _print_phase_summary(self, index: dict):
         """완료된 step들의 요약을 출력한다."""
@@ -790,10 +798,12 @@ def _make_step_template(n: int, phase_name: str) -> str:
         "\n"
         "## 읽어야 할 파일\n"
         "\n"
-        "먼저 아래 파일들을 읽고 프로젝트의 아키텍처와 설계 의도를 파악하라:\n"
+        "먼저 아래 파일들을 읽고 프로젝트의 아키텍처와 설계 의도를 파악하라.\n"
+        "문서 본문은 프롬프트에 인라인되지 않으므로(ADR-069), 이 step 에 필요한\n"
+        "docs/ 문서는 반드시 이 목록에 명시할 것:\n"
         "\n"
         "- `/docs/ARCHITECTURE.md`\n"
-        "- `/docs/ADR.md`\n"
+        "- `/docs/ADR.md` (인덱스 — 관련 ADR 은 `docs/adr/NNN-*.md` 를 골라 읽을 것)\n"
         "- (이전 step에서 생성/수정된 파일 경로를 여기에 추가하라)\n"
         "\n"
         "## 작업\n"

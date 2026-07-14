@@ -142,54 +142,57 @@ class TestJsonHelpers:
 
 
 # ---------------------------------------------------------------------------
-# _load_guardrails
+# _build_doc_index (ADR-069: pull 모델 — 구 _load_guardrails 대체)
 # ---------------------------------------------------------------------------
 
-class TestLoadGuardrails:
-    def test_loads_claude_md_and_docs(self, executor, tmp_project):
+class TestBuildDocIndex:
+    def test_lists_doc_paths_without_bodies(self, executor, tmp_project):
+        """docs/*.md 는 경로만 나열하고 본문은 인라인하지 않는다."""
         with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
-        assert "# Rules" in result
-        assert "rule one" in result
-        assert "# Architecture" in result
-        assert "# Guide" in result
+            result = executor._build_doc_index()
+        assert "`docs/arch.md`" in result
+        assert "`docs/guide.md`" in result
+        assert "Some content" not in result
+        assert "Another doc" not in result
 
-    def test_sections_separated_by_divider(self, executor, tmp_project):
+    def test_has_index_header(self, executor, tmp_project):
         with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
-        assert "---" in result
+            result = executor._build_doc_index()
+        assert result.startswith("## 참고 문서 색인")
+
+    def test_does_not_include_claude_md(self, executor, tmp_project):
+        """CLAUDE.md 는 헤드리스 세션이 자동 로드하므로 본문·색인 어디에도 넣지 않는다."""
+        with patch.object(ex, "ROOT", tmp_project):
+            result = executor._build_doc_index()
+        assert "rule one" not in result
+        assert "# Rules" not in result
+
+    def test_instructs_selective_read(self, executor, tmp_project):
+        """필요한 문서만 직접 Read 하라는 pull 지시가 포함된다."""
+        with patch.object(ex, "ROOT", tmp_project):
+            result = executor._build_doc_index()
+        assert "Read" in result
+        assert "읽어야 할 파일" in result
 
     def test_docs_sorted_alphabetically(self, executor, tmp_project):
         with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
+            result = executor._build_doc_index()
         arch_pos = result.index("arch")
         guide_pos = result.index("guide")
         assert arch_pos < guide_pos
 
-    def test_no_claude_md(self, executor, tmp_project):
-        (tmp_project / "CLAUDE.md").unlink()
-        with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
-        assert "CLAUDE.md" not in result
-        assert "Architecture" in result
-
-    def test_no_docs_dir(self, executor, tmp_project):
+    def test_no_docs_dir_returns_empty(self, executor, tmp_project):
         import shutil
         shutil.rmtree(tmp_project / "docs")
         with patch.object(ex, "ROOT", tmp_project):
-            result = executor._load_guardrails()
-        assert "Rules" in result
-        assert "Architecture" not in result
+            result = executor._build_doc_index()
+        assert result == ""
 
     def test_empty_project(self, tmp_path):
         with patch.object(ex, "ROOT", tmp_path):
             # executor가 필요 없는 static-like 동작이므로 임시 인스턴스
-            phases_dir = tmp_path / "phases" / "dummy"
-            phases_dir.mkdir(parents=True)
-            idx = {"project": "T", "phase": "t", "steps": []}
-            (phases_dir / "index.json").write_text(json.dumps(idx))
             inst = ex.StepExecutor.__new__(ex.StepExecutor)
-            result = inst._load_guardrails()
+            result = inst._build_doc_index()
         assert result == ""
 
 
@@ -236,9 +239,9 @@ class TestBuildPreamble:
         result = executor._build_preamble("", "")
         assert "TestProject" in result
 
-    def test_includes_guardrails(self, executor):
-        result = executor._build_preamble("GUARD_CONTENT", "")
-        assert "GUARD_CONTENT" in result
+    def test_includes_doc_index(self, executor):
+        result = executor._build_preamble("DOC_INDEX_CONTENT", "")
+        assert "DOC_INDEX_CONTENT" in result
 
     def test_includes_step_context(self, executor):
         ctx = "## 이전 Step 산출물\n\n- Step 0: done"
@@ -439,8 +442,10 @@ class TestInvokeClaude:
         assert "--output-format" in cmd
         assert "--model" in cmd
         assert cmd[cmd.index("--model") + 1] == executor._model
-        assert "PREAMBLE" in cmd[-1]
-        assert "UI를 구현하세요" in cmd[-1]
+        # 프롬프트는 argv 가 아니라 stdin(input=)으로 전달된다 (ARG_MAX 회피)
+        sent = mock_run.call_args[1]["input"]
+        assert "PREAMBLE" in sent
+        assert "UI를 구현하세요" in sent
 
     def test_saves_output_json(self, executor):
         mock_result = MagicMock(returncode=0, stdout='{"ok": true}', stderr="")

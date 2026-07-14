@@ -45,6 +45,12 @@
       "dir": "persona-removal",
       "status": "completed",
       "completed_at": "2026-07-07T08:23:26+09:00"
+    },
+    {
+      "dir": "adr-split",
+      "status": "completed",
+      "started_at": "2026-07-14T09:48:26+0900",
+      "completed_at": "2026-07-14T10:12:19+0900"
     }
   ]
 }

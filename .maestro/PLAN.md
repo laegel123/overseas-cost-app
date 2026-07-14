@@ -5,7 +5,7 @@
 
 - 정식 인벤토리(체크리스트): `docs/TESTING.md §18-A`
 - 러너/빌드 전제: `.maestro/README.md`
-- 도입 근거: `docs/ADR.md ADR-066`
+- 도입 근거: `docs/adr/066-maestro-e2e.md`
 
 ---
 

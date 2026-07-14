@@ -1,0 +1,40 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "adr-split",
+  "steps": [
+    {
+      "step": 0,
+      "name": "adr-extract",
+      "status": "completed",
+      "started_at": "2026-07-14T09:48:26+0900",
+      "completed_at": "2026-07-14T10:01:57+0900",
+      "summary": "docs/adr/ 67개 추출(무손실 검증 통과), ADR-058 마커 미신설 보고, 스크립트 삭제, green"
+    },
+    {
+      "step": 1,
+      "name": "adr-068-and-index",
+      "status": "completed",
+      "started_at": "2026-07-14T10:01:57+0900",
+      "completed_at": "2026-07-14T10:07:28+0900",
+      "summary": "ADR-068 신규 + docs/ADR.md 68행 인덱스 재작성(본문 전량 파일 이동), green"
+    },
+    {
+      "step": 2,
+      "name": "refs-rewording",
+      "status": "completed",
+      "started_at": "2026-07-14T10:07:28+0900",
+      "completed_at": "2026-07-14T10:09:55+0900",
+      "summary": "워크플로우 문구 갱신(CLAUDE.md 2곳·UI_GUIDE·ARCHITECTURE·RELEASE·.maestro 2곳), 이력 문서 무변경, green"
+    },
+    {
+      "step": 3,
+      "name": "verify-gate",
+      "status": "completed",
+      "started_at": "2026-07-14T10:09:55+0900",
+      "completed_at": "2026-07-14T10:12:19+0900",
+      "summary": "bijection 68 + 인덱스↔파일 1:1 + 백링크 유효 + 잔존참조 유효 + green, 파일 변경 없음"
+    }
+  ],
+  "created_at": "2026-07-14T09:48:26+0900",
+  "completed_at": "2026-07-14T10:12:19+0900"
+}
