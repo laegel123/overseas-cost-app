@@ -84,3 +84,4 @@
 | [066](adr/066-maestro-e2e.md) | Maestro 기반 E2E | Active | iOS 시뮬레이터 + YAML 플로우 |
 | [067](adr/067-persona-removal.md) | 페르소나 개념 제거 + 온보딩 도시 선택 | Active | 통합 6카테고리 뷰, 온보딩=도시 선택 |
 | [068](adr/068-adr-doc-split.md) | ADR 문서 구조 = 인덱스 + 파일당 1 ADR 분할 | Active | 번호=주소, 새 ADR=새 파일 |
+| [069](adr/069-harness-doc-pull.md) | 하네스 가드레일 push → pull 전환 | Active | 색인만 주입, 본문은 step 이 Read |
