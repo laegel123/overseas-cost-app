@@ -48,7 +48,8 @@
     },
     {
       "dir": "adr-split",
-      "status": "pending"
+      "status": "in_progress",
+      "started_at": "2026-07-14T09:48:26+0900"
     }
   ]
 }

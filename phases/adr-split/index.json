@@ -5,10 +5,10 @@
     {
       "step": 0,
       "name": "adr-extract",
-      "status": "error",
+      "status": "completed",
       "started_at": "2026-07-14T09:48:26+0900",
-      "error_message": "[3회 시도 후 실패] Step did not update status",
-      "failed_at": "2026-07-14T09:48:34+0900"
+      "completed_at": "2026-07-14T10:10:00+0900",
+      "summary": "docs/adr/ 67개 추출(무손실 검증 통과), ADR-058 마커 미신설 보고, 스크립트 삭제, green"
     },
     {
       "step": 1,
