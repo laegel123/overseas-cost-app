@@ -1,0 +1,30 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "adr-split",
+  "steps": [
+    {
+      "step": 0,
+      "name": "adr-extract",
+      "status": "error",
+      "started_at": "2026-07-14T09:48:26+0900",
+      "error_message": "[3회 시도 후 실패] Step did not update status",
+      "failed_at": "2026-07-14T09:48:34+0900"
+    },
+    {
+      "step": 1,
+      "name": "adr-068-and-index",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "refs-rewording",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "verify-gate",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-07-14T09:48:26+0900"
+}
