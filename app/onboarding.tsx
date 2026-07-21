@@ -15,11 +15,10 @@
 
 import * as React from 'react';
 
-import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Image, Pressable, ScrollView, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
-import { Icon } from '@/components/Icon';
 import { RecentRow } from '@/components/RecentRow';
 import { RegionPill } from '@/components/RegionPill';
 import { Screen } from '@/components/Screen';
@@ -207,13 +206,13 @@ export default function OnboardingScreen(): React.ReactElement {
     <Screen scroll testID="onboarding-screen">
       {/* Hero section */}
       <View className="mt-6 gap-3">
-        {/* Hero icon */}
-        <View
-          className="w-14 h-14 rounded-hero-icon bg-orange items-center justify-center"
+        {/* Hero icon — 앱 아이콘(살까말까 마크)과 동일 (런처/스토어 아이콘과 일관) */}
+        <Image
+          source={require('../assets/icon.png')}
+          className="w-14 h-14 rounded-hero-icon"
           style={shadows.orangeCta}
-        >
-          <Icon name="globe" size={28} color={colors.white} strokeWidth={2.2} />
-        </View>
+          accessibilityLabel="살까말까"
+        />
 
         {/* Greeting */}
         <View className="gap-1">
