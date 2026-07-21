@@ -13,7 +13,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#FFFFFF"
+      "backgroundColor": "#FC6011"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -24,7 +24,7 @@
     },
     "android": {
       "package": "com.laegel.overseascostapp",
-      "versionCode": 1,
+      "versionCode": 3,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FC6011"
