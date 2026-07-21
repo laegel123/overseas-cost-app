@@ -27,9 +27,9 @@ PRD 기준 5개 핵심 화면을 hi-fi로 mock한 상태입니다.
 ### 1. Onboarding — 환영 + 페르소나 선택
 
 - **Purpose**: 설치 직후 1회. "어떤 분이신가요?" — 유학생 / 취업자 / 아직 모름. 이후 홈으로 진입.
-- **Layout**: 풀 세로 스택. 상단 24px 마진 → 글로브 아이콘(56×56, 주황 배경 18px 라운드) → 환영 메시지(2줄, 두 번째 줄 주황) → 짧은 설명 → "어떤 분이신가요?" 라벨 → 카드 3개 → 푸터 안내문.
+- **Layout**: 풀 세로 스택. 상단 24px 마진 → 앱 아이콘 이미지(56×56, 18px 라운드) → 환영 메시지(2줄, 두 번째 줄 주황) → 짧은 설명 → "어떤 분이신가요?" 라벨 → 카드 3개 → 푸터 안내문.
 - **Components**:
-  - **Hero icon**: 56×56, border-radius 18px, background `#FC6011`, shadow `0 8px 24px rgba(252,96,17,0.3)`. 흰색 글로브 아이콘 28px.
+  - **Hero icon**: 56×56, border-radius 18px, shadow `0 8px 24px rgba(252,96,17,0.3)`. 앱 아이콘 이미지(`assets/icon.png` — `#FC6011` 배경 + 흰색 `살까말까?` 마크, 런처·스토어 아이콘과 동일). *이전: 주황 배경 박스 + 흰색 globe 벡터 28px — globe 히어로로 되돌리지 말 것.*
   - **Greeting**: Manrope 800, 30px, 첫 줄 navy / 둘째 줄 orange. letter-spacing -0.02em, line-height 1.1.
   - **Persona card (primary, 유학생)**: padding 16px, border-radius 18px, border `1.5px solid #FC6011`, background `#FFF4ED`. 좌측 아이콘 박스 44×44 / 12px 라운드 / 주황 배경. Title `유학생` (Manrope 700, 14px). Sub `학비 · 셰어 · 식비 중심` (11px, gray-2). 우측 chevron 주황.
   - **Persona card (secondary, 취업자)**: 같은 골격, border `1px solid #E4ECF2`, background `#FFFFFF`, 아이콘 박스 `#F0F5F9`.
