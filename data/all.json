@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-03T02:09:42.434Z",
+  "generatedAt": "2026-08-03T12:28:03.115Z",
   "fxBaseDate": "2026-08-03",
   "cities": {
     "amsterdam": {
@@ -727,7 +727,7 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-05-02",
+      "lastUpdated": "2026-08-03",
       "rent": {
         "share": 1105,
         "studio": 1700,
@@ -736,7 +736,7 @@
       },
       "food": {
         "restaurantMeal": 19,
-        "cafe": 5.5,
+        "cafe": 9.3,
         "groceries": {
           "milk1L": 3.1,
           "eggs12": 4.2,
@@ -805,6 +805,12 @@
           "name": "Government visa fee pages (static estimates)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
           "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI",
+          "url": "https://www150.statcan.gc.ca/",
+          "accessedAt": "2026-08-03"
         }
       ]
     },
@@ -1769,7 +1775,7 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-05-02",
+      "lastUpdated": "2026-08-03",
       "rent": {
         "share": 1203,
         "studio": 1850,
@@ -1777,14 +1783,14 @@
         "twoBed": 2800
       },
       "food": {
-        "restaurantMeal": 22,
-        "cafe": 6,
+        "restaurantMeal": 19.47,
+        "cafe": 5.41,
         "groceries": {
-          "milk1L": 3.25,
-          "eggs12": 4.5,
-          "rice1kg": 3.8,
-          "chicken1kg": 15,
-          "bread": 3.5,
+          "milk1L": 6.44,
+          "eggs12": 8.56,
+          "rice1kg": 6.86,
+          "chicken1kg": 31.52,
+          "bread": 8.17,
           "onion1kg": 2.8,
           "apple1kg": 4.5,
           "ramen": 1.5
@@ -1847,6 +1853,12 @@
           "name": "Government visa fee pages (static estimates)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
           "accessedAt": "2026-05-02"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI",
+          "url": "https://www150.statcan.gc.ca/",
+          "accessedAt": "2026-08-03"
         }
       ]
     }
