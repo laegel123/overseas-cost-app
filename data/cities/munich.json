@@ -7,12 +7,12 @@
   "country": "DE",
   "currency": "EUR",
   "region": "eu",
-  "lastUpdated": "2026-05-03",
+  "lastUpdated": "2026-09-01",
   "rent": {
-    "share": 750,
-    "studio": 1150,
-    "oneBed": 1350,
-    "twoBed": 1900
+    "share": 1013,
+    "studio": 1553,
+    "oneBed": 1823,
+    "twoBed": 2565
   },
   "food": {
     "restaurantMeal": 13.2,
@@ -55,13 +55,13 @@
       "category": "rent",
       "name": "Destatis GENESIS + static estimates",
       "url": "https://www.destatis.de/EN/Themes/Society-Environment/Housing/_node.html",
-      "accessedAt": "2026-05-03"
+      "accessedAt": "2026-09-01"
     },
     {
       "category": "food",
       "name": "Destatis CPI + static estimates",
       "url": "https://www.destatis.de/EN/Themes/Economy/Prices/_node.html",
-      "accessedAt": "2026-05-03"
+      "accessedAt": "2026-09-01"
     },
     {
       "category": "transport",
