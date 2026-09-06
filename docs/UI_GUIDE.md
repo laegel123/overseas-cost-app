@@ -146,6 +146,10 @@ border-radius
 - 막대: SEO=gray, CITY=orange, 8px height, 4px radius, track `#F0F5F9`. 좌측 라벨 28px width / 우측 값 56px width 11px right.
 - **Hot rule**: `mult >= 2.0 || hot === true` → 아이콘 박스 + 배수 텍스트 orange.
 - 신규(서울에 없는 항목, 비자 등): mult `'신규'` 표기, 배수 색은 navy.
+- **접근성 구조**: 카드 = 하나의 `button` 요소 (`accessibilityLabel="{카테고리} 비교 카드"`) — 탭하면 Detail 진입.
+  합산 포함 토글은 그 button **밖의 독립 `switch` 요소** (`accessibilityLabel="{카테고리} 합산 포함"` + `accessibilityState.checked`).
+  Switch 를 button 안에 두면 iOS 가 카드를 단일 접근성 요소로 묶어 토글이 VoiceOver·E2E 트리에서 사라진다 (`.maestro/GOTCHAS.md` §5).
+  → 시각 컨테이너(View, 카드 border/radius/opacity) 안에 탭 영역 Pressable(`p-3`) 과 Switch(`absolute top-3 right-3`) 를 형제로 배치.
 
 ### GroceryRow (Detail 식재료 행)
 

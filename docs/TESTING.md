@@ -1588,6 +1588,16 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] 토글 a11y — `accessibilityRole='switch'` + `accessibilityLabel='${label} 합산 포함'`
 - [x] `included=false` + `onToggleInclude` 미지정 → 배지/opacity 적용은 되지만 토글 자체는 미렌더 (시각 상태만 표현)
 
+**토글 접근성 구조 (e2e-defects step 2 — `.maestro/GOTCHAS.md` §5):**
+
+- [x] `included=true` → 토글 `accessibilityState.checked === true`
+- [x] `included=false` → 토글 `accessibilityState.checked === false`
+- [x] 불변식 A — 토글의 조상 체인에 `accessible === true` / `accessibilityRole === 'button'` 요소 없음 (iOS 가 카드를 단일 접근성 요소로 묶어 토글을 삼키는 결함 회귀 방지)
+- [x] 불변식 B — 탭 영역은 `button` 요소 **1개** (`accessibilityLabel = '${label} 비교 카드'`), press → `onPress`; 토글 `valueChange` → `onToggleInclude` 만 호출되고 `onPress` 는 미호출
+- [x] 불변식 B — `onPress` 미지정 → `button` 요소 없음, 토글은 여전히 렌더
+- [x] 불변식 C·D — root `testID` = 시각 컨테이너 (`rounded-card` + `border-line` + opacity), 탭 영역이 카드 padding (`p-3`) 보유
+- [x] 불변식 C — 토글 있으면 배수 텍스트 우측에 tailwind 토큰 여백 (`mr-14`), 없으면 여백 없음 (매직 px 금지)
+
 ### 9.18 `src/components/FavCard.tsx`
 
 **accent variant:**

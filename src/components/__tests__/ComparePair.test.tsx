@@ -197,8 +197,9 @@ describe('ComparePair', () => {
     it('onPress 정의 시 탭 동작', () => {
       const onPress = jest.fn();
       renderPair({ onPress });
-      const card = screen.getByTestId('compare-pair');
-      fireEvent.press(card);
+      // root testID 는 시각 컨테이너, 탭 영역은 그 안의 단일 button 요소
+      // (e2e-defects step 2 — 불변식 B).
+      fireEvent.press(screen.getByRole('button'));
       expect(onPress).toHaveBeenCalledTimes(1);
     });
 
@@ -207,6 +208,7 @@ describe('ComparePair', () => {
       render(<ComparePair {...propsWithoutOnPress} />);
       const card = screen.getByTestId('compare-pair');
       expect(card.props.accessibilityRole).not.toBe('button');
+      expect(screen.queryByRole('button')).toBeNull();
     });
 
     it('onPress 정의 시 accessibilityLabel 에 카테고리 라벨 포함 (PR #16 review 이슈 2)', () => {
@@ -287,6 +289,94 @@ describe('ComparePair', () => {
       expect(badge).toBeTruthy();
       const card = screen.getByTestId('compare-pair');
       expect(card.props.style).toMatchObject({ opacity: 0.55 });
+    });
+  });
+
+  describe('토글 접근성 구조 (e2e-defects step 2)', () => {
+    /** testID 요소의 조상 체인을 루트까지 배열로 수집. */
+    function ancestorsOf(testID: string): ReturnType<typeof screen.getByTestId>[] {
+      const chain: ReturnType<typeof screen.getByTestId>[] = [];
+      let node = screen.getByTestId(testID).parent;
+      while (node !== null) {
+        chain.push(node);
+        node = node.parent;
+      }
+      return chain;
+    }
+
+    /** 조상들의 className 을 하나의 문자열로 (레이아웃 클래스 존재 여부 단정용). */
+    function ancestorClassNames(testID: string): string {
+      return ancestorsOf(testID)
+        .map((node) => node.props.className)
+        .filter((cn) => typeof cn === 'string')
+        .join(' ');
+    }
+
+    it('included=true → accessibilityState.checked=true', () => {
+      renderPair({ included: true, onToggleInclude: jest.fn() });
+      const toggle = screen.getByTestId('compare-pair-toggle');
+      expect(toggle.props.accessibilityState).toMatchObject({ checked: true });
+    });
+
+    it('included=false → accessibilityState.checked=false', () => {
+      renderPair({ included: false, onToggleInclude: jest.fn() });
+      const toggle = screen.getByTestId('compare-pair-toggle');
+      expect(toggle.props.accessibilityState).toMatchObject({ checked: false });
+    });
+
+    it('불변식 A — 토글 조상 중 accessible 컨테이너·button 역할 없음 (iOS 접근성 트리에서 개별 요소로 노출)', () => {
+      renderPair({ onPress: jest.fn(), onToggleInclude: jest.fn() });
+      const chain = ancestorsOf('compare-pair-toggle');
+      // 컴포넌트 루트까지 실제로 올라갔는지 확인 (체인이 비어 단정이 무의미해지는 것 방지)
+      expect(chain.length).toBeGreaterThan(0);
+      chain.forEach((node) => {
+        expect(node.props.accessible).not.toBe(true);
+        expect(node.props.accessibilityRole).not.toBe('button');
+      });
+    });
+
+    it('불변식 B — 탭 영역은 단일 button 요소 (라벨 "${label} 비교 카드"), 토글 조작은 onPress 를 부르지 않음', () => {
+      const onPress = jest.fn();
+      const onToggleInclude = jest.fn();
+      renderPair({ label: '월세', included: true, onPress, onToggleInclude });
+
+      const buttons = screen.getAllByRole('button');
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0].props.accessibilityLabel).toBe('월세 비교 카드');
+      fireEvent.press(buttons[0]);
+      expect(onPress).toHaveBeenCalledTimes(1);
+
+      fireEvent(screen.getByTestId('compare-pair-toggle'), 'valueChange', false);
+      expect(onToggleInclude).toHaveBeenCalledWith(false);
+      expect(onPress).toHaveBeenCalledTimes(1);
+    });
+
+    it('불변식 B — onPress 미지정 시 button 요소 없이도 토글은 렌더', () => {
+      const { onPress: _, ...propsWithoutOnPress } = defaultProps;
+      render(
+        <ComparePair {...propsWithoutOnPress} onToggleInclude={jest.fn()} />,
+      );
+      expect(screen.queryByRole('button')).toBeNull();
+      expect(screen.getByTestId('compare-pair-toggle')).toBeTruthy();
+    });
+
+    it('불변식 C·D — root testID = 시각 컨테이너(카드 border/radius + opacity), 탭 영역이 카드 padding(p-3) 을 가짐', () => {
+      renderPair({ onPress: jest.fn(), onToggleInclude: jest.fn() });
+      const card = screen.getByTestId('compare-pair');
+      expect(card.props.className).toContain('rounded-card');
+      expect(card.props.className).toContain('border-line');
+      expect(card.props.style).toMatchObject({ opacity: 1 });
+      expect(screen.getByRole('button').props.className).toContain('p-3');
+    });
+
+    it('불변식 C — 토글이 있으면 배수 텍스트 우측에 Switch 폭만큼 여백 (tailwind 토큰 mr-14)', () => {
+      renderPair({ onToggleInclude: jest.fn() });
+      expect(ancestorClassNames('compare-pair-mult')).toContain('mr-14');
+    });
+
+    it('불변식 C — 토글이 없으면 여백도 없음', () => {
+      renderPair();
+      expect(ancestorClassNames('compare-pair-mult')).not.toContain('mr-14');
     });
   });
 });

@@ -7,8 +7,14 @@
  * 포함/제외 토글 (ADR-062):
  *   사용자가 카드별 Switch 로 hero 합산에 포함할지 결정. 미포함 카드는 화면에서
  *   숨기지 않고 카드 전체 opacity + "제외됨" 배지 + 토글 OFF 색 = 3중 인코딩
- *   으로 표시. 토글은 자체 native 터치 영역을 가지므로 부모 Pressable 의 onPress
- *   (Detail 진입) 와 충돌하지 않는다.
+ *   으로 표시.
+ *
+ * 접근성 구조 (e2e-defects step 2):
+ *   시각 컨테이너(View, root testID) > 탭 영역(Pressable, 단일 button 요소) 과
+ *   Switch 를 **형제**로 둔다. Switch 가 accessible Pressable 의 자손이면 iOS 가
+ *   카드를 하나의 접근성 요소로 묶어 토글이 VoiceOver·E2E 트리에서 개별 요소로
+ *   노출되지 않는다 (.maestro/GOTCHAS.md §5). Switch 는 헤더 우측 끝에 카드
+ *   padding 과 같은 오프셋(top-3/right-3)으로 절대 배치한다.
  */
 
 import * as React from 'react';
@@ -111,13 +117,11 @@ export function ComparePair({
     [onToggleInclude],
   );
 
-  const card = (
-    <View
-      style={{ opacity: included ? 1 : EXCLUDED_CARD_OPACITY }}
-      className="bg-white border border-line rounded-card p-3"
-      testID={testID}
-    >
-      {/* 헤더: 아이콘 박스 + 라벨 (+ "제외됨" 배지) / 배수 + 토글 */}
+  const hasToggle = onToggleInclude !== undefined;
+
+  const content = (
+    <>
+      {/* 헤더: 아이콘 박스 + 라벨 (+ "제외됨" 배지) / 배수 */}
       <View className="flex-row items-center justify-between mb-2 gap-2">
         <View className="flex-row items-center gap-2 flex-1 min-w-0">
           <View
@@ -142,7 +146,11 @@ export function ComparePair({
             </View>
           )}
         </View>
-        <View className="flex-row items-center gap-2 shrink-0">
+        {/* Switch 는 이 Pressable 밖에 절대 배치되므로 (파일 상단 주석) 겹치지
+            않도록 Switch 폭만큼 우측 여백을 둔다. */}
+        <View
+          className={`flex-row items-center gap-2 shrink-0${hasToggle ? ' mr-14' : ''}`}
+        >
           <H3
             color={multColor}
             numberOfLines={1}
@@ -151,18 +159,6 @@ export function ComparePair({
           >
             {multText}
           </H3>
-          {onToggleInclude !== undefined && (
-            <Switch
-              value={included}
-              onValueChange={handleToggle}
-              trackColor={{ false: colors.line, true: colors.orange }}
-              thumbColor={colors.white}
-              ios_backgroundColor={colors.line}
-              accessibilityRole="switch"
-              accessibilityLabel={`${label} 합산 포함`}
-              {...(testID !== undefined ? { testID: `${testID}-toggle` } : {})}
-            />
-          )}
         </View>
       </View>
 
@@ -225,20 +221,43 @@ export function ComparePair({
           </Small>
         </View>
       </View>
-    </View>
+    </>
   );
 
-  if (onPress !== undefined) {
-    return (
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={`${label} 비교 카드`}
-      >
-        {card}
-      </Pressable>
-    );
-  }
+  return (
+    <View
+      style={{ opacity: included ? 1 : EXCLUDED_CARD_OPACITY }}
+      className="bg-white border border-line rounded-card"
+      testID={testID}
+    >
+      {onPress !== undefined ? (
+        <Pressable
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={`${label} 비교 카드`}
+          className="p-3"
+        >
+          {content}
+        </Pressable>
+      ) : (
+        <View className="p-3">{content}</View>
+      )}
 
-  return card;
+      {hasToggle && (
+        <View className="absolute top-3 right-3">
+          <Switch
+            value={included}
+            onValueChange={handleToggle}
+            trackColor={{ false: colors.line, true: colors.orange }}
+            thumbColor={colors.white}
+            ios_backgroundColor={colors.line}
+            accessibilityRole="switch"
+            accessibilityLabel={`${label} 합산 포함`}
+            accessibilityState={{ checked: included }}
+            {...(testID !== undefined ? { testID: `${testID}-toggle` } : {})}
+          />
+        </View>
+      )}
+    </View>
+  );
 }
