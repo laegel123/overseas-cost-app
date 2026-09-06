@@ -16,7 +16,7 @@
       "status": "completed",
       "started_at": "2026-09-06T16:18:51+0900",
       "summary": "app/detail/[cityId]/[category].tsx 행 렌더링의 `mult={typeof mult === 'number' ? mult : 1}` 강등 제거 → computeMultiplier 결과(number | '신규')를 GroceryRow 에 그대로 전달. 회귀 테스트 3건 추가 (app/detail/__tests__/[category].test.tsx: tuition row '신규'·'1.0×' 아님 단언으로 기존 테스트 확장, visa detail-row-visa-fee '신규' 신규 테스트, food detail-row-restaurantMeal '↑2.1×' 숫자 배수 회귀 방지). docs/TESTING.md §9.25 인벤토리 3개 항목 갱신 (visa '신규' 표시 deferred [ ] → [x]).",
-      "completed_at": "2026-09-06T16:24:00+0900"
+      "completed_at": "2026-09-06T16:21:45+0900"
     },
     {
       "step": 2,
