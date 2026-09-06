@@ -31,7 +31,8 @@
       "name": "compare-pair-bar-columns",
       "status": "completed",
       "started_at": "2026-09-06T16:34:00+0900",
-      "summary": "ComparePair 막대 영역을 컬럼 우선(column-major) 레이아웃으로 전환 — 라벨/값 고정 폭(w-7/w-14) 제거, 라벨·값 컬럼 shrink-0(값은 items-end) + 막대 컬럼 flex-1 min-w-0, 두 행을 컬럼별로 세로로 쌓아 폭을 긴 쪽에 맞춰 서울/도시 막대 x 정렬 유지. 세 컬럼 셀 높이 h-4(=Small line-height)·행 간격 gap-1.5 통일(토큰만, 매직 px 없음), 색상·폰트·track/fill·testID·numberOfLines=1 불변. ComparePair.test.tsx 레이아웃 테스트 5건 추가(고정 폭 부재, 컬럼 flex 규칙, 긴 입력 샌프란시스코/1234.5만원 무잘림, 셀 높이·간격 동일, 스타일 유지) → 51건 통과. 전체 88 suite/1935 테스트 통과, typecheck·lint OK. docs/UI_GUIDE.md §ComparePair 명세 교체(28/56px 는 SEO/VAN 원안 근거 명시), docs/TESTING.md §9.17 인벤토리 5행 추가. 시각 확인은 /verify-e2e 세션에서."
+      "summary": "ComparePair 막대 영역을 컬럼 우선(column-major) 레이아웃으로 전환 — 라벨/값 고정 폭(w-7/w-14) 제거, 라벨·값 컬럼 shrink-0(값은 items-end) + 막대 컬럼 flex-1 min-w-0, 두 행을 컬럼별로 세로로 쌓아 폭을 긴 쪽에 맞춰 서울/도시 막대 x 정렬 유지. 세 컬럼 셀 높이 h-4(=Small line-height)·행 간격 gap-1.5 통일(토큰만, 매직 px 없음), 색상·폰트·track/fill·testID·numberOfLines=1 불변. ComparePair.test.tsx 레이아웃 테스트 5건 추가(고정 폭 부재, 컬럼 flex 규칙, 긴 입력 샌프란시스코/1234.5만원 무잘림, 셀 높이·간격 동일, 스타일 유지) → 51건 통과. 전체 88 suite/1935 테스트 통과, typecheck·lint OK. docs/UI_GUIDE.md §ComparePair 명세 교체(28/56px 는 SEO/VAN 원안 근거 명시), docs/TESTING.md §9.17 인벤토리 5행 추가. 시각 확인은 /verify-e2e 세션에서.",
+      "completed_at": "2026-09-06T16:31:56+0900"
     },
     {
       "step": 4,
