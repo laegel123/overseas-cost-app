@@ -1,0 +1,15 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "in-app-policy-pages",
+  "steps": [
+    { "step": 0, "name": "source-urls", "status": "pending" },
+    { "step": 1, "name": "category-meta", "status": "pending" },
+    { "step": 2, "name": "source-registry", "status": "pending" },
+    { "step": 3, "name": "sources-index", "status": "pending" },
+    { "step": 4, "name": "sources-city", "status": "pending" },
+    { "step": 5, "name": "privacy-content", "status": "pending" },
+    { "step": 6, "name": "privacy-screen", "status": "pending" },
+    { "step": 7, "name": "settings-wiring", "status": "pending" },
+    { "step": 8, "name": "docs-sync", "status": "pending" }
+  ]
+}
