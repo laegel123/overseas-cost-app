@@ -598,6 +598,7 @@ class TestRunCmd:
         assert args.timeout == 1800
         assert args.verbose is False
         assert args.push is False
+        assert args.once is False
 
     def test_from_step(self):
         args = self._capture_run_args(["my-phase", "--from-step", "2"])
@@ -618,6 +619,26 @@ class TestRunCmd:
     def test_push(self):
         args = self._capture_run_args(["my-phase", "--push"])
         assert args.push is True
+
+    def test_once(self):
+        args = self._capture_run_args(["my-phase", "--once"])
+        assert args.once is True
+
+    def test_once_forwarded_to_executor(self):
+        """cmd_run 이 --once 를 StepExecutor 로 넘기는지 검증."""
+        captured = {}
+
+        class FakeExecutor:
+            def __init__(self, phase_dir, **kwargs):
+                captured.update(kwargs)
+
+            def run(self):
+                pass
+
+        args = self._capture_run_args(["my-phase", "--once"])
+        with patch.object(ex, "StepExecutor", FakeExecutor):
+            ex.cmd_run(args)
+        assert captured["once"] is True
 
 
 # ---------------------------------------------------------------------------
@@ -1773,3 +1794,153 @@ class TestPhaseSummary:
         inst = self._make_executor_with_index(tmp_project, summary_index)
         output = self._capture_summary(inst, summary_index)
         assert "─" in output
+
+
+# ---------------------------------------------------------------------------
+# --once (single-step mode, ADR-073)
+# ---------------------------------------------------------------------------
+
+class TestOnceMode:
+    """--once: pending step 하나만 실행하고 종료한다."""
+
+    @pytest.fixture
+    def multi_pending(self, tmp_project):
+        """pending step 3개를 가진 phase 디렉토리."""
+        d = tmp_project / "phases" / "multi"
+        d.mkdir()
+        index = {
+            "project": "TestProject",
+            "phase": "multi",
+            "steps": [
+                {"step": 0, "name": "a", "status": "pending"},
+                {"step": 1, "name": "b", "status": "pending"},
+                {"step": 2, "name": "c", "status": "pending"},
+            ],
+        }
+        (d / "index.json").write_text(json.dumps(index, indent=2, ensure_ascii=False))
+        for i in range(3):
+            (d / f"step{i}.md").write_text(f"# Step {i}")
+        return d
+
+    def _make_executor(self, tmp_project, **kwargs):
+        with patch.object(ex, "ROOT", tmp_project):
+            return ex.StepExecutor("multi", **kwargs)
+
+    def _stub_single_step(self, inst, calls):
+        """_execute_single_step 을 '해당 step 을 completed 로 마킹' 으로 대체."""
+        def _fake(step, doc_index):
+            calls.append(step["step"])
+            index = inst._read_json(inst._index_file)
+            for s in index["steps"]:
+                if s["step"] == step["step"]:
+                    s["status"] = "completed"
+            inst._write_json(inst._index_file, index)
+            return True
+        inst._execute_single_step = _fake
+
+    # --- 실행 개수 ---
+
+    def test_runs_exactly_one_step(self, tmp_project, multi_pending):
+        inst = self._make_executor(tmp_project, once=True)
+        calls = []
+        self._stub_single_step(inst, calls)
+
+        inst._execute_all_steps("")
+
+        assert calls == [0]
+        statuses = [s["status"] for s in inst._read_json(inst._index_file)["steps"]]
+        assert statuses == ["completed", "pending", "pending"]
+
+    def test_resumes_at_next_pending(self, tmp_project, multi_pending):
+        """이미 completed 인 step 은 건너뛰고 다음 pending 부터 실행한다."""
+        index = json.loads((multi_pending / "index.json").read_text())
+        index["steps"][0]["status"] = "completed"
+        (multi_pending / "index.json").write_text(json.dumps(index, ensure_ascii=False))
+
+        inst = self._make_executor(tmp_project, once=True)
+        calls = []
+        self._stub_single_step(inst, calls)
+
+        inst._execute_all_steps("")
+
+        assert calls == [1]
+
+    def test_without_once_runs_all_steps(self, tmp_project, multi_pending):
+        """회귀: --once 없으면 기존대로 전부 실행한다."""
+        inst = self._make_executor(tmp_project)
+        calls = []
+        self._stub_single_step(inst, calls)
+
+        assert inst._execute_all_steps("") is True
+        assert calls == [0, 1, 2]
+
+    # --- 반환값 (finalize 여부를 결정한다) ---
+
+    def test_returns_false_when_steps_remain(self, tmp_project, multi_pending):
+        inst = self._make_executor(tmp_project, once=True)
+        self._stub_single_step(inst, [])
+        assert inst._execute_all_steps("") is False
+
+    def test_returns_true_on_last_pending(self, tmp_project, multi_pending):
+        """마지막 pending 을 --once 로 끝내면 finalize 로 이어진다."""
+        index = json.loads((multi_pending / "index.json").read_text())
+        for s in index["steps"][:2]:
+            s["status"] = "completed"
+        (multi_pending / "index.json").write_text(json.dumps(index, ensure_ascii=False))
+
+        inst = self._make_executor(tmp_project, once=True)
+        self._stub_single_step(inst, [])
+        assert inst._execute_all_steps("") is True
+
+    # --- --from-step 조합 ---
+
+    def test_respects_from_step(self, tmp_project, multi_pending):
+        inst = self._make_executor(tmp_project, once=True, from_step=2)
+        calls = []
+        self._stub_single_step(inst, calls)
+
+        # step 2 가 --from-step 범위의 마지막 pending → True
+        assert inst._execute_all_steps("") is True
+        assert calls == [2]
+
+    # --- 안내 출력 ---
+
+    def test_prints_next_command_with_remaining(self, tmp_project, multi_pending, capsys):
+        inst = self._make_executor(tmp_project, once=True)
+        self._stub_single_step(inst, [])
+
+        inst._execute_all_steps("")
+
+        out = capsys.readouterr().out
+        assert "--once" in out
+        assert "남은 step 2개" in out
+
+    def test_header_shows_mode(self, tmp_project, multi_pending, capsys):
+        inst = self._make_executor(tmp_project, once=True)
+        inst._print_header()
+        assert "single-step" in capsys.readouterr().out
+
+    def test_header_omits_mode_without_once(self, tmp_project, multi_pending, capsys):
+        inst = self._make_executor(tmp_project)
+        inst._print_header()
+        assert "single-step" not in capsys.readouterr().out
+
+    # --- run() 통합: finalize 호출 여부 ---
+
+    def _run_with_stubs(self, tmp_project, inst):
+        calls = []
+        self._stub_single_step(inst, calls)
+        finalized = []
+        inst._finalize = lambda: finalized.append(True)
+        inst._checkout_branch = lambda: None
+        with patch.object(ex, "ROOT", tmp_project):
+            inst.run()
+        return finalized
+
+    def test_run_skips_finalize_when_steps_remain(self, tmp_project, multi_pending):
+        inst = self._make_executor(tmp_project, once=True)
+        assert self._run_with_stubs(tmp_project, inst) == []
+
+    def test_run_finalizes_when_all_done(self, tmp_project, multi_pending):
+        inst = self._make_executor(tmp_project)
+        assert self._run_with_stubs(tmp_project, inst) == [True]
