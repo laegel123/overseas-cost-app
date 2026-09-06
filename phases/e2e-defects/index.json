@@ -24,7 +24,7 @@
       "status": "completed",
       "started_at": "2026-09-06T16:21:45+0900",
       "summary": "ComparePair 합산 토글 접근성 구조 분리 — Switch 를 카드 Pressable(accessibilityRole=button) 자손에서 빼내 시각 컨테이너(root testID, bg/border/rounded-card/opacity) 직속 형제로 절대 배치(absolute top-3 right-3), 탭 영역 Pressable 은 p-3 + 배수 텍스트 우측 mr-14 여백(tailwind 토큰만, 매직 px 없음). Switch 에 accessibilityState={{checked: included}} 추가. testID 7종·라벨·토글 의미 모두 불변. ComparePair.test.tsx 접근성 구조 테스트 8건 추가(checked true/false, 불변식 A 조상 체인 검사, 불변식 B button 단일성·press 분리 2건, 불변식 C·D 컨테이너/padding, mr-14 유무 2건) + 기존 'onPress 탭' 테스트를 button 요소 기준으로 갱신 → 46건 통과. docs/TESTING.md §9.17 인벤토리, docs/UI_GUIDE.md §ComparePair 접근성 구조, .maestro/GOTCHAS.md §5 관찰 사례 갱신. 전체 88 suite/1930 테스트 통과, typecheck·lint OK. 시각·VoiceOver 확인은 /verify-e2e 세션에서 (부팅된 시뮬레이터 없음).",
-      "completed_at": "2026-09-06T16:34:00+0900"
+      "completed_at": "2026-09-06T16:28:11+0900"
     },
     {
       "step": 3,
