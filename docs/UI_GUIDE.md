@@ -157,6 +157,7 @@ border-radius
   합산 포함 토글은 그 button **밖의 독립 `switch` 요소** (`accessibilityLabel="{카테고리} 합산 포함"` + `accessibilityState.checked`).
   Switch 를 button 안에 두면 iOS 가 카드를 단일 접근성 요소로 묶어 토글이 VoiceOver·E2E 트리에서 사라진다 (`.maestro/GOTCHAS.md` §5).
   → 시각 컨테이너(View, 카드 border/radius/opacity) 안에 탭 영역 Pressable(`p-3`) 과 Switch(`absolute top-3 right-3`) 를 형제로 배치.
+  Switch 가 흐름 밖으로 나가므로 헤더 우측 배수 텍스트에 `mr-20`(80px) 여백을 준다 — iOS Switch 의 **실측** 폭은 63pt(RN 문서상 51pt 아님, `maestro hierarchy` 측정)라 `right-3`(12pt) 오프셋까지 75pt 를 비워야 한다. `mr-14`(56px) 는 16pt 부족해 배수 텍스트가 가려진다.
 
 ### GroceryRow (Detail 식재료 행)
 

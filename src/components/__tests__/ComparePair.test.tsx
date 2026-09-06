@@ -369,14 +369,21 @@ describe('ComparePair', () => {
       expect(screen.getByRole('button').props.className).toContain('p-3');
     });
 
-    it('불변식 C — 토글이 있으면 배수 텍스트 우측에 Switch 폭만큼 여백 (tailwind 토큰 mr-14)', () => {
+    // 여백 값은 iOS Switch 실측 폭 63pt + right-3(12pt) = 75pt 를 덮어야 한다.
+    // mr-14(56px) 은 16pt 부족해 배수 텍스트가 Switch 에 가려졌다 (실측 회귀).
+    it('불변식 C — 토글이 있으면 배수 텍스트 우측에 Switch 폭만큼 여백 (mr-20 = 80px ≥ 75pt)', () => {
       renderPair({ onToggleInclude: jest.fn() });
-      expect(ancestorClassNames('compare-pair-mult')).toContain('mr-14');
+      expect(ancestorClassNames('compare-pair-mult')).toContain('mr-20');
+    });
+
+    it('불변식 C — 여백이 Switch 를 덮기에 부족한 mr-14 로 되돌아가지 않는다', () => {
+      renderPair({ onToggleInclude: jest.fn() });
+      expect(ancestorClassNames('compare-pair-mult')).not.toContain('mr-14');
     });
 
     it('불변식 C — 토글이 없으면 여백도 없음', () => {
       renderPair();
-      expect(ancestorClassNames('compare-pair-mult')).not.toContain('mr-14');
+      expect(ancestorClassNames('compare-pair-mult')).not.toContain('mr-20');
     });
   });
 

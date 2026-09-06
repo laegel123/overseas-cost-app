@@ -147,9 +147,12 @@ export function ComparePair({
           )}
         </View>
         {/* Switch 는 이 Pressable 밖에 절대 배치되므로 (파일 상단 주석) 겹치지
-            않도록 Switch 폭만큼 우측 여백을 둔다. */}
+            않도록 Switch 폭만큼 우측 여백을 둔다.
+            iOS Switch 의 실측 폭은 63pt 다 (RN 문서상 51pt 가 아니다 —
+            maestro hierarchy 로 측정). right-3(12pt) 오프셋을 더하면 75pt 를
+            비워야 하므로 mr-20(80px) 을 쓴다. mr-16(64px) 은 부족하다. */}
         <View
-          className={`flex-row items-center gap-2 shrink-0${hasToggle ? ' mr-14' : ''}`}
+          className={`flex-row items-center gap-2 shrink-0${hasToggle ? ' mr-20' : ''}`}
         >
           <H3
             color={multColor}

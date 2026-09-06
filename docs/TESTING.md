@@ -1596,7 +1596,8 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] 불변식 B — 탭 영역은 `button` 요소 **1개** (`accessibilityLabel = '${label} 비교 카드'`), press → `onPress`; 토글 `valueChange` → `onToggleInclude` 만 호출되고 `onPress` 는 미호출
 - [x] 불변식 B — `onPress` 미지정 → `button` 요소 없음, 토글은 여전히 렌더
 - [x] 불변식 C·D — root `testID` = 시각 컨테이너 (`rounded-card` + `border-line` + opacity), 탭 영역이 카드 padding (`p-3`) 보유
-- [x] 불변식 C — 토글 있으면 배수 텍스트 우측에 tailwind 토큰 여백 (`mr-14`), 없으면 여백 없음 (매직 px 금지)
+- [x] 불변식 C — 토글 있으면 배수 텍스트 우측에 tailwind 토큰 여백 (`mr-20` = 80px ≥ Switch 실측 63pt + `right-3` 12pt), 없으면 여백 없음 (매직 px 금지)
+- [x] 불변식 C — 여백이 `mr-14`(56px) 로 되돌아가지 않음 (16pt 부족해 배수 텍스트가 Switch 에 가려지던 회귀 방지)
 
 **막대 영역 레이아웃 (e2e-defects step 3 — 도시명·금액 잘림 결함):**
 
