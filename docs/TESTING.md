@@ -1598,6 +1598,14 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] 불변식 C·D — root `testID` = 시각 컨테이너 (`rounded-card` + `border-line` + opacity), 탭 영역이 카드 padding (`p-3`) 보유
 - [x] 불변식 C — 토글 있으면 배수 텍스트 우측에 tailwind 토큰 여백 (`mr-14`), 없으면 여백 없음 (매직 px 금지)
 
+**막대 영역 레이아웃 (e2e-defects step 3 — 도시명·금액 잘림 결함):**
+
+- [x] 불변식 A — 라벨(`sLabel`/`cLabel`)·값(`sValue`/`cValue`) 텍스트 className 에 고정 폭 `w-7`/`w-14` 없음
+- [x] 불변식 A — 라벨·값 컬럼 `shrink-0` (값 컬럼은 `items-end`), 막대 컬럼 `flex-1 min-w-0`
+- [x] 불변식 A — 긴 입력(`cLabel='샌프란시스코'`, `cValue='1234.5만원'`, `sValue='368.9만원'`) 이 생략 없이 그대로 렌더 + `numberOfLines === 1` (안전망 유지)
+- [x] 불변식 B — 세 컬럼의 행 간격(`gap-1.5`) 과 6개 셀 높이(`h-4 justify-center`) 가 동일 → 두 행 막대가 같은 x 에서 시작·끝남
+- [x] 불변식 C — 색상(`text-gray-2`/`text-orange`/`text-navy`)·폰트(`font-manrope-semibold`)·막대(track `h-2 bg-light rounded`, fill `bg-gray`/`bg-orange`) 스타일 유지
+
 ### 9.18 `src/components/FavCard.tsx`
 
 **accent variant:**

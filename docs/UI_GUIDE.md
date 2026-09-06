@@ -143,7 +143,14 @@ border-radius
 
 - 카드 padding 12, radius 16, white bg, 1px line border.
 - 헤더: 좌측 32×32 아이콘 박스(hot 시 `#FFE9DC` + orange icon, 정상은 `#F0F5F9` + navy icon) + 라벨 14 Manrope 700 / 우측 배수 14 Manrope 800.
-- 막대: SEO=gray, CITY=orange, 8px height, 4px radius, track `#F0F5F9`. 좌측 라벨 28px width / 우측 값 56px width 11px right.
+- 막대: SEO=gray, CITY=orange, 8px height, 4px radius, track `#F0F5F9`.
+  **컬럼 우선(column-major) 레이아웃** — 좌측 라벨·우측 값은 내용 폭(`shrink-0`, 고정 `w-*` 없음),
+  막대가 `flex-1 min-w-0` 으로 남는 폭을 흡수. 두 행의 라벨/값을 각각 세로로 쌓아 컬럼 폭을 긴 쪽에
+  맞추므로 서울 행과 도시 행의 막대가 같은 x 에서 시작·끝난다 (듀얼 바 = 길이 비교이므로 정렬이 전제).
+  세 컬럼의 셀 높이(`h-4` = Small line-height)와 행 간격(`gap-1.5`)은 동일. 값은 우측 정렬.
+  `design/README.md` §3 의 "라벨 28px / 값 56px width" 는 `SEO`/`VAN` 3글자 코드 원안 기준이며,
+  구현은 한글 도시명(최대 6자: 샌프란시스코)과 `formatKRW()` 문자열(`368.9만원`·`1.2억원`)을 받으므로
+  고정 폭이면 잘린다 (e2e-defects step 3).
 - **Hot rule**: `mult >= 2.0 || hot === true` → 아이콘 박스 + 배수 텍스트 orange.
 - 신규(서울에 없는 항목, 비자 등): mult `'신규'` 표기, 배수 색은 navy.
 - **접근성 구조**: 카드 = 하나의 `button` 요소 (`accessibilityLabel="{카테고리} 비교 카드"`) — 탭하면 Detail 진입.

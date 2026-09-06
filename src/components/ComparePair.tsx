@@ -162,63 +162,84 @@ export function ComparePair({
         </View>
       </View>
 
-      {/* 막대 영역 */}
-      <View className="gap-1.5">
-        {/* 서울 행 */}
-        <View className="flex-row items-center gap-2">
-          <Small
-            color="gray-2"
-            numberOfLines={1}
-            className="w-7 font-manrope-bold"
-          >
-            {sLabel}
-          </Small>
-          <View className="flex-1 h-2 bg-light rounded">
-            {sw > 0 && (
-              <View
-                style={{ width: `${sw * 100}%` }}
-                className="h-2 bg-gray rounded"
-                {...(testID !== undefined ? { testID: `${testID}-bar-seoul` } : {})}
-              />
-            )}
+      {/* 막대 영역 — 컬럼 우선(column-major) 구조.
+          불변식 B: 라벨/값을 행마다 auto 폭으로 두면 "서울" 과 "샌프란시스코"
+          처럼 라벨 길이가 다를 때 두 막대의 시작·끝 x 가 어긋나 길이 비교라는
+          듀얼 바의 존재 이유가 깨진다. 컬럼별로 두 행을 세로로 쌓아 폭을 긴
+          쪽에 맞추고, 세 컬럼의 셀 높이(h-4 = Small line-height)와 행 간격
+          (gap-1.5)을 동일하게 둬 행이 가로로 정렬되게 한다. */}
+      <View className="flex-row items-center gap-2">
+        {/* 라벨 컬럼 — 내용 폭 (고정 폭 없음 → 도시명 잘림 없음) */}
+        <View className="shrink-0 gap-1.5">
+          <View className="h-4 justify-center">
+            <Small
+              color="gray-2"
+              numberOfLines={1}
+              className="font-manrope-bold"
+            >
+              {sLabel}
+            </Small>
           </View>
-          <Small
-            color="gray"
-            numberOfLines={1}
-            className="w-14 text-right font-manrope-semibold"
-          >
-            {sValue}
-          </Small>
+          <View className="h-4 justify-center">
+            <Small
+              // design/README.md §3 line 77 — "좌측 라벨 (SEO/VAN ... — 색상 일치)".
+              // 도시 라벨은 막대 색 (orange) 과 일치하도록 hot 여부와 무관하게 항상
+              // orange 고정 (PR #16 review 이슈 4).
+              color="orange"
+              numberOfLines={1}
+              className="font-manrope-bold"
+            >
+              {cLabel}
+            </Small>
+          </View>
         </View>
 
-        {/* 도시 행 */}
-        <View className="flex-row items-center gap-2">
-          <Small
-            // design/README.md §3 line 77 — "좌측 라벨 (SEO/VAN ... — 색상 일치)".
-            // 도시 라벨은 막대 색 (orange) 과 일치하도록 hot 여부와 무관하게 항상
-            // orange 고정 (PR #16 review 이슈 4).
-            color="orange"
-            numberOfLines={1}
-            className="w-7 font-manrope-bold"
-          >
-            {cLabel}
-          </Small>
-          <View className="flex-1 h-2 bg-light rounded">
-            {cw > 0 && (
-              <View
-                style={{ width: `${cw * 100}%` }}
-                className="h-2 bg-orange rounded"
-                {...(testID !== undefined ? { testID: `${testID}-bar-city` } : {})}
-              />
-            )}
+        {/* 막대 컬럼 — 남는 폭 흡수 */}
+        <View className="flex-1 min-w-0 gap-1.5">
+          <View className="h-4 justify-center">
+            <View className="h-2 bg-light rounded">
+              {sw > 0 && (
+                <View
+                  style={{ width: `${sw * 100}%` }}
+                  className="h-2 bg-gray rounded"
+                  {...(testID !== undefined ? { testID: `${testID}-bar-seoul` } : {})}
+                />
+              )}
+            </View>
           </View>
-          <Small
-            color="navy"
-            numberOfLines={1}
-            className="w-14 text-right font-manrope-bold"
-          >
-            {cValue}
-          </Small>
+          <View className="h-4 justify-center">
+            <View className="h-2 bg-light rounded">
+              {cw > 0 && (
+                <View
+                  style={{ width: `${cw * 100}%` }}
+                  className="h-2 bg-orange rounded"
+                  {...(testID !== undefined ? { testID: `${testID}-bar-city` } : {})}
+                />
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* 값 컬럼 — 내용 폭, 우측 정렬 (금액 잘림 없음) */}
+        <View className="shrink-0 items-end gap-1.5">
+          <View className="h-4 justify-center">
+            <Small
+              color="gray"
+              numberOfLines={1}
+              className="text-right font-manrope-semibold"
+            >
+              {sValue}
+            </Small>
+          </View>
+          <View className="h-4 justify-center">
+            <Small
+              color="navy"
+              numberOfLines={1}
+              className="text-right font-manrope-bold"
+            >
+              {cValue}
+            </Small>
+          </View>
         </View>
       </View>
     </>

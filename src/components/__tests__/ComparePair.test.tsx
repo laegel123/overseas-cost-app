@@ -379,4 +379,110 @@ describe('ComparePair', () => {
       expect(ancestorClassNames('compare-pair-mult')).not.toContain('mr-14');
     });
   });
+
+  describe('막대 영역 레이아웃 (e2e-defects step 3)', () => {
+    type Node = ReturnType<typeof screen.getByText>;
+
+    /** host(View/Text) 조상만 루트까지 수집 — composite 래퍼는 건너뛴다. */
+    function hostAncestorsOf(node: Node): Node[] {
+      const chain: Node[] = [];
+      let current = node.parent;
+      while (current !== null) {
+        if (typeof current.type === 'string') chain.push(current);
+        current = current.parent;
+      }
+      return chain;
+    }
+
+    /** 막대 행 3컬럼 (라벨 / 막대 / 값) 컨테이너. */
+    function columns(): { label: Node; bar: Node; value: Node } {
+      return {
+        label: hostAncestorsOf(screen.getByText(defaultProps.sLabel))[1],
+        bar: hostAncestorsOf(screen.getByTestId('compare-pair-bar-seoul'))[2],
+        value: hostAncestorsOf(screen.getByText(defaultProps.sValue))[1],
+      };
+    }
+
+    it('불변식 A — 라벨·값에 고정 폭 클래스(w-7 / w-14) 없음', () => {
+      renderPair();
+      [
+        defaultProps.sLabel,
+        defaultProps.cLabel,
+        defaultProps.sValue,
+        defaultProps.cValue,
+      ].forEach((text) => {
+        const className = screen.getByText(text).props.className as string;
+        expect(className).not.toContain('w-7');
+        expect(className).not.toContain('w-14');
+      });
+    });
+
+    it('불변식 A — 라벨·값 컬럼은 내용 폭(shrink-0), 막대 컬럼이 남는 폭 흡수(flex-1 min-w-0)', () => {
+      renderPair();
+      const { label, bar, value } = columns();
+      expect(label.props.className).toContain('shrink-0');
+      expect(value.props.className).toContain('shrink-0');
+      expect(value.props.className).toContain('items-end');
+      expect(bar.props.className).toContain('flex-1');
+      expect(bar.props.className).toContain('min-w-0');
+    });
+
+    it('불변식 A — 긴 도시명·금액이 생략 없이 그대로 렌더 (numberOfLines=1 안전망 유지)', () => {
+      renderPair({
+        sValue: '368.9만원',
+        cLabel: '샌프란시스코',
+        cValue: '1234.5만원',
+      });
+      ['서울', '368.9만원', '샌프란시스코', '1234.5만원'].forEach((text) => {
+        const node = screen.getByText(text);
+        expect(node.props.children).toBe(text);
+        expect(node.props.numberOfLines).toBe(1);
+      });
+    });
+
+    it('불변식 B — 세 컬럼의 행 간격(gap-1.5) 과 셀 높이(h-4 justify-center) 가 동일 (두 막대 x 정렬)', () => {
+      renderPair({ cLabel: '샌프란시스코', cValue: '1234.5만원' });
+      Object.values(columns()).forEach((column) => {
+        expect(column.props.className).toContain('gap-1.5');
+      });
+
+      const cells = [
+        hostAncestorsOf(screen.getByText(defaultProps.sLabel))[0],
+        hostAncestorsOf(screen.getByText('샌프란시스코'))[0],
+        hostAncestorsOf(screen.getByTestId('compare-pair-bar-seoul'))[1],
+        hostAncestorsOf(screen.getByTestId('compare-pair-bar-city'))[1],
+        hostAncestorsOf(screen.getByText(defaultProps.sValue))[0],
+        hostAncestorsOf(screen.getByText('1234.5만원'))[0],
+      ];
+      expect(cells).toHaveLength(6);
+      cells.forEach((cell) => {
+        expect(cell.props.className).toBe('h-4 justify-center');
+      });
+    });
+
+    it('불변식 C — 색상·폰트·막대 스타일 유지', () => {
+      renderPair();
+      expect(screen.getByText(defaultProps.sLabel).props.className).toContain(
+        'text-gray-2',
+      );
+      expect(screen.getByText(defaultProps.cLabel).props.className).toContain(
+        'text-orange',
+      );
+      expect(screen.getByText(defaultProps.sValue).props.className).toContain(
+        'font-manrope-semibold',
+      );
+      expect(screen.getByText(defaultProps.cValue).props.className).toContain(
+        'text-navy',
+      );
+
+      const seoulBar = screen.getByTestId('compare-pair-bar-seoul');
+      expect(seoulBar.props.className).toContain('bg-gray');
+      expect(hostAncestorsOf(seoulBar)[0].props.className).toBe(
+        'h-2 bg-light rounded',
+      );
+      expect(screen.getByTestId('compare-pair-bar-city').props.className).toContain(
+        'bg-orange',
+      );
+    });
+  });
 });
