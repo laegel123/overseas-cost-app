@@ -22,8 +22,8 @@ export type GroceryRowProps = {
   seoulPrice: string;
   /** 도시 가격 문자열 — 예: "2.2만" */
   cityPrice: string;
-  /** 배수 */
-  mult: number;
+  /** 배수 — `computeMultiplier` 결과 그대로. `'신규'` 는 서울에 없는 항목(학비·비자 등). */
+  mult: number | '신규';
   /** 마지막 행 — bottom border 없음 */
   isLast?: boolean;
   /** hot override — 미지정 시 isHot(mult) 자동 판정 */

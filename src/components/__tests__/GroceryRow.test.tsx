@@ -82,6 +82,42 @@ describe('GroceryRow', () => {
     });
   });
 
+  describe('신규 케이스 (서울 값 0 — 학비·비자)', () => {
+    it('mult="신규" → 배수 텍스트 "신규" (1.0× 아님)', () => {
+      renderRow({ mult: '신규' });
+      const mult = screen.getByTestId('grocery-row-mult');
+      expect(mult.props.children).toBe('신규');
+    });
+
+    it('mult="신규" → not hot (bg-light + mult gray, isHot("신규")=false 와 일관)', () => {
+      renderRow({ mult: '신규' });
+      const emojiBox = screen.getByTestId('grocery-row-emoji-box');
+      expect(emojiBox.props.className).toContain('bg-light');
+      expect(emojiBox.props.className).not.toContain('bg-orange-soft');
+      const mult = screen.getByTestId('grocery-row-mult');
+      expect(mult.props.className).toContain('text-gray');
+      expect(mult.props.className).not.toContain('text-orange');
+    });
+
+    it('mult="신규" + hot=true override → hot 스타일 적용 (텍스트는 "신규" 유지)', () => {
+      renderRow({ mult: '신규', hot: true });
+      const emojiBox = screen.getByTestId('grocery-row-emoji-box');
+      expect(emojiBox.props.className).toContain('bg-orange-soft');
+      const mult = screen.getByTestId('grocery-row-mult');
+      expect(mult.props.children).toBe('신규');
+      expect(mult.props.className).toContain('text-orange');
+    });
+
+    it('mult="신규" + selected=true → white 반전 규칙 유지', () => {
+      renderRow({ mult: '신규', selected: true });
+      const mult = screen.getByTestId('grocery-row-mult');
+      expect(mult.props.children).toBe('신규');
+      expect(mult.props.className).toContain('text-white');
+      const emojiBox = screen.getByTestId('grocery-row-emoji-box');
+      expect(emojiBox.props.className).toContain('bg-white');
+    });
+  });
+
   describe('isLast border', () => {
     it('isLast=false → border-b 표시', () => {
       renderRow({ isLast: false });

@@ -5,7 +5,9 @@
     {
       "step": 0,
       "name": "grocery-row-new-mult",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-06T16:16:15+0900",
+      "summary": "GroceryRow mult prop 을 number | '신규' 로 확장 (src/components/GroceryRow.tsx), '신규' 렌더 테스트 4건 추가 (GroceryRow.test.tsx: 텍스트 '신규' / not hot / hot=true override / selected white 반전), docs/TESTING.md §9.20 인벤토리 갱신. 호출부(app/detail/[cityId]/[category].tsx) 수정은 step 1."
     },
     {
       "step": 1,
@@ -27,5 +29,6 @@
       "name": "source-name-korean",
       "status": "pending"
     }
-  ]
+  ],
+  "created_at": "2026-09-06T16:16:15+0900"
 }

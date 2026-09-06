@@ -1708,6 +1708,13 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] mult=0.7 → ↓0.7×
 - [x] mult=1.0 → 1.0×
 
+**신규 케이스 (서울 값 0 — 학비·비자, e2e-defects phase step 0):**
+
+- [x] mult='신규' → 배수 텍스트 '신규' (1.0× 로 강등되지 않음)
+- [x] mult='신규' → not hot (bg-light + mult gray, `isHot('신규')=false` 와 일관)
+- [x] mult='신규' + hot=true override → hot 스타일 (orange-soft + mult orange), 텍스트는 '신규' 유지
+- [x] mult='신규' + selected=true → white 반전 규칙 유지 (mult white + emoji box white)
+
 **이모지 박스:**
 
 - [x] 36×36 (w-9 h-9) 크기
