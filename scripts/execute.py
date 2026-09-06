@@ -67,6 +67,7 @@ class StepExecutor:
         model: str = "claude-opus-4-5",
         timeout: int = 1800,
         verbose: bool = False,
+        once: bool = False,
     ):
         self._root = str(ROOT)
         self._phases_dir = ROOT / "phases"
@@ -78,6 +79,7 @@ class StepExecutor:
         self._model = model
         self._timeout = timeout
         self._verbose = verbose
+        self._once = once
 
         if not self._phase_dir.is_dir():
             print(f"ERROR: {self._phase_dir} not found")
@@ -100,8 +102,8 @@ class StepExecutor:
         self._checkout_branch()
         doc_index = self._build_doc_index()
         self._ensure_created_at()
-        self._execute_all_steps(doc_index)
-        self._finalize()
+        if self._execute_all_steps(doc_index):
+            self._finalize()
 
     # --- timestamps ---
 
@@ -340,6 +342,8 @@ class StepExecutor:
         print(f"\n{'='*60}")
         print(f"  Harness Step Executor")
         print(f"  Phase: {self._phase_name} | Steps: {self._total}")
+        if self._once:
+            print(f"  Mode: single-step (--once)")
         if self._auto_push:
             print(f"  Auto-push: enabled")
         print(f"{'='*60}")
@@ -470,7 +474,18 @@ class StepExecutor:
 
         return False  # unreachable
 
-    def _execute_all_steps(self, doc_index: str):
+    def _count_pending(self) -> int:
+        return sum(
+            1 for s in self._read_json(self._index_file)["steps"]
+            if s["status"] == "pending" and s["step"] >= self._from_step
+        )
+
+    def _execute_all_steps(self, doc_index: str) -> bool:
+        """pending step을 실행한다. 남은 pending이 없으면 True.
+
+        --once 면 step 하나만 실행하고 종료한다. 그 step이 마지막이었다면
+        (남은 pending 0) True 를 반환해 phase finalize 로 이어진다.
+        """
         if self._from_step > 0:
             print(f"  WARN: --from-step {self._from_step} 지정됨. Step {self._from_step} 이전은 건너뜁니다.")
 
@@ -483,7 +498,7 @@ class StepExecutor:
             )
             if pending is None:
                 print("\n  All steps completed!")
-                return
+                return True
 
             step_num = pending["step"]
             for s in index["steps"]:
@@ -493,6 +508,15 @@ class StepExecutor:
                     break
 
             self._execute_single_step(pending, doc_index)
+
+            if self._once:
+                remaining = self._count_pending()
+                if remaining == 0:
+                    print("\n  All steps completed!")
+                    return True
+                print(f"\n  다음: python3 scripts/execute.py run {self._phase_dir_name} --once"
+                      f"  (남은 step {remaining}개)")
+                return False
 
     def _print_phase_summary(self, index: dict):
         """완료된 step들의 요약을 출력한다."""
@@ -574,6 +598,7 @@ def cmd_run(args):
         model=args.model,
         timeout=args.timeout,
         verbose=args.verbose,
+        once=args.once,
     ).run()
 
 
@@ -917,6 +942,8 @@ def main():
                        help="Claude 호출 타임아웃(초) (기본: 1800)")
     p_run.add_argument("--verbose", action="store_true",
                        help="Claude 출력을 실시간으로 터미널에 표시")
+    p_run.add_argument("--once", action="store_true",
+                       help="pending step 하나만 실행하고 종료 (ADR-073)")
     p_run.set_defaults(func=cmd_run)
 
     # status (stub)

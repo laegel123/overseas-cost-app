@@ -61,6 +61,7 @@ npm run build       # eas build — 요청 시에만 실행
 ```bash
 python3 scripts/execute.py status                       # 전체 phase 현황
 python3 scripts/execute.py run <phase>                  # phase 실행
+python3 scripts/execute.py run <phase> --once           # pending step 1개만 실행 후 종료 (ADR-073)
 python3 scripts/execute.py reset <phase> [--step N]     # 실패 step 리셋
 python3 scripts/execute.py init <phase> --steps N --project overseas-cost-app
 npm run test:harness                                    # 하네스 pytest — scripts/execute.py 수정 시 필수 (npm test 에 미포함)

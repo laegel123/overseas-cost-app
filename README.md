@@ -96,6 +96,21 @@ init → edit step*.md → run → [completed]
                       [blocked] → resolve → reset → run
 ```
 
+### 단일 step 실행 (`--once`)
+
+`run` 은 pending step 을 전부 소진할 때까지 멈추지 않는다. step 하나마다 산출물을 검수하려면
+`--once` 를 쓴다 — 첫 pending step 하나만 실행하고 셸로 복귀한다 (ADR-073).
+
+```bash
+python3 scripts/execute.py run my-feature --once   # step 하나 실행 → 종료
+# 산출물 검토 (git log, git diff, 테스트 등)
+python3 scripts/execute.py run my-feature --once   # 다음 step
+```
+
+- 실행 대상은 `index.json` 의 첫 pending step 이다 (`--from-step` 과 조합 가능).
+- step 내부 자동 재시도(최대 3회)는 그대로 동작한다. `--once` 는 step 경계에서만 멈춘다.
+- 마지막 pending step 을 `--once` 로 끝내면 phase 완료 마킹·summary·`--push` 까지 `run` 과 동일하게 수행된다.
+
 ## CLI 레퍼런스
 
 | 커맨드                      | 설명                            |
@@ -104,6 +119,7 @@ init → edit step*.md → run → [completed]
 | `run <phase> --push`        | 실행 후 git push                |
 | `run <phase> --from-step N` | N번 step부터 시작               |
 | `run <phase> --verbose`     | Claude 출력 실시간 표시         |
+| `run <phase> --once`        | pending step 1개만 실행 후 종료 |
 | `run <phase> --model M`     | Claude 모델 지정                |
 | `run <phase> --timeout S`   | 타임아웃(초) 지정               |
 | `status`                    | 전체 phase 현황                 |
