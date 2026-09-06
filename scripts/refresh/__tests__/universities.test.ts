@@ -76,8 +76,18 @@ describe('CITY_CONFIGS', () => {
 describe('SOURCE', () => {
   it('tuition 카테고리', () => {
     expect(SOURCE.category).toBe('tuition');
-    expect(SOURCE.name).toContain('university');
     expect(SOURCE.url).toBeDefined();
+  });
+
+  it('출처명은 한국어 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)', () => {
+    expect(SOURCE.name).toContain('학비');
+    expect(SOURCE.name).toContain('정적 추정치');
+  });
+
+  it('legacyNames 에 구 영문 출처명 포함 (데이터 중복 방지)', () => {
+    expect(SOURCE.legacyNames).toContain(
+      'Official university international tuition pages (static estimates)',
+    );
   });
 });
 
@@ -250,6 +260,43 @@ describe('refresh (integration)', () => {
     const tuitionChange = result.changes.find((c: RefreshChange) => c.field.includes('tuition'));
     expect(tuitionChange).toBeDefined();
     expect(typeof tuitionChange?.pctChange).toBe('number');
+  }, 30000);
+
+  it('값 변동 0 + 구 출처명 잔존: 이름만 이전 (ADR-070) — 재실행은 no-op', async () => {
+    const cityPath = path.join(testDir, 'cities', 'vancouver.json');
+    const existingData = {
+      id: 'vancouver',
+      name: { ko: '밴쿠버', en: 'Vancouver' },
+      country: 'CA',
+      currency: 'CAD',
+      region: 'na',
+      lastUpdated: '2026-04-01',
+      rent: { share: 1000, studio: 1500, oneBed: 1800, twoBed: 2200 },
+      food: { restaurantMeal: 2000, cafe: 500, groceries: { milk1L: 300, eggs12: 400, rice1kg: 350, chicken1kg: 1400, bread: 350 } },
+      transport: { monthlyPass: 10000, singleRide: 300, taxiBase: 400 },
+      // registry 와 동일한 값 → 숫자 변동 0.
+      tuition: UNIVERSITY_REGISTRY.vancouver.map((u) => ({
+        school: u.school,
+        level: u.level,
+        annual: u.staticAnnual,
+      })),
+      sources: [{ category: 'tuition', name: SOURCE.legacyNames[0], url: SOURCE.url, accessedAt: '2026-04-01' }],
+    };
+    fs.writeFileSync(cityPath, JSON.stringify(existingData));
+
+    const first = await refreshUniversities({ useStatic: true, cities: ['vancouver'] });
+    expect(first.changes).toHaveLength(0);
+    expect(first.cities).toContain('vancouver');
+
+    const written = JSON.parse(fs.readFileSync(cityPath, 'utf-8'));
+    const tuitionSources = written.sources.filter((s: { category: string }) => s.category === 'tuition');
+    expect(tuitionSources).toHaveLength(1);
+    expect(tuitionSources[0].name).toBe(SOURCE.name);
+    expect(written.tuition).toEqual(existingData.tuition);
+
+    // 이전 완료 후 재실행 = 쓸 이유 없음.
+    const second = await refreshUniversities({ useStatic: true, cities: ['vancouver'] });
+    expect(second.cities).not.toContain('vancouver');
   }, 30000);
 
   it('알 수 없는 도시: errors에 추가', async () => {

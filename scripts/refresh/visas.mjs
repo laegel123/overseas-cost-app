@@ -14,7 +14,7 @@
  * 실제 파싱은 v1.x 별도 phase 에서 도입 예정 (각국 페이지 구조가 모두 달라 도시별 selector 필요).
  */
 
-import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage } from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, hasLegacySourceName } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 import { OVERSEAS_CITY_CONFIGS } from './_cities.mjs';
 
@@ -116,9 +116,11 @@ export const CITY_CONFIGS = OVERSEAS_CITY_CONFIGS;
 
 export const SOURCE = {
   category: 'visa',
-  name: 'Government visa fee pages (static estimates)',
+  name: '각국 정부 공식 비자 수수료 페이지 (정적 추정치)',
   // main 브랜치 고정 — 과거 HEAD alias 는 시점에 따라 다른 commit 을 가리켜 sources URL 의 시간적 일관성이 흔들렸다. main 으로 고정하면 release 후 변경되지 않는다.
   url: 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md',
+  // 구 영문 출처명 — updateSources 가 제거해 도시당 항목 1개를 유지한다 (ADR-070).
+  legacyNames: ['Government visa fee pages (static estimates)'],
 };
 
 /**
@@ -279,7 +281,10 @@ export default async function refresh(opts = {}) {
       }
     }
 
-    if (!opts.dryRun && hasChanges) {
+    // 값 변동이 없어도 구 출처명이 남아 있으면 한 번은 써서 이름을 이전한다 (ADR-070).
+    const needsSourceRename = hasLegacySourceName(oldData?.sources, SOURCE);
+
+    if (!opts.dryRun && (hasChanges || needsSourceRename)) {
       const base = oldData ?? createCitySeed(config);
       const updatedData = { ...base, visa };
 
@@ -289,7 +294,7 @@ export default async function refresh(opts = {}) {
       } catch (err) {
         errors.push({ cityId, reason: `Write failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}` });
       }
-    } else if (hasChanges) {
+    } else if (hasChanges || needsSourceRename) {
       updatedCities.push(cityId);
     }
   }

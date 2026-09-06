@@ -1588,6 +1588,25 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] 토글 a11y — `accessibilityRole='switch'` + `accessibilityLabel='${label} 합산 포함'`
 - [x] `included=false` + `onToggleInclude` 미지정 → 배지/opacity 적용은 되지만 토글 자체는 미렌더 (시각 상태만 표현)
 
+**토글 접근성 구조 (e2e-defects step 2 — `.maestro/GOTCHAS.md` §5):**
+
+- [x] `included=true` → 토글 `accessibilityState.checked === true`
+- [x] `included=false` → 토글 `accessibilityState.checked === false`
+- [x] 불변식 A — 토글의 조상 체인에 `accessible === true` / `accessibilityRole === 'button'` 요소 없음 (iOS 가 카드를 단일 접근성 요소로 묶어 토글을 삼키는 결함 회귀 방지)
+- [x] 불변식 B — 탭 영역은 `button` 요소 **1개** (`accessibilityLabel = '${label} 비교 카드'`), press → `onPress`; 토글 `valueChange` → `onToggleInclude` 만 호출되고 `onPress` 는 미호출
+- [x] 불변식 B — `onPress` 미지정 → `button` 요소 없음, 토글은 여전히 렌더
+- [x] 불변식 C·D — root `testID` = 시각 컨테이너 (`rounded-card` + `border-line` + opacity), 탭 영역이 카드 padding (`p-3`) 보유
+- [x] 불변식 C — 토글 있으면 배수 텍스트 우측에 tailwind 토큰 여백 (`mr-20` = 80px ≥ Switch 실측 63pt + `right-3` 12pt), 없으면 여백 없음 (매직 px 금지)
+- [x] 불변식 C — 여백이 `mr-14`(56px) 로 되돌아가지 않음 (16pt 부족해 배수 텍스트가 Switch 에 가려지던 회귀 방지)
+
+**막대 영역 레이아웃 (e2e-defects step 3 — 도시명·금액 잘림 결함):**
+
+- [x] 불변식 A — 라벨(`sLabel`/`cLabel`)·값(`sValue`/`cValue`) 텍스트 className 에 고정 폭 `w-7`/`w-14` 없음
+- [x] 불변식 A — 라벨·값 컬럼 `shrink-0` (값 컬럼은 `items-end`), 막대 컬럼 `flex-1 min-w-0`
+- [x] 불변식 A — 긴 입력(`cLabel='샌프란시스코'`, `cValue='1234.5만원'`, `sValue='368.9만원'`) 이 생략 없이 그대로 렌더 + `numberOfLines === 1` (안전망 유지)
+- [x] 불변식 B — 세 컬럼의 행 간격(`gap-1.5`) 과 6개 셀 높이(`h-4 justify-center`) 가 동일 → 두 행 막대가 같은 x 에서 시작·끝남
+- [x] 불변식 C — 색상(`text-gray-2`/`text-orange`/`text-navy`)·폰트(`font-manrope-semibold`)·막대(track `h-2 bg-light rounded`, fill `bg-gray`/`bg-orange`) 스타일 유지
+
 ### 9.18 `src/components/FavCard.tsx`
 
 **accent variant:**
@@ -1707,6 +1726,13 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] mult=1.8 → ↑1.8×
 - [x] mult=0.7 → ↓0.7×
 - [x] mult=1.0 → 1.0×
+
+**신규 케이스 (서울 값 0 — 학비·비자, e2e-defects phase step 0):**
+
+- [x] mult='신규' → 배수 텍스트 '신규' (1.0× 로 강등되지 않음)
+- [x] mult='신규' → not hot (bg-light + mult gray, `isHot('신규')=false` 와 일관)
+- [x] mult='신규' + hot=true override → hot 스타일 (orange-soft + mult orange), 텍스트는 '신규' 유지
+- [x] mult='신규' + selected=true → white 반전 규칙 유지 (mult white + emoji box white)
 
 **이모지 박스:**
 
@@ -2065,6 +2091,7 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [ ] 신라면 hot (2.5×) 검증 (v1.x — 데이터 fixture 의존)
 - [x] 외식 → 식재료 순서
 - [x] 항목 수 표시 ("2 항목" / "N 항목")
+- [x] 서울 값이 있는 행은 숫자 배수 표기 — `detail-row-restaurantMeal` = `↑2.1×`, `'신규'` 아님 (e2e-defects step 1 회귀 방지)
 - [x] 출처 푸터: 헤더(출처 N개 / 갱신 MM-DD) + 카테고리별 출처명 모두 노출 (단일행 좌우 정렬에서 다중행으로 정리)
 - [x] 출처 0건 시 "출처 정보가 없어요" 표시
 - [ ] "출처 보기" 링크: 외부 브라우저 열림 (v1.x)
@@ -2108,6 +2135,7 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] 시트 내 학교 선택 → store 갱신 + dismiss (TuitionChoiceSheet 통합)
 - [x] 도시에 tuition 부재 → emptyText "학비 데이터가 아직 준비되지 않았어요." + 직접 입력 버튼
 - [x] hero footer = "선택된 항목 기준 (탭으로 변경)"
+- [x] 서울 학비 부재 (seoulVal=0) → `detail-row-tuition-UBC` 안 배수 텍스트가 `'신규'` 이고 `'1.0×'` 아님 (e2e-defects step 1)
 
 **tax 카테고리 (단일 선택 + 직접 입력 — ADR-061):**
 
@@ -2125,7 +2153,7 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] navy hero: 합계
 - [x] "비자/정착" 섹션 — fee + settlementApprox (있는 것만)
 - [x] 데이터 부재 도시: "데이터 준비 중"
-- [ ] visa row 의 mult `'신규'` 시각 표시 — v1.x (현재 GroceryRow `mult: number` 라 1 로 fallback → "1.0×" 표기. 시각 회귀 발생 — Compare 카드는 "신규" 배지로 정확 표기. 통일하려면 GroceryRow 타입 확장 필요, components phase 산출물 변경 부담으로 후속). PR #17 review round 3 이슈 3.
+- [x] visa row 의 mult `'신규'` 시각 표시 — `detail-row-visa-fee` 안 배수 텍스트가 `'신규'` 이고 `'1.0×'` 아님 (e2e-defects step 1. 이전엔 호출부가 `'신규'` 를 1 로 강등해 hero "신규" vs 행 "1.0×" 모순 — PR #17 review round 3 이슈 3 해소)
 - [ ] 정부 페이지 링크 (v1.x)
 
 **잘못된 입력:**
@@ -2564,9 +2592,21 @@ afterEach(() => {
 - [x] `sources[]` 에 (category, name, url, accessedAt) 추가 (기존 유지)
 - [x] 같은 source 가 이미 있으면 accessedAt 만 갱신
 - [x] sources 배열 — 한 호출로 여러 카테고리 누적 (vn_gso·ae_fcsc 연쇄 호출 회귀 차단)
+- [x] `legacyNames`: 같은 category 의 구 이름 항목 제거 + 새 이름 append (ADR-070)
+- [x] `legacyNames`: 다른 category 이거나 목록에 없는 이름은 무변경
+- [x] `legacyNames`: 2회 연속 실행해도 결과 동일 (멱등)
+- [x] `legacyNames` 미지정: 기존 upsert 동작 불변 (구 이름 잔존)
+- [x] `legacyNames` 는 데이터에 기록되지 않음 (category/name/url/accessedAt 4필드만)
 - [x] 스키마 위반 데이터 입력 시 throws (write 실패)
 - [ ] atomic write (임시 파일 → rename) — 부분 쓰기 방지 (구현 완료, 테스트는 파일시스템 검증 어려움)
 - [x] 디렉터리 부재 시 자동 생성
+
+#### `hasLegacySourceName(sources, source): boolean` (ADR-070)
+
+- [x] 같은 category 에 구 이름 항목이 있으면 true
+- [x] 이미 새 이름으로 이전됐으면 false (멱등 — 재실행 시 write 안 함)
+- [x] category 가 다르면 false
+- [x] `legacyNames` 미지정 / `sources` undefined → false
 
 #### `classifyChange(oldVal, newVal)` (in `_outlier.mjs`)
 
@@ -2957,6 +2997,9 @@ afterEach(() => {
 - [x] 각 대학 공식 international tuition 페이지 fetch (reachability check 만)
 - [x] `staticAnnual` 항상 반환 — fetch 실패 시 graceful fallback
 - [x] 워크플로우에서 `--useStatic` 강제 (refresh-tuition.yml, PR #20 review round 7)
+- [x] `SOURCE.name` 한국어 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)
+- [x] `SOURCE.legacyNames` 에 구 영문 출처명 포함 (데이터 중복 방지)
+- [x] 값 변동 0 + 구 출처명 잔존: 이름만 이전 후 재실행은 no-op (ADR-070)
 - [ ] HTML parse — 페이지 구조별 selector (v1.x — 미구현, 현재 all-static)
 - [ ] 학비 단위 (per credit vs per year vs per semester) 정규화 → annual (v1.x — 미구현)
 - [ ] 페이지 구조 변경 시 selector 실패 → errors + 기존값 유지 (v1.x — selector 미도입)
@@ -2971,6 +3014,9 @@ afterEach(() => {
 - [x] 정착 비용 추정 (정적 + 비자료) — VISA_REGISTRY.settlementApprox
 - [x] 페이지 변경 시 graceful fail — fetchedFromPage:false 면 console.info, errors 미추가
 - [x] 워크플로우에서 `--useStatic` 강제 (refresh-visa.yml, PR #20 review round 7)
+- [x] `SOURCE.name` 한국어 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)
+- [x] `SOURCE.legacyNames` 에 구 영문 출처명 포함 (데이터 중복 방지)
+- [x] 값 변동 0 + 구 출처명 잔존: 이름만 이전 후 재실행은 no-op (ADR-070)
 - [ ] 정부 페이지 fetch + parse (v1.x — HTML 파싱 미구현, 현재 all-static)
 - [ ] 통화별 처리 (USD vs CAD vs EUR vs JPY 등) — registry 단위 매핑 (v1.x — 동적 파싱 미구현)
 

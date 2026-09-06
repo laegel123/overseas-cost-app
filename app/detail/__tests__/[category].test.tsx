@@ -180,6 +180,16 @@ describe('DetailScreen', () => {
       expect(screen.getByTestId('detail-row-rice1kg')).toBeTruthy();
       expect(screen.getByTestId('detail-row-chicken1kg')).toBeTruthy();
     });
+
+    it('서울 값이 있는 행은 숫자 배수 표기 (신규 아님)', async () => {
+      setupMocks({ category: 'food' });
+      render(<DetailScreen />);
+      await flush();
+      // 서울 10,400원 vs 밴쿠버 22 CAD × 980 = 21,560원 → ↑2.1×
+      const row = screen.getByTestId('detail-row-restaurantMeal');
+      expect(within(row).getByText('↑2.1×')).toBeTruthy();
+      expect(within(row).queryByText('신규')).toBeNull();
+    });
   });
 
   describe('rent 카테고리', () => {
@@ -354,10 +364,11 @@ describe('DetailScreen', () => {
       setupMocks({ category: 'tuition' });
       render(<DetailScreen />);
       await flush();
-      // 서울 0원 → cityVal/seoulVal=∞ → '신규' 처리, 단 hero 에는 도시 단가만.
-      // 서울 가격이 "0원" 으로 row 에 표시되는지 확인.
+      // 서울 0원 → computeMultiplier 가 '신규' 반환 → 행 배수도 hero 와 동일하게 '신규'.
+      // 이전엔 호출부가 '신규' 를 1 로 강등해 "1.0×" 로 표기됐다 (E2E 결함 1).
       const row = screen.getByTestId('detail-row-tuition-UBC');
-      expect(row).toBeTruthy();
+      expect(within(row).getByText('신규')).toBeTruthy();
+      expect(within(row).queryByText('1.0×')).toBeNull();
     });
 
     it('preset 변경 — store 갱신 시 다른 학교가 row 로 표시', async () => {
@@ -501,6 +512,15 @@ describe('DetailScreen', () => {
       render(<DetailScreen />);
       await flush();
       expect(screen.getByTestId('detail-section-비자/정착')).toBeTruthy();
+    });
+
+    it('서울 비자 데이터 부재 — 행 배수가 "신규" (1.0× 강등 금지)', async () => {
+      setupMocks({ category: 'visa' });
+      render(<DetailScreen />);
+      await flush();
+      const row = screen.getByTestId('detail-row-visa-fee');
+      expect(within(row).getByText('신규')).toBeTruthy();
+      expect(within(row).queryByText('1.0×')).toBeNull();
     });
   });
 

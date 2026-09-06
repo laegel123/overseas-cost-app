@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-06T02:22:26.390Z",
+  "generatedAt": "2026-09-06T07:35:12.421Z",
   "fxBaseDate": "2026-09-06",
   "cities": {
     "amsterdam": {
@@ -12,7 +12,7 @@
       "country": "NL",
       "currency": "EUR",
       "region": "eu",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 700,
         "studio": 1200,
@@ -81,15 +81,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -102,7 +102,7 @@
       "country": "DE",
       "currency": "EUR",
       "region": "eu",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 550,
         "studio": 850,
@@ -171,15 +171,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -192,7 +192,7 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-05-04",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1300,
         "studio": 2000,
@@ -261,15 +261,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -282,7 +282,7 @@
       "country": "AE",
       "currency": "AED",
       "region": "me",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 3000,
         "studio": 5500,
@@ -346,15 +346,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -367,7 +367,7 @@
       "country": "VN",
       "currency": "VND",
       "region": "asia",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 5000000,
         "studio": 8000000,
@@ -436,15 +436,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -457,7 +457,7 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-05-04",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1170,
         "studio": 1800,
@@ -526,15 +526,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -547,7 +547,7 @@
       "country": "GB",
       "currency": "GBP",
       "region": "eu",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1105,
         "studio": 1700,
@@ -616,15 +616,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -637,7 +637,7 @@
       "country": "AU",
       "currency": "AUD",
       "region": "oceania",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 953,
         "studio": 1732,
@@ -706,15 +706,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -727,7 +727,7 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-05-02",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1105,
         "studio": 1700,
@@ -796,15 +796,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-02"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-02"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -817,7 +817,7 @@
       "country": "DE",
       "currency": "EUR",
       "region": "eu",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 750,
         "studio": 1150,
@@ -881,15 +881,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -902,7 +902,7 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-05-04",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1430,
         "studio": 2200,
@@ -971,15 +971,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -992,7 +992,7 @@
       "country": "JP",
       "currency": "JPY",
       "region": "asia",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 45000,
         "studio": 60000,
@@ -1061,15 +1061,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -1082,7 +1082,7 @@
       "country": "FR",
       "currency": "EUR",
       "region": "eu",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 650,
         "studio": 1050,
@@ -1151,15 +1151,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -1172,7 +1172,7 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-05-04",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1170,
         "studio": 1800,
@@ -1236,15 +1236,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -1319,7 +1319,7 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-05-04",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1560,
         "studio": 2400,
@@ -1388,15 +1388,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -1409,7 +1409,7 @@
       "country": "SG",
       "currency": "SGD",
       "region": "asia",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1200,
         "studio": 2200,
@@ -1478,15 +1478,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -1499,7 +1499,7 @@
       "country": "AU",
       "currency": "AUD",
       "region": "oceania",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1083,
         "studio": 1949,
@@ -1568,15 +1568,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -1589,7 +1589,7 @@
       "country": "JP",
       "currency": "JPY",
       "region": "asia",
-      "lastUpdated": "2026-05-03",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 65000,
         "studio": 85000,
@@ -1658,15 +1658,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-03"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -1679,7 +1679,7 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-05-02",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1235,
         "studio": 1900,
@@ -1748,15 +1748,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-02"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-02"
+          "accessedAt": "2026-09-06"
         }
       ]
     },
@@ -1769,7 +1769,7 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-05-02",
+      "lastUpdated": "2026-09-06",
       "rent": {
         "share": 1203,
         "studio": 1850,
@@ -1838,15 +1838,15 @@
         },
         {
           "category": "tuition",
-          "name": "Official university international tuition pages (static estimates)",
+          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-02"
+          "accessedAt": "2026-09-06"
         },
         {
           "category": "visa",
-          "name": "Government visa fee pages (static estimates)",
+          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-05-02"
+          "accessedAt": "2026-09-06"
         }
       ]
     }

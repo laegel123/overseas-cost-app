@@ -197,8 +197,9 @@ describe('ComparePair', () => {
     it('onPress 정의 시 탭 동작', () => {
       const onPress = jest.fn();
       renderPair({ onPress });
-      const card = screen.getByTestId('compare-pair');
-      fireEvent.press(card);
+      // root testID 는 시각 컨테이너, 탭 영역은 그 안의 단일 button 요소
+      // (e2e-defects step 2 — 불변식 B).
+      fireEvent.press(screen.getByRole('button'));
       expect(onPress).toHaveBeenCalledTimes(1);
     });
 
@@ -207,6 +208,7 @@ describe('ComparePair', () => {
       render(<ComparePair {...propsWithoutOnPress} />);
       const card = screen.getByTestId('compare-pair');
       expect(card.props.accessibilityRole).not.toBe('button');
+      expect(screen.queryByRole('button')).toBeNull();
     });
 
     it('onPress 정의 시 accessibilityLabel 에 카테고리 라벨 포함 (PR #16 review 이슈 2)', () => {
@@ -287,6 +289,207 @@ describe('ComparePair', () => {
       expect(badge).toBeTruthy();
       const card = screen.getByTestId('compare-pair');
       expect(card.props.style).toMatchObject({ opacity: 0.55 });
+    });
+  });
+
+  describe('토글 접근성 구조 (e2e-defects step 2)', () => {
+    /** testID 요소의 조상 체인을 루트까지 배열로 수집. */
+    function ancestorsOf(testID: string): ReturnType<typeof screen.getByTestId>[] {
+      const chain: ReturnType<typeof screen.getByTestId>[] = [];
+      let node = screen.getByTestId(testID).parent;
+      while (node !== null) {
+        chain.push(node);
+        node = node.parent;
+      }
+      return chain;
+    }
+
+    /** 조상들의 className 을 하나의 문자열로 (레이아웃 클래스 존재 여부 단정용). */
+    function ancestorClassNames(testID: string): string {
+      return ancestorsOf(testID)
+        .map((node) => node.props.className)
+        .filter((cn) => typeof cn === 'string')
+        .join(' ');
+    }
+
+    it('included=true → accessibilityState.checked=true', () => {
+      renderPair({ included: true, onToggleInclude: jest.fn() });
+      const toggle = screen.getByTestId('compare-pair-toggle');
+      expect(toggle.props.accessibilityState).toMatchObject({ checked: true });
+    });
+
+    it('included=false → accessibilityState.checked=false', () => {
+      renderPair({ included: false, onToggleInclude: jest.fn() });
+      const toggle = screen.getByTestId('compare-pair-toggle');
+      expect(toggle.props.accessibilityState).toMatchObject({ checked: false });
+    });
+
+    it('불변식 A — 토글 조상 중 accessible 컨테이너·button 역할 없음 (iOS 접근성 트리에서 개별 요소로 노출)', () => {
+      renderPair({ onPress: jest.fn(), onToggleInclude: jest.fn() });
+      const chain = ancestorsOf('compare-pair-toggle');
+      // 컴포넌트 루트까지 실제로 올라갔는지 확인 (체인이 비어 단정이 무의미해지는 것 방지)
+      expect(chain.length).toBeGreaterThan(0);
+      chain.forEach((node) => {
+        expect(node.props.accessible).not.toBe(true);
+        expect(node.props.accessibilityRole).not.toBe('button');
+      });
+    });
+
+    it('불변식 B — 탭 영역은 단일 button 요소 (라벨 "${label} 비교 카드"), 토글 조작은 onPress 를 부르지 않음', () => {
+      const onPress = jest.fn();
+      const onToggleInclude = jest.fn();
+      renderPair({ label: '월세', included: true, onPress, onToggleInclude });
+
+      const buttons = screen.getAllByRole('button');
+      expect(buttons).toHaveLength(1);
+      expect(buttons[0].props.accessibilityLabel).toBe('월세 비교 카드');
+      fireEvent.press(buttons[0]);
+      expect(onPress).toHaveBeenCalledTimes(1);
+
+      fireEvent(screen.getByTestId('compare-pair-toggle'), 'valueChange', false);
+      expect(onToggleInclude).toHaveBeenCalledWith(false);
+      expect(onPress).toHaveBeenCalledTimes(1);
+    });
+
+    it('불변식 B — onPress 미지정 시 button 요소 없이도 토글은 렌더', () => {
+      const { onPress: _, ...propsWithoutOnPress } = defaultProps;
+      render(
+        <ComparePair {...propsWithoutOnPress} onToggleInclude={jest.fn()} />,
+      );
+      expect(screen.queryByRole('button')).toBeNull();
+      expect(screen.getByTestId('compare-pair-toggle')).toBeTruthy();
+    });
+
+    it('불변식 C·D — root testID = 시각 컨테이너(카드 border/radius + opacity), 탭 영역이 카드 padding(p-3) 을 가짐', () => {
+      renderPair({ onPress: jest.fn(), onToggleInclude: jest.fn() });
+      const card = screen.getByTestId('compare-pair');
+      expect(card.props.className).toContain('rounded-card');
+      expect(card.props.className).toContain('border-line');
+      expect(card.props.style).toMatchObject({ opacity: 1 });
+      expect(screen.getByRole('button').props.className).toContain('p-3');
+    });
+
+    // 여백 값은 iOS Switch 실측 폭 63pt + right-3(12pt) = 75pt 를 덮어야 한다.
+    // mr-14(56px) 은 16pt 부족해 배수 텍스트가 Switch 에 가려졌다 (실측 회귀).
+    it('불변식 C — 토글이 있으면 배수 텍스트 우측에 Switch 폭만큼 여백 (mr-20 = 80px ≥ 75pt)', () => {
+      renderPair({ onToggleInclude: jest.fn() });
+      expect(ancestorClassNames('compare-pair-mult')).toContain('mr-20');
+    });
+
+    it('불변식 C — 여백이 Switch 를 덮기에 부족한 mr-14 로 되돌아가지 않는다', () => {
+      renderPair({ onToggleInclude: jest.fn() });
+      expect(ancestorClassNames('compare-pair-mult')).not.toContain('mr-14');
+    });
+
+    it('불변식 C — 토글이 없으면 여백도 없음', () => {
+      renderPair();
+      expect(ancestorClassNames('compare-pair-mult')).not.toContain('mr-20');
+    });
+  });
+
+  describe('막대 영역 레이아웃 (e2e-defects step 3)', () => {
+    type Node = ReturnType<typeof screen.getByText>;
+
+    /** host(View/Text) 조상만 루트까지 수집 — composite 래퍼는 건너뛴다. */
+    function hostAncestorsOf(node: Node): Node[] {
+      const chain: Node[] = [];
+      let current = node.parent;
+      while (current !== null) {
+        if (typeof current.type === 'string') chain.push(current);
+        current = current.parent;
+      }
+      return chain;
+    }
+
+    /** 막대 행 3컬럼 (라벨 / 막대 / 값) 컨테이너. */
+    function columns(): { label: Node; bar: Node; value: Node } {
+      return {
+        label: hostAncestorsOf(screen.getByText(defaultProps.sLabel))[1],
+        bar: hostAncestorsOf(screen.getByTestId('compare-pair-bar-seoul'))[2],
+        value: hostAncestorsOf(screen.getByText(defaultProps.sValue))[1],
+      };
+    }
+
+    it('불변식 A — 라벨·값에 고정 폭 클래스(w-7 / w-14) 없음', () => {
+      renderPair();
+      [
+        defaultProps.sLabel,
+        defaultProps.cLabel,
+        defaultProps.sValue,
+        defaultProps.cValue,
+      ].forEach((text) => {
+        const className = screen.getByText(text).props.className as string;
+        expect(className).not.toContain('w-7');
+        expect(className).not.toContain('w-14');
+      });
+    });
+
+    it('불변식 A — 라벨·값 컬럼은 내용 폭(shrink-0), 막대 컬럼이 남는 폭 흡수(flex-1 min-w-0)', () => {
+      renderPair();
+      const { label, bar, value } = columns();
+      expect(label.props.className).toContain('shrink-0');
+      expect(value.props.className).toContain('shrink-0');
+      expect(value.props.className).toContain('items-end');
+      expect(bar.props.className).toContain('flex-1');
+      expect(bar.props.className).toContain('min-w-0');
+    });
+
+    it('불변식 A — 긴 도시명·금액이 생략 없이 그대로 렌더 (numberOfLines=1 안전망 유지)', () => {
+      renderPair({
+        sValue: '368.9만원',
+        cLabel: '샌프란시스코',
+        cValue: '1234.5만원',
+      });
+      ['서울', '368.9만원', '샌프란시스코', '1234.5만원'].forEach((text) => {
+        const node = screen.getByText(text);
+        expect(node.props.children).toBe(text);
+        expect(node.props.numberOfLines).toBe(1);
+      });
+    });
+
+    it('불변식 B — 세 컬럼의 행 간격(gap-1.5) 과 셀 높이(h-4 justify-center) 가 동일 (두 막대 x 정렬)', () => {
+      renderPair({ cLabel: '샌프란시스코', cValue: '1234.5만원' });
+      Object.values(columns()).forEach((column) => {
+        expect(column.props.className).toContain('gap-1.5');
+      });
+
+      const cells = [
+        hostAncestorsOf(screen.getByText(defaultProps.sLabel))[0],
+        hostAncestorsOf(screen.getByText('샌프란시스코'))[0],
+        hostAncestorsOf(screen.getByTestId('compare-pair-bar-seoul'))[1],
+        hostAncestorsOf(screen.getByTestId('compare-pair-bar-city'))[1],
+        hostAncestorsOf(screen.getByText(defaultProps.sValue))[0],
+        hostAncestorsOf(screen.getByText('1234.5만원'))[0],
+      ];
+      expect(cells).toHaveLength(6);
+      cells.forEach((cell) => {
+        expect(cell.props.className).toBe('h-4 justify-center');
+      });
+    });
+
+    it('불변식 C — 색상·폰트·막대 스타일 유지', () => {
+      renderPair();
+      expect(screen.getByText(defaultProps.sLabel).props.className).toContain(
+        'text-gray-2',
+      );
+      expect(screen.getByText(defaultProps.cLabel).props.className).toContain(
+        'text-orange',
+      );
+      expect(screen.getByText(defaultProps.sValue).props.className).toContain(
+        'font-manrope-semibold',
+      );
+      expect(screen.getByText(defaultProps.cValue).props.className).toContain(
+        'text-navy',
+      );
+
+      const seoulBar = screen.getByTestId('compare-pair-bar-seoul');
+      expect(seoulBar.props.className).toContain('bg-gray');
+      expect(hostAncestorsOf(seoulBar)[0].props.className).toBe(
+        'h-2 bg-light rounded',
+      );
+      expect(screen.getByTestId('compare-pair-bar-city').props.className).toContain(
+        'bg-orange',
+      );
     });
   });
 });

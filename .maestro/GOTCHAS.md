@@ -66,6 +66,8 @@ ScrollView(`Screen scroll`)·BottomSheet 는 키보드가 떠 있을 때 **첫 �
 
 - `TaxChoiceSheet` 무데이터 본문(제목 `연봉 기준 선택` + 안내 문구) → backdrop 만 노출.
 - 설정 `menu-app-info` 의 버전 `v1.0.0`(MenuRow `rightText`) → 라벨은 `앱 정보` 뿐.
+- `accessible` Pressable 자손인 Switch (`compare-pair-{category}-toggle`) 는 iOS 접근성 트리에서 상태에 따라 사라졌음
+  (ON 이면 미노출 — 2026-09-04 검증, e2e-defects step 2 에서 Switch 를 Pressable 밖 형제로 분리 + `accessibilityState.checked` 추가해 해결).
 
 → flow 는 노출되는 앵커(backdrop, 행 testID)로 대체 검증하고, **접근성 갭은 별도 이슈로 보고**.
 

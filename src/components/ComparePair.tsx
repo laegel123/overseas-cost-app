@@ -7,8 +7,14 @@
  * 포함/제외 토글 (ADR-062):
  *   사용자가 카드별 Switch 로 hero 합산에 포함할지 결정. 미포함 카드는 화면에서
  *   숨기지 않고 카드 전체 opacity + "제외됨" 배지 + 토글 OFF 색 = 3중 인코딩
- *   으로 표시. 토글은 자체 native 터치 영역을 가지므로 부모 Pressable 의 onPress
- *   (Detail 진입) 와 충돌하지 않는다.
+ *   으로 표시.
+ *
+ * 접근성 구조 (e2e-defects step 2):
+ *   시각 컨테이너(View, root testID) > 탭 영역(Pressable, 단일 button 요소) 과
+ *   Switch 를 **형제**로 둔다. Switch 가 accessible Pressable 의 자손이면 iOS 가
+ *   카드를 하나의 접근성 요소로 묶어 토글이 VoiceOver·E2E 트리에서 개별 요소로
+ *   노출되지 않는다 (.maestro/GOTCHAS.md §5). Switch 는 헤더 우측 끝에 카드
+ *   padding 과 같은 오프셋(top-3/right-3)으로 절대 배치한다.
  */
 
 import * as React from 'react';
@@ -111,13 +117,11 @@ export function ComparePair({
     [onToggleInclude],
   );
 
-  const card = (
-    <View
-      style={{ opacity: included ? 1 : EXCLUDED_CARD_OPACITY }}
-      className="bg-white border border-line rounded-card p-3"
-      testID={testID}
-    >
-      {/* 헤더: 아이콘 박스 + 라벨 (+ "제외됨" 배지) / 배수 + 토글 */}
+  const hasToggle = onToggleInclude !== undefined;
+
+  const content = (
+    <>
+      {/* 헤더: 아이콘 박스 + 라벨 (+ "제외됨" 배지) / 배수 */}
       <View className="flex-row items-center justify-between mb-2 gap-2">
         <View className="flex-row items-center gap-2 flex-1 min-w-0">
           <View
@@ -142,7 +146,14 @@ export function ComparePair({
             </View>
           )}
         </View>
-        <View className="flex-row items-center gap-2 shrink-0">
+        {/* Switch 는 이 Pressable 밖에 절대 배치되므로 (파일 상단 주석) 겹치지
+            않도록 Switch 폭만큼 우측 여백을 둔다.
+            iOS Switch 의 실측 폭은 63pt 다 (RN 문서상 51pt 가 아니다 —
+            maestro hierarchy 로 측정). right-3(12pt) 오프셋을 더하면 75pt 를
+            비워야 하므로 mr-20(80px) 을 쓴다. mr-16(64px) 은 부족하다. */}
+        <View
+          className={`flex-row items-center gap-2 shrink-0${hasToggle ? ' mr-20' : ''}`}
+        >
           <H3
             color={multColor}
             numberOfLines={1}
@@ -151,94 +162,126 @@ export function ComparePair({
           >
             {multText}
           </H3>
-          {onToggleInclude !== undefined && (
-            <Switch
-              value={included}
-              onValueChange={handleToggle}
-              trackColor={{ false: colors.line, true: colors.orange }}
-              thumbColor={colors.white}
-              ios_backgroundColor={colors.line}
-              accessibilityRole="switch"
-              accessibilityLabel={`${label} 합산 포함`}
-              {...(testID !== undefined ? { testID: `${testID}-toggle` } : {})}
-            />
-          )}
         </View>
       </View>
 
-      {/* 막대 영역 */}
-      <View className="gap-1.5">
-        {/* 서울 행 */}
-        <View className="flex-row items-center gap-2">
-          <Small
-            color="gray-2"
-            numberOfLines={1}
-            className="w-7 font-manrope-bold"
-          >
-            {sLabel}
-          </Small>
-          <View className="flex-1 h-2 bg-light rounded">
-            {sw > 0 && (
-              <View
-                style={{ width: `${sw * 100}%` }}
-                className="h-2 bg-gray rounded"
-                {...(testID !== undefined ? { testID: `${testID}-bar-seoul` } : {})}
-              />
-            )}
+      {/* 막대 영역 — 컬럼 우선(column-major) 구조.
+          불변식 B: 라벨/값을 행마다 auto 폭으로 두면 "서울" 과 "샌프란시스코"
+          처럼 라벨 길이가 다를 때 두 막대의 시작·끝 x 가 어긋나 길이 비교라는
+          듀얼 바의 존재 이유가 깨진다. 컬럼별로 두 행을 세로로 쌓아 폭을 긴
+          쪽에 맞추고, 세 컬럼의 셀 높이(h-4 = Small line-height)와 행 간격
+          (gap-1.5)을 동일하게 둬 행이 가로로 정렬되게 한다. */}
+      <View className="flex-row items-center gap-2">
+        {/* 라벨 컬럼 — 내용 폭 (고정 폭 없음 → 도시명 잘림 없음) */}
+        <View className="shrink-0 gap-1.5">
+          <View className="h-4 justify-center">
+            <Small
+              color="gray-2"
+              numberOfLines={1}
+              className="font-manrope-bold"
+            >
+              {sLabel}
+            </Small>
           </View>
-          <Small
-            color="gray"
-            numberOfLines={1}
-            className="w-14 text-right font-manrope-semibold"
-          >
-            {sValue}
-          </Small>
+          <View className="h-4 justify-center">
+            <Small
+              // design/README.md §3 line 77 — "좌측 라벨 (SEO/VAN ... — 색상 일치)".
+              // 도시 라벨은 막대 색 (orange) 과 일치하도록 hot 여부와 무관하게 항상
+              // orange 고정 (PR #16 review 이슈 4).
+              color="orange"
+              numberOfLines={1}
+              className="font-manrope-bold"
+            >
+              {cLabel}
+            </Small>
+          </View>
         </View>
 
-        {/* 도시 행 */}
-        <View className="flex-row items-center gap-2">
-          <Small
-            // design/README.md §3 line 77 — "좌측 라벨 (SEO/VAN ... — 색상 일치)".
-            // 도시 라벨은 막대 색 (orange) 과 일치하도록 hot 여부와 무관하게 항상
-            // orange 고정 (PR #16 review 이슈 4).
-            color="orange"
-            numberOfLines={1}
-            className="w-7 font-manrope-bold"
-          >
-            {cLabel}
-          </Small>
-          <View className="flex-1 h-2 bg-light rounded">
-            {cw > 0 && (
-              <View
-                style={{ width: `${cw * 100}%` }}
-                className="h-2 bg-orange rounded"
-                {...(testID !== undefined ? { testID: `${testID}-bar-city` } : {})}
-              />
-            )}
+        {/* 막대 컬럼 — 남는 폭 흡수 */}
+        <View className="flex-1 min-w-0 gap-1.5">
+          <View className="h-4 justify-center">
+            <View className="h-2 bg-light rounded">
+              {sw > 0 && (
+                <View
+                  style={{ width: `${sw * 100}%` }}
+                  className="h-2 bg-gray rounded"
+                  {...(testID !== undefined ? { testID: `${testID}-bar-seoul` } : {})}
+                />
+              )}
+            </View>
           </View>
-          <Small
-            color="navy"
-            numberOfLines={1}
-            className="w-14 text-right font-manrope-bold"
-          >
-            {cValue}
-          </Small>
+          <View className="h-4 justify-center">
+            <View className="h-2 bg-light rounded">
+              {cw > 0 && (
+                <View
+                  style={{ width: `${cw * 100}%` }}
+                  className="h-2 bg-orange rounded"
+                  {...(testID !== undefined ? { testID: `${testID}-bar-city` } : {})}
+                />
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* 값 컬럼 — 내용 폭, 우측 정렬 (금액 잘림 없음) */}
+        <View className="shrink-0 items-end gap-1.5">
+          <View className="h-4 justify-center">
+            <Small
+              color="gray"
+              numberOfLines={1}
+              className="text-right font-manrope-semibold"
+            >
+              {sValue}
+            </Small>
+          </View>
+          <View className="h-4 justify-center">
+            <Small
+              color="navy"
+              numberOfLines={1}
+              className="text-right font-manrope-bold"
+            >
+              {cValue}
+            </Small>
+          </View>
         </View>
       </View>
-    </View>
+    </>
   );
 
-  if (onPress !== undefined) {
-    return (
-      <Pressable
-        onPress={onPress}
-        accessibilityRole="button"
-        accessibilityLabel={`${label} 비교 카드`}
-      >
-        {card}
-      </Pressable>
-    );
-  }
+  return (
+    <View
+      style={{ opacity: included ? 1 : EXCLUDED_CARD_OPACITY }}
+      className="bg-white border border-line rounded-card"
+      testID={testID}
+    >
+      {onPress !== undefined ? (
+        <Pressable
+          onPress={onPress}
+          accessibilityRole="button"
+          accessibilityLabel={`${label} 비교 카드`}
+          className="p-3"
+        >
+          {content}
+        </Pressable>
+      ) : (
+        <View className="p-3">{content}</View>
+      )}
 
-  return card;
+      {hasToggle && (
+        <View className="absolute top-3 right-3">
+          <Switch
+            value={included}
+            onValueChange={handleToggle}
+            trackColor={{ false: colors.line, true: colors.orange }}
+            thumbColor={colors.white}
+            ios_backgroundColor={colors.line}
+            accessibilityRole="switch"
+            accessibilityLabel={`${label} 합산 포함`}
+            accessibilityState={{ checked: included }}
+            {...(testID !== undefined ? { testID: `${testID}-toggle` } : {})}
+          />
+        </View>
+      )}
+    </View>
+  );
 }

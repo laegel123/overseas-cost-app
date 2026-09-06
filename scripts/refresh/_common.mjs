@@ -176,6 +176,36 @@ export async function readCity(id) {
 }
 
 /**
+ * @typedef {Object} SourceDescriptor writeCity 에 넘기는 출처 디스크립터.
+ * @property {string} category 'rent' | 'food' | 'transport' | 'tuition' | 'tax' | 'visa'
+ * @property {string} name 표시용 출처명. 기관 고유명은 원어, 우리가 짓는 서술형 문구는 한국어 (ADR-070).
+ * @property {string} url
+ * @property {string[]} [legacyNames] 이 출처의 구 이름들. 같은 category 의 해당 이름 항목을 제거한 뒤
+ *   현재 name 으로 upsert 한다 — 출처명 변경 시 구/신 항목이 중복 누적되는 것을 막는다 (ADR-070).
+ *   데이터에는 기록되지 않는다.
+ */
+
+/**
+ * 데이터에 이 출처의 구 이름(`legacyNames`) 항목이 남아 있는지 판정.
+ *
+ * fetcher 는 숫자 값이 바뀐 도시만 writeCity 로 쓰므로, 출처명만 바꾸면 값이 고정된
+ * 정적 출처(universities·visas)에서는 이름 이전이 영원히 일어나지 않는다. fetcher 가
+ * 본 함수로 "이전이 남았는가" 를 확인해 값 변동이 없어도 한 번은 쓰게 한다 (ADR-070).
+ * 이전이 끝나면 false 를 반환하므로 이후 실행은 다시 no-op — 멱등.
+ *
+ * @param {import('../../src/types/city').CitySource[] | undefined} sources
+ * @param {SourceDescriptor} source
+ * @returns {boolean}
+ */
+export function hasLegacySourceName(sources, source) {
+  const legacyNames = source.legacyNames ?? [];
+  if (legacyNames.length === 0) return false;
+  return (sources ?? []).some(
+    (s) => s.category === source.category && legacyNames.includes(s.name),
+  );
+}
+
+/**
  * 도시 JSON 쓰기 (atomic write).
  *
  * `source` 가 배열이면 한 번의 호출로 여러 카테고리 sources 를 누적 갱신.
@@ -185,7 +215,7 @@ export async function readCity(id) {
  *
  * @param {string} id
  * @param {import('../../src/types/city').CityCostData} data
- * @param {{category: string, name: string, url: string} | Array<{category: string, name: string, url: string}>} source
+ * @param {SourceDescriptor | SourceDescriptor[]} source
  * @returns {Promise<void>}
  */
 export async function writeCity(id, data, source) {
@@ -219,13 +249,21 @@ export async function writeCity(id, data, source) {
 
 /**
  * sources 배열 업데이트. 같은 category+name 이면 accessedAt 만 갱신.
+ *
+ * `newSource.legacyNames` 가 있으면 upsert 전에 같은 category 의 구 이름 항목을 제거한다.
+ * updateSources 는 category+name 으로 항목을 식별하므로 이름만 바꾸면 구 항목이 남아
+ * 도시마다 출처가 중복된다 (ADR-070).
+ *
  * @param {import('../../src/types/city').CitySource[] | undefined} sources
- * @param {{category: string, name: string, url: string}} newSource
+ * @param {SourceDescriptor} newSource
  * @param {string} accessedAt
  * @returns {import('../../src/types/city').CitySource[]}
  */
 function updateSources(sources, newSource, accessedAt) {
-  const existing = sources ?? [];
+  const legacyNames = newSource.legacyNames ?? [];
+  const existing = (sources ?? []).filter(
+    (s) => !(s.category === newSource.category && legacyNames.includes(s.name)),
+  );
   const idx = existing.findIndex(
     (s) => s.category === newSource.category && s.name === newSource.name,
   );

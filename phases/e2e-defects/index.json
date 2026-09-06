@@ -1,0 +1,48 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "e2e-defects",
+  "steps": [
+    {
+      "step": 0,
+      "name": "grocery-row-new-mult",
+      "status": "completed",
+      "started_at": "2026-09-06T16:16:15+0900",
+      "summary": "GroceryRow mult prop 을 number | '신규' 로 확장 (src/components/GroceryRow.tsx), '신규' 렌더 테스트 4건 추가 (GroceryRow.test.tsx: 텍스트 '신규' / not hot / hot=true override / selected white 반전), docs/TESTING.md §9.20 인벤토리 갱신. 호출부(app/detail/[cityId]/[category].tsx) 수정은 step 1.",
+      "completed_at": "2026-09-06T16:18:51+0900"
+    },
+    {
+      "step": 1,
+      "name": "detail-mult-passthrough",
+      "status": "completed",
+      "started_at": "2026-09-06T16:18:51+0900",
+      "summary": "app/detail/[cityId]/[category].tsx 행 렌더링의 `mult={typeof mult === 'number' ? mult : 1}` 강등 제거 → computeMultiplier 결과(number | '신규')를 GroceryRow 에 그대로 전달. 회귀 테스트 3건 추가 (app/detail/__tests__/[category].test.tsx: tuition row '신규'·'1.0×' 아님 단언으로 기존 테스트 확장, visa detail-row-visa-fee '신규' 신규 테스트, food detail-row-restaurantMeal '↑2.1×' 숫자 배수 회귀 방지). docs/TESTING.md §9.25 인벤토리 3개 항목 갱신 (visa '신규' 표시 deferred [ ] → [x]).",
+      "completed_at": "2026-09-06T16:21:45+0900"
+    },
+    {
+      "step": 2,
+      "name": "compare-pair-switch-a11y",
+      "status": "completed",
+      "started_at": "2026-09-06T16:21:45+0900",
+      "summary": "ComparePair 합산 토글 접근성 구조 분리 — Switch 를 카드 Pressable(accessibilityRole=button) 자손에서 빼내 시각 컨테이너(root testID, bg/border/rounded-card/opacity) 직속 형제로 절대 배치(absolute top-3 right-3), 탭 영역 Pressable 은 p-3 + 배수 텍스트 우측 mr-14 여백(tailwind 토큰만, 매직 px 없음). Switch 에 accessibilityState={{checked: included}} 추가. testID 7종·라벨·토글 의미 모두 불변. ComparePair.test.tsx 접근성 구조 테스트 8건 추가(checked true/false, 불변식 A 조상 체인 검사, 불변식 B button 단일성·press 분리 2건, 불변식 C·D 컨테이너/padding, mr-14 유무 2건) + 기존 'onPress 탭' 테스트를 button 요소 기준으로 갱신 → 46건 통과. docs/TESTING.md §9.17 인벤토리, docs/UI_GUIDE.md §ComparePair 접근성 구조, .maestro/GOTCHAS.md §5 관찰 사례 갱신. 전체 88 suite/1930 테스트 통과, typecheck·lint OK. 시각·VoiceOver 확인은 /verify-e2e 세션에서 (부팅된 시뮬레이터 없음).",
+      "completed_at": "2026-09-06T16:28:11+0900"
+    },
+    {
+      "step": 3,
+      "name": "compare-pair-bar-columns",
+      "status": "completed",
+      "started_at": "2026-09-06T16:28:11+0900",
+      "summary": "ComparePair 막대 영역을 컬럼 우선(column-major) 레이아웃으로 전환 — 라벨/값 고정 폭(w-7/w-14) 제거, 라벨·값 컬럼 shrink-0(값은 items-end) + 막대 컬럼 flex-1 min-w-0, 두 행을 컬럼별로 세로로 쌓아 폭을 긴 쪽에 맞춰 서울/도시 막대 x 정렬 유지. 세 컬럼 셀 높이 h-4(=Small line-height)·행 간격 gap-1.5 통일(토큰만, 매직 px 없음), 색상·폰트·track/fill·testID·numberOfLines=1 불변. ComparePair.test.tsx 레이아웃 테스트 5건 추가(고정 폭 부재, 컬럼 flex 규칙, 긴 입력 샌프란시스코/1234.5만원 무잘림, 셀 높이·간격 동일, 스타일 유지) → 51건 통과. 전체 88 suite/1935 테스트 통과, typecheck·lint OK. docs/UI_GUIDE.md §ComparePair 명세 교체(28/56px 는 SEO/VAN 원안 근거 명시), docs/TESTING.md §9.17 인벤토리 5행 추가. 시각 확인은 /verify-e2e 세션에서.",
+      "completed_at": "2026-09-06T16:31:56+0900"
+    },
+    {
+      "step": 4,
+      "name": "source-name-korean",
+      "status": "completed",
+      "started_at": "2026-09-06T16:31:56+0900",
+      "summary": "ADR-070(출처명 표기 언어 정책 + legacyNames 이름 이전) 신규 + docs/ADR.md 인덱스 행. universities/visas SOURCE.name 을 한국어로 교체 — tuition '각 대학 공식 국제학생 학비 페이지 (정적 추정치)', visa '각국 정부 공식 비자 수수료 페이지 (정적 추정치)' + legacyNames 에 구 영문명 선언. _common.mjs: SourceDescriptor typedef(legacyNames?) 추가, updateSources 가 upsert 전 같은 category 의 구 이름 항목 제거(기록 필드는 4개 유지), hasLegacySourceName() 신규 export. 두 fetcher 는 숫자 변동 0 일 때 writeCity 를 건너뛰어 이름 이전이 자동화 경로로 전파되지 않았으므로 write 조건을 hasChanges || needsSourceRename 으로 확장(이전 완료 후 재실행은 no-op, 워크플로우 YAML 무변경). 테스트 15건 추가(_common 9: legacyNames 5 + hasLegacySourceName 4, universities 3, visas 3) → 88 suite/1950 통과, typecheck·lint OK. 데이터는 _run.mjs universities/visas --useStatic → build_data.mjs → validate_cities.mjs 자동화 경로로만 재생성 — 21개 파일(해외 도시 20 + all.json), 숫자 값 무변경(출처명·lastUpdated·accessedAt·generatedAt 라인만 변경), 도시당 tuition/visa 출처 각 1개, data/seed·seoul.json·DATA_SOURCES_COUNT·.github 무변경. docs DATA.md(스키마 주석·§3.3)·AUTOMATION.md(§3 writeCity/출처명 변경 절차, §8 '정적 추정치' 마커)·TESTING.md(§9-A.1 writeCity 5행 + hasLegacySourceName 절, §9-A.9 universities/visas 각 3행) 갱신.",
+      "completed_at": "2026-09-06T16:39:31+0900"
+    }
+  ],
+  "created_at": "2026-09-06T16:16:15+0900",
+  "completed_at": "2026-09-06T16:39:31+0900"
+}

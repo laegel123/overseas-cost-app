@@ -7,7 +7,7 @@
   "country": "CA",
   "currency": "CAD",
   "region": "na",
-  "lastUpdated": "2026-05-02",
+  "lastUpdated": "2026-09-06",
   "rent": {
     "share": 1105,
     "studio": 1700,
@@ -76,15 +76,15 @@
     },
     {
       "category": "tuition",
-      "name": "Official university international tuition pages (static estimates)",
+      "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
       "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-      "accessedAt": "2026-05-02"
+      "accessedAt": "2026-09-06"
     },
     {
       "category": "visa",
-      "name": "Government visa fee pages (static estimates)",
+      "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
       "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-      "accessedAt": "2026-05-02"
+      "accessedAt": "2026-09-06"
     }
   ]
 }
