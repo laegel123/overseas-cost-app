@@ -132,6 +132,11 @@ export default async function refresh(): Promise<RefreshResult>;
 export async function fetchWithRetry(url, opts?): Promise<Response>; // exponential backoff 3회
 export async function readCity(id): Promise<CityCostData>;
 export async function writeCity(id, data, source): Promise<void>; // sources 자동 갱신
+// source = { category, name, url, legacyNames?: string[] } 또는 그 배열.
+//  - name: 기관 고유명은 원어, 우리가 짓는 서술형 문구는 한국어 (ADR-070)
+//  - legacyNames: 이 출처의 구 이름들. upsert 전에 같은 category 의 해당 항목을 제거해
+//    출처명 변경 시 구/신 항목이 중복 누적되는 것을 막는다. 데이터에는 기록되지 않는다.
+export function hasLegacySourceName(sources, source): boolean; // 이름 이전이 남았는지 판정
 
 // _outlier.mjs — classifyChange 는 oldVal/newVal 두 인자를 받아 분기 분류
 export function classifyChange(
@@ -139,6 +144,12 @@ export function classifyChange(
   newVal: number | null,
 ): 'new' | 'commit' | 'pr-update' | 'pr-outlier' | 'pr-removed';
 ```
+
+**출처명 변경 절차 (ADR-070):**
+
+1. `SOURCE.name` 을 새 이름으로 바꾸고 `SOURCE.legacyNames` 에 구 이름을 추가한다.
+2. fetcher 의 write 조건을 `hasChanges || hasLegacySourceName(oldData?.sources, SOURCE)` 로 둔다 — 숫자 변동이 없는 정적 출처(`universities` / `visas`) 도 다음 cron 에서 이름이 이전된다. 이전이 끝나면 `hasLegacySourceName` 이 false 라 다시 no-op (멱등).
+3. 데이터 JSON 은 직접 편집하지 않는다 (ADR-032) — `_run.mjs` → `build_data.mjs` → `validate_cities.mjs` 순으로 재생성한다.
 
 ## 4. 워크플로우 명세
 
@@ -422,7 +433,7 @@ PR 자동 생성: `peter-evans/create-pull-request@v6` 액션 사용. 라벨 자
 | **외식 가격**          | CPI 는 평균값만 — 실제 식당 1끼 매핑 불완전            | CPI 의 "Food away from home" 카테고리 + 도시별 보정 계수 (보정값 자체는 정적, 분기 검토) |
 | **호치민·두바이 비자** | 정부 페이지 영문 정보 부족                             | visas.mjs 에 영문 페이지 + 한계 명시                                                     |
 
-이런 예외는 모두 `data/cities/<id>.json` 의 `sources[].name` 에 "추정" 또는 "static" 마커로 표기.
+이런 예외는 모두 `data/cities/<id>.json` 의 `sources[].name` 에 "추정" 또는 "static" 마커로 표기. 한국어 출처명에서는 **"정적 추정치"** 가 이 마커 역할을 한다 (ADR-070 — 서술형 출처명은 한국어, 기관 고유명은 원어).
 
 ### 8.1 v1.x TODO — 추적 항목
 

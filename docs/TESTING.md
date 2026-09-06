@@ -2591,9 +2591,21 @@ afterEach(() => {
 - [x] `sources[]` 에 (category, name, url, accessedAt) 추가 (기존 유지)
 - [x] 같은 source 가 이미 있으면 accessedAt 만 갱신
 - [x] sources 배열 — 한 호출로 여러 카테고리 누적 (vn_gso·ae_fcsc 연쇄 호출 회귀 차단)
+- [x] `legacyNames`: 같은 category 의 구 이름 항목 제거 + 새 이름 append (ADR-070)
+- [x] `legacyNames`: 다른 category 이거나 목록에 없는 이름은 무변경
+- [x] `legacyNames`: 2회 연속 실행해도 결과 동일 (멱등)
+- [x] `legacyNames` 미지정: 기존 upsert 동작 불변 (구 이름 잔존)
+- [x] `legacyNames` 는 데이터에 기록되지 않음 (category/name/url/accessedAt 4필드만)
 - [x] 스키마 위반 데이터 입력 시 throws (write 실패)
 - [ ] atomic write (임시 파일 → rename) — 부분 쓰기 방지 (구현 완료, 테스트는 파일시스템 검증 어려움)
 - [x] 디렉터리 부재 시 자동 생성
+
+#### `hasLegacySourceName(sources, source): boolean` (ADR-070)
+
+- [x] 같은 category 에 구 이름 항목이 있으면 true
+- [x] 이미 새 이름으로 이전됐으면 false (멱등 — 재실행 시 write 안 함)
+- [x] category 가 다르면 false
+- [x] `legacyNames` 미지정 / `sources` undefined → false
 
 #### `classifyChange(oldVal, newVal)` (in `_outlier.mjs`)
 
@@ -2984,6 +2996,9 @@ afterEach(() => {
 - [x] 각 대학 공식 international tuition 페이지 fetch (reachability check 만)
 - [x] `staticAnnual` 항상 반환 — fetch 실패 시 graceful fallback
 - [x] 워크플로우에서 `--useStatic` 강제 (refresh-tuition.yml, PR #20 review round 7)
+- [x] `SOURCE.name` 한국어 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)
+- [x] `SOURCE.legacyNames` 에 구 영문 출처명 포함 (데이터 중복 방지)
+- [x] 값 변동 0 + 구 출처명 잔존: 이름만 이전 후 재실행은 no-op (ADR-070)
 - [ ] HTML parse — 페이지 구조별 selector (v1.x — 미구현, 현재 all-static)
 - [ ] 학비 단위 (per credit vs per year vs per semester) 정규화 → annual (v1.x — 미구현)
 - [ ] 페이지 구조 변경 시 selector 실패 → errors + 기존값 유지 (v1.x — selector 미도입)
@@ -2998,6 +3013,9 @@ afterEach(() => {
 - [x] 정착 비용 추정 (정적 + 비자료) — VISA_REGISTRY.settlementApprox
 - [x] 페이지 변경 시 graceful fail — fetchedFromPage:false 면 console.info, errors 미추가
 - [x] 워크플로우에서 `--useStatic` 강제 (refresh-visa.yml, PR #20 review round 7)
+- [x] `SOURCE.name` 한국어 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)
+- [x] `SOURCE.legacyNames` 에 구 영문 출처명 포함 (데이터 중복 방지)
+- [x] 값 변동 0 + 구 출처명 잔존: 이름만 이전 후 재실행은 no-op (ADR-070)
 - [ ] 정부 페이지 fetch + parse (v1.x — HTML 파싱 미구현, 현재 all-static)
 - [ ] 통화별 처리 (USD vs CAD vs EUR vs JPY 등) — registry 단위 매핑 (v1.x — 동적 파싱 미구현)
 

@@ -67,7 +67,9 @@ export type CityCostData = {
   };
   sources: Array<{
     category: 'rent' | 'food' | 'transport' | 'tuition' | 'tax' | 'visa';
-    name: string; // 'Statistics Canada'
+    // 기관·데이터셋 고유명은 원어 유지 ('Statistics Canada', '東京メトロ'),
+    // refresh 스크립트가 짓는 서술형 문구는 한국어 ('각 대학 공식 국제학생 학비 페이지 (정적 추정치)'). ADR-070
+    name: string;
     url: string;
     accessedAt: string; // ISO date
   }>;
@@ -110,6 +112,8 @@ export type CityCostData = {
 ### 3.3 출처 표기
 
 모든 데이터 포인트는 `sources` 배열에 카테고리별 출처 1개 이상 명시. 사용자에게 보이는 비교 화면 푸터에 `출처 N개` 카운트 + "출처 보기" 링크. 출처 없는 데이터는 추가하지 않는다.
+
+출처명 언어 정책 (ADR-070): 기관·데이터셋 고유명은 **원어 유지**, refresh 스크립트가 짓는 서술형 출처명은 **한국어**. 정적 추정치 caveat 는 "정적 추정치" 마커로 표기한다 (AUTOMATION.md §8). 출처명을 바꿀 때는 `SOURCE.legacyNames` 에 구 이름을 선언해야 항목이 중복되지 않는다.
 
 ## 4. 데이터 큐레이션 절차
 

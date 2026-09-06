@@ -22,6 +22,7 @@ import {
   redactSecretsInBody,
   redactErrorMessage,
   createCitySeed,
+  hasLegacySourceName,
 } from '../_common.mjs';
 
 setupTestEnv();
@@ -176,6 +177,116 @@ describe('writeCity', () => {
     );
   });
 
+  it('legacyNames: 같은 category 의 구 이름 항목 제거 + 새 이름 append', async () => {
+    const existingData = {
+      ...VALID_CITY_FIXTURE,
+      id: 'legacy-rename',
+      sources: [
+        { category: 'tuition', name: 'Old English Name', url: 'https://old.com', accessedAt: '2026-04-01' },
+      ],
+    };
+    createTempCityFile('legacy-rename', existingData as any);
+
+    const renamed = {
+      category: 'tuition',
+      name: '새 한국어 출처명 (정적 추정치)',
+      url: 'https://new.com',
+      legacyNames: ['Old English Name'],
+    };
+    await writeCity('legacy-rename', existingData as any, renamed);
+
+    const written = readTempCityFile('legacy-rename') as any;
+    expect(written.sources).toHaveLength(1);
+    expect(written.sources[0].name).toBe('새 한국어 출처명 (정적 추정치)');
+  });
+
+  it('legacyNames: 다른 category 이거나 목록에 없는 이름은 무변경', async () => {
+    const existingData = {
+      ...VALID_CITY_FIXTURE,
+      id: 'legacy-scoped',
+      sources: [
+        // 같은 이름이지만 category 가 달라 제거 대상 아님.
+        { category: 'food', name: 'Old English Name', url: 'https://food.com', accessedAt: '2026-04-01' },
+        { category: 'tuition', name: 'Keep Me', url: 'https://keep.com', accessedAt: '2026-04-01' },
+      ],
+    };
+    createTempCityFile('legacy-scoped', existingData as any);
+
+    const renamed = {
+      category: 'tuition',
+      name: '새 이름',
+      url: 'https://new.com',
+      legacyNames: ['Old English Name'],
+    };
+    await writeCity('legacy-scoped', existingData as any, renamed);
+
+    const written = readTempCityFile('legacy-scoped') as any;
+    expect(written.sources.map((s: { name: string }) => s.name)).toEqual([
+      'Old English Name',
+      'Keep Me',
+      '새 이름',
+    ]);
+  });
+
+  it('legacyNames: 2회 연속 실행해도 결과 동일 (멱등)', async () => {
+    const existingData = {
+      ...VALID_CITY_FIXTURE,
+      id: 'legacy-idempotent',
+      sources: [
+        { category: 'visa', name: 'Old Visa Name', url: 'https://old.com', accessedAt: '2026-04-01' },
+      ],
+    };
+    createTempCityFile('legacy-idempotent', existingData as any);
+
+    const renamed = {
+      category: 'visa',
+      name: '새 비자 출처명',
+      url: 'https://new.com',
+      legacyNames: ['Old Visa Name'],
+    };
+    await writeCity('legacy-idempotent', existingData as any, renamed);
+    const first = readTempCityFile('legacy-idempotent') as any;
+    await writeCity('legacy-idempotent', first, renamed);
+    const second = readTempCityFile('legacy-idempotent') as any;
+
+    expect(second.sources).toHaveLength(1);
+    expect(second.sources).toEqual(first.sources);
+  });
+
+  it('legacyNames 미지정: 기존 upsert 동작 불변 (구 이름 잔존)', async () => {
+    const existingData = {
+      ...VALID_CITY_FIXTURE,
+      id: 'no-legacy',
+      sources: [
+        { category: 'tuition', name: 'Old English Name', url: 'https://old.com', accessedAt: '2026-04-01' },
+      ],
+    };
+    createTempCityFile('no-legacy', existingData as any);
+
+    const renamed = { category: 'tuition', name: '새 이름', url: 'https://new.com' };
+    await writeCity('no-legacy', existingData as any, renamed);
+
+    const written = readTempCityFile('no-legacy') as any;
+    expect(written.sources).toHaveLength(2);
+  });
+
+  it('legacyNames 는 데이터에 기록되지 않음 (4개 필드만)', async () => {
+    const existingData = { ...VALID_CITY_FIXTURE, id: 'legacy-not-persisted' };
+    createTempCityFile('legacy-not-persisted', existingData as any);
+
+    const renamed = {
+      category: 'tuition',
+      name: '새 이름',
+      url: 'https://new.com',
+      legacyNames: ['Old English Name'],
+    };
+    await writeCity('legacy-not-persisted', existingData as any, renamed);
+
+    const written = readTempCityFile('legacy-not-persisted') as any;
+    const entry = written.sources.find((s: { category: string }) => s.category === 'tuition');
+    expect(Object.keys(entry).sort()).toEqual(['accessedAt', 'category', 'name', 'url']);
+  });
+
   it('스키마 위반 데이터: throws', async () => {
     const invalidData = { id: 'invalid' };
     const source = { category: 'rent', name: 'Test', url: 'https://example.com' };
@@ -196,6 +307,36 @@ describe('writeCity', () => {
     expect(fs.existsSync(path.join(subDir, 'nested-city.json'))).toBe(true);
 
     process.env.DATA_DIR = testDir;
+  });
+});
+
+describe('hasLegacySourceName', () => {
+  const source = {
+    category: 'tuition',
+    name: '새 이름',
+    url: 'https://new.com',
+    legacyNames: ['Old English Name'],
+  };
+
+  it('같은 category 에 구 이름 항목이 있으면 true', () => {
+    const sources = [{ category: 'tuition', name: 'Old English Name', url: 'x', accessedAt: '2026-04-01' }];
+    expect(hasLegacySourceName(sources as any, source)).toBe(true);
+  });
+
+  it('이미 새 이름으로 이전됐으면 false (멱등 — 재실행 시 write 안 함)', () => {
+    const sources = [{ category: 'tuition', name: '새 이름', url: 'x', accessedAt: '2026-04-01' }];
+    expect(hasLegacySourceName(sources as any, source)).toBe(false);
+  });
+
+  it('category 가 다르면 false', () => {
+    const sources = [{ category: 'food', name: 'Old English Name', url: 'x', accessedAt: '2026-04-01' }];
+    expect(hasLegacySourceName(sources as any, source)).toBe(false);
+  });
+
+  it('legacyNames 미지정 / sources undefined → false', () => {
+    const noLegacy = { category: 'tuition', name: '새 이름', url: 'https://new.com' };
+    expect(hasLegacySourceName([] as any, noLegacy)).toBe(false);
+    expect(hasLegacySourceName(undefined, source)).toBe(false);
   });
 });
 
