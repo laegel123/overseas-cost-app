@@ -583,7 +583,7 @@ export default function DetailScreen(): React.ReactElement {
                       emoji={row.emoji}
                       seoulPrice={formatKRW(row.seoulVal)}
                       cityPrice={formatKRW(row.cityVal)}
-                      mult={typeof mult === 'number' ? mult : 1}
+                      mult={mult}
                       isLast={idx === section.rows.length - 1}
                       {...singlePickProps}
                       testID={`detail-row-${row.key}`}

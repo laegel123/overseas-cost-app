@@ -2072,6 +2072,7 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [ ] 신라면 hot (2.5×) 검증 (v1.x — 데이터 fixture 의존)
 - [x] 외식 → 식재료 순서
 - [x] 항목 수 표시 ("2 항목" / "N 항목")
+- [x] 서울 값이 있는 행은 숫자 배수 표기 — `detail-row-restaurantMeal` = `↑2.1×`, `'신규'` 아님 (e2e-defects step 1 회귀 방지)
 - [x] 출처 푸터: 헤더(출처 N개 / 갱신 MM-DD) + 카테고리별 출처명 모두 노출 (단일행 좌우 정렬에서 다중행으로 정리)
 - [x] 출처 0건 시 "출처 정보가 없어요" 표시
 - [ ] "출처 보기" 링크: 외부 브라우저 열림 (v1.x)
@@ -2115,6 +2116,7 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] 시트 내 학교 선택 → store 갱신 + dismiss (TuitionChoiceSheet 통합)
 - [x] 도시에 tuition 부재 → emptyText "학비 데이터가 아직 준비되지 않았어요." + 직접 입력 버튼
 - [x] hero footer = "선택된 항목 기준 (탭으로 변경)"
+- [x] 서울 학비 부재 (seoulVal=0) → `detail-row-tuition-UBC` 안 배수 텍스트가 `'신규'` 이고 `'1.0×'` 아님 (e2e-defects step 1)
 
 **tax 카테고리 (단일 선택 + 직접 입력 — ADR-061):**
 
@@ -2132,7 +2134,7 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] navy hero: 합계
 - [x] "비자/정착" 섹션 — fee + settlementApprox (있는 것만)
 - [x] 데이터 부재 도시: "데이터 준비 중"
-- [ ] visa row 의 mult `'신규'` 시각 표시 — v1.x (현재 GroceryRow `mult: number` 라 1 로 fallback → "1.0×" 표기. 시각 회귀 발생 — Compare 카드는 "신규" 배지로 정확 표기. 통일하려면 GroceryRow 타입 확장 필요, components phase 산출물 변경 부담으로 후속). PR #17 review round 3 이슈 3.
+- [x] visa row 의 mult `'신규'` 시각 표시 — `detail-row-visa-fee` 안 배수 텍스트가 `'신규'` 이고 `'1.0×'` 아님 (e2e-defects step 1. 이전엔 호출부가 `'신규'` 를 1 로 강등해 hero "신규" vs 행 "1.0×" 모순 — PR #17 review round 3 이슈 3 해소)
 - [ ] 정부 페이지 링크 (v1.x)
 
 **잘못된 입력:**
