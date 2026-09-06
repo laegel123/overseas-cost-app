@@ -1,0 +1,31 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "e2e-defects",
+  "steps": [
+    {
+      "step": 0,
+      "name": "grocery-row-new-mult",
+      "status": "pending"
+    },
+    {
+      "step": 1,
+      "name": "detail-mult-passthrough",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "compare-pair-switch-a11y",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "compare-pair-bar-columns",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "source-name-korean",
+      "status": "pending"
+    }
+  ]
+}
