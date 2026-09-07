@@ -3305,6 +3305,13 @@ ADR-072 / in-app-policy-pages step 5. 정본 `src/lib/privacyPolicy.json` → `d
 - [x] 두 출력 모두 "직접 편집 금지 + `npm run gen:privacy`" 표시와 `마지막 갱신: <updatedAt>` 을 담고 **개행 하나로 끝난다** (diff 안정성)
 - [x] 배포된 `<style>` 블록 유지 (`--accent: #fc6011`, `max-width: 720px`) — 리디자인 금지
 
+**HTML escape (PR #44 리뷰 지적 반영):**
+
+- [x] 큰따옴표를 `&quot;` 로 escape 해 `content="…"` / `<title>` 속성값이 조기 종료되지 않는다
+- [x] `href="mailto:…"` 의 주소와 라벨도 동일하게 escape 된다
+
+> `escapeHtml` 은 요소 내용뿐 아니라 **큰따옴표 속성값 안에서도 재사용**된다. `&`/`<`/`>` 만 처리하던 초기 판본은 정본에 인용부호가 들어오는 순간 속성이 끊겨 마크업이 깨졌다. 현재 정본에는 `"` 가 없어 생성물은 무변경이지만, 방어는 fixture 로 고정해 둔다.
+
 > 파일 쓰기(`generate()`)는 테스트하지 않는다 — 순수 함수 2개가 전문 일치로 검증되면 남는 것은 `writeFile` 호출뿐이고, 실제 쓰기 결과는 위 드리프트 단언이 커밋된 파일로 확인한다.
 
 ### 9-A.12 정적 데이터 파일

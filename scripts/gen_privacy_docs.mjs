@@ -110,11 +110,20 @@ const HTML_STYLE = `    :root {
 
 /**
  * 텍스트를 HTML 에 넣기 전 escape. 정본은 마크업 없는 평문이다.
+ *
+ * `"` 까지 escape 하는 이유: 이 함수는 요소 내용뿐 아니라 큰따옴표 속성값
+ * (`content="…"`, `href="mailto:…"`) 안에서도 재사용된다. `"` 를 남겨두면
+ * 정본에 인용부호가 들어오는 순간 속성이 조기 종료돼 마크업이 깨진다.
+ *
  * @param {string} text
  * @returns {string}
  */
 function escapeHtml(text) {
-  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
 }
 
 /**
