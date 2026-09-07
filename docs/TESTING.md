@@ -1561,7 +1561,7 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] sw=1.0, cw=0.5 → 정상
 - [x] sw + cw 범위 벗어남 → clamp + warn
 
-**Icon 매핑:**
+**Icon 매핑** (맵 정의는 `src/lib/categoryMeta.ts` 의 `CATEGORY_ICON` — §9.36. 본 절은 category prop → 렌더된 아이콘 배선만 검증):
 
 - [x] category=rent → house icon
 - [x] category=food → fork icon
@@ -1941,6 +1941,8 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 
 **카드 (통합 뷰 — 항상 6 카테고리, ADR-067):**
 
+> 카드 라벨은 `CategoryConfig` 가 아니라 `src/lib/categoryMeta.ts` 의 `CATEGORY_LABEL[category]` 에서 온다 (ADR-071, in-app-policy-pages step 1). 라벨 문자열 자체의 고정은 §9.36, 본 절은 화면 배선 (`세금 (근사)` 파생 포함) 만 검증.
+
 - [x] rent/food/transport/tuition/tax/visa 6개 모두 표시 — 페르소나 분기 제거 (persona-removal step 4)
 - [x] ComparePair 각 카테고리별 1회 mount (persona-removal step 4)
 - [x] tuition/tax 카드는 항상 표시 (hero 합산엔 default 미포함, 사용자 토글로 ON 가능)
@@ -2082,6 +2084,8 @@ ARCHITECTURE.md §검색 알고리즘 정확 검증.
 ### 9.25 `app/detail/[cityId]/[category].tsx` (상세)
 
 screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 동일 골격 + 데이터 있는 항목만 렌더. 페르소나 분기는 v1.x 미루고 raw 카테고리 데이터를 균등 노출.
+
+> TopBar / hero 캡션의 카테고리 라벨(과 visa 섹션 라벨)은 `src/lib/categoryMeta.ts` 의 `CATEGORY_LABEL` 에서 온다 (ADR-071, in-app-policy-pages step 1). 라벨 문자열 자체의 고정은 §9.36.
 
 **food 카테고리 (v1.0 우선):**
 
@@ -2511,6 +2515,28 @@ Onboarding 페르소나 선택 카드. 온보딩 도시 선택 전환으로 삭�
 
 - [x] 단일 testID 매칭 시 해당 서브트리 반환 (간접 검증 — 본 헬퍼 사용 테스트 다수 pass)
 - [x] testID 못 찾으면 throw (간접 검증)
+
+### 9.36 `src/lib/categoryMeta.ts` — 카테고리 라벨·아이콘·순서 단일 출처
+
+ADR-071 / in-app-policy-pages step 1. 라벨은 `app/detail/[cityId]/[category].tsx` 와 `app/compare/[cityId].tsx` 에, 아이콘은 `src/components/ComparePair.tsx` 에 각각 흩어져 있던 것을 한 곳으로 모았다. 출처 화면(`app/sources/*`)이 같은 값을 세 번째 소비처로 쓴다. 값 변경은 Compare·Detail·출처 화면에 동시 파급되므로 본 인벤토리가 문자열을 고정한다.
+
+**`CATEGORY_LABEL`:**
+
+- [x] 6 카테고리 (`SourceCategory` 전수) 를 빠짐없이 갖는다 — 키 집합 일치
+- [x] rent=`월세` / food=`식비` / transport=`교통` / tuition=`학비` / tax=`세금` / visa=`비자/정착` 각각 일치 (6건)
+
+**`CATEGORY_ICON`:**
+
+- [x] 6 카테고리를 빠짐없이 갖는다 — 키 집합 일치
+- [x] rent=`house` / food=`fork` / transport=`bus` / tuition=`graduation` / tax=`briefcase` / visa=`passport` 각각 일치 (6건)
+- [x] 모든 값이 `ICON_NAMES` (§Icon 카탈로그) 에 존재하는 유효한 아이콘 이름 — 오타 시 런타임에서야 드러나는 결함 차단
+
+**`CATEGORY_ORDER`:**
+
+- [x] Compare 카드 순서 (`COMPARE_CATEGORIES`) 와 동일 — rent → food → transport → tuition → tax → visa
+- [x] 6 카테고리를 중복 없이 전부 담는다 (Set 크기 + 정렬 비교)
+
+> `IconName` 은 **타입 전용** import (`import type`). lib → components 런타임 의존 금지 — 이 방향이 깨지면 lib 테스트가 RN 컴포넌트 트리를 끌어온다.
 
 ---
 

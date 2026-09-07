@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "category-meta",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-07T10:01:51+0900",
+      "summary": "src/lib/categoryMeta.ts 신규 — 카테고리 한국어 라벨(CATEGORY_LABEL)·아이콘(CATEGORY_ICON)·표시 순서(CATEGORY_ORDER, step 4 출처 화면용) 단일 출처화. 세 곳에 흩어져 있던 정의를 흡수: app/detail/[cityId]/[category].tsx 의 CATEGORY_LABEL 상수(+ visa 섹션 라벨 리터럴 2건), app/compare/[cityId].tsx 의 CategoryConfig.label 필드와 6개 config 리터럴(타입에서 label 제거 → displayLabel 이 CATEGORY_LABEL[cfg.category] 조회), src/components/ComparePair.tsx 의 CATEGORY_ICON. IconName 은 import type 으로만 참조 (lib → components 런타임 의존 없음). 테스트 +17건 (src/lib/__tests__/categoryMeta.test.ts — 6 카테고리 전수·라벨 6·아이콘 6·ICON_NAMES 유효성·ORDER 중복 없는 전수/Compare 순서 일치), categoryMeta.ts 커버리지 100/100/100/100. TESTING.md §9.36 신규 + §9.17·§9.24·§9.25 정의 위치 이전 반영. 화면 출력·스냅샷 7개 무변경, 기존 테스트 수정 0건.",
+      "completed_at": "2026-09-07T10:08:40+0900"
     },
     {
       "step": 2,

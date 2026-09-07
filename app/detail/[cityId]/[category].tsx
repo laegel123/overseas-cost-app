@@ -28,6 +28,7 @@ import { TopBar } from '@/components/TopBar';
 import { TuitionChoiceSheet } from '@/components/TuitionChoiceSheet';
 import { Body, MonoLabel, Small, Tiny } from '@/components/typography/Text';
 import {
+  CATEGORY_LABEL,
   computeBarPcts,
   computeMultiplier,
   convertToKRW,
@@ -54,15 +55,6 @@ import type {
   ExchangeRates,
   SourceCategory,
 } from '@/types/city';
-
-const CATEGORY_LABEL: Record<SourceCategory, string> = {
-  rent: '월세',
-  food: '식비',
-  transport: '교통',
-  tuition: '학비',
-  tax: '세금',
-  visa: '비자/정착',
-};
 
 const VALID_CATEGORIES = new Set<SourceCategory>([
   'rent',
@@ -275,7 +267,7 @@ function buildSections(
   if (!visa) {
     return [
       {
-        label: '비자/정착',
+        label: CATEGORY_LABEL.visa,
         rows: [],
         emptyText: '비자 데이터가 아직 준비되지 않았어요.',
       },
@@ -303,7 +295,7 @@ function buildSections(
   }
   return [
     {
-      label: '비자/정착',
+      label: CATEGORY_LABEL.visa,
       rows,
       emptyText: '비자 데이터가 아직 준비되지 않았어요.',
     },
