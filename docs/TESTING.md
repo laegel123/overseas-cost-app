@@ -2657,6 +2657,41 @@ ADR-072 / in-app-policy-pages step 5. 본문 정본(`privacyPolicy.json`)에 타
 
 ---
 
+### 9.41 `app/privacy.tsx` — 개인정보 처리방침 화면 (`/privacy`)
+
+ADR-071·ADR-072 / in-app-policy-pages step 6. 설정의 "개인정보 처리방침 → GitHub Pages HTML" 외부 링크를 대체하는 앱 내 화면 (배선 교체는 step 7 — 이 시점에는 테스트로만 도달한다). 본문은 §9.40 정본(`PRIVACY_POLICY`)이 단일 출처라 화면은 **렌더만** 한다. `Linking` 은 `@/lib/linking` wrapper 만 mock (§5), `expo-router` 는 `useRouter` 만 mock.
+
+**본문 렌더 (실제 정본 기준):**
+
+- [x] 리드 문단(`privacy-lead`)에 `PRIVACY_POLICY.lead` 가 표시
+- [x] 섹션 7개가 `privacy-section-0` … `privacy-section-6` 순서로 렌더
+- [x] 제목에 `1.` ~ `7.` 번호가 순서대로 붙는다 — 번호는 정본 `title` 에 없고 화면이 붙인다
+- [x] `list` 블록 항목 10개 전량 렌더 + 불릿 마커 10개 (개수 단언)
+- [x] `paragraph` 블록도 전문 그대로 렌더
+- [x] 본문 텍스트에 `numberOfLines` 미적용 — 법적 고지라 말줄임·"더 보기" 접기 금지
+- [x] 헤더 부제에 `마지막 갱신 <updatedAt>` 표시
+
+**이메일 링크 (탭 가능한 유일한 요소):**
+
+- [x] `email` 블록 탭 → `openURL('mailto:<operatorEmail>')` 1회 (`privacy-email-<섹션 인덱스>`, 정본 기준 4·6)
+- [x] `accessibilityRole="button"` + `<label> 이메일 보내기` a11y 라벨
+- [x] `openURL` reject → `Alert.alert('링크 열기 실패', '이메일 앱을 찾을 수 없습니다.')` (silent fail 금지)
+
+**하드코딩 가드 (ADR-072 — 이 화면의 핵심 단언):**
+
+- [x] `@/lib` 배럴의 `PRIVACY_POLICY` 를 가짜 정본으로 갈아끼우면 리드·섹션 제목·문단·목록·연락처 라벨·`updatedAt` 이 전부 가짜 값을 따라가고, 실제 정본 문장은 화면에서 사라진다
+- [x] 가짜 정본의 이메일 주소로 `mailto:` 가 열린다 (주소도 하드코딩 아님)
+
+**네비게이션:**
+
+- [x] TopBar back 탭 → `router.back()` 1회
+
+> mock 기법 주석: jest 는 `jest.mock` 팩토리 결과의 프로퍼티를 **값으로 복사**하므로 getter 로 `PRIVACY_POLICY` 를 교체할 수 없다. 정본의 얕은 복사본 객체 하나를 노출하고 테스트가 `Object.assign` 으로 그 내용을 갈아끼운다 (화면이 렌더 시점에 필드를 읽으므로 반영된다).
+>
+> 환율 API 주소 등 이메일 외의 본문 문자열은 링크로 만들지 않는다 (사실 명시일 뿐 실행할 동선이 아님 — ADR-071). 화면 이동은 `presentation: 'modal'` 이 아니라 일반 Stack push (ADR-071 결정 3).
+
+---
+
 ## 9-A. 자동화 스크립트 (scripts/refresh/_ + scripts/build/_)
 
 ADR-032 / AUTOMATION.md 의 자동화 인프라에 대응하는 테스트 인벤토리. 모든 fetch 는 모킹 (`jest.spyOn(global, 'fetch')`), 시간은 `jest.setSystemTime`, 파일 시스템은 `tmp` 디렉터리 또는 `memfs` 모킹.
