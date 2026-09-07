@@ -64,7 +64,7 @@
       "status": "completed",
       "started_at": "2026-09-07T10:48:00+0900",
       "summary": "app/(tabs)/settings.tsx 배선 교체 — 데이터 출처 보기 → router.push('/sources'), 개인정보 처리방침 → router.push('/privacy') (ADR-071 결정 1). 외부 링크 상수 DATA_SOURCES_URL / PRIVACY_POLICY_URL 삭제, 피드백 mailto 와 safeOpenURL 헬퍼는 그대로 유지. menu-sources rightText 는 countUniqueSources() 런타임 실측값(`${sourceCount}개`)이며 citiesCount 와 동일한 useMemo([lastSync]) + exhaustive-deps 주석 패턴을 따라 데이터 갱신 후 값이 따라간다 (ADR-071 결정 2). DATA_SOURCES_COUNT 체계 전체 제거 — src/lib/dataSources.ts + 그 테스트 파일 삭제, src/lib/index.ts 배럴 export 제거, docs/DATA_SOURCES.md 상단 마커 경고 블록(본문 '출처 유형 총수: 12' 포함) 삭제(도시별 매핑 본문 무변경). 메뉴 라벨·아이콘·순서·testID 불변. 테스트: 인앱 라우팅 push 2건(+openURL 미호출) · rightText 실측값/12개 부재 · lastSync 변경 후 갱신 · 피드백 mailto 회귀 가드(+push 미호출), docs/TESTING.md §9.29 갱신 + §9.33 '(삭제됨 — ADR-071, in-app-policy-pages step 7)' 표시(§9.31·§9.34 선례). 스냅샷은 data-refresh-card 서브트리만 담아 rightText 를 포함하지 않으므로 무변경 (step 명세의 '스냅샷에 12개 포함' 전제는 사실과 다름). typecheck·lint 0, jest 94 suites / 2050 passed. 커버리지 임계 미달 목록은 HEAD 기준과 동일(사전 존재) — 삭제로 인한 신규 하락 없음.",
-      "completed_at": "2026-09-07T10:54:05+0900"
+      "completed_at": "2026-09-07T10:54:29+0900"
     },
     {
       "step": 8,
