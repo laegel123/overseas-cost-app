@@ -64,7 +64,7 @@ class StepExecutor:
         *,
         auto_push: bool = False,
         from_step: int = 0,
-        model: str = "claude-opus-4-5",
+        model: str = "claude-opus-5",
         timeout: int = 1800,
         verbose: bool = False,
         once: bool = False,
@@ -936,8 +936,8 @@ def main():
     p_run.add_argument("--push", action="store_true")
     p_run.add_argument("--from-step", type=int, default=0, metavar="N",
                        help="N번 step부터 시작 (기본: 0)")
-    p_run.add_argument("--model", default="claude-opus-4-5",
-                       help="Claude 모델 (기본: claude-opus-4-5)")
+    p_run.add_argument("--model", default="claude-opus-5",
+                       help="Claude 모델 (기본: claude-opus-5)")
     p_run.add_argument("--timeout", type=int, default=1800,
                        help="Claude 호출 타임아웃(초) (기본: 1800)")
     p_run.add_argument("--verbose", action="store_true",
