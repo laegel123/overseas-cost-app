@@ -2430,13 +2430,17 @@ screens phase step 3 구현 — 사용 통계 + 메뉴. 페르소나 배지는 *
 
 - [x] 4개 메뉴 모두 렌더링 (출처/피드백/개인정보/앱 정보) — `menu-refresh` 는 카드로 승격되어 제거 (persona-removal step 6)
 - [x] 앱 정보 rightText = v1.0.0 (expo-constants expoConfig.version) (screens step 3)
-- [x] 출처 rightText = 12개 — `DATA_SOURCES_COUNT` (`src/lib/dataSources.ts` 단일 출처) ↔ `docs/DATA_SOURCES.md` 마커 동기화는 §9.33 드리프트 테스트가 강제 (ADR-065; PR #18 round 9 의 수동 동기화 대체)
+- [x] 출처 rightText = `countUniqueSources()` 런타임 실측값 — 하드코딩 `12개` 미표시 (ADR-071, in-app-policy-pages step 7; 출처 유형 총수 큐레이션 상수 대체)
+- [x] 출처 rightText — 데이터 갱신(`lastSync` 변경) 후 새 실측값 반영 (`useMemo([lastSync])`, in-app-policy-pages step 7)
+
+**인앱 라우팅 (ADR-071):**
+
+- [x] 데이터 출처 보기 → `router.push('/sources')` + `openURL` 미호출 (in-app-policy-pages step 7; 기존 GitHub DATA_SOURCES.md 외부 링크 대체)
+- [x] 개인정보 처리방침 → `router.push('/privacy')` + `openURL` 미호출 (in-app-policy-pages step 7; 기존 GitHub Pages `privacy-policy.html` 외부 링크 대체)
 
 **외부 링크:**
 
-- [x] 피드백 보내기 → mailto:laegel1@gmail.com 호출 (ADR-021) (screens step 3)
-- [x] 데이터 출처 보기 → GitHub DATA_SOURCES.md URL 호출 (screens step 3)
-- [x] 개인정보 처리방침 → 출시 정본 GitHub Pages `privacy-policy.html` URL 호출 (ADR-065; 기존 GitHub PRIVACY.md 대체)
+- [x] 피드백 보내기 → mailto:laegel1@gmail.com 호출 + `router.push` 미호출 — 인앱 전환 후에도 유지 (ADR-021) (screens step 3, in-app-policy-pages step 7 회귀 가드)
 
 **Footer:**
 
@@ -2497,13 +2501,9 @@ screens phase step 3 에 추가된 thin wrapper. `jest.mock('@/lib/linking')` �
 - [x] openURL 호출 시 Linking.openURL 로 위임 (PR #18 review round 5)
 - [x] mailto: scheme 도 변형 없이 그대로 전달 (PR #18 review round 5)
 
-### 9.33 `src/lib/dataSources.ts` — 출처 유형 총수 단일 출처
+### 9.33 `src/lib/dataSources.ts` (삭제됨 — ADR-071, in-app-policy-pages step 7)
 
-v1.x DX 정리 (ADR-065). `DATA_SOURCES_COUNT` 를 `docs/DATA_SOURCES.md` 머신 마커와 동기화 강제 — settings.tsx 하드코딩 + 수동 동기화 제거.
-
-- [x] DATA_SOURCES_COUNT 는 양의 정수 (ADR-065)
-- [x] docs/DATA_SOURCES.md `<!-- DATA_SOURCES_COUNT: N -->` 마커와 일치 — 드리프트 가드 (ADR-065)
-- [x] 마커 부재 시 parseMarkerCount throw — silent fail 금지 (ADR-065)
+출처 유형 총수(12) 큐레이션 상수 + `docs/DATA_SOURCES.md` 머신 마커 드리프트 가드 (ADR-065). 출처 카운트가 런타임 실측(`countUniqueSources()`, §9.37)으로 바뀌면서 상수·마커·드리프트 테스트를 모두 삭제. 설정 화면 rightText 검증은 §9.29 로 이전.
 
 ### 9.34 `src/components/PersonaCard.tsx` (삭제됨 — ADR-067, persona-removal step 7)
 
