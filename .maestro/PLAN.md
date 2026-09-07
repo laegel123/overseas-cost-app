@@ -65,11 +65,17 @@ npm run e2e                               # 전체 (smoke + flows/**)
 
 ### 06-settings
 - **관찰:** 화면 구성, 데이터 새로고침, 외부 링크 이탈/복귀.
-- **리스크:** `data-refresh` 는 네트워크 의존 — 성공값 대신 '갱신 실패' 미노출로 검증. `external-links` 는 **실제 브라우저 페이지·메일 컴포저는 자동 검증 밖**(수동 관찰). 핸들러 동작 + 앱 복귀만 자동.
+- **리스크:** `data-refresh` 는 네트워크 의존 — 성공값 대신 '갱신 실패' 미노출로 검증. `external-links` 는 **실제 메일 컴포저가 자동 검증 밖**(수동 관찰). 핸들러 동작 + 앱 복귀만 자동.
+- **ADR-071 파급(2026-09-07):** `menu-sources`·`menu-privacy` 가 외부 링크에서 **인앱 화면 push** 로 바뀌었다. 설정에서 앱 밖으로 나가는 메뉴는 `menu-feedback`(mailto) 하나뿐이라 `external-links` 를 그 대상으로 재작성했다. 이전 판본은 `menu-privacy` 탭 후 `launchApp` → 홈을 단정했는데, 인앱 push 로 바뀐 뒤에도 `launchApp` 이 콜드스타트로 홈에 착지시켜 **통과하면서 아무것도 검증하지 않는 false-green** 이었다. 인앱 화면 검증은 08 배치가 담당.
 
 ### 07-visual-a11y
 - **관찰:** 7개 화면 스크린샷(온보딩/홈/Compare/상세×2/시트/설정). Hot tint·색·레이아웃·그림자 등 **색/픽셀은 사람이 눈으로 리뷰**.
-- **산출물:** 실행 디렉터리에 `01-onboarding.png` … `07-settings.png`. 리뷰 후 UI_GUIDE 대비 시각 회귀 판단.
+- **산출물:** `.maestro/.artifacts/` 에 `01-onboarding.png` … `10-privacy.png` (10컷). 리뷰 후 UI_GUIDE 대비 시각 회귀 판단.
+- 08~10 컷은 ADR-071 신규 화면(출처 목록/도시별 출처/처리방침). 도시는 **밴쿠버** — 학비·비자 출처가 있어 도시별 공공 출처가 실제로 렌더되는지 함께 본다.
+
+### 08-sources-privacy (ADR-071 신규 화면)
+- **관찰:** 설정 → `/sources` → `/sources/[cityId]` 2단계 드릴다운, 설정 → `/privacy`.
+- **리스크:** 앵커 도시 선택이 데이터 소스에 민감하다. 밴쿠버는 **번들 시드에만 `tax` 출처가 있고** 원격 전량 데이터에는 21개 도시 모두 `tax` 가 0건이라, 밴쿠버를 앵커로 쓰면 `source-group-tax` 존재 여부가 갈려 flaky 해진다 → `sources-drilldown` 은 **서울** 고정. 처리방침은 정본(`src/lib/privacyPolicy.json`) 개정에 flow 가 끌려가지 않도록 문구 리터럴 대신 구조(섹션 수·번호·블록 testID)와 날짜 **형식**만 단정한다.
 
 ---
 

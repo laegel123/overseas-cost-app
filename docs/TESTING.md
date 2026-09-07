@@ -3976,11 +3976,16 @@ it('비교 화면 모든 카드에 a11y label', () => {
 
 - [x] `overview` — 데이터 최신화 카드/통계/메뉴 4종/푸터 (persona-removal step 8; 버전 'v1.0.0' rightText 는 접근성 미노출 → menu-app-info 로 검증)
 - [x] `data-refresh` — 새로고침 → '갱신 실패' 미노출(네트워크 의존)
-- [ ] `external-links` — ⚠ **전제 무효 (ADR-071, in-app-policy-pages step 7).** `menu-privacy` 는 더 이상 외부 브라우저로 이탈하지 않고 인앱 `/privacy` 로 push 한다. 현재 flow(탭 → `launchApp` → 홈 assert)는 통과하지만 검증 의미가 없어 **인앱 화면 assert 로 재작성 필요** (flow 수정은 본 step 범위 밖 — 문서 정합 전용). 앱 밖으로 나가는 설정 메뉴는 `menu-feedback`(mailto) 뿐이다.
+- [x] `external-links` — 설정에 남은 **유일한 외부 링크**인 `menu-feedback`(mailto) 이탈/복귀. ADR-071 로 `menu-privacy`·`menu-sources` 가 인앱 push 로 바뀌면서, `menu-privacy` 를 탭하고 `launchApp` → 홈을 단정하던 이전 판본은 통과하면서도 아무것도 검증하지 않는 false-green 이 되어 재작성했다(2026-09-07 검증 세션). 인앱 화면 검증은 08-sources-privacy 담당
 
 **07-visual-a11y**
 
-- [x] `screenshots` — 온보딩/홈/Compare/상세/시트/설정 7컷 캡처(시각 수동 리뷰; takeScreenshot 직후 탭은 조건부 재탭 가드)
+- [x] `screenshots` — 온보딩/홈/Compare/상세/시트/설정 + 출처 목록/도시별 출처/처리방침 **10컷** 캡처(시각 수동 리뷰; takeScreenshot 직후 탭은 조건부 재탭 가드). 08~10 컷은 ADR-071 신규 화면 — 도시는 밴쿠버를 골라 학비·비자 출처가 렌더되는지 함께 본다
+
+**08-sources-privacy** (ADR-071 신규 화면)
+
+- [x] `sources-drilldown` — 설정 → `/sources` → `/sources/seoul` 2단계 드릴다운. 그룹·아이콘·출처 카드·갱신 주기 푸터 + **back 으로 목록 → 설정 단계별 복귀**(일반 Stack push 임을 검증 — modal 이면 목록을 건너뛰고 설정으로 떨어진다). 앵커 도시를 서울로 고정: 서울의 rent/food/transport 구성은 번들 시드와 원격 전량 데이터가 동일한 반면, 밴쿠버는 시드에만 `tax` 출처가 있어 그룹 존재 여부가 데이터 출처에 따라 갈린다
+- [x] `privacy-page` — 설정 → `/privacy`. 섹션 7개·화면이 부여하는 번호(1.~7.)·`privacy-email-6`·`마지막 갱신 \d{4}-\d{2}-\d{2}`. **정본 문구를 flow 에 복사하지 않는다** — 방침 개정마다 flow 가 깨지고 그건 이 화면의 검증 대상이 아니다. 이메일 블록은 존재만 확인하고 탭하지 않는다(mailto 외부 전환이 후속 flow 를 오염시킴)
 
 ---
 
