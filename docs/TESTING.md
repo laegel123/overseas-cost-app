@@ -2573,6 +2573,36 @@ ADR-071 / in-app-policy-pages step 2. `data.ts` 메모리 맵에서 출처 목�
 
 > 커버리지: `sources.ts` 100/100/100/100 (`src/lib/**` 임계치 statements 100 / branches 95 / lines 100 / functions 100).
 
+### 9.38 `app/sources/index.tsx` — 데이터 출처 목록 화면 (`/sources`)
+
+ADR-071 / in-app-policy-pages step 3. 설정의 "데이터 출처 보기" 외부 링크를 대체하는 앱 내 화면 (배선 교체는 step 7 — 이 시점에는 테스트로만 도달한다). 정렬·집계는 §9.37 `sources.ts` 가 끝냈고, **본 화면은 재정렬하지 않는다** — 그래서 lib 은 mock (`jest.mock('@/lib')`) 으로 순서를 고정하고, 화면이 그 순서를 그대로 그리는지만 본다. `expo-router` 는 `useRouter` 만 mock.
+
+**목록 렌더:**
+
+- [x] `getCitySourceGroups()` 가 준 순서 그대로 렌더 — `source-city-{seoul, newyork, vancouver}` (서울이 첫 행)
+- [x] 각 행에 도시 한국어 이름 + 출처 수가 `N개` 형식으로 표시 (4개 / 5개 / 6개)
+- [x] 마지막 행만 bottom border 없음 (`MenuRow` 의 `isLast` 관례)
+
+**네비게이션:**
+
+- [x] 행 탭 → `router.push('/sources/<cityId>')` — 정확한 경로 1회 (step 4 화면 대상)
+- [x] TopBar back 탭 → `router.back()` 1회
+
+**헤더:**
+
+- [x] 부제에 `countUniqueSources()` 실측값이 `출처 N개` 로 표시 (ADR-071 결정 2 — 하드코딩 상수 아님)
+
+**빈 상태:**
+
+- [x] 도시 0개 → `sources-empty` 표시 + `sources-city-list` 미렌더 + 크래시 없음. 헤더는 유지 (silent 빈 화면 금지)
+
+**접근성:**
+
+- [x] 각 행이 `accessibilityRole="button"`
+- [x] `accessibilityLabel` 이 행 의미를 담는다 — `서울 출처 4개 보기`
+
+> 권역 그룹 헤더는 없다 (평평한 목록). 화면 이동은 `presentation: 'modal'` 이 아니라 일반 Stack push — UI_GUIDE §Sheet C 명세와의 의도된 편차 (ADR-071 결정 3).
+
 ---
 
 ## 9-A. 자동화 스크립트 (scripts/refresh/_ + scripts/build/_)

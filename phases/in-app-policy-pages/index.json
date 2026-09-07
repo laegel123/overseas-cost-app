@@ -29,7 +29,10 @@
     {
       "step": 3,
       "name": "sources-index",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-07T10:16:46+0900",
+      "summary": "app/sources/index.tsx 신규 — /sources 데이터 출처 목록 화면 (Expo Router, 탭 바 없는 Stack push). Screen scroll + TopBar(title='데이터 출처', subtitle=`출처 ${countUniqueSources()}개` 런타임 실측, onBack→router.back()) 아래에 getCitySourceGroups() 결과를 재정렬 없이 받은 순서 그대로 렌더 (정렬·집계는 step 2 lib 책임). 각 행은 화면 파일 내 지역 컴포넌트 CitySourceRow — MenuRow 시각 규격(px/py-card-pad, gap-3, 마지막 행 border 없음)을 따르되 아이콘 박스 없이 도시 한국어명 + `N개`(Tiny gray-2) + chev-right, accessibilityRole='button' + accessibilityLabel `<도시> 출처 N개 보기`, 탭 → router.push('/sources/<cityId>') (step 4 대상). 목록 0개면 sources-empty 빈 상태('출처 정보를 불러오지 못했어요 / 설정에서 데이터를 새로고침해 주세요') — 헤더 유지, silent 빈 화면 금지. 권역 그룹 헤더 없음(평평한 목록), 도시 영문명 미표시, 색·radius·spacing 전부 토큰. settings.tsx·app/_layout.tsx·app/sources/[cityId].tsx 무변경 — 이 시점에 화면은 앱에서 도달 불가(의도, 배선은 step 7). 테스트 +8건 (app/sources/__tests__/index.test.tsx — jest.mock('@/lib')로 순서 고정 후 렌더 순서·N개 포맷·isLast border·push 경로·back·부제 실측값·빈 상태·a11y role/label), TESTING.md §9.38 인벤토리 신규. AC 전부 통과: typecheck·lint 0, jest 91 suites / 2005 passed (기존 테스트 수정 0건).",
+      "completed_at": "2026-09-07T10:20:13+0900"
     },
     {
       "step": 4,
