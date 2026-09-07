@@ -384,7 +384,7 @@ export default function CompareScreen(): React.ReactElement {
   const { swPct: heroSwPct, cwPct: heroCwPct } = computeBarPcts(seoulTotal, cityTotal);
   const diff = cityTotal - seoulTotal;
   const diffSign = diff >= 0 ? '+' : '';
-  // ADR-074 — `/월` 접미사 제거. 합계는 항목 단가의 합이지 가계 월 지출 추정치가
+  // ADR-075 — `/월` 접미사 제거. 합계는 항목 단가의 합이지 가계 월 지출 추정치가
   // 아니므로 "월 지출" 로 읽히는 표기를 쓰지 않는다.
   const centerCaption = `${diffSign}${formatKRW(diff)}`;
 

@@ -4,19 +4,22 @@
  * 본 모듈은 도시 비교 데이터만 책임진다. 환율은 `src/lib/currency.ts` 가 담당.
  *
  * Public API:
- *   - loadAllCities({ bypassCache }): 캐시 → primary → backup → seed 순.
+ *   - loadAllCities({ bypassCache, allowSeedFallback }): 캐시 → primary → backup → seed 순.
  *     성공 시 모듈 메모리 맵 갱신 — 이후 getCity / getAllCities 동기 조회 가능.
  *     **throw 정책:** 통상 흐름 (네트워크/HTTP/parse 실패) 은 시드 fallback 으로
  *     흡수되어 throw 되지 않는다. 시드까지 손상된 극단적 케이스 (assets 번들
  *     깨짐 / 자동화가 잘못된 시드 배포) 에만 `AllCitiesUnavailableError` throw.
+ *     `allowSeedFallback: false` (강제 새로고침 전용, ADR-074) 면 네트워크 실패를
+ *     시드로 덮지 않고 원 에러를 그대로 throw — 기존 도시 맵이 보존된다.
  *   - getCity(id): 메모리 맵 동기 조회. loadAllCities 전 또는 미존재 시 undefined.
  *   - getAllCities(): 메모리 맵 동기 조회.
  *   - refreshCache(): 캐시 + 환율 함께 강제 갱신, 결과 + lastSync 반환.
+ *     실패해도 기존 데이터를 잃지 않는다 (ADR-074).
  *
  * 정책:
  *   - 1차: GitHub Raw (laegel123/overseas-cost-app/main/data/all.json)
  *   - 2차: jsDelivr CDN 자동 미러 (DATA.md §6.4)
- *   - 3차: 번들 시드 (`data/seed/all.json` — 서울 + 밴쿠버, ADR-045)
+ *   - 3차: 번들 시드 (`data/seed/all.json` — 21개 실데이터, ADR-074 / 구 ADR-045)
  *   - 4차: 모두 손상 → AllCitiesUnavailableError
  *   - TTL 24h, 정확 24h = 만료 (TESTING §9.4)
  *   - timeout 10s per attempt (AbortController)
@@ -314,7 +317,10 @@ function loadFromSeed(): AllCitiesData {
  *
  * @throws AllCitiesUnavailableError 모든 단계 실패 (시드 손상 포함)
  */
-export function loadAllCities(opts?: { bypassCache?: boolean }): Promise<CitiesMap> {
+export function loadAllCities(opts?: {
+  bypassCache?: boolean;
+  allowSeedFallback?: boolean;
+}): Promise<CitiesMap> {
   // ADR-046 의 알려진 트레이드오프: 진행 중 inflight 가 있으면 bypassCache=true
   // 라도 그 Promise 를 그대로 반환한다 (강제 새로고침 의도가 race 시 무시됨).
   // 정책 근거 — 두 번째 클릭은 첫 번째 결과로 충족되며, 별도 취소 메커니즘은
@@ -322,6 +328,10 @@ export function loadAllCities(opts?: { bypassCache?: boolean }): Promise<CitiesM
   if (inflight !== null) return inflight;
 
   const bypassCache = opts?.bypassCache === true;
+  // 기본 true — 콜드스타트는 시드라도 보여주는 편이 빈 화면보다 낫다.
+  // false 는 강제 새로고침 전용 (ADR-074): 실패를 시드로 덮지 않고 그대로 throw 해
+  // 호출자가 기존 데이터를 유지하도록 한다.
+  const allowSeedFallback = opts?.allowSeedFallback !== false;
   const promise = (async (): Promise<CitiesMap> => {
     const now = Date.now();
 
@@ -340,6 +350,9 @@ export function loadAllCities(opts?: { bypassCache?: boolean }): Promise<CitiesM
     } catch (e) {
       /* istanbul ignore next: lib 내 모든 throw 는 AppError — 도달 불가 (방어) */
       if (!(e instanceof AppError)) throw e;
+      // ADR-074: 강제 새로고침은 시드로 덮지 않는다. citiesInMemory 를 건드리기 전에
+      // throw 해 기존 도시 맵 (21개) 이 그대로 살아남게 한다.
+      if (!allowSeedFallback) throw e;
       // 네트워크 단계 실패 → 시드 fallback (캐시 저장하지 않음 — 시드는 stale 의미 X)
       /* istanbul ignore next: __DEV__ 가드는 jest 환경에서 false (TESTING §4) */
       if (__DEV__) {
@@ -404,18 +417,30 @@ export async function getLastSync(): Promise<string | null> {
 /**
  * 강제 새로고침 — 설정 화면 "데이터 갱신" 메뉴.
  *
- * - data:all:v1 캐시 삭제 → bypassCache=true 로 loadAllCities 호출
+ * - bypassCache=true 로 loadAllCities 호출 (캐시를 읽지 않으므로 선삭제 불필요)
  * - 환율도 함께 갱신 (refreshFx)
  * - lastSync 메타키는 saveCacheEntry / refreshFx 가 각자 갱신
- * - 실패 시 이전 캐시·시드는 보존 (loadAllCities 가 시드 fallback)
+ *
+ * **ADR-074 (데이터 퇴행 방지):** 실패해도 기존 도시 데이터를 잃지 않는다.
+ * - 캐시를 미리 지우지 않는다 — 네트워크 실패 시 이전 캐시가 그대로 남아 다음
+ *   콜드스타트가 21개를 복원한다. (구버전은 선삭제 탓에 실패 = 영구 소실)
+ * - `allowSeedFallback: false` — 실패를 2개짜리 시드로 덮지 않는다. citiesInMemory
+ *   가 갱신되기 전에 throw 되므로 현재 화면의 도시 목록도 그대로 유지된다.
+ * - 따라서 네트워크 실패는 `ok: false` 로 정직하게 보고된다 (설정 화면 "갱신 실패").
+ *
+ * 알려진 한계 (ADR-046): 다른 loadAllCities 호출이 in-flight 면 그 Promise 가 재사용되어
+ * allowSeedFallback=false 가 적용되지 않을 수 있다. 이 경우에도 캐시 선삭제가 없으므로
+ * 데이터 소실은 발생하지 않고, 최대 영향은 "실패를 성공으로 보고" 에 그친다.
  */
 export async function refreshCache(): Promise<
   { ok: true; lastSync: string } | { ok: false; reason: string }
 > {
   try {
-    await safeRemoveCache();
     // 도시 batch 와 환율 fetch 는 서로 의존 없음 — 병렬화로 설정 화면 새로고침 UX 개선.
-    await Promise.all([loadAllCities({ bypassCache: true }), refreshFx()]);
+    await Promise.all([
+      loadAllCities({ bypassCache: true, allowSeedFallback: false }),
+      refreshFx(),
+    ]);
     const lastSync = await AsyncStorage.getItem(META_LAST_SYNC_KEY);
     return { ok: true, lastSync: lastSync ?? new Date().toISOString() };
   } catch (e) {

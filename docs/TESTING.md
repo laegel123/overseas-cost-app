@@ -332,8 +332,8 @@ UI_GUIDE.md §카테고리별 상세 화면 사양 의 5개 카테고리에 대�
 ### 7.3 fixture 카탈로그
 
 - [x] schema 통과 도시 객체 빌더 — `src/__fixtures__/cities/{seoul-valid, vancouver-valid}.ts`. citySchema 테스트 + 통합 smoke 에서 사용.
-- [x] `data/seed/all.json` — v1.0 시드 (서울+밴쿠버, schema-pass fixture 기반, ADR-045). 자동화 phase 산출물이 GitHub raw 로 배포되면 24h 내 덮어써짐.
-- [x] `src/__fixtures__/seed-roundtrip.test.ts` — 시드 round-trip + fixture↔seed drift 검증.
+- [x] `data/seed/all.json` — v1.0 시드 = **실 도시 데이터 21개 전량** (ADR-074, ADR-045 supersede). `scripts/build_data.mjs` 가 `data/all.json` 과 같은 내용으로 함께 쓴다. 네트워크 실패 시에도 도시 수가 퇴행하지 않는다.
+- [x] `src/__fixtures__/seed-roundtrip.test.ts` — 시드 round-trip + 21개 계약 + `시드 == data/all.json` drift 검증 (ADR-074).
 - [ ] 정상 도시 (서울, 밴쿠버, 도쿄)
 - [ ] JPY 통화 (도쿄) — 소수점 없는 통화 검증
 - [ ] VND 통화 (호치민) — 큰 수 검증
@@ -929,12 +929,20 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 
 #### `refreshCache()`
 
-- [ ] `data:all:v1` 키 삭제 후 loadAllCities 강제 호출
+- [x] `bypassCache: true` 로 loadAllCities 호출 — stale 캐시를 무시하고 새 데이터로 교체
 - [ ] `fx:v1` 도 갱신
 - [ ] `useSettingsStore.lastSync` 업데이트
-- [ ] 결과 객체 반환 (`{ ok: true, lastSync: ISO }`)
-- [ ] 실패 시 (`{ ok: false, reason: string }`)
+- [x] 결과 객체 반환 (`{ ok: true, lastSync: ISO }`)
+- [x] 실패 시 (`{ ok: false, reason: string }`)
 - [ ] 사용자 토스트 메시지에 사용
+
+**ADR-074 회귀 방어 (데이터 퇴행 금지)** — 구버전은 캐시를 선삭제한 뒤 시드로 fallback 해
+`ok: true` 를 반환했고, 그 결과 도시 21개가 2개로 무너졌다:
+
+- [x] 네트워크 전멸 → `ok: false` (시드로 성공을 위장하지 않는다)
+- [x] 실패해도 기존 도시 맵 보존 — `citiesInMemory` 가 시드로 덮이지 않는다
+- [x] 실패해도 기존 캐시(`data:all:v1`) 보존 — 다음 콜드스타트가 복원한다
+- [x] `loadAllCities({ allowSeedFallback: false })` → 시드로 덮지 않고 원 에러 throw
 
 #### `migrateCacheV1ToV2(stored): CitiesMap | null` (스키마 변경 시)
 
@@ -992,11 +1000,12 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 
 시드 fallback 경로 + 환율 변환 round-trip 을 모듈 경계 너머 검증. 실 네트워크 의존 없음.
 
-- [ ] 네트워크 실패 → 시드 fallback → 메모리 맵 갱신 → `getCity('vancouver')` / `getAllCities()` 즉시 반환
+- [x] 네트워크 실패 → 시드 fallback (21개 전량) → 메모리 맵 갱신 → `getCity('vancouver')` / `getAllCities()` 즉시 반환
 - [ ] 서울 KRW pass-through (`convertToKRW(amount, 'KRW', {})` === amount)
 - [ ] 밴쿠버 CAD → KRW 변환 (`fetchExchangeRates({ bypassCache: true })` 가 fetch 실패 시 hardcoded baseline 반환 → `convertToKRW` 가 정수 KRW)
-- [ ] `refreshCache()`: 네트워크 실패해도 시드 + FX baseline 으로 ok=true + lastSync 반환
-- [ ] `getAllCities()` 가 loadAllCities 호출 전 빈 객체, 후 시드 도시 2개 반환
+- [x] `refreshCache()`: 네트워크 전멸 → `ok: false` + 기존 도시 맵 보존 (ADR-074)
+- [x] `refreshCache()` 실패가 캐시를 지우지 않는다 (ADR-074)
+- [x] `getAllCities()` 가 loadAllCities 호출 전 빈 객체, 후 시드 도시 **21개** 반환
 
 ### 9.4.2 `src/store/hydration.ts` (waitForAllStoresHydrated, stores phase step 4)
 
@@ -1937,7 +1946,7 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 - [x] HeroCard orange mount 검증 (screens step 0)
 - [x] 서울값 / 도시값 / 배수 표시 (screens step 0)
 - [x] hero 합산 기본 포함: rent/food/transport (tuition/tax/visa 는 default OFF, ADR-067)
-- [x] footer `항목 단가 합` + hero 전체에 `/월` 표기 없음 — `평균 가정 기준` 폐기 (ADR-074)
+- [x] footer `항목 단가 합` + hero 전체에 `/월` 표기 없음 — `평균 가정 기준` 폐기 (ADR-075)
 - [ ] ❓ 탭: 가정값 시트 열림
 
 **카드 (통합 뷰 — 항상 6 카테고리, ADR-067):**
@@ -2090,7 +2099,7 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 
 **food 카테고리 (v1.0 우선):**
 
-- [x] 네이비 hero: 카테고리 합계 + 푸터 (`항목 단가 합` — ADR-074 이후 Compare hero footer 와 동일 문구. 이력: PR #17 review round 3 이슈 2)
+- [x] 네이비 hero: 카테고리 합계 + 푸터 (`항목 단가 합` — ADR-075 이후 Compare hero footer 와 동일 문구. 이력: PR #17 review round 3 이슈 2)
 - [x] 외식 섹션: 식당, 카페 (2 항목 표시)
 - [x] 식재료 섹션: 공통 8개 항목 (milk1L/eggs12/rice1kg/chicken1kg/bread/onion1kg/apple1kg/ramen)
 - [ ] 신라면 hot (2.5×) 검증 (v1.x — 데이터 fixture 의존)
@@ -3305,6 +3314,13 @@ ADR-072 / in-app-policy-pages step 5. 정본 `src/lib/privacyPolicy.json` → `d
 - [x] `paragraph` → `<p>`, `list` → `<ul><li>`
 - [x] 두 출력 모두 "직접 편집 금지 + `npm run gen:privacy`" 표시와 `마지막 갱신: <updatedAt>` 을 담고 **개행 하나로 끝난다** (diff 안정성)
 - [x] 배포된 `<style>` 블록 유지 (`--accent: #fc6011`, `max-width: 720px`) — 리디자인 금지
+
+**HTML escape (PR #44 리뷰 지적 반영):**
+
+- [x] 큰따옴표를 `&quot;` 로 escape 해 `content="…"` / `<title>` 속성값이 조기 종료되지 않는다
+- [x] `href="mailto:…"` 의 주소와 라벨도 동일하게 escape 된다
+
+> `escapeHtml` 은 요소 내용뿐 아니라 **큰따옴표 속성값 안에서도 재사용**된다. `&`/`<`/`>` 만 처리하던 초기 판본은 정본에 인용부호가 들어오는 순간 속성이 끊겨 마크업이 깨졌다. 현재 정본에는 `"` 가 없어 생성물은 무변경이지만, 방어는 fixture 로 고정해 둔다.
 
 > 파일 쓰기(`generate()`)는 테스트하지 않는다 — 순수 함수 2개가 전문 일치로 검증되면 남는 것은 `writeFile` 호출뿐이고, 실제 쓰기 결과는 위 드리프트 단언이 커밋된 파일로 확인한다.
 

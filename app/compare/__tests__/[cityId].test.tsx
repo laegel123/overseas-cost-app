@@ -344,7 +344,7 @@ describe('CompareScreen', () => {
       expect(screen.getAllByText('밴쿠버').length).toBeGreaterThan(0);
     });
 
-    it('hero — footer `항목 단가 합` + `/월` 표기 없음 (ADR-074)', async () => {
+    it('hero — footer `항목 단가 합` + `/월` 표기 없음 (ADR-075)', async () => {
       setupMocks();
 
       const { getByTestId } = render(<CompareScreen />);
@@ -683,7 +683,7 @@ describe('CompareScreen', () => {
       const multTexts = within(hero).queryAllByText(/×$/);
       expect(multTexts).toHaveLength(0);
 
-      // caption 은 여전히 표시 — `+N만원` 패턴 (ADR-074 로 `/월` 접미사 제거).
+      // caption 은 여전히 표시 — `+N만원` 패턴 (ADR-075 로 `/월` 접미사 제거).
       // 좌·우 값과 겹치지 않도록 가운데 컬럼으로 범위를 좁혀 검증.
       const captionTexts = within(getByTestId('compare-hero-center')).queryAllByText(
         /^\+.*원$/,
