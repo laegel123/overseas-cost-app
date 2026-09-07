@@ -2640,6 +2640,23 @@ ADR-071 / in-app-policy-pages step 4. §9.38 목록에서 도시를 탭하면 pu
 
 ---
 
+### 9.40 `src/lib/privacyPolicy.ts` — 개인정보 처리방침 본문 단일 출처
+
+ADR-072 / in-app-policy-pages step 5. 본문 정본(`privacyPolicy.json`)에 타입을 입혀 노출하는 상수 모듈. TS 는 JSON 을 **타입 단언**으로 받으므로 컴파일러가 형태를 검증하지 않는다 — 런타임 불변조건을 본 인벤토리가 지킨다. 렌더 결과 ↔ 생성 문서 일치는 §9-A.11 `gen_privacy_docs.mjs` 담당.
+
+- [x] 섹션이 7개다 (수집·저장 / 외부 서비스 / 분석·추적 / 정확성 고지 / 보호책임자 / 변경 / 문의)
+- [x] 모든 섹션에 비어 있지 않은 `title` 과 최소 1개 `block`
+- [x] `title` 에 섹션 번호(`1.` …)를 하드코딩하지 않는다 — 번호는 렌더 시점에 붙는다
+- [x] 모든 block 이 알려진 `kind` 이고 필수 필드를 갖는다 (`paragraph.text` / `list.items` / `email.label`+`email`)
+- [x] **본문 어디에도 `페르소나` / `유학생` / `취업자` 문자열이 없다** (ADR-067 회귀 방지 — 이 phase 의 핵심 가드)
+- [x] `updatedAt` 이 `YYYY-MM-DD` 형식
+- [x] 모든 `email` 블록의 주소가 `operatorEmail` 과 일치 (연락처 이원화 방지)
+- [x] `appName` / `lead` 비어 있지 않음, `operatorEmail` 에 `@` 포함
+
+> 저장 항목 서술은 `src/store/*.ts` 의 persist 설정 + `src/lib/{data,currency}.ts` 캐시와 일치해야 한다 (법적 문서). 코드로 강제할 수 없는 부분이라 store 를 추가·제거할 때 본문을 함께 점검한다.
+
+---
+
 ## 9-A. 자동화 스크립트 (scripts/refresh/_ + scripts/build/_)
 
 ADR-032 / AUTOMATION.md 의 자동화 인프라에 대응하는 테스트 인벤토리. 모든 fetch 는 모킹 (`jest.spyOn(global, 'fetch')`), 시간은 `jest.setSystemTime`, 파일 시스템은 `tmp` 디렉터리 또는 `memfs` 모킹.
@@ -3234,6 +3251,26 @@ afterEach(() => {
 - [x] `iterNumericFields` — null 값은 그대로 null 로 yield
 - [ ] CLI 실행: HEAD 부재(첫 commit) 시 outliers=0, exit 0
 - [ ] `GITHUB_OUTPUT` 미설정 환경에서도 stdout summary 만 출력하고 종료
+
+#### `scripts/gen_privacy_docs.mjs`
+
+ADR-072 / in-app-policy-pages step 5. 정본 `src/lib/privacyPolicy.json` → `docs/privacy-policy.html` (스토어 등록 URL) + `docs/PRIVACY.md`. `renderHtml` / `renderMarkdown` 은 파일 시스템을 건드리지 않는 순수 함수라 드리프트 테스트가 그대로 import 한다 (`import.meta` 미사용 — babel-preset-expo 가 트랜스폼하지 않아 jest import 가 깨진다. CLI 진입은 `process.argv[1]` 로 판별).
+
+**드리프트 가드 (CI 강제):**
+
+- [x] `renderHtml(PRIVACY_POLICY)` 가 `docs/privacy-policy.html` 전문과 **정확히 일치**
+- [x] `renderMarkdown(PRIVACY_POLICY)` 가 `docs/PRIVACY.md` 전문과 **정확히 일치**
+- [x] 불일치 시 실패 메시지에 `npm run gen:privacy` 재생성 안내가 담긴다 (jest diff 는 유지)
+
+**렌더 규칙 (최소 fixture — 정본이 바뀌어도 흔들리지 않는다):**
+
+- [x] 섹션 번호를 `1.` 부터 순서대로 붙인다 (HTML `<h2>` / Markdown `##`)
+- [x] `email` 블록 → HTML `<a href="mailto:…">`, Markdown `[주소](mailto:주소)`
+- [x] `paragraph` → `<p>`, `list` → `<ul><li>`
+- [x] 두 출력 모두 "직접 편집 금지 + `npm run gen:privacy`" 표시와 `마지막 갱신: <updatedAt>` 을 담고 **개행 하나로 끝난다** (diff 안정성)
+- [x] 배포된 `<style>` 블록 유지 (`--accent: #fc6011`, `max-width: 720px`) — 리디자인 금지
+
+> 파일 쓰기(`generate()`)는 테스트하지 않는다 — 순수 함수 2개가 전문 일치로 검증되면 남는 것은 `writeFile` 호출뿐이고, 실제 쓰기 결과는 위 드리프트 단언이 커밋된 파일로 확인한다.
 
 ### 9-A.12 정적 데이터 파일
 

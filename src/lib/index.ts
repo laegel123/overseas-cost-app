@@ -23,5 +23,7 @@ export {
   isHot,
 } from './format';
 export { computeCityTotal, multFromTotals } from './homeTotals';
+export type { PrivacyBlock, PrivacyPolicy, PrivacySection } from './privacyPolicy';
+export { PRIVACY_POLICY } from './privacyPolicy';
 export type { CategorySourceGroup, CitySourceGroup } from './sources';
 export { countUniqueSources, getCitySourceGroups, getCitySourcesByCategory } from './sources';

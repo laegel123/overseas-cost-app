@@ -87,3 +87,4 @@
 | [069](adr/069-harness-doc-pull.md) | 하네스 가드레일 push → pull 전환 | Active | 색인만 주입, 본문은 step 이 Read |
 | [070](adr/070-source-name-language.md) | 출처명 표기 언어 정책 + `legacyNames` 이름 이전 | Active | 서술형 출처명 한국어, 고유명 원어 |
 | [071](adr/071-in-app-policy-pages.md) | 정책 페이지 인앱 내재화 + 출처 카운트 실측 (Supersedes ADR-065) | Active | /sources·/privacy 자체 화면, 출처 URL 도시별 실제화 |
+| [072](adr/072-privacy-policy-source.md) | 개인정보 처리방침 본문 단일 출처 = `src/lib/privacyPolicy.ts` | Active | HTML·MD 는 생성물, 드리프트 테스트 강제 |

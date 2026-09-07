@@ -45,7 +45,10 @@
     {
       "step": 5,
       "name": "privacy-content",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-07T10:27:43+0900",
+      "summary": "개인정보 처리방침 본문 단일 출처화 — ADR-072 신규 + 인덱스 행. 정본 = src/lib/privacyPolicy.json (구조화 블록 paragraph/list/email, 섹션 번호는 title 에 없고 렌더 시점 부여) + src/lib/privacyPolicy.ts (타입 4개 + PRIVACY_POLICY, @/lib 배럴 export). scripts/gen_privacy_docs.mjs 신규 — 순수 함수 renderHtml/renderMarkdown + generate() 진입점(import.meta 미사용, process.argv 판별), npm run gen:privacy 로 docs/privacy-policy.html(스토어 등록 URL·<style> 블록 무변경) 과 docs/PRIVACY.md 재생성 (상단 '직접 편집 금지 + 재생성 명령' 주석). 페르소나(ADR-067) 문장을 src/store/*.ts persist 설정 + data/currency 캐시 실측에 맞게 정정하고, 갱신 주기를 AUTOMATION.md §9 실측치(환율 매일/식비 매주/월세 매월/교통·학비·비자 분기)로 정합, updatedAt=2026-09-07. 테스트 +21건 — src/lib/__tests__/privacyPolicy.test.ts (섹션 7개·block 형태·title 번호 없음·페르소나/유학생/취업자 부재·updatedAt 형식·email=operatorEmail) 와 scripts/__tests__/gen_privacy_docs.test.ts (HTML/MD 전문 일치 드리프트 가드 + 재생성 안내 메시지·번호 부여·mailto 렌더·개행 1개 종료·<style> 유지). TESTING.md §9.40 + §9-A.11 인벤토리 신규. privacyPolicy.ts 커버리지 100/100/100/100, jest 94 suites / 2041 passed, 재생성 멱등 확인. RELEASE.md §7 코드블록 제거는 ADR 에 결정만 기록 (step 8 범위).",
+      "completed_at": "2026-09-07T10:38:26+0900"
     },
     {
       "step": 6,
