@@ -53,7 +53,10 @@
     {
       "step": 6,
       "name": "privacy-screen",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-07T10:39:34+0900",
+      "completed_at": "2026-09-07T10:44:00+0900",
+      "summary": "app/privacy.tsx 신규 — /privacy 개인정보 처리방침 화면 (Stack push, 탭 바 없음). 본문은 @/lib 의 PRIVACY_POLICY 정본을 렌더만 하고 화면에 문장 하드코딩 없음(ADR-072). testID: privacy-screen / privacy-topbar / privacy-lead / privacy-section-<idx> / privacy-email-<섹션idx>. 섹션 번호(1.~7.)는 화면이 부여. 이메일 블록만 탭 가능(mailto, @/lib/linking 경유 + 실패 시 Alert). app/__tests__/privacy.test.tsx 11건 + docs/TESTING.md §9.41 인벤토리. step 7 은 settings 의 개인정보 처리방침 외부 링크를 router.push('/privacy') 로 교체하면 된다."
     },
     {
       "step": 7,
