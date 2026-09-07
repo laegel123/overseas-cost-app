@@ -1,0 +1,54 @@
+# UC-6: 설정 → 개인정보 처리방침 (앱 내부 화면, ADR-071 / ADR-072).
+# 이전에는 GitHub Pages HTML 외부 링크였다. 본문 정본은 src/lib/privacyPolicy.json 이고
+# 화면은 그것을 렌더만 한다 — 문구를 앱에 하드코딩하면 스토어 등록용 HTML 과 갈라진다.
+#
+# 문구 리터럴 대신 구조(섹션 개수·번호·블록 testID)로 검증한다. 정본 문장을 flow 에
+# 복사하면 방침 개정마다 flow 가 깨지고, 그건 이 화면이 검증해야 할 대상이 아니다.
+# 마지막 갱신일도 하드코딩하지 않고 날짜 형식만 확인한다.
+#
+# 이메일 블록은 존재만 확인하고 탭하지 않는다 — mailto 는 외부 앱 전환을 일으켜
+# 후속 flow 를 오염시킨다 (mailto 핸들러 검증은 06-settings/external-links.yaml 담당).
+appId: com.laegel.overseascostapp
+tags:
+  - settings
+  - privacy
+---
+- runFlow: ../../common/onboard.yaml
+- tapOn:
+    id: 'home-avatar'
+- assertVisible:
+    id: 'settings-screen'
+- tapOn:
+    id: 'menu-privacy'
+# 인앱 화면으로 push (외부 브라우저 이탈 아님 — 이게 ADR-071 의 핵심 변화)
+- assertVisible:
+    id: 'privacy-screen'
+- assertVisible:
+    id: 'privacy-topbar'
+- assertVisible: '개인정보 처리방침'
+# TopBar 부제 — 정본 updatedAt. 날짜 값이 아니라 형식만 단정한다.
+- assertVisible: '마지막 갱신 \d{4}-\d{2}-\d{2}'
+- assertVisible:
+    id: 'privacy-lead'
+# 섹션 번호는 정본 title 에 없고 화면이 부여한다 (1. 부터)
+- assertVisible:
+    id: 'privacy-section-0'
+- assertVisible: '1\. .*'
+# 마지막 섹션(문의)까지 스크롤 — 정본 섹션 7개라 인덱스 6 이 마지막
+- scrollUntilVisible:
+    element:
+      id: 'privacy-section-6'
+    direction: DOWN
+- assertVisible: '7\. .*'
+# email 블록은 정본 기준 섹션 4(보호책임자)·6(문의) 두 곳
+- assertVisible:
+    id: 'privacy-email-6'
+# back 앵커를 되올린다
+- scrollUntilVisible:
+    element:
+      id: 'privacy-topbar-back'
+    direction: UP
+- tapOn:
+    id: 'privacy-topbar-back'
+- assertVisible:
+    id: 'settings-screen'

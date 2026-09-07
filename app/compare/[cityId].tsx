@@ -17,6 +17,7 @@ import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
 import { Small } from '@/components/typography/Text';
 import {
+  CATEGORY_LABEL,
   computeBarPcts,
   computeMultiplier,
   convertToKRW,
@@ -49,9 +50,9 @@ import type {
   SourceCategory,
 } from '@/types/city';
 
+// 라벨은 본 타입에 두지 않는다 — `CATEGORY_LABEL[category]` 단일 출처 (ADR-071).
 type CategoryConfig = {
   category: SourceCategory;
-  label: string;
   /**
    * 카테고리 월 비용 (KRW). 사용자 선택 (`rentChoice` / `tuitionChoice` /
    * `taxChoice`) 에 따라 값이 바뀜 — Detail 의 단일 선택이 Compare hero / 카드
@@ -69,7 +70,6 @@ type CategoryConfig = {
 
 const RENT_CONFIG: CategoryConfig = {
   category: 'rent',
-  label: '월세',
   // 본 getValue 는 컴포넌트 본문 categoryData 빌드부에서 직접 호출되지 않는다
   // (PR #24 review 이슈 2). rent 는 city 기준 resolved key 를 1 회 결정 후
   // 양쪽 동일 key 적용. 본 정의는 CategoryConfig 인터페이스 충족용 +
@@ -93,7 +93,6 @@ const FOOD_GROCERY_TRIPS_PER_MONTH = 4;
 
 const FOOD_CONFIG: CategoryConfig = {
   category: 'food',
-  label: '식비',
   getValue: (city, fx) => {
     const meal = (city.food.restaurantMeal + city.food.cafe) * FOOD_RESTAURANT_DAYS_PER_MONTH;
     const groceryUnitSum =
@@ -108,7 +107,6 @@ const FOOD_CONFIG: CategoryConfig = {
 
 const TRANSPORT_CONFIG: CategoryConfig = {
   category: 'transport',
-  label: '교통',
   getValue: (city, fx) => {
     return convertToKRW(city.transport.monthlyPass, city.currency, fx);
   },
@@ -116,7 +114,6 @@ const TRANSPORT_CONFIG: CategoryConfig = {
 
 const TUITION_CONFIG: CategoryConfig = {
   category: 'tuition',
-  label: '학비',
   // ADR-061 — Detail 에서 선택한 학교 (preset) 또는 직접 입력값을 동일 단일
   // 출처에서 적용. 미선택이면 첫 entry fallback. 도시 데이터 결측 → null.
   // PR #25 3차 review — Compare 가 seoul 도 동일 호출에 통과하므로, entries 가
@@ -134,7 +131,6 @@ const TUITION_CONFIG: CategoryConfig = {
 
 const TAX_CONFIG: CategoryConfig = {
   category: 'tax',
-  label: '세금',
   // ADR-061 — Detail 에서 선택한 연봉 tier 또는 직접 입력값. 도시 첫 preset 의
   // takeHomePctApprox 사용 (custom 일 때).
   getValue: (city, fx, _rentChoice, _tuitionChoice, taxChoice) => {
@@ -149,7 +145,6 @@ const TAX_CONFIG: CategoryConfig = {
 
 const VISA_CONFIG: CategoryConfig = {
   category: 'visa',
-  label: '비자/정착',
   getValue: (city, fx) => {
     if (!city.visa) return null;
     const fee = city.visa.studentApplicationFee ?? city.visa.workApplicationFee ?? 0;
@@ -361,10 +356,11 @@ export default function CompareScreen(): React.ReactElement {
     // 의 값을 차용 (단순화). Compare 한 줄 카드라 사용자가 정확한 수치로 오해
     // 하지 않도록 "(근사)" 표기. v1.x 에서 takeHomePct 보간 정밀화 후 표기
     // 정책 재검토 (ADR-061 Deferred).
+    const label = CATEGORY_LABEL[cfg.category];
     const displayLabel =
       cfg.category === 'tax' && taxChoice?.kind === 'custom'
-        ? `${cfg.label} (근사)`
-        : cfg.label;
+        ? `${label} (근사)`
+        : label;
 
     return {
       ...cfg,

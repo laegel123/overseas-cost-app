@@ -13,7 +13,9 @@
 | 토스트 | success/error/info 하단 토스트 (§토스트) | 토스트 없음. 탭 redirect 안내만 네이티브 `Alert` | `app/(tabs)/_layout.tsx` |
 | 페르소나 변경 | Sheet B (라디오 + 취소/변경) (§Sheet B) | 시트 아님 — `persona-change-btn` → `setOnboarded(false)` → `/onboarding` 재진입 | `settings.tsx`, `onboarding.tsx` |
 | 가정값 ❓ 시트 | Compare hero ❓ → Sheet A | Compare hero 에 ❓ 없음. footer "평균 가정 기준"만 | `compare/[cityId].tsx` |
-| 출처 보기 모달 | 전체화면 Sheet C | Compare "출처 보기 →" **비활성**. Detail 은 인라인 텍스트 목록 | `compare/[cityId].tsx`, `detail/…/[category].tsx` |
+| 출처 보기 모달 | 전체화면 Sheet C (`presentation: 'modal'`) | 설정 → `/sources` → `/sources/[cityId]` **2단계 일반 push 화면** (modal 아님). Compare "출처 보기 →" 는 여전히 **비활성**, Detail 은 인라인 텍스트 목록 유지 (ADR-071 결정 3) | `app/sources/index.tsx`, `app/sources/[cityId].tsx`, `compare/[cityId].tsx`, `detail/…/[category].tsx` |
+| 개인정보 처리방침 진입 | 설정 메뉴 → **외부 링크** (GitHub Pages HTML) | 설정 → `/privacy` **인앱 화면**. 본문은 정본 `src/lib/privacyPolicy.ts` 를 렌더 (ADR-071·ADR-072). 스토어 등록용 공개 URL 은 그대로 유지 | `app/privacy.tsx`, `app/(tabs)/settings.tsx` |
+| 설정 "데이터 출처 보기" 우측 수 | `"12개"` (출처 **유형** 총수 상수) | 런타임 실측 unique `(name, url)` 출처 수 — 전량 로드 시 75개, 번들 시드만 있으면 10개 (ADR-071 결정 2) | `app/(tabs)/settings.tsx`, `src/lib/sources.ts` |
 | PersonaTag | subtitle `🎓 유학생 · 환율 · 기준일` | subtitle `1 CAD = 980원 · 04-27` (페르소나 미표기) | `compare/[cityId].tsx` |
 | Offline/Freshness 배지 | 오프라인·신선도 inline 배지 | 미구현 (배지 없음) | 화면 코드 전반 |
 | 페르소나 mismatch 가드 | worker→tuition 등 진입 차단 뷰 | 가드 없음 — Detail 은 페르소나 무관 렌더 | `detail/…/[category].tsx` |
@@ -220,7 +222,7 @@ border-radius
 
 ## 시트 콘텐츠 사양
 
-> ⚠ **v1.0 현황:** Sheet A(가정 ❓)·Sheet B(페르소나 변경)·Sheet C(출처 모달)는 이 형태로 **미구현**이다. 페르소나 변경은 온보딩 재진입, 출처는 Compare 비활성·Detail 인라인. 실제 존재하는 시트는 Detail 의 **학비/연봉 선택 시트**(`TuitionChoiceSheet`/`TaxChoiceSheet`) 뿐이다. (상단 §v1.0 구현 현황)
+> ⚠ **v1.0 현황:** Sheet A(가정 ❓)·Sheet B(페르소나 변경)·Sheet C(출처 모달)는 **시트 형태로는 미구현**이다. 페르소나 변경은 온보딩 재진입, 출처는 Compare 비활성·Detail 인라인 + **설정 → `/sources` 인앱 화면**(모달 아닌 일반 push, ADR-071). 실제 존재하는 시트는 Detail 의 **학비/연봉 선택 시트**(`TuitionChoiceSheet`/`TaxChoiceSheet`) 뿐이다. (상단 §v1.0 구현 현황)
 
 ARCHITECTURE.md 의 라우팅 디테일 + UI_GUIDE.md §시트·모달 의 골격을 정확한 텍스트로.
 
@@ -278,6 +280,8 @@ ARCHITECTURE.md 의 라우팅 디테일 + UI_GUIDE.md §시트·모달 의 골�
 - 선택만 즉시 적용하지 않음 (실수 방지)
 
 ### Sheet C — 출처 보기 (Compare/Detail "출처 보기 →" 탭)
+
+> ⚠ **v1.0 현황:** modal 이 아니라 **일반 push 2단계 화면**으로 구현됐다 — `/sources`(도시 목록) → `/sources/[cityId]`(카테고리 그룹). 진입점은 **설정 메뉴뿐**이다 (Compare "출처 보기 →" 는 비활성 유지, Detail 은 인라인 목록 유지 — ADR-071 결정 3). 아래 목업의 **카테고리 그룹핑 · 출처 카드(이름/접속일) · "페이지 열기 →" · 자동화 안내 푸터는 원안대로 구현**됐고(푸터는 `📊 자동화 정책 안내` 제목 없이 tiny 2줄), 헤더의 출처 수는 고정 `12개` 가 아니라 런타임 실측값이다. 실제 문구는 §문구 카탈로그 §출처 화면. (상단 §v1.0 구현 현황)
 
 ```
 ┌────────────────────────────────┐
@@ -448,6 +452,47 @@ menuAppInfo: '앱 정보',
 settingsFooter: 'Made with ♥ in Seoul · 2026',
 ```
 
+### 출처 화면 (`app/sources/index.tsx`, `app/sources/[cityId].tsx`)
+
+ADR-071 로 추가된 화면이라 디자인 mock 이 없다. 아래는 **구현에서 옮겨 적은 실제 문구**이며 (i18n 파일이 아니라 화면 파일 인라인), 화면이 바뀌면 이 목록도 함께 고친다.
+
+```ts
+// /sources — 도시 목록
+sourcesTitle: '데이터 출처',
+sourcesSubtitle: (n: number) => `출처 ${n}개`,          // n = 런타임 실측 unique 출처 수
+sourcesCityCount: (n: number) => `${n}개`,               // 행 우측 보조 텍스트
+sourcesCityA11y: (city: string, n: number) => `${city} 출처 ${n}개 보기`,
+sourcesEmpty: '출처 정보를 불러오지 못했어요.\n설정에서 데이터를 새로고침해 주세요',
+
+// /sources/[cityId] — 도시별 출처
+sourceCityTitle: (cityKo: string) => cityKo,             // 도시 한국어명 (영문명 미표기)
+sourceCitySubtitle: (n: number) => `출처 ${n}개`,
+sourceCityGroupLabel: CATEGORY_LABEL,                     // 월세 / 식비 / 교통 / 학비 / 세금 / 비자/정착
+sourceCityAccessed: (date: string) => `접속일 ${date}`,
+sourceCityOpen: '페이지 열기 →',
+sourceCityOpenA11y: (name: string) => `${name} 페이지 열기`,
+sourceCityFooter1: '모든 데이터는 위 공공 출처에서 자동으로 갱신됩니다.',
+sourceCityFooter2: '환율은 매일, 식비는 매주, 월세는 매월, 교통·학비·비자는 분기마다 갱신돼요.',
+sourceCityNotFound: '출처 정보를 찾을 수 없어요',        // ErrorView, 버튼 '돌아가기'
+```
+
+- 출처명(`source.name`)은 **가공하지 않는다** — 원어 고유명 유지(ADR-070), `numberOfLines` 없이 줄바꿈으로 전부 노출(§디자인 원칙 5).
+- 외부 링크 실패 시 네이티브 `Alert('링크 열기 실패', '브라우저를 열 수 없습니다.')`.
+
+### 개인정보 처리방침 화면 (`app/privacy.tsx`)
+
+**본문 문구는 이 문서가 아니라 `src/lib/privacyPolicy.json` 이 정본**이다 (ADR-072). 화면·`docs/privacy-policy.html`·`docs/PRIVACY.md` 가 같은 정본을 각자 렌더하므로, 아래에는 화면이 만들어 붙이는 chrome 문구만 적는다.
+
+```ts
+privacyTitle: '개인정보 처리방침',
+privacySubtitle: (d: string) => `마지막 갱신 ${d}`,       // d = PRIVACY_POLICY.updatedAt
+privacySectionHeading: (i: number, t: string) => `${i}. ${t}`,  // 번호는 렌더 시점 부여
+privacyEmailA11y: (label: string) => `${label} 이메일 보내기`,
+```
+
+- 리드 문장·섹션 제목·본문 단락/목록/이메일은 전부 `PRIVACY_POLICY` 에서 온다. **화면에 문장을 하드코딩하지 않는다.**
+- 이메일 블록 실패 시 네이티브 `Alert('링크 열기 실패', '이메일 앱을 찾을 수 없습니다.')`.
+
 ### 디자인 vs 데이터 정의 차이 처리
 
 디자인 mock 의 일부 항목 표기가 데이터 정의와 다른 경우:
@@ -534,12 +579,14 @@ v1.0 한국어 강제 (ADR-016). 향후 마찰 줄이기 위해:
 
 ### 설정 메뉴 정확 매핑 (`settings.jsx:46-50`)
 
+> ⚠ **v1.0 현황:** 출처·개인정보 두 행은 외부 링크가 아니라 **앱 내부 화면으로 push** 한다 (ADR-071). 앱 밖으로 나가는 메뉴는 피드백 `mailto` 뿐. 출처 행의 우측 수는 큐레이션 상수가 아니라 로드된 도시 데이터의 unique `(name, url)` 출처 수다.
+
 | 행                | 아이콘  | 아이콘 색     | 배경                  | 우측 텍스트             | 비고      |
 | ----------------- | ------- | ------------- | --------------------- | ----------------------- | --------- |
 | 데이터 새로고침   | refresh | #FC6011       | #FFE9DC (orange-soft) | "2026-04-01" (lastSync) | hot 강조  |
-| 데이터 출처 보기  | book    | #11263C       | #F0F5F9               | "12개" (출처 수)        |           |
+| 데이터 출처 보기  | book    | #11263C       | #F0F5F9               | "N개" (런타임 실측 출처 수) | 인앱 화면 `/sources` |
 | 피드백 보내기     | mail    | #11263C       | #F0F5F9               | (없음)                  | mailto    |
-| 개인정보 처리방침 | shield  | #11263C       | #F0F5F9               | (없음)                  | 외부 링크 |
+| 개인정보 처리방침 | shield  | #11263C       | #F0F5F9               | (없음)                  | 인앱 화면 `/privacy` |
 | 앱 정보           | info    | #8A98A0 (dim) | #F0F5F9               | "v1.0.0"                | dim 라벨  |
 
 ### RegionPill (홈 권역 필터)
@@ -553,6 +600,33 @@ v1.0 한국어 강제 (ADR-016). 향후 마찰 줄이기 위해:
 - padding 14, gap 12, 1px bottom border (마지막 행 제외).
 - 36×36 아이콘 박스 + 13 Manrope 700 라벨 + 11px tiny 우측 보조 + chevron.
 - "데이터 새로고침" 첫 행은 hot=orange. "앱 정보" 마지막은 dim gray-2.
+
+### 출처·처리방침 화면 (ADR-071 신규, 디자인 mock 없음)
+
+세 화면 모두 탭 바 없는 일반 Stack push 이고, `Screen scroll` + `TopBar`(back ←) 골격에 기존 토큰만 쓴다. 새 토큰·새 공용 컴포넌트를 만들지 않았다.
+
+**`/sources` — 도시 목록** (`sources-screen`)
+
+- TopBar: title `데이터 출처` (h2) + subtitle `출처 N개`.
+- 목록은 **단일 카드 그룹** (`rounded-card-lg`, white bg, 1px line border, overflow hidden) 안에 도시 행을 쌓는다.
+- 도시 행: `MenuRow` 시각 규격(padding 14, gap 12, 마지막 행만 bottom border 없음)을 따르되 **36×36 아이콘 박스는 없다**. 좌측 도시 한국어명(body navy, 1줄) + 우측 `N개`(tiny gray-2) + chevron.
+- **권역 그룹 헤더 없음** — 평평한 목록이고 권역은 정렬 순서(서울 고정 → 북미→유럽→아시아→오세아니아→중동 → 권역 내 가나다)로만 드러난다. 도시 영문명도 표기하지 않는다.
+- 목록이 0개면 카드 대신 빈 상태 텍스트(`sources-empty`) — 헤더는 그대로 유지한다(silent 빈 화면 금지).
+
+**`/sources/[cityId]` — 도시별 출처** (`source-city-screen`)
+
+- TopBar: title 도시 한국어명 + subtitle `출처 N개`(그룹 합산).
+- 카테고리 그룹: 16px 아이콘(gray-2, `CATEGORY_ICON`) + `MonoLabel` 라벨 → 그 아래 출처 카드 세로 스택. **출처 0개 카테고리는 그룹째 렌더하지 않는다** (v1.0 `tax`).
+- 출처 카드: white bg, `rounded-card`, 1px line border, padding 14. 이름(body navy, **말줄임 없음**) / `접속일 YYYY-MM-DD`(tiny) / `페이지 열기 →`(small orange bold, 좌측 정렬 버튼).
+- 하단 푸터: 1px **dashed** top border + tiny 2줄 (자동 갱신 안내 · 카테고리별 주기). 주기 문구의 출처는 `docs/AUTOMATION.md` §9.
+- 존재하지 않는 `cityId` → 전체화면 `ErrorView`(`variant='screen'`) + `돌아가기` 버튼.
+
+**`/privacy` — 개인정보 처리방침** (`privacy-screen`)
+
+- TopBar: title `개인정보 처리방침` + subtitle `마지막 갱신 YYYY-MM-DD`.
+- 리드 문장: `rounded-card` light bg 블록 안에 body navy 굵게 (`PRIVACY_POLICY.lead`).
+- 섹션: `H3` 제목(`N. 제목`) + 본문 블록 — `paragraph`(body gray) / `list`(`•` gray-2 + body gray, 항목 간 gap 8) / `email`(light bg 카드, 라벨 small gray + 주소 body orange bold, **유일한 탭 가능 요소**).
+- 법적 고지라 **본문을 자르지 않는다** — `numberOfLines` 도 "더 보기" 접기도 없다.
 
 ## 인터랙션·동작 규칙
 
@@ -653,6 +727,7 @@ Compare/Detail 푸터에 데이터 신선도 시각 강조.
 - **❓ 가정값 시트** (Compare hero 우측 ❓ 탭): bottom sheet, 라운드 22 top corners, navy text on white. 평균 가정 본문 + 닫기 버튼.
 - **페르소나 변경 시트** (설정 "변경" 탭): 3개 옵션 라디오, 선택 즉시 적용 + 자동 닫기 + 토스트.
 - **출처 보기**: full-screen modal (Stack.Screen `presentation: 'modal'`). 출처 카드 리스트(이름·URL·접근일).
+  - ⚠ **v1.0 현황:** modal 미사용. 설정 메뉴에서 `/sources` → `/sources/[cityId]` 로 **일반 Stack push** 하며, 이탈은 상단 ← / iOS swipe-back 이다 (ADR-071 결정 3).
 - 모든 시트는 swipe-to-dismiss + 명시적 닫기 버튼 둘 다 제공.
 
 ## 토스트

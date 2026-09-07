@@ -5,6 +5,7 @@
  * - 통계 카드 0건 / N건
  * - 메뉴 4개 모두 mount + 라벨 일치 (menu-refresh 는 카드로 승격되어 제거)
  * - formatLastSync (loading / error / null / 날짜) 카드에 표시
+ * - 출처·개인정보 메뉴 → 인앱 라우팅 push (ADR-071), 피드백만 mailto 유지
  * - snapshot 1 케이스 (data-refresh-card + 통계 비어있음)
  */
 
@@ -14,6 +15,7 @@ import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 
 import { jsonByTestId } from '@/__test-utils__/snapshotByTestId';
 import {
+  countUniqueSources as mockCountUniqueSources,
   getAllCities as mockGetAllCities,
   refreshCache as mockRefreshCache,
 } from '@/lib';
@@ -26,6 +28,12 @@ import SettingsScreen from '../settings';
 
 jest.mock('@/lib/linking', () => ({
   openURL: jest.fn(() => Promise.resolve(true)),
+}));
+
+const mockPush = jest.fn();
+
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: mockPush }),
 }));
 
 jest.mock('expo-constants', () => ({
@@ -42,6 +50,7 @@ jest.mock('@/lib', () => {
     ...actual,
     getAllCities: jest.fn(),
     refreshCache: jest.fn(),
+    countUniqueSources: jest.fn(),
   };
 });
 
@@ -52,9 +61,10 @@ const cityMapWith20 = Object.fromEntries(
   ]),
 );
 
-function setupMocks(opts?: { cities?: Record<string, unknown> }) {
+function setupMocks(opts?: { cities?: Record<string, unknown>; sourceCount?: number }) {
   const cities = opts?.cities ?? cityMapWith20;
   (mockGetAllCities as jest.Mock).mockReturnValue(cities);
+  (mockCountUniqueSources as jest.Mock).mockReturnValue(opts?.sourceCount ?? 75);
   (mockRefreshCache as jest.Mock).mockResolvedValue({
     ok: true,
     lastSync: new Date().toISOString(),
@@ -222,17 +232,57 @@ describe('SettingsScreen', () => {
       expect(getByText('v1.0.0')).toBeTruthy();
     });
 
-    it('출처 rightText = 12개', () => {
+    it('출처 rightText = countUniqueSources() 런타임 실측값 (ADR-071)', () => {
+      setupMocks({ sourceCount: 75 });
+
+      const { getByText, queryByText } = render(<SettingsScreen />);
+
+      expect(getByText('75개')).toBeTruthy();
+      // 옛 큐레이션 상수값(12) 잔재가 없다는 회귀 방지.
+      expect(queryByText('12개')).toBeNull();
+    });
+
+    it('출처 rightText — 데이터 갱신(lastSync 변경) 후 새 실측값 반영', () => {
+      setupMocks({ sourceCount: 75 });
+
+      const { getByText, queryByText } = render(<SettingsScreen />);
+      expect(getByText('75개')).toBeTruthy();
+
+      // refreshCache 성공 → 도시 맵(외부 모듈 상태) 갱신 + lastSync 갱신 흐름 재현.
+      (mockCountUniqueSources as jest.Mock).mockReturnValue(104);
+      act(() => {
+        useSettingsStore.setState({ lastSync: '2026-09-07T00:00:00Z' });
+      });
+
+      expect(getByText('104개')).toBeTruthy();
+      expect(queryByText('75개')).toBeNull();
+    });
+  });
+
+  describe('인앱 라우팅 (ADR-071)', () => {
+    it('데이터 출처 보기 → /sources push (외부 링크 아님)', () => {
       setupMocks();
 
-      const { getByText } = render(<SettingsScreen />);
+      const { getByTestId } = render(<SettingsScreen />);
+      fireEvent.press(getByTestId('menu-sources'));
 
-      expect(getByText('12개')).toBeTruthy();
+      expect(mockPush).toHaveBeenCalledWith('/sources');
+      expect(mockOpenURL).not.toHaveBeenCalled();
+    });
+
+    it('개인정보 처리방침 → /privacy push (외부 링크 아님)', () => {
+      setupMocks();
+
+      const { getByTestId } = render(<SettingsScreen />);
+      fireEvent.press(getByTestId('menu-privacy'));
+
+      expect(mockPush).toHaveBeenCalledWith('/privacy');
+      expect(mockOpenURL).not.toHaveBeenCalled();
     });
   });
 
   describe('외부 링크', () => {
-    it('피드백 보내기 → mailto 링크', () => {
+    it('피드백 보내기 → mailto 링크 (인앱 전환 후에도 유지)', () => {
       setupMocks();
 
       const { getByTestId } = render(<SettingsScreen />);
@@ -241,28 +291,7 @@ describe('SettingsScreen', () => {
       expect(mockOpenURL).toHaveBeenCalledWith(
         expect.stringContaining('mailto:laegel1@gmail.com'),
       );
-    });
-
-    it('데이터 출처 보기 → GitHub URL', () => {
-      setupMocks();
-
-      const { getByTestId } = render(<SettingsScreen />);
-      fireEvent.press(getByTestId('menu-sources'));
-
-      expect(mockOpenURL).toHaveBeenCalledWith(
-        expect.stringContaining('DATA_SOURCES.md'),
-      );
-    });
-
-    it('개인정보 처리방침 → 출시 정본 Pages URL', () => {
-      setupMocks();
-
-      const { getByTestId } = render(<SettingsScreen />);
-      fireEvent.press(getByTestId('menu-privacy'));
-
-      expect(mockOpenURL).toHaveBeenCalledWith(
-        expect.stringContaining('privacy-policy.html'),
-      );
+      expect(mockPush).not.toHaveBeenCalled();
     });
   });
 

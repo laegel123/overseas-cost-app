@@ -8,8 +8,8 @@
  *   `import { __resetForTesting } from '@/lib/data';`
  */
 export * from './errors';
+export { CATEGORY_ICON, CATEGORY_LABEL, CATEGORY_ORDER } from './categoryMeta';
 export { parseAllCitiesText, validateAllJson, validateCity } from './citySchema';
-export { DATA_SOURCES_COUNT } from './dataSources';
 export { convertToKRW, fetchExchangeRates, FX_BASELINE_2026Q2, refreshFx } from './currency';
 export { getAllCities, getCity, getLastSync, loadAllCities, refreshCache } from './data';
 export {
@@ -22,3 +22,7 @@ export {
   isHot,
 } from './format';
 export { computeCityTotal, multFromTotals } from './homeTotals';
+export type { PrivacyBlock, PrivacyPolicy, PrivacySection } from './privacyPolicy';
+export { PRIVACY_POLICY } from './privacyPolicy';
+export type { CategorySourceGroup, CitySourceGroup } from './sources';
+export { countUniqueSources, getCitySourceGroups, getCitySourcesByCategory } from './sources';

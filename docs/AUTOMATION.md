@@ -145,10 +145,15 @@ export function classifyChange(
 ): 'new' | 'commit' | 'pr-update' | 'pr-outlier' | 'pr-removed';
 ```
 
+**출처 디스크립터의 두 형태:**
+
+- **모듈 상수 `export const SOURCE = { ... }`** — 도시와 무관하게 출처가 하나인 fetcher (`ca_cmhc`, `us_bls` 등).
+- **`export function buildSource(cityId)`** — 도시마다 출처 URL·기관이 다른 fetcher. `universities.mjs` / `visas.mjs` 가 이 형태다 (ADR-071). registry(`UNIVERSITY_REGISTRY` / `VISA_REGISTRY` + `CITY_TO_COUNTRY`) 에서 도시별 실제 공공 출처 URL·기관명을 읽어 디스크립터를 만들며, **registry 미등록 도시는 명시적 throw** (silent fallback 금지). `refresh()` 는 도시 루프마다 `buildSource(cityId)` 를 한 번 호출해 변수에 담고 `hasLegacySourceName` / `writeCity` 양쪽에 같은 객체를 넘긴다. (`de_transit.mjs` 처럼 `{ ...SOURCE, name, url }` 로 도시별 오버라이드하는 중간 형태도 있다.)
+
 **출처명 변경 절차 (ADR-070):**
 
-1. `SOURCE.name` 을 새 이름으로 바꾸고 `SOURCE.legacyNames` 에 구 이름을 추가한다.
-2. fetcher 의 write 조건을 `hasChanges || hasLegacySourceName(oldData?.sources, SOURCE)` 로 둔다 — 숫자 변동이 없는 정적 출처(`universities` / `visas`) 도 다음 cron 에서 이름이 이전된다. 이전이 끝나면 `hasLegacySourceName` 이 false 라 다시 no-op (멱등).
+1. 출처명을 새 이름으로 바꾸고 `legacyNames` 에 구 이름을 **전부** 추가한다 — 세대가 여러 번 바뀌었으면 이전 세대 이름도 모두 남긴다. 하나라도 빠지면 그 이름의 항목이 지워지지 않아 도시별로 출처가 중복 append 된다.
+2. fetcher 의 write 조건을 `hasChanges || hasLegacySourceName(oldData?.sources, source)` 로 둔다 — 숫자 변동이 없는 정적 출처(`universities` / `visas`) 도 다음 cron 에서 이름이 이전된다. 이전이 끝나면 `hasLegacySourceName` 이 false 라 다시 no-op (멱등).
 3. 데이터 JSON 은 직접 편집하지 않는다 (ADR-032) — `_run.mjs` → `build_data.mjs` → `validate_cities.mjs` 순으로 재생성한다.
 
 ## 4. 워크플로우 명세
@@ -260,6 +265,8 @@ jobs:
 
 ### 4.4 `refresh-tuition.yml` — 분기 1회
 
+> **출처 기록**: `buildSource(cityId)` 가 도시별 디스크립터를 만든다 (ADR-071) — `url` 은 `UNIVERSITY_REGISTRY[cityId]` 첫 대학의 공식 페이지, `name` 은 `` `${대학명 · 나열} 공식 국제학생 학비 페이지 (정적 추정치)` `` (예: `UBC · SFU · BCIT 공식 국제학생 학비 페이지 (정적 추정치)`).
+>
 > **v1.0 한계**: `universities.mjs` 는 페이지 reachability 만 확인하고 HTML 파싱은 미구현 — 모든 대학이 항상 `UNIVERSITY_REGISTRY.staticAnnual` 을 반환한다. 결과적으로 `data/cities/*.json` 의 `tuition[].annual` 변동이 발생하지 않으며, `detect_outliers` 의 `outlier`/`update` PR 분기는 본 워크플로우에서 절대 트리거되지 않고 직접 commit (변경 0) 으로 종료된다. 학교별 selector 도입은 v1.x 별도 phase.
 
 
@@ -280,6 +287,8 @@ jobs:
 
 ### 4.5 `refresh-visa.yml` — 분기 1회
 
+> **출처 기록**: `buildSource(cityId)` 가 도시별 디스크립터를 만든다 (ADR-071) — `url` 은 `VISA_REGISTRY[CITY_TO_COUNTRY[cityId]].url`, `name` 은 `` `${기관} 공식 비자 수수료 페이지 (정적 추정치)` `` (예: `캐나다 이민·난민·시민권부(IRCC) 공식 비자 수수료 페이지 (정적 추정치)`). 기관 표기는 `VISA_REGISTRY[code].name` 이 단일 출처다.
+>
 > **v1.0 한계**: `visas.mjs` 도 동일 — 정부 비자 페이지 reachability 만 확인하고 HTML 파싱은 미구현 (`VISA_REGISTRY` 의 static 값 항상 반환). `outlier`/`update` PR 분기 트리거 0. 국가별 selector 도입은 v1.x 별도 phase.
 
 

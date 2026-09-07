@@ -122,14 +122,38 @@ export const UNIVERSITY_REGISTRY = {
 // 도시 추가·통화 변경 시 `_cities.mjs` 만 수정하면 universities.mjs / visas.mjs 양쪽에 자동 반영.
 export const CITY_CONFIGS = OVERSEAS_CITY_CONFIGS;
 
-export const SOURCE = {
-  category: 'tuition',
-  name: '각 대학 공식 국제학생 학비 페이지 (정적 추정치)',
-  // main 브랜치 고정 — 과거 HEAD alias 는 시점에 따라 다른 commit 을 가리켜 sources URL 의 시간적 일관성이 흔들렸다. main 으로 고정하면 release 후 변경되지 않는다.
-  url: 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md',
-  // 구 영문 출처명 — updateSources 가 제거해 도시당 항목 1개를 유지한다 (ADR-070).
-  legacyNames: ['Official university international tuition pages (static estimates)'],
-};
+// 이 출처의 구 이름들 — updateSources 가 제거해 도시당 항목 1개를 유지한다 (ADR-070).
+// 구 한국어명(ADR-070)·구 영문명(그 이전) 둘 다 필요: 하나라도 빠지면 해당 이름의 항목이
+// 지워지지 않고 새 이름 항목이 append 되어 도시별로 출처가 중복된다.
+const LEGACY_NAMES = [
+  '각 대학 공식 국제학생 학비 페이지 (정적 추정치)',
+  'Official university international tuition pages (static estimates)',
+];
+
+/**
+ * 도시별 tuition 출처 디스크립터 생성 (ADR-071).
+ *
+ * 모듈 레벨 단일 상수였을 때는 도시별로 다른 URL 을 쓸 수 없어 `docs/DATA_SOURCES.md`
+ * (우리 저장소) 를 가리켰다. 출처 화면이 이 url 을 "페이지 열기 →" 로 여는 이상
+ * 실제 공공 출처여야 한다 — registry 가 이미 갖고 있는 대학 공식 페이지를 쓴다.
+ *
+ * @param {string} cityId
+ * @returns {import('./_common.mjs').SourceDescriptor}
+ */
+export function buildSource(cityId) {
+  const universities = UNIVERSITY_REGISTRY[cityId];
+  if (!universities || universities.length === 0) {
+    throw new Error(`No university registry entry for city: ${cityId}`);
+  }
+
+  return {
+    category: 'tuition',
+    // 대학 고유명은 원어 유지, 서술만 한국어, '(정적 추정치)' 마커 유지 (ADR-070, AUTOMATION.md §8).
+    name: `${universities.map((u) => u.school).join(' · ')} 공식 국제학생 학비 페이지 (정적 추정치)`,
+    url: universities[0].url,
+    legacyNames: LEGACY_NAMES,
+  };
+}
 
 /**
  * 대학 페이지 도달 가능성(reachability) 체크 — v1.0 에서는 파싱 미구현.
@@ -262,15 +286,16 @@ export default async function refresh(opts = {}) {
       fields.push('tuition.length');
     }
 
+    const source = buildSource(cityId);
     // 값 변동이 없어도 구 출처명이 남아 있으면 한 번은 써서 이름을 이전한다 (ADR-070).
-    const needsSourceRename = hasLegacySourceName(oldData?.sources, SOURCE);
+    const needsSourceRename = hasLegacySourceName(oldData?.sources, source);
 
     if (!opts.dryRun && (hasChanges || needsSourceRename)) {
       const base = oldData ?? createCitySeed(config);
       const updatedData = { ...base, tuition };
 
       try {
-        await writeCity(cityId, updatedData, SOURCE);
+        await writeCity(cityId, updatedData, source);
         updatedCities.push(cityId);
       } catch (err) {
         errors.push({ cityId, reason: `Write failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}` });

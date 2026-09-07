@@ -7,7 +7,7 @@
   "country": "DE",
   "currency": "EUR",
   "region": "eu",
-  "lastUpdated": "2026-09-06",
+  "lastUpdated": "2026-09-07",
   "rent": {
     "share": 750,
     "studio": 1150,
@@ -71,15 +71,15 @@
     },
     {
       "category": "tuition",
-      "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-      "accessedAt": "2026-09-06"
+      "name": "LMU München · TU München 공식 국제학생 학비 페이지 (정적 추정치)",
+      "url": "https://www.lmu.de/en/study/all-information-on-degree-programmes/student-fees-and-charges/",
+      "accessedAt": "2026-09-07"
     },
     {
       "category": "visa",
-      "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-      "accessedAt": "2026-09-06"
+      "name": "독일 연방이주난민청(BAMF) 공식 비자 수수료 페이지 (정적 추정치)",
+      "url": "https://www.bamf.de/EN/Themen/MigrationAufenthalt/ZuwandererDrittstaaten/zuwandererdrittstaaten-node.html",
+      "accessedAt": "2026-09-07"
     }
   ]
 }

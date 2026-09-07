@@ -7,7 +7,7 @@
   "country": "US",
   "currency": "USD",
   "region": "na",
-  "lastUpdated": "2026-09-06",
+  "lastUpdated": "2026-09-07",
   "rent": {
     "share": 1170,
     "studio": 1800,
@@ -76,15 +76,15 @@
     },
     {
       "category": "tuition",
-      "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-      "accessedAt": "2026-09-06"
+      "name": "UCLA · USC · SMC 공식 국제학생 학비 페이지 (정적 추정치)",
+      "url": "https://www.registrar.ucla.edu/Fees-Residence/Fee-Amounts",
+      "accessedAt": "2026-09-07"
     },
     {
       "category": "visa",
-      "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-      "accessedAt": "2026-09-06"
+      "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
+      "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
+      "accessedAt": "2026-09-07"
     }
   ]
 }

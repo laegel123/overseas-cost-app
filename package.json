@@ -15,6 +15,7 @@
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
     "test:harness": "python3 -m pytest scripts/test_execute.py -q",
+    "gen:privacy": "node scripts/gen_privacy_docs.mjs",
     "e2e:check": "node scripts/e2e/preflight.mjs",
     "e2e:inspect": "node scripts/e2e/inspect.mjs",
     "pree2e": "npm run e2e:check",

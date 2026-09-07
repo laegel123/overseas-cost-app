@@ -19,7 +19,7 @@
 - ✅ 개인정보처리방침 URL이 브라우저에서 실제로 열림 — **2026-06-09 확인**
   - 정본 본문: `docs/privacy-policy.html` → live: `https://laegel123.github.io/overseas-cost-app/privacy-policy.html` (정상 노출 — "개인정보 처리방침 · 살까말까")
   - GitHub Pages 서빙 정상 (`laegel123` 계정 확인됨; app.json owner `juno1001` 은 EAS 계정이라 별개 — 무관)
-  - 인앱 "개인정보 처리방침" 메뉴 링크도 본 정본 URL 로 정렬됨 (ADR-065)
+  - 인앱 "개인정보 처리방침" 메뉴는 **외부 URL 이 아니라 앱 내부 화면 `/privacy` 로 이동**한다 (ADR-071). 같은 정본(`src/lib/privacyPolicy.ts`)에서 생성된 본문이라 위 live 페이지와 내용이 일치한다 (ADR-072). 스토어 등록용 URL 은 그대로 필요
 - ✅ EAS 로그인 확인 (`eas whoami` → `juno1001`)
 
 ### 단계 1 — 설정 파일 수정 (코드)

@@ -21,11 +21,11 @@ import * as React from 'react';
 
 import { Pressable, Switch, View } from 'react-native';
 
-import { formatMultiplier, getMultColor, isHot } from '@/lib';
+import { CATEGORY_ICON, formatMultiplier, getMultColor, isHot } from '@/lib';
 import { colors, EXCLUDED_CARD_OPACITY } from '@/theme/tokens';
 import type { SourceCategory } from '@/types/city';
 
-import { Icon, type IconName } from './Icon';
+import { Icon } from './Icon';
 import { H3, Small, Tiny } from './typography/Text';
 
 export type ComparePairProps = {
@@ -60,15 +60,6 @@ export type ComparePairProps = {
   onToggleInclude?: (next: boolean) => void;
   onPress?: () => void;
   testID?: string;
-};
-
-const CATEGORY_ICON: Record<SourceCategory, IconName> = {
-  rent: 'house',
-  food: 'fork',
-  transport: 'bus',
-  tuition: 'graduation',
-  tax: 'briefcase',
-  visa: 'passport',
 };
 
 /**
