@@ -7,7 +7,7 @@
   "country": "JP",
   "currency": "JPY",
   "region": "asia",
-  "lastUpdated": "2026-09-06",
+  "lastUpdated": "2026-09-07",
   "rent": {
     "share": 65000,
     "studio": 85000,
@@ -76,15 +76,15 @@
     },
     {
       "category": "tuition",
-      "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-      "accessedAt": "2026-09-06"
+      "name": "東京大学 · 早稲田大学 · 慶應義塾大学 공식 국제학생 학비 페이지 (정적 추정치)",
+      "url": "https://www.u-tokyo.ac.jp/en/prospective-students/admission_fees.html",
+      "accessedAt": "2026-09-07"
     },
     {
       "category": "visa",
-      "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-      "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-      "accessedAt": "2026-09-06"
+      "name": "일본 외무성 공식 비자 수수료 페이지 (정적 추정치)",
+      "url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+      "accessedAt": "2026-09-07"
     }
   ]
 }

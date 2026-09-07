@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-06T07:35:12.421Z",
-  "fxBaseDate": "2026-09-06",
+  "generatedAt": "2026-09-07T01:00:57.776Z",
+  "fxBaseDate": "2026-09-07",
   "cities": {
     "amsterdam": {
       "id": "amsterdam",
@@ -12,7 +12,7 @@
       "country": "NL",
       "currency": "EUR",
       "region": "eu",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 700,
         "studio": 1200,
@@ -81,15 +81,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "UvA · VU Amsterdam · Amsterdam UAS 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.uva.nl/en/education/fees-and-finance/tuition-fees/",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "네덜란드 이민귀화청(IND) 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://ind.nl/en/Pages/Costs.aspx",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -102,7 +102,7 @@
       "country": "DE",
       "currency": "EUR",
       "region": "eu",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 550,
         "studio": 850,
@@ -171,15 +171,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "TU Berlin · HU Berlin · FU Berlin 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.tu.berlin/en/studying/courses-of-study/fees-and-financing",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "독일 연방이주난민청(BAMF) 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://www.bamf.de/EN/Themen/MigrationAufenthalt/ZuwandererDrittstaaten/zuwandererdrittstaaten-node.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -192,7 +192,7 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1300,
         "studio": 2000,
@@ -261,15 +261,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "Harvard · MIT · BU 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://college.harvard.edu/financial-aid/cost-attendance",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -282,7 +282,7 @@
       "country": "AE",
       "currency": "AED",
       "region": "me",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 3000,
         "studio": 5500,
@@ -346,15 +346,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "American University in Dubai · Wollongong Dubai 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.aud.edu/admissions/tuition-fees/",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "UAE 정부 포털(u.ae) 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://u.ae/en/information-and-services/visa-and-emirates-id",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -367,7 +367,7 @@
       "country": "VN",
       "currency": "VND",
       "region": "asia",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 5000000,
         "studio": 8000000,
@@ -436,15 +436,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "VNU-HCMC · RMIT Vietnam · Fulbright 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://en.vnuhcm.edu.vn/admissions/",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "베트남 출입국관리국 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://immigration.gov.vn/en/",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -457,7 +457,7 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1170,
         "studio": 1800,
@@ -526,15 +526,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "UCLA · USC · SMC 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.registrar.ucla.edu/Fees-Residence/Fee-Amounts",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -547,7 +547,7 @@
       "country": "GB",
       "currency": "GBP",
       "region": "eu",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1105,
         "studio": 1700,
@@ -616,15 +616,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "Imperial College · UCL · King's College 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.imperial.ac.uk/study/fees-and-funding/tuition-fees/",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "영국 정부(GOV.UK) 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://www.gov.uk/government/publications/visa-regulations-revised-table",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -637,7 +637,7 @@
       "country": "AU",
       "currency": "AUD",
       "region": "oceania",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 953,
         "studio": 1732,
@@ -706,15 +706,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "UniMelb · Monash · RMIT 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://study.unimelb.edu.au/how-to-apply/international-fees",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "호주 내무부 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -727,7 +727,7 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1105,
         "studio": 1700,
@@ -796,15 +796,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "McGill · Concordia · UdeM 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.mcgill.ca/student-accounts/tuition-charges",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "캐나다 이민·난민·시민권부(IRCC) 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -817,7 +817,7 @@
       "country": "DE",
       "currency": "EUR",
       "region": "eu",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 750,
         "studio": 1150,
@@ -881,15 +881,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "LMU München · TU München 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.lmu.de/en/study/all-information-on-degree-programmes/student-fees-and-charges/",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "독일 연방이주난민청(BAMF) 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://www.bamf.de/EN/Themen/MigrationAufenthalt/ZuwandererDrittstaaten/zuwandererdrittstaaten-node.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -902,7 +902,7 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1430,
         "studio": 2200,
@@ -971,15 +971,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "Columbia · NYU · CUNY 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.studentfinancialservices.columbia.edu/tuition-fees",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -992,7 +992,7 @@
       "country": "JP",
       "currency": "JPY",
       "region": "asia",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 45000,
         "studio": 60000,
@@ -1061,15 +1061,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "大阪大学 · 京都大学 · 関西学院大学 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.osaka-u.ac.jp/en/admissions/tuition_fees",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "일본 외무성 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -1082,7 +1082,7 @@
       "country": "FR",
       "currency": "EUR",
       "region": "eu",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 650,
         "studio": 1050,
@@ -1151,15 +1151,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "Sorbonne Université · Sciences Po · École Polytechnique 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.sorbonne-universite.fr/en/admissions",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "프랑스 France-Visas 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://france-visas.gouv.fr/",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -1172,7 +1172,7 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1170,
         "studio": 1800,
@@ -1236,15 +1236,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "University of Washington · Seattle Central 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://opb.washington.edu/content/tuition-fees",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -1319,7 +1319,7 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1560,
         "studio": 2400,
@@ -1388,15 +1388,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "UC Berkeley · Stanford · CCSF 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://registrar.berkeley.edu/tuition-fees-residency/",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -1409,7 +1409,7 @@
       "country": "SG",
       "currency": "SGD",
       "region": "asia",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1200,
         "studio": 2200,
@@ -1478,15 +1478,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "NUS · NTU · SMU 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.nus.edu.sg/oam/admissions/international/applying/fees",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "싱가포르 이민검문청(ICA) 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://www.ica.gov.sg/enter-transit-depart/entering-singapore",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -1499,7 +1499,7 @@
       "country": "AU",
       "currency": "AUD",
       "region": "oceania",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1083,
         "studio": 1949,
@@ -1568,15 +1568,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "USyd · UNSW · Macquarie 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.sydney.edu.au/students/student-fees.html",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "호주 내무부 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -1589,7 +1589,7 @@
       "country": "JP",
       "currency": "JPY",
       "region": "asia",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 65000,
         "studio": 85000,
@@ -1658,15 +1658,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "東京大学 · 早稲田大学 · 慶應義塾大学 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://www.u-tokyo.ac.jp/en/prospective-students/admission_fees.html",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "일본 외무성 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://www.mofa.go.jp/j_info/visit/visa/short/novisa.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -1679,7 +1679,7 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1235,
         "studio": 1900,
@@ -1748,15 +1748,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "University of Toronto · York University · Seneca 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://studentaccount.utoronto.ca/tuition-fees/",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "캐나다 이민·난민·시민권부(IRCC) 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     },
@@ -1769,7 +1769,7 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-09-06",
+      "lastUpdated": "2026-09-07",
       "rent": {
         "share": 1203,
         "studio": 1850,
@@ -1838,15 +1838,15 @@
         },
         {
           "category": "tuition",
-          "name": "각 대학 공식 국제학생 학비 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "UBC · SFU · BCIT 공식 국제학생 학비 페이지 (정적 추정치)",
+          "url": "https://you.ubc.ca/financial-planning/cost/",
+          "accessedAt": "2026-09-07"
         },
         {
           "category": "visa",
-          "name": "각국 정부 공식 비자 수수료 페이지 (정적 추정치)",
-          "url": "https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md",
-          "accessedAt": "2026-09-06"
+          "name": "캐나다 이민·난민·시민권부(IRCC) 공식 비자 수수료 페이지 (정적 추정치)",
+          "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit.html",
+          "accessedAt": "2026-09-07"
         }
       ]
     }
