@@ -2538,6 +2538,41 @@ ADR-071 / in-app-policy-pages step 1. 라벨은 `app/detail/[cityId]/[category].
 
 > `IconName` 은 **타입 전용** import (`import type`). lib → components 런타임 의존 금지 — 이 방향이 깨지면 lib 테스트가 RN 컴포넌트 트리를 끌어온다.
 
+### 9.37 `src/lib/sources.ts` — 출처 집계 (`/sources` 화면용)
+
+ADR-071 / in-app-policy-pages step 2. `data.ts` 메모리 맵에서 출처 목록의 표시 순서·카운트·카테고리 그룹을 만든다. 화면(step 3·4)은 계산하지 않고 결과를 그리기만 한다. `data.ts` 는 mock (`jest.mock('../data')`) — 이 모듈의 책임은 fetch 가 아니라 정렬·중복 제거·그룹핑이다. **실데이터 카운트는 단언하지 않는다** — cron 이 도시 JSON 을 갱신하면 곧바로 drift 나는 테스트가 되고, 그게 ADR-071 결정 2 가 걷어낸 패턴이다.
+
+**`getCitySourceGroups`:**
+
+- [x] 서울이 항상 첫 번째 — 맵의 **마지막** 항목으로 들어와도 고정 (comparator 의 `b === seoul` 분기)
+- [x] 서울이 맵의 **첫** 항목이어도 첫 번째 (comparator 의 `a === seoul` 분기)
+- [x] 권역 순서 `na → eu → asia → oceania → me` — 홈 `REGIONS` 순서와 동일 (권역 섞인 fixture)
+- [x] 같은 권역 안에서는 `name.ko` 가나다순 (`localeCompare('ko')`) — 뉴욕 < 밴쿠버
+- [x] 서울 고정 + 권역 + 가나다 복합 정렬 (7개 도시 전체 순서)
+- [x] `count` = 해당 도시 `sources[]` 길이 (서울 4 / 밴쿠버 6) — 도시 안에서는 중복 제거 없음
+- [x] 출처 0개 도시는 결과에서 제외
+- [x] 데이터 미로드 (빈 맵) → 빈 배열 (**에러 아님** — 부팅 중/시드 fallback 정상 상태)
+
+**`countUniqueSources`:**
+
+- [x] 서로 다른 도시가 같은 `(name, url)` 을 쓰면 1개 (실데이터에 20개 도시가 공유하는 출처가 있다)
+- [x] 이름이 같고 url 이 다르면 2개
+- [x] url 이 같고 이름이 다르면 2개 — **키는 `(name, url)` 쌍이지 url 단독이 아니다** (실측: unique url 72 vs unique (name,url) 75)
+- [x] 중복이 없으면 전체 엔트리 수와 일치 (서울 4 + 밴쿠버 6 = 10)
+- [x] 데이터 미로드 (빈 맵) → `0` (에러 아님)
+
+**`getCitySourcesByCategory`:**
+
+- [x] `CATEGORY_ORDER` 순서로 그룹 반환 (rent → food → transport → tuition → tax → visa)
+- [x] 원본 `sources[]` 가 역순이어도 그룹 순서는 `CATEGORY_ORDER` 를 따른다
+- [x] 출처 0개 카테고리는 그룹 자체가 없다 — 서울은 rent/food/transport 3개 그룹만 (`tax` 는 v1.0 전 도시 0개)
+- [x] 한 카테고리에 출처 2개 (서울 food) → 둘 다 **원본 등장 순서**로 포함
+- [x] 원본 `CitySource` 를 가공 없이 그대로 넘긴다 (이름 축약·도메인 추출은 화면 책임)
+- [x] 존재하지 않는 `cityId` → `CityNotFoundError` throw + `code === 'CITY_NOT_FOUND'` (빈 배열로 삼키지 않음 — §20 규약)
+- [x] 출처가 0개인 **존재하는** 도시 → 빈 배열. "미존재" 와 구분된다
+
+> 커버리지: `sources.ts` 100/100/100/100 (`src/lib/**` 임계치 statements 100 / branches 95 / lines 100 / functions 100).
+
 ---
 
 ## 9-A. 자동화 스크립트 (scripts/refresh/_ + scripts/build/_)

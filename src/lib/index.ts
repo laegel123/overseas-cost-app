@@ -23,3 +23,5 @@ export {
   isHot,
 } from './format';
 export { computeCityTotal, multFromTotals } from './homeTotals';
+export type { CategorySourceGroup, CitySourceGroup } from './sources';
+export { countUniqueSources, getCitySourceGroups, getCitySourcesByCategory } from './sources';

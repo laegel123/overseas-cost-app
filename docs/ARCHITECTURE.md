@@ -275,7 +275,7 @@ export class AppError extends Error {
 | `FxTimeoutError`            | `FX_TIMEOUT`             | currency.ts (10초 초과)                      | 동일                            |
 | `CityParseError`            | `CITY_PARSE_FAILED`      | data.ts (JSON 파싱 실패)                     | 시드 fallback + ErrorView       |
 | `CitySchemaError`           | `CITY_SCHEMA_INVALID`    | data.ts (validateCity 실패)                  | 동일                            |
-| `CityNotFoundError`         | `CITY_NOT_FOUND`         | data.ts (HTTP 404)                           | 시드 fallback 시도              |
+| `CityNotFoundError`         | `CITY_NOT_FOUND`         | data.ts (HTTP 404), sources.ts (미존재 도시) | 시드 fallback 시도 / ErrorView  |
 | `CityFetchError`            | `CITY_FETCH_FAILED`      | data.ts (HTTP 5xx, 네트워크)                 | 동일                            |
 | `CityTimeoutError`          | `CITY_TIMEOUT`           | data.ts (10초 초과)                          | 동일                            |
 | `AllCitiesUnavailableError` | `ALL_CITIES_UNAVAILABLE` | data.ts (모든 도시 fetch 실패)               | 전체 ErrorView + 다시 시도      |
