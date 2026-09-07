@@ -594,7 +594,7 @@ class TestRunCmd:
         args = self._capture_run_args(["my-phase"])
         assert args.phase_dir == "my-phase"
         assert args.from_step == 0
-        assert args.model == "claude-opus-4-5"
+        assert args.model == "claude-opus-5"
         assert args.timeout == 1800
         assert args.verbose is False
         assert args.push is False
