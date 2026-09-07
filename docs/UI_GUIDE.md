@@ -12,7 +12,7 @@
 | --- | --- | --- | --- |
 | 토스트 | success/error/info 하단 토스트 (§토스트) | 토스트 없음. 탭 redirect 안내만 네이티브 `Alert` | `app/(tabs)/_layout.tsx` |
 | 페르소나 변경 | Sheet B (라디오 + 취소/변경) (§Sheet B) | 시트 아님 — `persona-change-btn` → `setOnboarded(false)` → `/onboarding` 재진입 | `settings.tsx`, `onboarding.tsx` |
-| 가정값 ❓ 시트 | Compare hero ❓ → Sheet A | Compare hero 에 ❓ 없음. footer "평균 가정 기준"만 | `compare/[cityId].tsx` |
+| 가정값 ❓ 시트 | Compare hero ❓ → Sheet A | Compare hero 에 ❓ 없음. footer "항목 단가 합"만 (ADR-074) | `compare/[cityId].tsx` |
 | 출처 보기 모달 | 전체화면 Sheet C (`presentation: 'modal'`) | 설정 → `/sources` → `/sources/[cityId]` **2단계 일반 push 화면** (modal 아님). Compare "출처 보기 →" 는 여전히 **비활성**, Detail 은 인라인 텍스트 목록 유지 (ADR-071 결정 3) | `app/sources/index.tsx`, `app/sources/[cityId].tsx`, `compare/[cityId].tsx`, `detail/…/[category].tsx` |
 | 개인정보 처리방침 진입 | 설정 메뉴 → **외부 링크** (GitHub Pages HTML) | 설정 → `/privacy` **인앱 화면**. 본문은 정본 `src/lib/privacyPolicy.ts` 를 렌더 (ADR-071·ADR-072). 스토어 등록용 공개 URL 은 그대로 유지 | `app/privacy.tsx`, `app/(tabs)/settings.tsx` |
 | 설정 "데이터 출처 보기" 우측 수 | `"12개"` (출처 **유형** 총수 상수) | 런타임 실측 unique `(name, url)` 출처 수 — 전량 로드 시 75개, 번들 시드만 있으면 10개 (ADR-071 결정 2) | `app/(tabs)/settings.tsx`, `src/lib/sources.ts` |
@@ -24,7 +24,7 @@
 | rent 상세 | student=share / worker=oneBed 고정 | 행 탭으로 4형태 순환 단일 선택 (ADR-060) | `detail/…/[category].tsx` |
 | tuition/tax 상세 | 목록 정적 표시 | 선택 시트(preset + 직접 입력) 단일 선택 (ADR-061) | `TuitionChoiceSheet.tsx`, `TaxChoiceSheet.tsx` |
 | Detail hero 라벨 | "월 임차료 (메디안)"·"연간 학비 (국제학생)" 등 | `{카테고리} · {선택 항목}` 캡션 (예: "월세 · 셰어하우스") | `detail/…/[category].tsx` |
-| Compare hero 라벨 | "한눈에 보는 물가 비교" + "❓ 자세히" | HeroCard 좌/우 라벨 + footer "평균 가정 기준" | `compare/[cityId].tsx` |
+| Compare hero 라벨 | "한눈에 보는 물가 비교" + "❓ 자세히" | HeroCard 좌/우 라벨 + footer "항목 단가 합" · 가운데 caption 은 차액만 (`/월` 미표기, ADR-074) | `compare/[cityId].tsx` |
 | 홈 빈 즐겨찾기 | "관심 있는 도시를 골라보세요" | "아직 즐겨찾기가 없어요.\n도시를 탭해 ⭐ 추가해보세요" | `(tabs)/index.tsx` |
 | 홈 최근 0개 | 섹션 미표시 | "최근 본 도시가 없어요" 빈 상태 표시 | `(tabs)/index.tsx` |
 | 홈 검색 0건 | "'○○'에 해당하는 도시가 없어요…" | "검색 결과가 없어요" | `(tabs)/index.tsx` |

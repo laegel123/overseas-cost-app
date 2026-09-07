@@ -89,3 +89,4 @@
 | [071](adr/071-in-app-policy-pages.md) | 정책 페이지 인앱 내재화 + 출처 카운트 실측 (Supersedes ADR-065) | Active | /sources·/privacy 자체 화면, 출처 URL 도시별 실제화 |
 | [072](adr/072-privacy-policy-source.md) | 개인정보 처리방침 본문 단일 출처 = `src/lib/privacyPolicy.ts` | Active | HTML·MD 는 생성물, 드리프트 테스트 강제 |
 | [073](adr/073-harness-single-step-mode.md) | 하네스 단일 step 실행 모드 `run --once` | Active | step 경계에서만 멈춤, 재시도 3회 유지 |
+| [074](adr/074-hero-basket-sum-wording.md) | Compare hero 문구 정정 — `평균 가정 기준`/`/월` 폐기 | Active | 합계는 항목 단가 합, Detail 과 동일 footer |

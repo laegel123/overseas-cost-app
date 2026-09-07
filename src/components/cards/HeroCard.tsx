@@ -29,13 +29,13 @@ export type HeroCardProps = {
   /**
    * 가운데 큰 배수 — 예: "↑1.9×". undefined 면 가운데 mult 미렌더 (ADR-062).
    * Compare 의 서울합=0 케이스에서 division by zero / `↑∞×` 회피 — caption 의
-   * 차액(+N만원/월) 만으로 비교 정보 전달.
+   * 차액(+N만원) 만으로 비교 정보 전달.
    *
    * `string | undefined` — exactOptionalPropertyTypes 가 활성화되어 있어
    * 명시적 undefined 를 허용해야 호출부에서 conditional 값 바인딩 가능.
    */
   centerMult?: string | undefined;
-  /** 가운데 caption — 예: "+165만/월" (슬래시 줄바꿈 방지) */
+  /** 가운데 caption — 예: "+165만원", "월세 · 셰어하우스" (1줄 고정) */
   centerCaption?: string;
   /** 우측 작은 라벨 — 예: "밴쿠버" */
   rightLabel: string;
@@ -45,7 +45,7 @@ export type HeroCardProps = {
   swPct: number;
   /** 도시 막대 비율 [0, 1] */
   cwPct: number;
-  /** 출처 footer — 예: "평균 가정 기준" */
+  /** 출처 footer — 예: "항목 단가 합" */
   footer?: string;
   /** ❓ info 아이콘 표시 여부 (기본 true) */
   showInfoIcon?: boolean;
@@ -179,7 +179,8 @@ export function HeroCard({
               </Display>
             )}
             {centerCaption !== undefined && (
-              // numberOfLines={1} — design §3 의 "슬래시 줄바꿈 방지" (`+165만/월`)
+              // numberOfLines={1} — design §3 의 줄바꿈 방지. Detail 의 긴 캡션
+              // (`월세 · 셰어하우스`) 도 1줄로 고정.
               <MonoLabel color="white" numberOfLines={1}>
                 {centerCaption}
               </MonoLabel>

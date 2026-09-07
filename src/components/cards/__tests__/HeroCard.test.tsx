@@ -100,39 +100,39 @@ describe('HeroCard', () => {
       expect(mult.props.numberOfLines).toBe(1);
     });
 
-    it('centerCaption 있을 때 → 렌더 + numberOfLines={1} (슬래시 줄바꿈 방지)', () => {
+    it('centerCaption 있을 때 → 렌더 + numberOfLines={1} (1줄 고정)', () => {
       render(
         <HeroCard
           {...baseProps}
           variant="orange"
-          centerCaption="+165만/월"
+          centerCaption="+165만원"
           testID="h"
         />,
       );
-      const caption = screen.getByText('+165만/월');
+      const caption = screen.getByText('+165만원');
       expect(caption).toBeTruthy();
       expect(caption.props.numberOfLines).toBe(1);
     });
 
     it('centerCaption 미제공 → 미렌더', () => {
       render(<HeroCard {...baseProps} variant="orange" testID="h" />);
-      expect(screen.queryByText('+165만/월')).toBeNull();
+      expect(screen.queryByText('+165만원')).toBeNull();
     });
 
     it('centerMult undefined → 가운데 mult 미렌더 + caption 만 표시 (ADR-062)', () => {
       // Compare 의 서울합=0 케이스 — division by zero / `↑∞×` 회피 정책.
-      // caption 의 차액(+N만원/월) 만으로 비교 정보 전달.
+      // caption 의 차액(+N만원) 만으로 비교 정보 전달.
       const { centerMult: _, ...propsWithoutMult } = baseProps;
       render(
         <HeroCard
           {...propsWithoutMult}
           variant="orange"
-          centerCaption="+229.3만원/월"
+          centerCaption="+229.3만원"
           testID="h"
         />,
       );
       expect(screen.queryByText('↑1.9×')).toBeNull();
-      expect(screen.getByText('+229.3만원/월')).toBeTruthy();
+      expect(screen.getByText('+229.3만원')).toBeTruthy();
     });
 
     it('centerMult + centerCaption 둘 다 undefined → 가운데 컬럼 자체 미렌더', () => {
@@ -148,7 +148,7 @@ describe('HeroCard', () => {
         <HeroCard
           {...propsWithoutMult}
           variant="orange"
-          centerCaption="+229.3만원/월"
+          centerCaption="+229.3만원"
           testID="h"
         />,
       );
@@ -160,11 +160,11 @@ describe('HeroCard', () => {
         <HeroCard
           {...baseProps}
           variant="orange"
-          footer="평균 가정 기준"
+          footer="항목 단가 합"
           testID="h"
         />,
       );
-      expect(screen.getByText('평균 가정 기준')).toBeTruthy();
+      expect(screen.getByText('항목 단가 합')).toBeTruthy();
       // footer wrapper 의 opacity 토큰 검증
       const footerWrap = screen.getByTestId('h-footer');
       expect(footerWrap.props.style).toMatchObject({ opacity: HERO_FOOTER_OPACITY });
@@ -172,7 +172,7 @@ describe('HeroCard', () => {
 
     it('footer 미제공 → 미렌더 (wrapper 도 없음)', () => {
       render(<HeroCard {...baseProps} variant="orange" testID="h" />);
-      expect(screen.queryByText('평균 가정 기준')).toBeNull();
+      expect(screen.queryByText('항목 단가 합')).toBeNull();
       expect(screen.queryByTestId('h-footer')).toBeNull();
     });
 
@@ -370,7 +370,7 @@ describe('HeroCard', () => {
           {...baseProps}
           variant="orange"
           centerMult="↑10.0×"
-          centerCaption="+9,999만/월"
+          centerCaption="+9,999만원"
           testID="h"
         />,
       );
@@ -408,8 +408,8 @@ describe('HeroCard', () => {
         <HeroCard
           {...baseProps}
           variant="orange"
-          footer="평균 가정 기준"
-          centerCaption="+165만/월"
+          footer="항목 단가 합"
+          centerCaption="+165만원"
           testID="h"
         />,
       );
@@ -421,7 +421,7 @@ describe('HeroCard', () => {
         <HeroCard
           {...baseProps}
           variant="navy"
-          centerCaption="+165만/월"
+          centerCaption="+165만원"
           testID="h"
         />,
       );
