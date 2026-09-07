@@ -90,6 +90,35 @@ describe('renderHtml', () => {
     expect(html.endsWith('</html>\n')).toBe(true);
   });
 
+  // escapeHtml 은 요소 내용과 큰따옴표 속성값(content="…" / href="mailto:…") 양쪽에서
+  // 재사용된다. `"` 를 남기면 정본에 인용부호가 들어오는 순간 속성이 끊긴다.
+  it('큰따옴표를 escape 해 속성값이 조기 종료되지 않는다', () => {
+    const html = renderHtml({
+      ...FIXTURE,
+      appName: '테스트"앱',
+      lead: '그는 "수집하지 않는다" 고 답했다.',
+    });
+
+    expect(html).toContain(
+      '<meta name="description" content="그는 &quot;수집하지 않는다&quot; 고 답했다." />',
+    );
+    expect(html).toContain('<title>개인정보 처리방침 · 테스트&quot;앱</title>');
+    // 속성 안에 raw " 가 남아 조기 종료되는 형태가 아니어야 한다
+    expect(html).not.toMatch(/content="[^"]*"수집하지/);
+  });
+
+  it('mailto 속성값의 큰따옴표도 escape 한다', () => {
+    const html = renderHtml({
+      ...FIXTURE,
+      sections: [
+        { title: '문의', blocks: [{ kind: 'email', label: '운영자"', email: 'a"b@c.com' }] },
+      ],
+    });
+
+    expect(html).toContain('<a href="mailto:a&quot;b@c.com">a&quot;b@c.com</a>');
+    expect(html).toContain('운영자&quot;:');
+  });
+
   it('배포된 <style> 블록을 그대로 유지한다 (리디자인 금지)', () => {
     const html: string = renderHtml(FIXTURE);
 
