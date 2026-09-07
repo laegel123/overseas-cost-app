@@ -16,7 +16,7 @@
   },
   "food": {
     "restaurantMeal": 19,
-    "cafe": 5.5,
+    "cafe": 9.34,
     "groceries": {
       "milk1L": 3.1,
       "eggs12": 4.2,
@@ -84,6 +84,12 @@
       "category": "visa",
       "name": "캐나다 이민·난민·시민권부(IRCC) 공식 비자 수수료 페이지 (정적 추정치)",
       "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit.html",
+      "accessedAt": "2026-09-07"
+    },
+    {
+      "category": "food",
+      "name": "Statistics Canada CPI",
+      "url": "https://www150.statcan.gc.ca/",
       "accessedAt": "2026-09-07"
     }
   ]

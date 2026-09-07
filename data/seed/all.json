@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-07T05:27:42.702Z",
+  "generatedAt": "2026-09-07T14:54:48.542Z",
   "fxBaseDate": "2026-09-07",
   "cities": {
     "amsterdam": {
@@ -736,7 +736,7 @@
       },
       "food": {
         "restaurantMeal": 19,
-        "cafe": 5.5,
+        "cafe": 9.34,
         "groceries": {
           "milk1L": 3.1,
           "eggs12": 4.2,
@@ -804,6 +804,12 @@
           "category": "visa",
           "name": "캐나다 이민·난민·시민권부(IRCC) 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit.html",
+          "accessedAt": "2026-09-07"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI",
+          "url": "https://www150.statcan.gc.ca/",
           "accessedAt": "2026-09-07"
         }
       ]
@@ -1777,14 +1783,14 @@
         "twoBed": 2800
       },
       "food": {
-        "restaurantMeal": 22,
-        "cafe": 6,
+        "restaurantMeal": 19.51,
+        "cafe": 5.36,
         "groceries": {
-          "milk1L": 3.25,
-          "eggs12": 4.5,
-          "rice1kg": 3.8,
-          "chicken1kg": 15,
-          "bread": 3.5,
+          "milk1L": 6.59,
+          "eggs12": 8.76,
+          "rice1kg": 7.08,
+          "chicken1kg": 31.71,
+          "bread": 7.15,
           "onion1kg": 2.8,
           "apple1kg": 4.5,
           "ramen": 1.5
@@ -1846,6 +1852,12 @@
           "category": "visa",
           "name": "캐나다 이민·난민·시민권부(IRCC) 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit.html",
+          "accessedAt": "2026-09-07"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI",
+          "url": "https://www150.statcan.gc.ca/",
           "accessedAt": "2026-09-07"
         }
       ]
