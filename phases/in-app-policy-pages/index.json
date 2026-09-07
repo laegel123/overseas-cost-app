@@ -40,7 +40,7 @@
       "status": "completed",
       "started_at": "2026-09-07T10:20:33+0900",
       "summary": "app/sources/[cityId].tsx 신규 — /sources/[cityId] 도시별 출처 화면 (2단계 드릴다운, 일반 Stack push). useLocalSearchParams 로 cityId → getCitySourcesByCategory(step 2 lib) 결과를 재정렬 없이 그대로 렌더: 그룹 헤더는 CATEGORY_ICON 아이콘(source-icon-<cat>) + CATEGORY_LABEL MonoLabel, 그 아래 출처 카드(source-item-<cat>-<idx>)에 이름(numberOfLines 미적용 — 말줄임 금지, ADR-070 원문 유지) / `접속일 YYYY-MM-DD`(Tiny) / '페이지 열기 →'(orange, accessibilityRole=button + `<출처명> 페이지 열기` 라벨). TopBar title=city.name.ko, subtitle=`출처 N개`(그룹 합산 실측), onBack→router.back(). 출처 0개 카테고리(v1.0 tax)는 lib 이 빈 그룹을 주지 않아 화면 분기 없이 미렌더. 하단 source-city-footer 에 AUTOMATION.md §9 실제 주기 인용(환율 매일/식비 매주/월세 매월/교통·학비·비자 분기) 2줄. 외부 링크는 @/lib/linking 의 openURL 경유 + 실패 시 Alert('링크 열기 실패') — settings 의 safeOpenURL 패턴, silent fail 없음. 미존재 cityId 는 lib throw 를 잡아 ErrorView(variant='screen', 돌아가기→back) 로 변환(source-city-error). settings.tsx·app/sources/index.tsx 무변경 — 이 시점에도 앱 도달 경로 없음(배선은 step 7). 테스트 +15건 (app/sources/__tests__/[cityId].test.tsx — jest.mock('@/lib')·jest.mock('@/lib/linking'), 그룹 순서·라벨/아이콘·서울 food 2건·원문 이름/접속일·numberOfLines 미적용·정확한 url openURL·a11y·Alert 경로·tax 미렌더·헤더 실측·푸터·back·미존재 도시 ErrorView·돌아가기·파라미터 없음), TESTING.md §9.39 인벤토리 신규. AC 전부 통과: typecheck·lint 0, jest 92 suites / 2020 passed (기존 테스트 수정 0건).",
-      "completed_at": "2026-09-07T10:29:00+0900"
+      "completed_at": "2026-09-07T10:27:43+0900"
     },
     {
       "step": 5,
