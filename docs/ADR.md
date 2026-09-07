@@ -86,3 +86,4 @@
 | [068](adr/068-adr-doc-split.md) | ADR 문서 구조 = 인덱스 + 파일당 1 ADR 분할 | Active | 번호=주소, 새 ADR=새 파일 |
 | [069](adr/069-harness-doc-pull.md) | 하네스 가드레일 push → pull 전환 | Active | 색인만 주입, 본문은 step 이 Read |
 | [070](adr/070-source-name-language.md) | 출처명 표기 언어 정책 + `legacyNames` 이름 이전 | Active | 서술형 출처명 한국어, 고유명 원어 |
+| [073](adr/073-harness-single-step-mode.md) | 하네스 단일 step 실행 모드 `run --once` | Active | step 경계에서만 멈춤, 재시도 3회 유지 |
