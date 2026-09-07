@@ -60,7 +60,7 @@
 | [042](adr/042-unit-1kg.md) | 사과·양파 단위 — 1kg 통일 | Active | 디자인 "1개"→데이터 1kg 유지 |
 | [043](adr/043-worklets-stub.md) | react-native-worklets 빈 plugin stub | Superseded by ADR-044 | (폐기) SDK 52 우회책 |
 | [044](adr/044-expo-sdk-54-upgrade.md) | Expo SDK 52 → 54 업그레이드 | Active | React 19 / RN 0.81 / Router 6 |
-| [045](adr/045-seed-fixture.md) | v1.0 시드 = schema-pass fixture | Active | 자동화 전 placeholder, 빌드 게이트 |
+| [045](adr/045-seed-fixture.md) | v1.0 시드 = schema-pass fixture | Superseded (ADR-074) | 시드는 실데이터 21개 전량으로 전환 |
 | [046](adr/046-fx-fallback-v1.md) | 환율 fallback v1.0 (1차+3차, 2차 ECB 보류) | Active | ECB 파싱 복잡 → v1.x 검토 |
 | [047](adr/047-fx-baseline-quarterly.md) | FX_BASELINE 분기 갱신 정책 | Active | 분기 1회 한국은행 기준 갱신 |
 | [048](adr/048-partial-schema-fail.md) | 부분 schema 실패 정책 (도시 제외 + warn) | Active | 개별 도시 실패 시 제외, 전체 X |
@@ -89,3 +89,4 @@
 | [071](adr/071-in-app-policy-pages.md) | 정책 페이지 인앱 내재화 + 출처 카운트 실측 (Supersedes ADR-065) | Active | /sources·/privacy 자체 화면, 출처 URL 도시별 실제화 |
 | [072](adr/072-privacy-policy-source.md) | 개인정보 처리방침 본문 단일 출처 = `src/lib/privacyPolicy.ts` | Active | HTML·MD 는 생성물, 드리프트 테스트 강제 |
 | [073](adr/073-harness-single-step-mode.md) | 하네스 단일 step 실행 모드 `run --once` | Active | step 경계에서만 멈춤, 재시도 3회 유지 |
+| [074](adr/074-refresh-data-regression.md) | 강제 새로고침 데이터 퇴행 방지 + 시드 = 실데이터 전량 | Active | 캐시 선삭제 제거, 시드 21개 (ADR-045 supersede) |

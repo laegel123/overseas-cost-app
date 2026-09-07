@@ -24,6 +24,10 @@ import {
 const CACHE_KEY = 'data:all:v1';
 const META_KEY = 'meta:lastSync';
 
+// 시드에서 파생 — 시드가 21개 실데이터로 유지되는지는 seed-roundtrip.test.ts 가 못박는다.
+// 여기서는 "시드 fallback 이 시드 전량을 싣는다" 만 검증하므로 하드코딩하지 않는다.
+const SEED_CITY_COUNT = Object.keys(seedJson.cities).length;
+
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 function buildBatch(cities: Record<string, unknown>): Record<string, unknown> {
@@ -486,11 +490,12 @@ describe('loadAllCities — primary HTTP', () => {
 // ─── loadAllCities — 시드 fallback ──────────────────────────────────────────
 
 describe('loadAllCities — 시드 fallback', () => {
-  it('primary + backup 둘 다 실패 → 시드 로드 (서울+밴쿠버)', async () => {
+  it('primary + backup 둘 다 실패 → 시드 로드 (21개 전량)', async () => {
     mockFetchSequence([{ error: 'network' }, { error: 'network' }]);
 
     const cities = await loadAllCities();
-    expect(Object.keys(cities).sort()).toEqual(['seoul', 'vancouver']);
+    // ADR-074: 시드가 실데이터 전량 — 오프라인이어도 도시 수가 줄지 않는다.
+    expect(Object.keys(cities)).toHaveLength(SEED_CITY_COUNT);
     expect(cities.seoul?.currency).toBe('KRW');
     expect(cities.vancouver?.currency).toBe('CAD');
   });
@@ -502,7 +507,7 @@ describe('loadAllCities — 시드 fallback', () => {
     ]);
 
     const cities = await loadAllCities();
-    expect(Object.keys(cities).sort()).toEqual(['seoul', 'vancouver']);
+    expect(Object.keys(cities)).toHaveLength(SEED_CITY_COUNT);
   });
 
   it('시드 fallback 시 캐시는 저장하지 않는다', async () => {
@@ -517,7 +522,26 @@ describe('loadAllCities — 시드 fallback', () => {
     mockFetchSequence([{ error: 'timeout' }, { error: 'timeout' }]);
 
     const cities = await loadAllCities();
-    expect(Object.keys(cities).sort()).toEqual(['seoul', 'vancouver']);
+    expect(Object.keys(cities)).toHaveLength(SEED_CITY_COUNT);
+  });
+
+  it('allowSeedFallback:false → 시드로 덮지 않고 원 에러 throw (ADR-074)', async () => {
+    // 먼저 정상 데이터를 메모리에 올린다.
+    mockFetchSequence([
+      { ok: true, status: 200, body: buildBatch({ tokyo: makeFakeCity('tokyo') }) },
+    ]);
+    await loadAllCities();
+    expect(getCity('tokyo')).toBeDefined();
+
+    // 이후 강제 새로고침이 전멸해도 시드로 갈아끼우지 않는다.
+    mockFetchSequence([{ error: 'network' }, { error: 'network' }]);
+    await expect(
+      loadAllCities({ bypassCache: true, allowSeedFallback: false }),
+    ).rejects.toThrow();
+
+    // 기존 도시 맵이 그대로 살아 있다 — 시드 21개로 대체되지 않았다.
+    expect(getCity('tokyo')).toBeDefined();
+    expect(Object.keys(getAllCities())).toHaveLength(1);
   });
 });
 
@@ -623,7 +647,7 @@ describe('refreshCache', () => {
     }
   });
 
-  it('refreshCache 는 캐시 삭제 후 bypassCache=true 로 호출', async () => {
+  it('refreshCache 는 bypassCache=true — stale 캐시를 무시하고 새 데이터로 교체', async () => {
     // 1. 캐시 시드
     const cached = buildBatch({ stale: makeFakeCity('stale') });
     const t0 = new Date('2026-04-29T00:00:00.000Z').getTime();
@@ -645,38 +669,9 @@ describe('refreshCache', () => {
     expect(getCity('stale')).toBeUndefined();
   });
 
-  it('실패 시 ok=false + reason — 시드까지 손상', async () => {
-    jest.resetModules();
-    jest.doMock('../../../data/seed/all.json', () => ({
-      schemaVersion: 999,
-      cities: {},
-    }));
-    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
-    const data: typeof import('../data') = require('../data');
-    data.__resetForTesting();
-
-    mockFetchSequence([
-      { error: 'network' },
-      { error: 'network' },
-      { error: 'network' },
-    ]);
-    const result = await data.refreshCache();
-    expect(result.ok).toBe(false);
-    if (!result.ok) {
-      expect(result.reason).toContain('ALL_CITIES_UNAVAILABLE');
-    }
-    jest.dontMock('../../../data/seed/all.json');
-  });
-
-  it('실패 시 ok=false + reason (defensive — non-AppError 케이스 미도달, 시드 가용)', async () => {
-    // primary, backup, fx 모두 실패 → 시드 fallback 으로 loadAllCities 는 성공.
-    // 이 테스트는 시드도 손상시켜야 ok=false 를 만들 수 있다 — 시드 mock 어렵.
-    // 대신 의도적으로 throw 시킬 다른 경로 — fetch 모킹 후 AsyncStorage 손상.
-    // 단순화: refreshFx 가 hardcoded baseline 으로 fallback 해 항상 성공.
-    // → "ok=false" 는 시드도 loadable 하지 않을 때만 발생 (extreme).
-    //
-    // 그래서 본 케이스는 "정상 실패 시나리오 없음" 을 확인 — refreshCache 는
-    // 통상 ok=true 로 떨어진다 (시드가 안전망).
+  it('네트워크 전멸 → ok=false (시드로 성공을 위장하지 않는다, ADR-074)', async () => {
+    // 회귀 방어: 구버전은 여기서 시드 fallback 으로 ok=true 를 반환해
+    // "갱신 성공" 을 표시하면서 실제로는 21개 → 2개로 퇴행시켰다.
     mockFetchSequence([
       { error: 'network' }, // primary
       { error: 'network' }, // backup
@@ -684,8 +679,50 @@ describe('refreshCache', () => {
     ]);
 
     const result = await refreshCache();
-    // 시드가 성공하므로 ok=true
-    expect(result.ok).toBe(true);
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('실패해도 기존 도시 맵을 시드로 덮지 않는다 (ADR-074)', async () => {
+    // 1. 정상 데이터 1개를 메모리에 올린다.
+    mockFetchSequence([
+      { ok: true, status: 200, body: buildBatch({ tokyo: makeFakeCity('tokyo') }) },
+    ]);
+    await loadAllCities();
+    expect(getCity('tokyo')).toBeDefined();
+
+    // 2. 새로고침이 전멸한다.
+    mockFetchSequence([
+      { error: 'network' },
+      { error: 'network' },
+      { error: 'network' },
+    ]);
+    const result = await refreshCache();
+    expect(result.ok).toBe(false);
+
+    // 3. tokyo 가 살아 있고 시드 21개로 대체되지 않았다.
+    expect(getCity('tokyo')).toBeDefined();
+    expect(Object.keys(getAllCities())).toHaveLength(1);
+  });
+
+  it('실패해도 기존 캐시를 지우지 않는다 (ADR-074)', async () => {
+    // 캐시가 남아야 다음 콜드스타트가 이전 데이터를 복원한다.
+    const cached = buildBatch({ tokyo: makeFakeCity('tokyo') });
+    const t0 = new Date('2026-04-29T00:00:00.000Z').getTime();
+    await seedCache(cached, t0);
+    const before = await AsyncStorage.getItem(CACHE_KEY);
+
+    mockFetchSequence([
+      { error: 'network' },
+      { error: 'network' },
+      { error: 'network' },
+    ]);
+    const result = await refreshCache();
+    expect(result.ok).toBe(false);
+
+    await expect(AsyncStorage.getItem(CACHE_KEY)).resolves.toBe(before);
   });
 });
 
