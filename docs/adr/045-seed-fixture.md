@@ -2,7 +2,7 @@
 
 # ADR-045: v1.0 시드 = schema-pass fixture (한시적)
 
-**상태:** 채택 (2026-04-29)
+**상태:** Superseded by [ADR-074](074-refresh-data-regression.md) (2026-09-07) — 시드는 이제 실 도시 데이터 21개 전량이다. 아래는 채택 당시(2026-04-29) 기록.
 
 **맥락:**
 

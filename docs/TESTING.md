@@ -332,8 +332,8 @@ UI_GUIDE.md §카테고리별 상세 화면 사양 의 5개 카테고리에 대�
 ### 7.3 fixture 카탈로그
 
 - [x] schema 통과 도시 객체 빌더 — `src/__fixtures__/cities/{seoul-valid, vancouver-valid}.ts`. citySchema 테스트 + 통합 smoke 에서 사용.
-- [x] `data/seed/all.json` — v1.0 시드 (서울+밴쿠버, schema-pass fixture 기반, ADR-045). 자동화 phase 산출물이 GitHub raw 로 배포되면 24h 내 덮어써짐.
-- [x] `src/__fixtures__/seed-roundtrip.test.ts` — 시드 round-trip + fixture↔seed drift 검증.
+- [x] `data/seed/all.json` — v1.0 시드 = **실 도시 데이터 21개 전량** (ADR-074, ADR-045 supersede). `scripts/build_data.mjs` 가 `data/all.json` 과 같은 내용으로 함께 쓴다. 네트워크 실패 시에도 도시 수가 퇴행하지 않는다.
+- [x] `src/__fixtures__/seed-roundtrip.test.ts` — 시드 round-trip + 21개 계약 + `시드 == data/all.json` drift 검증 (ADR-074).
 - [ ] 정상 도시 (서울, 밴쿠버, 도쿄)
 - [ ] JPY 통화 (도쿄) — 소수점 없는 통화 검증
 - [ ] VND 통화 (호치민) — 큰 수 검증
@@ -929,12 +929,20 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 
 #### `refreshCache()`
 
-- [ ] `data:all:v1` 키 삭제 후 loadAllCities 강제 호출
+- [x] `bypassCache: true` 로 loadAllCities 호출 — stale 캐시를 무시하고 새 데이터로 교체
 - [ ] `fx:v1` 도 갱신
 - [ ] `useSettingsStore.lastSync` 업데이트
-- [ ] 결과 객체 반환 (`{ ok: true, lastSync: ISO }`)
-- [ ] 실패 시 (`{ ok: false, reason: string }`)
+- [x] 결과 객체 반환 (`{ ok: true, lastSync: ISO }`)
+- [x] 실패 시 (`{ ok: false, reason: string }`)
 - [ ] 사용자 토스트 메시지에 사용
+
+**ADR-074 회귀 방어 (데이터 퇴행 금지)** — 구버전은 캐시를 선삭제한 뒤 시드로 fallback 해
+`ok: true` 를 반환했고, 그 결과 도시 21개가 2개로 무너졌다:
+
+- [x] 네트워크 전멸 → `ok: false` (시드로 성공을 위장하지 않는다)
+- [x] 실패해도 기존 도시 맵 보존 — `citiesInMemory` 가 시드로 덮이지 않는다
+- [x] 실패해도 기존 캐시(`data:all:v1`) 보존 — 다음 콜드스타트가 복원한다
+- [x] `loadAllCities({ allowSeedFallback: false })` → 시드로 덮지 않고 원 에러 throw
 
 #### `migrateCacheV1ToV2(stored): CitiesMap | null` (스키마 변경 시)
 
@@ -992,11 +1000,12 @@ ADR-031 에 따라 21개 도시(서울 + 20) 는 단일 `all.json` 으로 fetch.
 
 시드 fallback 경로 + 환율 변환 round-trip 을 모듈 경계 너머 검증. 실 네트워크 의존 없음.
 
-- [ ] 네트워크 실패 → 시드 fallback → 메모리 맵 갱신 → `getCity('vancouver')` / `getAllCities()` 즉시 반환
+- [x] 네트워크 실패 → 시드 fallback (21개 전량) → 메모리 맵 갱신 → `getCity('vancouver')` / `getAllCities()` 즉시 반환
 - [ ] 서울 KRW pass-through (`convertToKRW(amount, 'KRW', {})` === amount)
 - [ ] 밴쿠버 CAD → KRW 변환 (`fetchExchangeRates({ bypassCache: true })` 가 fetch 실패 시 hardcoded baseline 반환 → `convertToKRW` 가 정수 KRW)
-- [ ] `refreshCache()`: 네트워크 실패해도 시드 + FX baseline 으로 ok=true + lastSync 반환
-- [ ] `getAllCities()` 가 loadAllCities 호출 전 빈 객체, 후 시드 도시 2개 반환
+- [x] `refreshCache()`: 네트워크 전멸 → `ok: false` + 기존 도시 맵 보존 (ADR-074)
+- [x] `refreshCache()` 실패가 캐시를 지우지 않는다 (ADR-074)
+- [x] `getAllCities()` 가 loadAllCities 호출 전 빈 객체, 후 시드 도시 **21개** 반환
 
 ### 9.4.2 `src/store/hydration.ts` (waitForAllStoresHydrated, stores phase step 4)
 

@@ -60,7 +60,7 @@
 | [042](adr/042-unit-1kg.md) | 사과·양파 단위 — 1kg 통일 | Active | 디자인 "1개"→데이터 1kg 유지 |
 | [043](adr/043-worklets-stub.md) | react-native-worklets 빈 plugin stub | Superseded by ADR-044 | (폐기) SDK 52 우회책 |
 | [044](adr/044-expo-sdk-54-upgrade.md) | Expo SDK 52 → 54 업그레이드 | Active | React 19 / RN 0.81 / Router 6 |
-| [045](adr/045-seed-fixture.md) | v1.0 시드 = schema-pass fixture | Active | 자동화 전 placeholder, 빌드 게이트 |
+| [045](adr/045-seed-fixture.md) | v1.0 시드 = schema-pass fixture | Superseded (ADR-074) | 시드는 실데이터 21개 전량으로 전환 |
 | [046](adr/046-fx-fallback-v1.md) | 환율 fallback v1.0 (1차+3차, 2차 ECB 보류) | Active | ECB 파싱 복잡 → v1.x 검토 |
 | [047](adr/047-fx-baseline-quarterly.md) | FX_BASELINE 분기 갱신 정책 | Active | 분기 1회 한국은행 기준 갱신 |
 | [048](adr/048-partial-schema-fail.md) | 부분 schema 실패 정책 (도시 제외 + warn) | Active | 개별 도시 실패 시 제외, 전체 X |
@@ -86,3 +86,4 @@
 | [068](adr/068-adr-doc-split.md) | ADR 문서 구조 = 인덱스 + 파일당 1 ADR 분할 | Active | 번호=주소, 새 ADR=새 파일 |
 | [069](adr/069-harness-doc-pull.md) | 하네스 가드레일 push → pull 전환 | Active | 색인만 주입, 본문은 step 이 Read |
 | [070](adr/070-source-name-language.md) | 출처명 표기 언어 정책 + `legacyNames` 이름 이전 | Active | 서술형 출처명 한국어, 고유명 원어 |
+| [074](adr/074-refresh-data-regression.md) | 강제 새로고침 데이터 퇴행 방지 + 시드 = 실데이터 전량 | Active | 캐시 선삭제 제거, 시드 21개 (ADR-045 supersede) |
