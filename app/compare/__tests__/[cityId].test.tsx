@@ -343,6 +343,23 @@ describe('CompareScreen', () => {
       // 도시명 노출 — TopBar / hero / 카테고리 카드 어느 곳이든
       expect(screen.getAllByText('밴쿠버').length).toBeGreaterThan(0);
     });
+
+    it('hero — footer `항목 단가 합` + `/월` 표기 없음 (ADR-075)', async () => {
+      setupMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // hero 합계는 카테고리별 항목 단가의 합이지 가계 월 지출 추정치가 아니다.
+      // → footer 는 Detail hero 와 동일한 `항목 단가 합`, caption 은 `/월` 미표기.
+      const footer = within(getByTestId('compare-hero-footer'));
+      expect(footer.getByText('항목 단가 합')).toBeTruthy();
+      expect(screen.queryByText('평균 가정 기준')).toBeNull();
+      expect(within(getByTestId('compare-hero')).queryAllByText(/\/월$/)).toHaveLength(0);
+    });
   });
 
   describe('rent — useRentChoiceStore 연동 (ADR-060)', () => {
@@ -666,8 +683,11 @@ describe('CompareScreen', () => {
       const multTexts = within(hero).queryAllByText(/×$/);
       expect(multTexts).toHaveLength(0);
 
-      // caption 은 여전히 표시 — `+N만원/월` 또는 `만원/월` 패턴.
-      const captionTexts = within(hero).queryAllByText(/만원\/월$/);
+      // caption 은 여전히 표시 — `+N만원` 패턴 (ADR-075 로 `/월` 접미사 제거).
+      // 좌·우 값과 겹치지 않도록 가운데 컬럼으로 범위를 좁혀 검증.
+      const captionTexts = within(getByTestId('compare-hero-center')).queryAllByText(
+        /^\+.*원$/,
+      );
       expect(captionTexts.length).toBeGreaterThan(0);
 
       // 다시 한 카드라도 서울 측 양수 카테고리 (rent) ON 하면 mult 복구.

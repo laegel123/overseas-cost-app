@@ -384,7 +384,9 @@ export default function CompareScreen(): React.ReactElement {
   const { swPct: heroSwPct, cwPct: heroCwPct } = computeBarPcts(seoulTotal, cityTotal);
   const diff = cityTotal - seoulTotal;
   const diffSign = diff >= 0 ? '+' : '';
-  const centerCaption = `${diffSign}${formatKRW(diff)}/월`;
+  // ADR-075 — `/월` 접미사 제거. 합계는 항목 단가의 합이지 가계 월 지출 추정치가
+  // 아니므로 "월 지출" 로 읽히는 표기를 쓰지 않는다.
+  const centerCaption = `${diffSign}${formatKRW(diff)}`;
 
   const sourceCount = city.sources.length;
 
@@ -413,7 +415,7 @@ export default function CompareScreen(): React.ReactElement {
           rightValue={formatKRW(cityTotal)}
           swPct={heroSwPct}
           cwPct={heroCwPct}
-          footer="평균 가정 기준"
+          footer="항목 단가 합"
           testID="compare-hero"
         />
       </View>

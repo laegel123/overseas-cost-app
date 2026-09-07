@@ -1946,6 +1946,7 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 - [x] HeroCard orange mount 검증 (screens step 0)
 - [x] 서울값 / 도시값 / 배수 표시 (screens step 0)
 - [x] hero 합산 기본 포함: rent/food/transport (tuition/tax/visa 는 default OFF, ADR-067)
+- [x] footer `항목 단가 합` + hero 전체에 `/월` 표기 없음 — `평균 가정 기준` 폐기 (ADR-075)
 - [ ] ❓ 탭: 가정값 시트 열림
 
 **카드 (통합 뷰 — 항상 6 카테고리, ADR-067):**
@@ -2098,7 +2099,7 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 
 **food 카테고리 (v1.0 우선):**
 
-- [x] 네이비 hero: 카테고리 합계 + 푸터 (`항목 단가 합` — Compare 의 `평균 가정 기준` 과 의도 차이 명시, PR #17 review round 3 이슈 2)
+- [x] 네이비 hero: 카테고리 합계 + 푸터 (`항목 단가 합` — ADR-075 이후 Compare hero footer 와 동일 문구. 이력: PR #17 review round 3 이슈 2)
 - [x] 외식 섹션: 식당, 카페 (2 항목 표시)
 - [x] 식재료 섹션: 공통 8개 항목 (milk1L/eggs12/rice1kg/chicken1kg/bread/onion1kg/apple1kg/ramen)
 - [ ] 신라면 hot (2.5×) 검증 (v1.x — 데이터 fixture 의존)
