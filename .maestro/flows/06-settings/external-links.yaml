@@ -1,8 +1,13 @@
-# UC-6: 외부 링크(개인정보 처리방침) 탭 → 외부 브라우저 오픈. 핸들러가 크래시 없이
+# UC-6: 설정에 남은 **유일한 외부 링크** — 피드백(mailto). 핸들러가 크래시 없이
 # 동작하고 앱으로 복귀 가능한지까지만 자동 검증한다.
 #
-# 주의: 실제 브라우저에 열린 페이지 내용/메일 컴포저는 Maestro 자동 검증 범위 밖 →
-# '수동 관찰' 항목(PLAN.md). menu-feedback(mailto)/menu-sources(github) 도 동일 성격.
+# ADR-071 이전에는 '개인정보 처리방침'(GitHub Pages HTML)·'데이터 출처 보기'(GitHub
+# 마크다운)도 외부 링크였다. 둘 다 앱 내부 화면이 되었으므로 여기서 검증하지 않는다
+# — flows/08-sources-privacy/ 가 담당한다. menu-privacy 를 탭하고 launchApp 으로
+# 홈을 단정하던 이전 판본은 인앱 push 로 바뀐 뒤에도 계속 통과했으나(launchApp 이
+# 콜드스타트로 홈에 착지) 실제로는 아무것도 검증하지 않는 false-green 이었다.
+#
+# 주의: 실제 메일 컴포저 내용은 Maestro 자동 검증 범위 밖 → '수동 관찰' 항목(PLAN.md).
 appId: com.laegel.overseascostapp
 tags:
   - settings
@@ -11,10 +16,13 @@ tags:
 - runFlow: ../../common/onboard.yaml
 - tapOn:
     id: 'home-avatar'
+- assertVisible:
+    id: 'menu-feedback'
 - tapOn:
-    id: 'menu-privacy'
-# 외부 브라우저로 이탈 → launchApp 은 홈 루트로 콜드스타트한다(설정 상태 미보존).
-# 크래시 없이 앱으로 복귀(재기동)됨을 홈 화면으로 검증한다 (브라우저 내용은 수동 관찰).
+    id: 'menu-feedback'
+# 메일 컴포저로 이탈(또는 핸들러 부재 시 '링크 열기 실패' Alert) → 어느 쪽이든
+# 크래시 없이 앱으로 복귀 가능해야 한다. launchApp 은 홈 루트로 콜드스타트한다
+# (설정 화면 상태 미보존 — GOTCHAS §6).
 - launchApp
 - assertVisible:
     id: 'home-screen'

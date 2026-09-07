@@ -1,0 +1,70 @@
+# UC-6: 설정 → 데이터 출처 목록 → 도시별 출처 (2단계 드릴다운, ADR-071).
+# 이전에는 '데이터 출처 보기' 가 GitHub 마크다운 외부 링크였다. 지금은 앱 내부 화면이며
+# presentation:'modal' 이 아닌 **일반 Stack push** 라 back 으로 단계별 복귀가 가능하다
+# (ADR-071 결정 3) — 이 flow 가 그 스택 동작까지 검증한다.
+#
+# 앵커 도시를 서울로 고정하는 이유: 서울은 rent/food/transport 출처만 있고 이 구성이
+# 번들 시드(data/seed/all.json)와 원격 전량 데이터(data/all.json)에서 동일하다.
+# 밴쿠버는 시드에 tax 출처가 1건 있으나 원격 전량에는 21개 도시 모두 tax 가 0건이어서
+# source-group-tax 존재 여부가 데이터 출처에 따라 갈린다 — 앵커로 쓰면 flaky 해진다.
+appId: com.laegel.overseascostapp
+tags:
+  - settings
+  - sources
+---
+- runFlow: ../../common/onboard.yaml
+- tapOn:
+    id: 'home-avatar'
+- assertVisible:
+    id: 'settings-screen'
+- tapOn:
+    id: 'menu-sources'
+# 1단계 — 인앱 화면으로 push (외부 브라우저 이탈 아님)
+- assertVisible:
+    id: 'sources-screen'
+- assertVisible:
+    id: 'sources-topbar'
+- assertVisible: '데이터 출처'
+- assertVisible:
+    id: 'sources-city-list'
+# 서울은 권역 정렬과 무관하게 최상단 고정 (권역 헤더 없는 평평한 목록)
+- assertVisible:
+    id: 'source-city-seoul'
+- tapOn:
+    id: 'source-city-seoul'
+# 2단계 — 카테고리별 그룹 + 출처 카드
+- assertVisible:
+    id: 'source-city-screen'
+- assertVisible:
+    id: 'source-city-topbar'
+- assertVisible:
+    id: 'source-group-rent'
+- assertVisible:
+    id: 'source-icon-rent'
+# source-item-{category}-{그룹 내 인덱스} — 전체 통짜 인덱스가 아니다
+- assertVisible:
+    id: 'source-item-rent-0'
+- assertVisible:
+    id: 'source-open-rent-0'
+- assertVisible:
+    id: 'source-group-food'
+# 자동 갱신 주기 안내 (AUTOMATION.md §9). 화면 밖일 수 있어 스크롤로 도달한다.
+- scrollUntilVisible:
+    element:
+      id: 'source-city-footer'
+    direction: DOWN
+# back 앵커가 화면 밖으로 밀렸을 수 있으므로 되올린다
+- scrollUntilVisible:
+    element:
+      id: 'source-city-topbar-back'
+    direction: UP
+# back → 1단계 목록 복귀 (일반 push 라 스택이 남아 있다 — modal 이면 목록이 아니라 설정으로 떨어진다)
+- tapOn:
+    id: 'source-city-topbar-back'
+- assertVisible:
+    id: 'sources-screen'
+# back → 설정 복귀
+- tapOn:
+    id: 'sources-topbar-back'
+- assertVisible:
+    id: 'settings-screen'

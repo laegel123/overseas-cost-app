@@ -10,7 +10,7 @@ import refreshVisas, {
   VISA_REGISTRY,
   CITY_TO_COUNTRY,
   CITY_CONFIGS,
-  SOURCE,
+  buildSource,
   getVisaForCity,
   fetchVisaFees,
 } from '../visas.mjs';
@@ -39,6 +39,7 @@ afterEach(() => {
 });
 
 type VisaRegistryEntry = {
+  name: string;
   url: string;
   studentApplicationFee: number;
   workApplicationFee: number;
@@ -52,6 +53,7 @@ describe('VISA_REGISTRY', () => {
 
   it('각 국가에 비자 fee 필수 필드 포함', () => {
     for (const [, registry] of Object.entries(VISA_REGISTRY) as [string, VisaRegistryEntry][]) {
+      expect(registry.name.length).toBeGreaterThan(0);
       expect(registry.url).toMatch(/^https?:\/\//);
       expect(typeof registry.studentApplicationFee).toBe('number');
       expect(registry.studentApplicationFee).toBeGreaterThan(0);
@@ -92,19 +94,50 @@ describe('CITY_CONFIGS', () => {
   });
 });
 
-describe('SOURCE', () => {
+describe('buildSource', () => {
   it('visa 카테고리', () => {
-    expect(SOURCE.category).toBe('visa');
-    expect(SOURCE.url).toBeDefined();
+    expect(buildSource('vancouver').category).toBe('visa');
   });
 
-  it('출처명은 한국어 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)', () => {
-    expect(SOURCE.name).toContain('비자');
-    expect(SOURCE.name).toContain('정적 추정치');
+  it('url = 해당 도시 국가 registry 의 실제 정부 페이지 (ADR-071)', () => {
+    expect(buildSource('vancouver').url).toBe(VISA_REGISTRY.CA.url);
+    expect(buildSource('tokyo').url).toBe(VISA_REGISTRY.JP.url);
   });
 
-  it('legacyNames 에 구 영문 출처명 포함 (데이터 중복 방지)', () => {
-    expect(SOURCE.legacyNames).toContain('Government visa fee pages (static estimates)');
+  it('url 이 우리 저장소(github.com) 를 가리키지 않음 — 20개 도시 전부 (ADR-071)', () => {
+    for (const cityId of Object.keys(CITY_TO_COUNTRY)) {
+      expect(buildSource(cityId).url).not.toContain('github.com');
+    }
+  });
+
+  it('출처명은 기관 고유명 + 한국어 서술 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)', () => {
+    expect(buildSource('vancouver').name).toBe(
+      '캐나다 이민·난민·시민권부(IRCC) 공식 비자 수수료 페이지 (정적 추정치)',
+    );
+    expect(buildSource('tokyo').name).toBe('일본 외무성 공식 비자 수수료 페이지 (정적 추정치)');
+  });
+
+  it('출처명이 도시별로 다름 + 모든 도시가 마커 유지', () => {
+    for (const cityId of Object.keys(CITY_TO_COUNTRY)) {
+      const { name } = buildSource(cityId);
+      expect(name).toContain('비자');
+      expect(name).toContain('정적 추정치');
+    }
+    expect(buildSource('vancouver').name).not.toBe(buildSource('tokyo').name);
+  });
+
+  it('같은 국가 도시는 동일 출처 (도쿄 = 오사카)', () => {
+    expect(buildSource('tokyo')).toEqual(buildSource('osaka'));
+  });
+
+  it('legacyNames 에 구 한국어명·구 영문명 둘 다 포함 (데이터 중복 방지)', () => {
+    const { legacyNames } = buildSource('vancouver');
+    expect(legacyNames).toContain('각국 정부 공식 비자 수수료 페이지 (정적 추정치)');
+    expect(legacyNames).toContain('Government visa fee pages (static estimates)');
+  });
+
+  it('registry 미등록 도시: 명시적 throw (silent fallback 금지)', () => {
+    expect(() => buildSource('unknown-city')).toThrow(/No visa registry entry/);
   });
 });
 
@@ -288,7 +321,15 @@ describe('refresh (integration)', () => {
         workApplicationFee: ca.workApplicationFee,
         settlementApprox: ca.settlementApprox,
       },
-      sources: [{ category: 'visa', name: SOURCE.legacyNames[0], url: SOURCE.url, accessedAt: '2026-04-01' }],
+      // 이전 상태: 구 한국어 출처명 + 우리 저장소를 가리키던 url.
+      sources: [
+        {
+          category: 'visa',
+          name: '각국 정부 공식 비자 수수료 페이지 (정적 추정치)',
+          url: 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md',
+          accessedAt: '2026-04-01',
+        },
+      ],
     };
     fs.writeFileSync(cityPath, JSON.stringify(existingData));
 
@@ -299,7 +340,8 @@ describe('refresh (integration)', () => {
     const written = JSON.parse(fs.readFileSync(cityPath, 'utf-8'));
     const visaSources = written.sources.filter((s: { category: string }) => s.category === 'visa');
     expect(visaSources).toHaveLength(1);
-    expect(visaSources[0].name).toBe(SOURCE.name);
+    expect(visaSources[0].name).toBe(buildSource('vancouver').name);
+    expect(visaSources[0].url).toBe(buildSource('vancouver').url);
     expect(written.visa).toEqual(existingData.visa);
 
     // 이전 완료 후 재실행 = 쓸 이유 없음.

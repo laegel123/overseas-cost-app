@@ -80,10 +80,13 @@
 | [062](adr/062-inclusion-toggle.md) | Compare 카테고리 포함/제외 토글 | 부분 supersede (ADR-067) | persona-aware default→고정 default |
 | [063](adr/063-eas-build-android.md) | EAS Build 출시 전략 — Android 단독 v1.0 | Active | iOS v1.1+, Android 우선 출시 |
 | [064](adr/064-eas-update-track.md) | EAS Update 도입 + 비공개 테스트 트랙 | Active | Closed testing 14일 게이트 |
-| [065](adr/065-source-count-privacy.md) | 출처 유형 총수 단일 출처화 + 개인정보 링크 | Active | DATA_SOURCES_COUNT 상수화 |
+| [065](adr/065-source-count-privacy.md) | 출처 유형 총수 단일 출처화 + 개인정보 링크 | Superseded (ADR-071) | 실측 카운트 + 인앱 화면으로 전환 |
 | [066](adr/066-maestro-e2e.md) | Maestro 기반 E2E | Active | iOS 시뮬레이터 + YAML 플로우 |
 | [067](adr/067-persona-removal.md) | 페르소나 개념 제거 + 온보딩 도시 선택 | Active | 통합 6카테고리 뷰, 온보딩=도시 선택 |
 | [068](adr/068-adr-doc-split.md) | ADR 문서 구조 = 인덱스 + 파일당 1 ADR 분할 | Active | 번호=주소, 새 ADR=새 파일 |
 | [069](adr/069-harness-doc-pull.md) | 하네스 가드레일 push → pull 전환 | Active | 색인만 주입, 본문은 step 이 Read |
 | [070](adr/070-source-name-language.md) | 출처명 표기 언어 정책 + `legacyNames` 이름 이전 | Active | 서술형 출처명 한국어, 고유명 원어 |
+| [071](adr/071-in-app-policy-pages.md) | 정책 페이지 인앱 내재화 + 출처 카운트 실측 (Supersedes ADR-065) | Active | /sources·/privacy 자체 화면, 출처 URL 도시별 실제화 |
+| [072](adr/072-privacy-policy-source.md) | 개인정보 처리방침 본문 단일 출처 = `src/lib/privacyPolicy.ts` | Active | HTML·MD 는 생성물, 드리프트 테스트 강제 |
+| [073](adr/073-harness-single-step-mode.md) | 하네스 단일 step 실행 모드 `run --once` | Active | step 경계에서만 멈춤, 재시도 3회 유지 |
 | [074](adr/074-refresh-data-regression.md) | 강제 새로고침 데이터 퇴행 방지 + 시드 = 실데이터 전량 | Active | 캐시 선삭제 제거, 시드 21개 (ADR-045 supersede) |

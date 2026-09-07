@@ -73,3 +73,44 @@ tags:
 - assertVisible:
     id: 'settings-screen'
 - takeScreenshot: '.maestro/.artifacts/07-settings'
+# ADR-071: 설정의 '데이터 출처 보기'·'개인정보 처리방침' 이 외부 링크에서 앱 내부 화면이
+# 되었다. 아래 3컷은 그 신규 화면들 — 출처 목록(08) → 도시별 출처(09) → 처리방침(10).
+# 도시는 밴쿠버를 고른다: tuition·visa 출처가 있어 step 0 이 교체한 도시별 공공 출처
+# (대학 공식 페이지 / 이민당국 페이지)가 실제로 렌더되는지 눈으로 확인할 수 있다.
+- tapOn:
+    id: 'menu-sources'
+- runFlow:
+    when:
+      visible:
+        id: 'menu-sources'
+    commands:
+      - tapOn:
+          id: 'menu-sources'
+- assertVisible:
+    id: 'sources-screen'
+- takeScreenshot: '.maestro/.artifacts/08-sources'
+- tapOn:
+    id: 'source-city-vancouver'
+- runFlow:
+    when:
+      visible:
+        id: 'source-city-vancouver'
+    commands:
+      - tapOn:
+          id: 'source-city-vancouver'
+- assertVisible:
+    id: 'source-city-screen'
+- takeScreenshot: '.maestro/.artifacts/09-source-city'
+- tapOn:
+    id: 'source-city-topbar-back'
+- assertVisible:
+    id: 'sources-screen'
+- tapOn:
+    id: 'sources-topbar-back'
+- assertVisible:
+    id: 'settings-screen'
+- tapOn:
+    id: 'menu-privacy'
+- assertVisible:
+    id: 'privacy-screen'
+- takeScreenshot: '.maestro/.artifacts/10-privacy'

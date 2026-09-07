@@ -9,7 +9,7 @@ import * as os from 'node:os';
 import refreshUniversities, {
   UNIVERSITY_REGISTRY,
   CITY_CONFIGS,
-  SOURCE,
+  buildSource,
   getTuitionForCity,
   fetchUniversityTuition,
 } from '../universities.mjs';
@@ -73,21 +73,50 @@ describe('CITY_CONFIGS', () => {
   });
 });
 
-describe('SOURCE', () => {
+describe('buildSource', () => {
   it('tuition 카테고리', () => {
-    expect(SOURCE.category).toBe('tuition');
-    expect(SOURCE.url).toBeDefined();
+    expect(buildSource('vancouver').category).toBe('tuition');
   });
 
-  it('출처명은 한국어 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)', () => {
-    expect(SOURCE.name).toContain('학비');
-    expect(SOURCE.name).toContain('정적 추정치');
+  it('url = 해당 도시 registry 첫 대학의 실제 페이지 (ADR-071)', () => {
+    expect(buildSource('vancouver').url).toBe(UNIVERSITY_REGISTRY.vancouver[0]!.url);
+    expect(buildSource('tokyo').url).toBe(UNIVERSITY_REGISTRY.tokyo[0]!.url);
   });
 
-  it('legacyNames 에 구 영문 출처명 포함 (데이터 중복 방지)', () => {
-    expect(SOURCE.legacyNames).toContain(
+  it('url 이 우리 저장소(github.com) 를 가리키지 않음 — 20개 도시 전부 (ADR-071)', () => {
+    for (const cityId of Object.keys(UNIVERSITY_REGISTRY)) {
+      expect(buildSource(cityId).url).not.toContain('github.com');
+    }
+  });
+
+  it('출처명은 도시별 대학명 + 한국어 서술 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)', () => {
+    expect(buildSource('vancouver').name).toBe(
+      'UBC · SFU · BCIT 공식 국제학생 학비 페이지 (정적 추정치)',
+    );
+    expect(buildSource('tokyo').name).toBe(
+      '東京大学 · 早稲田大学 · 慶應義塾大学 공식 국제학생 학비 페이지 (정적 추정치)',
+    );
+  });
+
+  it('출처명이 도시별로 다름 + 모든 도시가 마커 유지', () => {
+    const names = Object.keys(UNIVERSITY_REGISTRY).map((id) => buildSource(id).name);
+    for (const name of names) {
+      expect(name).toContain('학비');
+      expect(name).toContain('정적 추정치');
+    }
+    expect(buildSource('vancouver').name).not.toBe(buildSource('tokyo').name);
+  });
+
+  it('legacyNames 에 구 한국어명·구 영문명 둘 다 포함 (데이터 중복 방지)', () => {
+    const { legacyNames } = buildSource('vancouver');
+    expect(legacyNames).toContain('각 대학 공식 국제학생 학비 페이지 (정적 추정치)');
+    expect(legacyNames).toContain(
       'Official university international tuition pages (static estimates)',
     );
+  });
+
+  it('registry 미등록 도시: 명시적 throw (silent fallback 금지)', () => {
+    expect(() => buildSource('unknown-city')).toThrow(/No university registry entry/);
   });
 });
 
@@ -280,7 +309,15 @@ describe('refresh (integration)', () => {
         level: u.level,
         annual: u.staticAnnual,
       })),
-      sources: [{ category: 'tuition', name: SOURCE.legacyNames[0], url: SOURCE.url, accessedAt: '2026-04-01' }],
+      // 이전 상태: 구 한국어 출처명 + 우리 저장소를 가리키던 url.
+      sources: [
+        {
+          category: 'tuition',
+          name: '각 대학 공식 국제학생 학비 페이지 (정적 추정치)',
+          url: 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md',
+          accessedAt: '2026-04-01',
+        },
+      ],
     };
     fs.writeFileSync(cityPath, JSON.stringify(existingData));
 
@@ -291,7 +328,8 @@ describe('refresh (integration)', () => {
     const written = JSON.parse(fs.readFileSync(cityPath, 'utf-8'));
     const tuitionSources = written.sources.filter((s: { category: string }) => s.category === 'tuition');
     expect(tuitionSources).toHaveLength(1);
-    expect(tuitionSources[0].name).toBe(SOURCE.name);
+    expect(tuitionSources[0].name).toBe(buildSource('vancouver').name);
+    expect(tuitionSources[0].url).toBe(buildSource('vancouver').url);
     expect(written.tuition).toEqual(existingData.tuition);
 
     // 이전 완료 후 재실행 = 쓸 이유 없음.

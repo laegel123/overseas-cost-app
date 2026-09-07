@@ -1570,7 +1570,7 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] sw=1.0, cw=0.5 → 정상
 - [x] sw + cw 범위 벗어남 → clamp + warn
 
-**Icon 매핑:**
+**Icon 매핑** (맵 정의는 `src/lib/categoryMeta.ts` 의 `CATEGORY_ICON` — §9.36. 본 절은 category prop → 렌더된 아이콘 배선만 검증):
 
 - [x] category=rent → house icon
 - [x] category=food → fork icon
@@ -1950,6 +1950,8 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 
 **카드 (통합 뷰 — 항상 6 카테고리, ADR-067):**
 
+> 카드 라벨은 `CategoryConfig` 가 아니라 `src/lib/categoryMeta.ts` 의 `CATEGORY_LABEL[category]` 에서 온다 (ADR-071, in-app-policy-pages step 1). 라벨 문자열 자체의 고정은 §9.36, 본 절은 화면 배선 (`세금 (근사)` 파생 포함) 만 검증.
+
 - [x] rent/food/transport/tuition/tax/visa 6개 모두 표시 — 페르소나 분기 제거 (persona-removal step 4)
 - [x] ComparePair 각 카테고리별 1회 mount (persona-removal step 4)
 - [x] tuition/tax 카드는 항상 표시 (hero 합산엔 default 미포함, 사용자 토글로 ON 가능)
@@ -2091,6 +2093,8 @@ ARCHITECTURE.md §검색 알고리즘 정확 검증.
 ### 9.25 `app/detail/[cityId]/[category].tsx` (상세)
 
 screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 동일 골격 + 데이터 있는 항목만 렌더. 페르소나 분기는 v1.x 미루고 raw 카테고리 데이터를 균등 노출.
+
+> TopBar / hero 캡션의 카테고리 라벨(과 visa 섹션 라벨)은 `src/lib/categoryMeta.ts` 의 `CATEGORY_LABEL` 에서 온다 (ADR-071, in-app-policy-pages step 1). 라벨 문자열 자체의 고정은 §9.36.
 
 **food 카테고리 (v1.0 우선):**
 
@@ -2435,13 +2439,17 @@ screens phase step 3 구현 — 사용 통계 + 메뉴. 페르소나 배지는 *
 
 - [x] 4개 메뉴 모두 렌더링 (출처/피드백/개인정보/앱 정보) — `menu-refresh` 는 카드로 승격되어 제거 (persona-removal step 6)
 - [x] 앱 정보 rightText = v1.0.0 (expo-constants expoConfig.version) (screens step 3)
-- [x] 출처 rightText = 12개 — `DATA_SOURCES_COUNT` (`src/lib/dataSources.ts` 단일 출처) ↔ `docs/DATA_SOURCES.md` 마커 동기화는 §9.33 드리프트 테스트가 강제 (ADR-065; PR #18 round 9 의 수동 동기화 대체)
+- [x] 출처 rightText = `countUniqueSources()` 런타임 실측값 — 하드코딩 `12개` 미표시 (ADR-071, in-app-policy-pages step 7; 출처 유형 총수 큐레이션 상수 대체)
+- [x] 출처 rightText — 데이터 갱신(`lastSync` 변경) 후 새 실측값 반영 (`useMemo([lastSync])`, in-app-policy-pages step 7)
+
+**인앱 라우팅 (ADR-071):**
+
+- [x] 데이터 출처 보기 → `router.push('/sources')` + `openURL` 미호출 (in-app-policy-pages step 7; 기존 GitHub DATA_SOURCES.md 외부 링크 대체)
+- [x] 개인정보 처리방침 → `router.push('/privacy')` + `openURL` 미호출 (in-app-policy-pages step 7; 기존 GitHub Pages `privacy-policy.html` 외부 링크 대체)
 
 **외부 링크:**
 
-- [x] 피드백 보내기 → mailto:laegel1@gmail.com 호출 (ADR-021) (screens step 3)
-- [x] 데이터 출처 보기 → GitHub DATA_SOURCES.md URL 호출 (screens step 3)
-- [x] 개인정보 처리방침 → 출시 정본 GitHub Pages `privacy-policy.html` URL 호출 (ADR-065; 기존 GitHub PRIVACY.md 대체)
+- [x] 피드백 보내기 → mailto:laegel1@gmail.com 호출 + `router.push` 미호출 — 인앱 전환 후에도 유지 (ADR-021) (screens step 3, in-app-policy-pages step 7 회귀 가드)
 
 **Footer:**
 
@@ -2502,13 +2510,9 @@ screens phase step 3 에 추가된 thin wrapper. `jest.mock('@/lib/linking')` �
 - [x] openURL 호출 시 Linking.openURL 로 위임 (PR #18 review round 5)
 - [x] mailto: scheme 도 변형 없이 그대로 전달 (PR #18 review round 5)
 
-### 9.33 `src/lib/dataSources.ts` — 출처 유형 총수 단일 출처
+### 9.33 `src/lib/dataSources.ts` (삭제됨 — ADR-071, in-app-policy-pages step 7)
 
-v1.x DX 정리 (ADR-065). `DATA_SOURCES_COUNT` 를 `docs/DATA_SOURCES.md` 머신 마커와 동기화 강제 — settings.tsx 하드코딩 + 수동 동기화 제거.
-
-- [x] DATA_SOURCES_COUNT 는 양의 정수 (ADR-065)
-- [x] docs/DATA_SOURCES.md `<!-- DATA_SOURCES_COUNT: N -->` 마커와 일치 — 드리프트 가드 (ADR-065)
-- [x] 마커 부재 시 parseMarkerCount throw — silent fail 금지 (ADR-065)
+출처 유형 총수(12) 큐레이션 상수 + `docs/DATA_SOURCES.md` 머신 마커 드리프트 가드 (ADR-065). 출처 카운트가 런타임 실측(`countUniqueSources()`, §9.37)으로 바뀌면서 상수·마커·드리프트 테스트를 모두 삭제. 설정 화면 rightText 검증은 §9.29 로 이전.
 
 ### 9.34 `src/components/PersonaCard.tsx` (삭제됨 — ADR-067, persona-removal step 7)
 
@@ -2520,6 +2524,180 @@ Onboarding 페르소나 선택 카드. 온보딩 도시 선택 전환으로 삭�
 
 - [x] 단일 testID 매칭 시 해당 서브트리 반환 (간접 검증 — 본 헬퍼 사용 테스트 다수 pass)
 - [x] testID 못 찾으면 throw (간접 검증)
+
+### 9.36 `src/lib/categoryMeta.ts` — 카테고리 라벨·아이콘·순서 단일 출처
+
+ADR-071 / in-app-policy-pages step 1. 라벨은 `app/detail/[cityId]/[category].tsx` 와 `app/compare/[cityId].tsx` 에, 아이콘은 `src/components/ComparePair.tsx` 에 각각 흩어져 있던 것을 한 곳으로 모았다. 출처 화면(`app/sources/*`)이 같은 값을 세 번째 소비처로 쓴다. 값 변경은 Compare·Detail·출처 화면에 동시 파급되므로 본 인벤토리가 문자열을 고정한다.
+
+**`CATEGORY_LABEL`:**
+
+- [x] 6 카테고리 (`SourceCategory` 전수) 를 빠짐없이 갖는다 — 키 집합 일치
+- [x] rent=`월세` / food=`식비` / transport=`교통` / tuition=`학비` / tax=`세금` / visa=`비자/정착` 각각 일치 (6건)
+
+**`CATEGORY_ICON`:**
+
+- [x] 6 카테고리를 빠짐없이 갖는다 — 키 집합 일치
+- [x] rent=`house` / food=`fork` / transport=`bus` / tuition=`graduation` / tax=`briefcase` / visa=`passport` 각각 일치 (6건)
+- [x] 모든 값이 `ICON_NAMES` (§Icon 카탈로그) 에 존재하는 유효한 아이콘 이름 — 오타 시 런타임에서야 드러나는 결함 차단
+
+**`CATEGORY_ORDER`:**
+
+- [x] Compare 카드 순서 (`COMPARE_CATEGORIES`) 와 동일 — rent → food → transport → tuition → tax → visa
+- [x] 6 카테고리를 중복 없이 전부 담는다 (Set 크기 + 정렬 비교)
+
+> `IconName` 은 **타입 전용** import (`import type`). lib → components 런타임 의존 금지 — 이 방향이 깨지면 lib 테스트가 RN 컴포넌트 트리를 끌어온다.
+
+### 9.37 `src/lib/sources.ts` — 출처 집계 (`/sources` 화면용)
+
+ADR-071 / in-app-policy-pages step 2. `data.ts` 메모리 맵에서 출처 목록의 표시 순서·카운트·카테고리 그룹을 만든다. 화면(step 3·4)은 계산하지 않고 결과를 그리기만 한다. `data.ts` 는 mock (`jest.mock('../data')`) — 이 모듈의 책임은 fetch 가 아니라 정렬·중복 제거·그룹핑이다. **실데이터 카운트는 단언하지 않는다** — cron 이 도시 JSON 을 갱신하면 곧바로 drift 나는 테스트가 되고, 그게 ADR-071 결정 2 가 걷어낸 패턴이다.
+
+**`getCitySourceGroups`:**
+
+- [x] 서울이 항상 첫 번째 — 맵의 **마지막** 항목으로 들어와도 고정 (comparator 의 `b === seoul` 분기)
+- [x] 서울이 맵의 **첫** 항목이어도 첫 번째 (comparator 의 `a === seoul` 분기)
+- [x] 권역 순서 `na → eu → asia → oceania → me` — 홈 `REGIONS` 순서와 동일 (권역 섞인 fixture)
+- [x] 같은 권역 안에서는 `name.ko` 가나다순 (`localeCompare('ko')`) — 뉴욕 < 밴쿠버
+- [x] 서울 고정 + 권역 + 가나다 복합 정렬 (7개 도시 전체 순서)
+- [x] `count` = 해당 도시 `sources[]` 길이 (서울 4 / 밴쿠버 6) — 도시 안에서는 중복 제거 없음
+- [x] 출처 0개 도시는 결과에서 제외
+- [x] 데이터 미로드 (빈 맵) → 빈 배열 (**에러 아님** — 부팅 중/시드 fallback 정상 상태)
+
+**`countUniqueSources`:**
+
+- [x] 서로 다른 도시가 같은 `(name, url)` 을 쓰면 1개 (실데이터에 20개 도시가 공유하는 출처가 있다)
+- [x] 이름이 같고 url 이 다르면 2개
+- [x] url 이 같고 이름이 다르면 2개 — **키는 `(name, url)` 쌍이지 url 단독이 아니다** (실측: unique url 72 vs unique (name,url) 75)
+- [x] 중복이 없으면 전체 엔트리 수와 일치 (서울 4 + 밴쿠버 6 = 10)
+- [x] 데이터 미로드 (빈 맵) → `0` (에러 아님)
+
+**`getCitySourcesByCategory`:**
+
+- [x] `CATEGORY_ORDER` 순서로 그룹 반환 (rent → food → transport → tuition → tax → visa)
+- [x] 원본 `sources[]` 가 역순이어도 그룹 순서는 `CATEGORY_ORDER` 를 따른다
+- [x] 출처 0개 카테고리는 그룹 자체가 없다 — 서울은 rent/food/transport 3개 그룹만 (`tax` 는 v1.0 전 도시 0개)
+- [x] 한 카테고리에 출처 2개 (서울 food) → 둘 다 **원본 등장 순서**로 포함
+- [x] 원본 `CitySource` 를 가공 없이 그대로 넘긴다 (이름 축약·도메인 추출은 화면 책임)
+- [x] 존재하지 않는 `cityId` → `CityNotFoundError` throw + `code === 'CITY_NOT_FOUND'` (빈 배열로 삼키지 않음 — §20 규약)
+- [x] 출처가 0개인 **존재하는** 도시 → 빈 배열. "미존재" 와 구분된다
+
+> 커버리지: `sources.ts` 100/100/100/100 (`src/lib/**` 임계치 statements 100 / branches 95 / lines 100 / functions 100).
+
+### 9.38 `app/sources/index.tsx` — 데이터 출처 목록 화면 (`/sources`)
+
+ADR-071 / in-app-policy-pages step 3. 설정의 "데이터 출처 보기" 외부 링크를 대체하는 앱 내 화면 (배선 교체는 step 7 — 이 시점에는 테스트로만 도달한다). 정렬·집계는 §9.37 `sources.ts` 가 끝냈고, **본 화면은 재정렬하지 않는다** — 그래서 lib 은 mock (`jest.mock('@/lib')`) 으로 순서를 고정하고, 화면이 그 순서를 그대로 그리는지만 본다. `expo-router` 는 `useRouter` 만 mock.
+
+**목록 렌더:**
+
+- [x] `getCitySourceGroups()` 가 준 순서 그대로 렌더 — `source-city-{seoul, newyork, vancouver}` (서울이 첫 행)
+- [x] 각 행에 도시 한국어 이름 + 출처 수가 `N개` 형식으로 표시 (4개 / 5개 / 6개)
+- [x] 마지막 행만 bottom border 없음 (`MenuRow` 의 `isLast` 관례)
+
+**네비게이션:**
+
+- [x] 행 탭 → `router.push('/sources/<cityId>')` — 정확한 경로 1회 (step 4 화면 대상)
+- [x] TopBar back 탭 → `router.back()` 1회
+
+**헤더:**
+
+- [x] 부제에 `countUniqueSources()` 실측값이 `출처 N개` 로 표시 (ADR-071 결정 2 — 하드코딩 상수 아님)
+
+**빈 상태:**
+
+- [x] 도시 0개 → `sources-empty` 표시 + `sources-city-list` 미렌더 + 크래시 없음. 헤더는 유지 (silent 빈 화면 금지)
+
+**접근성:**
+
+- [x] 각 행이 `accessibilityRole="button"`
+- [x] `accessibilityLabel` 이 행 의미를 담는다 — `서울 출처 4개 보기`
+
+> 권역 그룹 헤더는 없다 (평평한 목록). 화면 이동은 `presentation: 'modal'` 이 아니라 일반 Stack push — UI_GUIDE §Sheet C 명세와의 의도된 편차 (ADR-071 결정 3).
+
+---
+
+### 9.39 `app/sources/[cityId].tsx` — 도시별 출처 화면 (`/sources/[cityId]`)
+
+ADR-071 / in-app-policy-pages step 4. §9.38 목록에서 도시를 탭하면 push 되는 2단계 드릴다운 (설정 배선은 step 7 — 이 시점에는 테스트로만 도달한다). 카테고리 그룹핑·`CATEGORY_ORDER` 정렬·빈 그룹 제외는 §9.37 `getCitySourcesByCategory` 가 끝냈으므로 lib 은 mock (`jest.mock('@/lib')`) 으로 고정하고, **화면이 받은 그대로 그리는지**만 본다. `Linking` 은 `@/lib/linking` wrapper 만 mock (§5 — RN `Linking` 직접 import 금지). fixture 는 실데이터 모양: 서울 = rent 1 / food **2** / transport 1, 도쿄 = food 1 / tuition 1(장문 이름).
+
+**그룹 렌더:**
+
+- [x] `getCitySourcesByCategory()` 가 준 순서 그대로 — `source-group-{rent, food, transport}`
+- [x] 각 그룹에 `CATEGORY_LABEL` 라벨 (월세·식비·교통) + `CATEGORY_ICON` 아이콘 (`source-icon-{category}`)
+- [x] 한 카테고리에 출처 2개 (서울 food) → `source-item-food-0` / `source-item-food-1` 둘 다 렌더
+- [x] `tax` 그룹 미렌더 — v1.0 출처 0개라 lib 이 빈 그룹을 주지 않는다 (화면 분기 없음)
+
+**출처 카드:**
+
+- [x] 출처 이름·`접속일 YYYY-MM-DD` 를 원문 그대로 표시 (번역·축약 없음 — ADR-070). 같은 접속일 3건은 3건 모두 표시
+- [x] 긴 출처명(`東京大学 · … 공식 국제학생 학비 페이지 (정적 추정치)`)에 `numberOfLines` 미적용 — 말줄임 금지 (UI_GUIDE §디자인 원칙 5)
+
+**외부 링크:**
+
+- [x] "페이지 열기 →" 탭 → `openURL(<해당 출처의 정확한 url>)` 1회
+- [x] `openURL` reject → `Alert.alert('링크 열기 실패', '브라우저를 열 수 없습니다.')` (silent fail 금지 — settings 의 `safeOpenURL` 과 동일 패턴)
+
+**헤더 / 푸터:**
+
+- [x] TopBar 에 도시 한국어명 + `출처 N개` (그룹 합산 실측 = 서울 4개)
+- [x] `source-city-footer` 자동 갱신 정책 안내 렌더 (AUTOMATION.md §9 의 실제 주기 인용)
+- [x] back 탭 → `router.back()` 1회
+
+**에러:**
+
+- [x] 미존재 cityId → `getCitySourcesByCategory` 가 `CityNotFoundError` throw → `source-city-error` (ErrorView) 렌더, `source-city-screen` 미렌더, 크래시 없음
+- [x] ErrorView "돌아가기" 탭 → `router.back()`
+- [x] `cityId` 파라미터 없음 → ErrorView + lib 미호출
+
+---
+
+### 9.40 `src/lib/privacyPolicy.ts` — 개인정보 처리방침 본문 단일 출처
+
+ADR-072 / in-app-policy-pages step 5. 본문 정본(`privacyPolicy.json`)에 타입을 입혀 노출하는 상수 모듈. TS 는 JSON 을 **타입 단언**으로 받으므로 컴파일러가 형태를 검증하지 않는다 — 런타임 불변조건을 본 인벤토리가 지킨다. 렌더 결과 ↔ 생성 문서 일치는 §9-A.11 `gen_privacy_docs.mjs` 담당.
+
+- [x] 섹션이 7개다 (수집·저장 / 외부 서비스 / 분석·추적 / 정확성 고지 / 보호책임자 / 변경 / 문의)
+- [x] 모든 섹션에 비어 있지 않은 `title` 과 최소 1개 `block`
+- [x] `title` 에 섹션 번호(`1.` …)를 하드코딩하지 않는다 — 번호는 렌더 시점에 붙는다
+- [x] 모든 block 이 알려진 `kind` 이고 필수 필드를 갖는다 (`paragraph.text` / `list.items` / `email.label`+`email`)
+- [x] **본문 어디에도 `페르소나` / `유학생` / `취업자` 문자열이 없다** (ADR-067 회귀 방지 — 이 phase 의 핵심 가드)
+- [x] `updatedAt` 이 `YYYY-MM-DD` 형식
+- [x] 모든 `email` 블록의 주소가 `operatorEmail` 과 일치 (연락처 이원화 방지)
+- [x] `appName` / `lead` 비어 있지 않음, `operatorEmail` 에 `@` 포함
+
+> 저장 항목 서술은 `src/store/*.ts` 의 persist 설정 + `src/lib/{data,currency}.ts` 캐시와 일치해야 한다 (법적 문서). 코드로 강제할 수 없는 부분이라 store 를 추가·제거할 때 본문을 함께 점검한다.
+
+---
+
+### 9.41 `app/privacy.tsx` — 개인정보 처리방침 화면 (`/privacy`)
+
+ADR-071·ADR-072 / in-app-policy-pages step 6. 설정의 "개인정보 처리방침 → GitHub Pages HTML" 외부 링크를 대체하는 앱 내 화면 (배선 교체는 step 7 — 이 시점에는 테스트로만 도달한다). 본문은 §9.40 정본(`PRIVACY_POLICY`)이 단일 출처라 화면은 **렌더만** 한다. `Linking` 은 `@/lib/linking` wrapper 만 mock (§5), `expo-router` 는 `useRouter` 만 mock.
+
+**본문 렌더 (실제 정본 기준):**
+
+- [x] 리드 문단(`privacy-lead`)에 `PRIVACY_POLICY.lead` 가 표시
+- [x] 섹션 7개가 `privacy-section-0` … `privacy-section-6` 순서로 렌더
+- [x] 제목에 `1.` ~ `7.` 번호가 순서대로 붙는다 — 번호는 정본 `title` 에 없고 화면이 붙인다
+- [x] `list` 블록 항목 10개 전량 렌더 + 불릿 마커 10개 (개수 단언)
+- [x] `paragraph` 블록도 전문 그대로 렌더
+- [x] 본문 텍스트에 `numberOfLines` 미적용 — 법적 고지라 말줄임·"더 보기" 접기 금지
+- [x] 헤더 부제에 `마지막 갱신 <updatedAt>` 표시
+
+**이메일 링크 (탭 가능한 유일한 요소):**
+
+- [x] `email` 블록 탭 → `openURL('mailto:<operatorEmail>')` 1회 (`privacy-email-<섹션 인덱스>`, 정본 기준 4·6)
+- [x] `accessibilityRole="button"` + `<label> 이메일 보내기` a11y 라벨
+- [x] `openURL` reject → `Alert.alert('링크 열기 실패', '이메일 앱을 찾을 수 없습니다.')` (silent fail 금지)
+
+**하드코딩 가드 (ADR-072 — 이 화면의 핵심 단언):**
+
+- [x] `@/lib` 배럴의 `PRIVACY_POLICY` 를 가짜 정본으로 갈아끼우면 리드·섹션 제목·문단·목록·연락처 라벨·`updatedAt` 이 전부 가짜 값을 따라가고, 실제 정본 문장은 화면에서 사라진다
+- [x] 가짜 정본의 이메일 주소로 `mailto:` 가 열린다 (주소도 하드코딩 아님)
+
+**네비게이션:**
+
+- [x] TopBar back 탭 → `router.back()` 1회
+
+> mock 기법 주석: jest 는 `jest.mock` 팩토리 결과의 프로퍼티를 **값으로 복사**하므로 getter 로 `PRIVACY_POLICY` 를 교체할 수 없다. 정본의 얕은 복사본 객체 하나를 노출하고 테스트가 `Object.assign` 으로 그 내용을 갈아끼운다 (화면이 렌더 시점에 필드를 읽으므로 반영된다).
+>
+> 환율 API 주소 등 이메일 외의 본문 문자열은 링크로 만들지 않는다 (사실 명시일 뿐 실행할 동선이 아님 — ADR-071). 화면 이동은 `presentation: 'modal'` 이 아니라 일반 Stack push (ADR-071 결정 3).
 
 ---
 
@@ -3006,9 +3184,14 @@ afterEach(() => {
 - [x] 각 대학 공식 international tuition 페이지 fetch (reachability check 만)
 - [x] `staticAnnual` 항상 반환 — fetch 실패 시 graceful fallback
 - [x] 워크플로우에서 `--useStatic` 강제 (refresh-tuition.yml, PR #20 review round 7)
-- [x] `SOURCE.name` 한국어 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)
-- [x] `SOURCE.legacyNames` 에 구 영문 출처명 포함 (데이터 중복 방지)
-- [x] 값 변동 0 + 구 출처명 잔존: 이름만 이전 후 재실행은 no-op (ADR-070)
+- [x] `buildSource(cityId).category` = 'tuition'
+- [x] `buildSource(cityId).url` = 해당 도시 registry 첫 대학의 실제 페이지 (밴쿠버·도쿄) (ADR-071)
+- [x] `buildSource(cityId).url` 이 `github.com` 미포함 — 20개 도시 전부 (ADR-071)
+- [x] `buildSource(cityId).name` 한국어 + 도시별 대학명 나열 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)
+- [x] `buildSource` 출처명이 도시별로 다름 (밴쿠버 ≠ 도쿄) + 전 도시 마커 유지
+- [x] `buildSource(cityId).legacyNames` 에 구 한국어명·구 영문명 둘 다 포함 (데이터 중복 방지)
+- [x] `buildSource` registry 미등록 도시 id: 명시적 throw (silent fallback 금지)
+- [x] 값 변동 0 + 구 출처명 잔존: 이름·URL 만 이전 후 재실행은 no-op (ADR-070, ADR-071)
 - [ ] HTML parse — 페이지 구조별 selector (v1.x — 미구현, 현재 all-static)
 - [ ] 학비 단위 (per credit vs per year vs per semester) 정규화 → annual (v1.x — 미구현)
 - [ ] 페이지 구조 변경 시 selector 실패 → errors + 기존값 유지 (v1.x — selector 미도입)
@@ -3023,9 +3206,15 @@ afterEach(() => {
 - [x] 정착 비용 추정 (정적 + 비자료) — VISA_REGISTRY.settlementApprox
 - [x] 페이지 변경 시 graceful fail — fetchedFromPage:false 면 console.info, errors 미추가
 - [x] 워크플로우에서 `--useStatic` 강제 (refresh-visa.yml, PR #20 review round 7)
-- [x] `SOURCE.name` 한국어 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)
-- [x] `SOURCE.legacyNames` 에 구 영문 출처명 포함 (데이터 중복 방지)
-- [x] 값 변동 0 + 구 출처명 잔존: 이름만 이전 후 재실행은 no-op (ADR-070)
+- [x] `VISA_REGISTRY[code].name` 기관 표기 non-empty (11개국)
+- [x] `buildSource(cityId).category` = 'visa'
+- [x] `buildSource(cityId).url` = `VISA_REGISTRY[CITY_TO_COUNTRY[cityId]].url` (밴쿠버·도쿄) (ADR-071)
+- [x] `buildSource(cityId).url` 이 `github.com` 미포함 — 20개 도시 전부 (ADR-071)
+- [x] `buildSource(cityId).name` 한국어 + 기관 고유명 + "정적 추정치" 마커 (ADR-070, AUTOMATION.md §8)
+- [x] `buildSource` 출처명이 도시별로 다름 (밴쿠버 ≠ 도쿄) + 같은 국가는 동일 (도쿄 = 오사카)
+- [x] `buildSource(cityId).legacyNames` 에 구 한국어명·구 영문명 둘 다 포함 (데이터 중복 방지)
+- [x] `buildSource` registry 미등록 도시 id: 명시적 throw (silent fallback 금지)
+- [x] 값 변동 0 + 구 출처명 잔존: 이름·URL 만 이전 후 재실행은 no-op (ADR-070, ADR-071)
 - [ ] 정부 페이지 fetch + parse (v1.x — HTML 파싱 미구현, 현재 all-static)
 - [ ] 통화별 처리 (USD vs CAD vs EUR vs JPY 등) — registry 단위 매핑 (v1.x — 동적 파싱 미구현)
 
@@ -3106,6 +3295,26 @@ afterEach(() => {
 - [x] `iterNumericFields` — null 값은 그대로 null 로 yield
 - [ ] CLI 실행: HEAD 부재(첫 commit) 시 outliers=0, exit 0
 - [ ] `GITHUB_OUTPUT` 미설정 환경에서도 stdout summary 만 출력하고 종료
+
+#### `scripts/gen_privacy_docs.mjs`
+
+ADR-072 / in-app-policy-pages step 5. 정본 `src/lib/privacyPolicy.json` → `docs/privacy-policy.html` (스토어 등록 URL) + `docs/PRIVACY.md`. `renderHtml` / `renderMarkdown` 은 파일 시스템을 건드리지 않는 순수 함수라 드리프트 테스트가 그대로 import 한다 (`import.meta` 미사용 — babel-preset-expo 가 트랜스폼하지 않아 jest import 가 깨진다. CLI 진입은 `process.argv[1]` 로 판별).
+
+**드리프트 가드 (CI 강제):**
+
+- [x] `renderHtml(PRIVACY_POLICY)` 가 `docs/privacy-policy.html` 전문과 **정확히 일치**
+- [x] `renderMarkdown(PRIVACY_POLICY)` 가 `docs/PRIVACY.md` 전문과 **정확히 일치**
+- [x] 불일치 시 실패 메시지에 `npm run gen:privacy` 재생성 안내가 담긴다 (jest diff 는 유지)
+
+**렌더 규칙 (최소 fixture — 정본이 바뀌어도 흔들리지 않는다):**
+
+- [x] 섹션 번호를 `1.` 부터 순서대로 붙인다 (HTML `<h2>` / Markdown `##`)
+- [x] `email` 블록 → HTML `<a href="mailto:…">`, Markdown `[주소](mailto:주소)`
+- [x] `paragraph` → `<p>`, `list` → `<ul><li>`
+- [x] 두 출력 모두 "직접 편집 금지 + `npm run gen:privacy`" 표시와 `마지막 갱신: <updatedAt>` 을 담고 **개행 하나로 끝난다** (diff 안정성)
+- [x] 배포된 `<style>` 블록 유지 (`--accent: #fc6011`, `max-width: 720px`) — 리디자인 금지
+
+> 파일 쓰기(`generate()`)는 테스트하지 않는다 — 순수 함수 2개가 전문 일치로 검증되면 남는 것은 `writeFile` 호출뿐이고, 실제 쓰기 결과는 위 드리프트 단언이 커밋된 파일로 확인한다.
 
 ### 9-A.12 정적 데이터 파일
 
@@ -3688,7 +3897,23 @@ it('비교 화면 모든 카드에 a11y label', () => {
 - [ ] 각 도시 각 카테고리 hot 규칙 정확
 - [ ] 출처 링크 외부 브라우저 열림
 
-### 18.7 출시 전 (M6)
+### 18.7 출처·개인정보 화면 (ADR-071)
+
+인앱 화면 3종(`/sources`, `/sources/[cityId]`, `/privacy`). 진입점은 설정 메뉴뿐 — Compare "출처 보기 →" 는 v1.0 비활성이다.
+
+- [ ] 설정 "데이터 출처 보기" 우측 수가 실제 보유 데이터를 반영 (번들 시드만이면 10개 → 새로고침 후 증가)
+- [ ] 탭 → `/sources` 진입: 서울이 맨 위, 이후 북미→유럽→아시아→오세아니아→중동, 권역 안은 가나다 순
+- [ ] 도시 행 탭 → `/sources/[cityId]`: 카테고리 그룹 헤더(아이콘 + 라벨)가 월세→식비→교통→학비→비자/정착 순. 출처가 없는 그룹은 아예 렌더 안 됨 — 세금(tax)은 전 도시, 서울은 학비·비자도 없음
+- [ ] 긴 출처명이 말줄임 없이 여러 줄로 전부 보임 (ADR-070 원문 유지)
+- [ ] "페이지 열기 →" 탭 → 외부 브라우저가 **해당 기관 공식 페이지**로 열림 (github.com 아님 — ADR-071 결정 4)
+- [ ] 상단 ← / iOS swipe-back: 도시별 출처 → 출처 목록 → 설정 순으로 복귀 (모달 swipe-down dismiss 아님)
+- [ ] 비행기 모드에서도 두 출처 화면이 정상 렌더 (외부 링크만 실패 → "링크 열기 실패" Alert)
+- [ ] 설정 "개인정보 처리방침" 탭 → **앱을 벗어나지 않고** `/privacy` 화면이 열림
+- [ ] `/privacy`: 섹션 번호 1.~7. 순서대로, 부제 `마지막 갱신 YYYY-MM-DD` 가 `docs/privacy-policy.html` 라이브 페이지와 동일
+- [ ] `/privacy` 이메일 블록 탭 → 메일 앱 컴포저 (실패 시 "링크 열기 실패" Alert). 그 외 본문은 탭 반응 없음
+- [ ] `/privacy` 본문에 "페르소나 / 유학생 / 취업자" 문구가 없음 (ADR-067 · ADR-072)
+
+### 18.8 출시 전 (M6)
 
 - [ ] 5명 이상 베타 테스터 24h 사용 후 크래시 0
 - [ ] TestFlight / Internal Play 설치 정상
@@ -3760,11 +3985,16 @@ it('비교 화면 모든 카드에 a11y label', () => {
 
 - [x] `overview` — 데이터 최신화 카드/통계/메뉴 4종/푸터 (persona-removal step 8; 버전 'v1.0.0' rightText 는 접근성 미노출 → menu-app-info 로 검증)
 - [x] `data-refresh` — 새로고침 → '갱신 실패' 미노출(네트워크 의존)
-- [x] `external-links` — 개인정보 링크 탭 → 외부 이탈 후 launchApp 은 홈으로 복귀(브라우저 내용은 수동)
+- [x] `external-links` — 설정에 남은 **유일한 외부 링크**인 `menu-feedback`(mailto) 이탈/복귀. ADR-071 로 `menu-privacy`·`menu-sources` 가 인앱 push 로 바뀌면서, `menu-privacy` 를 탭하고 `launchApp` → 홈을 단정하던 이전 판본은 통과하면서도 아무것도 검증하지 않는 false-green 이 되어 재작성했다(2026-09-07 검증 세션). 인앱 화면 검증은 08-sources-privacy 담당
 
 **07-visual-a11y**
 
-- [x] `screenshots` — 온보딩/홈/Compare/상세/시트/설정 7컷 캡처(시각 수동 리뷰; takeScreenshot 직후 탭은 조건부 재탭 가드)
+- [x] `screenshots` — 온보딩/홈/Compare/상세/시트/설정 + 출처 목록/도시별 출처/처리방침 **10컷** 캡처(시각 수동 리뷰; takeScreenshot 직후 탭은 조건부 재탭 가드). 08~10 컷은 ADR-071 신규 화면 — 도시는 밴쿠버를 골라 학비·비자 출처가 렌더되는지 함께 본다
+
+**08-sources-privacy** (ADR-071 신규 화면)
+
+- [x] `sources-drilldown` — 설정 → `/sources` → `/sources/seoul` 2단계 드릴다운. 그룹·아이콘·출처 카드·갱신 주기 푸터 + **back 으로 목록 → 설정 단계별 복귀**(일반 Stack push 임을 검증 — modal 이면 목록을 건너뛰고 설정으로 떨어진다). 앵커 도시를 서울로 고정: 서울의 rent/food/transport 구성은 번들 시드와 원격 전량 데이터가 동일한 반면, 밴쿠버는 시드에만 `tax` 출처가 있어 그룹 존재 여부가 데이터 출처에 따라 갈린다
+- [x] `privacy-page` — 설정 → `/privacy`. 섹션 7개·화면이 부여하는 번호(1.~7.)·`privacy-email-6`·`마지막 갱신 \d{4}-\d{2}-\d{2}`. **정본 문구를 flow 에 복사하지 않는다** — 방침 개정마다 flow 가 깨지고 그건 이 화면의 검증 대상이 아니다. 이메일 블록은 존재만 확인하고 탭하지 않는다(mailto 외부 전환이 후속 flow 를 오염시킴)
 
 ---
 

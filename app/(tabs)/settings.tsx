@@ -8,7 +8,9 @@
  * - Menu list: MenuRow 4개 (출처 / 피드백 / 개인정보 / 앱 정보 dim)
  * - Footer: Made with ♥ in Seoul · 2026
  *
- * 외부 링크는 모두 Linking.openURL 경유. 데이터 새로고침은 refreshCache (내부에서 refreshFx 포함).
+ * 출처·개인정보 메뉴는 앱 내부 화면(`/sources`, `/privacy`)으로 push 한다 (ADR-071 —
+ * 기존 GitHub 마크다운 / GitHub Pages 외부 링크 대체). 앱 밖으로 나가는 것은 피드백
+ * mailto 뿐이며 Linking.openURL 경유. 데이터 새로고침은 refreshCache (내부에서 refreshFx 포함).
  */
 
 import * as React from 'react';
@@ -17,12 +19,13 @@ import { Alert, Pressable, View } from 'react-native';
 
 // eslint-disable-next-line import/no-named-as-default
 import Constants from 'expo-constants';
+import { useRouter } from 'expo-router';
 
 import { Icon } from '@/components/Icon';
 import { MenuRow } from '@/components/MenuRow';
 import { Screen } from '@/components/Screen';
 import { H1, H3, Tiny } from '@/components/typography/Text';
-import { DATA_SOURCES_COUNT, formatShortDate, getAllCities, refreshCache } from '@/lib';
+import { countUniqueSources, formatShortDate, getAllCities, refreshCache } from '@/lib';
 import { openURL } from '@/lib/linking';
 import { useFavoritesStore } from '@/store/favorites';
 import { useRecentStore } from '@/store/recent';
@@ -30,16 +33,12 @@ import { useSettingsStore } from '@/store/settings';
 import { colors } from '@/theme/tokens';
 
 const APP_VERSION = Constants.expoConfig?.version ?? '1.0.0';
-// DATA_SOURCES_COUNT 는 `src/lib/dataSources.ts` 단일 출처 (docs/DATA_SOURCES.md 마커와
-// 테스트가 동기화 강제). 개인정보 처리방침은 출시용 정본 GitHub Pages HTML — 스토어 등록
-// URL 과 동일 (RELEASE.md §7: privacy-policy.html 이 실제 노출 본문 단일 출처).
-const PRIVACY_POLICY_URL = 'https://laegel123.github.io/overseas-cost-app/privacy-policy.html';
-const DATA_SOURCES_URL = 'https://github.com/laegel123/overseas-cost-app/blob/main/docs/DATA_SOURCES.md';
 const FEEDBACK_EMAIL = 'laegel1@gmail.com';
 
 type RefreshState = 'idle' | 'loading' | 'error';
 
 export default function SettingsScreen(): React.ReactElement {
+  const router = useRouter();
   const favoriteIds = useFavoritesStore((s) => s.cityIds);
   const recentIds = useRecentStore((s) => s.cityIds);
   const lastSync = useSettingsStore((s) => s.lastSync);
@@ -52,6 +51,11 @@ export default function SettingsScreen(): React.ReactElement {
   // lastSync 를 dep 으로 명시하고 경고를 의도적으로 무시.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const citiesCount = React.useMemo(() => Object.keys(getAllCities()).length, [lastSync]);
+
+  // 출처 수도 같은 외부 상태(citiesInMemory)에서 나오는 런타임 실측값이라 citiesCount 와
+  // 동일한 방식으로 lastSync 에 물린다 (ADR-071 결정 2 — 출처 유형 총수 큐레이션 상수 대체).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const sourceCount = React.useMemo(() => countUniqueSources(), [lastSync]);
 
   const handleRefresh = React.useCallback(async () => {
     setRefreshState('loading');
@@ -73,8 +77,8 @@ export default function SettingsScreen(): React.ReactElement {
   }, []);
 
   const handleDataSources = React.useCallback(() => {
-    void safeOpenURL(DATA_SOURCES_URL, '브라우저를 열 수 없습니다.');
-  }, [safeOpenURL]);
+    router.push('/sources');
+  }, [router]);
 
   const handleFeedback = React.useCallback(() => {
     const subject = encodeURIComponent('살까말까 피드백');
@@ -85,8 +89,8 @@ export default function SettingsScreen(): React.ReactElement {
   }, [safeOpenURL]);
 
   const handlePrivacy = React.useCallback(() => {
-    void safeOpenURL(PRIVACY_POLICY_URL, '브라우저를 열 수 없습니다.');
-  }, [safeOpenURL]);
+    router.push('/privacy');
+  }, [router]);
 
   const formatLastSync = React.useCallback((): string => {
     if (refreshState === 'loading') return '갱신 중...';
@@ -164,7 +168,7 @@ export default function SettingsScreen(): React.ReactElement {
         <MenuRow
           icon="book"
           label="데이터 출처 보기"
-          rightText={`${DATA_SOURCES_COUNT}개`}
+          rightText={`${sourceCount}개`}
           onPress={handleDataSources}
           testID="menu-sources"
         />

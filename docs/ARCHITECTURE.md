@@ -14,7 +14,11 @@ overseas-cost-app/
 │   │   ├── index.tsx             # 홈
 │   │   └── settings.tsx          # 설정
 │   ├── compare/[cityId].tsx      # 비교 화면 (서울 vs 도시)
-│   └── detail/[cityId]/[category].tsx  # 항목 상세 (식비, 월세, ...)
+│   ├── detail/[cityId]/[category].tsx  # 항목 상세 (식비, 월세, ...)
+│   ├── sources/                  # 데이터 출처 (ADR-071)
+│   │   ├── index.tsx             # 도시 목록
+│   │   └── [cityId].tsx          # 도시별 출처 (카테고리 그룹)
+│   └── privacy.tsx               # 개인정보 처리방침 (ADR-071 / ADR-072)
 │
 ├── src/
 │   ├── components/               # 재사용 UI 컴포넌트
@@ -43,7 +47,10 @@ overseas-cost-app/
 │   │   ├── data.ts               # 도시 JSON fetch + 24h TTL 캐시
 │   │   ├── currency.ts           # 환율 fetch + KRW 변환
 │   │   ├── format.ts             # 만/천 단위, 배수 포매팅, 날짜
-│   │   └── compare.ts            # 카테고리 비교, 월 합계 계산 (PRD 부록 C)
+│   │   ├── compare.ts            # 카테고리 비교, 월 합계 계산 (PRD 부록 C)
+│   │   ├── categoryMeta.ts       # 카테고리 라벨·아이콘·순서 단일 출처 (ADR-071)
+│   │   ├── sources.ts            # 출처 집계 — /sources 화면용 (ADR-071)
+│   │   └── privacyPolicy.ts      # 처리방침 본문 정본 (+ privacyPolicy.json, ADR-072)
 │   │
 │   ├── types/                    # TypeScript 타입
 │   │   ├── city.ts               # City, CityCostData, CategoryComparison, ItemComparison, ExchangeRates
@@ -93,6 +100,9 @@ overseas-cost-app/
 /(tabs)/settings                # 설정
 /compare/[cityId]               # 비교 (서울 vs city)
 /detail/[cityId]/[category]     # 항목 상세 (food | rent | transport | tuition | tax | visa)
+/sources                        # 데이터 출처 — 도시 목록
+/sources/[cityId]               # 도시별 출처 (카테고리 그룹)
+/privacy                        # 개인정보 처리방침
 ```
 
 - 즐겨찾기·비교 탭은 v1.0 에서 **홈을 재사용**한다(필터 전환만). 별도 화면 추가는 v2 이후.
@@ -275,7 +285,7 @@ export class AppError extends Error {
 | `FxTimeoutError`            | `FX_TIMEOUT`             | currency.ts (10초 초과)                      | 동일                            |
 | `CityParseError`            | `CITY_PARSE_FAILED`      | data.ts (JSON 파싱 실패)                     | 시드 fallback + ErrorView       |
 | `CitySchemaError`           | `CITY_SCHEMA_INVALID`    | data.ts (validateCity 실패)                  | 동일                            |
-| `CityNotFoundError`         | `CITY_NOT_FOUND`         | data.ts (HTTP 404)                           | 시드 fallback 시도              |
+| `CityNotFoundError`         | `CITY_NOT_FOUND`         | data.ts (HTTP 404), sources.ts (미존재 도시) | 시드 fallback 시도 / ErrorView  |
 | `CityFetchError`            | `CITY_FETCH_FAILED`      | data.ts (HTTP 5xx, 네트워크)                 | 동일                            |
 | `CityTimeoutError`          | `CITY_TIMEOUT`           | data.ts (10초 초과)                          | 동일                            |
 | `AllCitiesUnavailableError` | `ALL_CITIES_UNAVAILABLE` | data.ts (모든 도시 fetch 실패)               | 전체 ErrorView + 다시 시도      |
@@ -305,7 +315,7 @@ export class AppError extends Error {
 
 ## 라우팅 디테일
 
-- Expo Router 의 `Stack` + `Tabs` 조합. 깊이 2단계 이상 push 시 `Stack.Screen` 의 `presentation: 'modal'` 옵션 활용 (예: 출처 보기 화면).
+- Expo Router 의 `Stack` + `Tabs` 조합. **v1.0 은 `presentation: 'modal'` 을 쓰지 않는다** — 깊이와 무관하게 전부 일반 push 다. 출처 화면(`/sources` → `/sources/[cityId]`)도 2단계 드릴다운이지만 compare/detail 과 같은 push 로 통일했다 (ADR-071 결정 3; `docs/UI_GUIDE.md` §Sheet C 의 full-screen modal 명세는 미구현으로 편차표에 기록).
 - Deep link: v1.0 미지원. `app.json` 의 `scheme` 만 예약 (`overseascost://`). 실 처리 v1.x 결정.
 
 ### 하단 탭 동작 정책
@@ -330,6 +340,9 @@ export class AppError extends Error {
 | Compare                     | 홈으로 (또는 이전 도시 비교) | 활성           |
 | Detail                      | Compare 로                   | 활성           |
 | 설정                        | 홈으로                       | 활성           |
+| 출처 목록 (`/sources`)      | 설정으로                     | 활성           |
+| 도시별 출처 (`/sources/[cityId]`) | 출처 목록으로          | 활성           |
+| 개인정보 (`/privacy`)       | 설정으로                     | 활성           |
 | 시트 (학비/연봉 선택 등)    | 시트 dismiss (스택 영향 X)   | swipe-down     |
 
 즐겨찾기 토글 후 뒤로 → 홈: 스토어 기반이라 자연스럽게 반영.
