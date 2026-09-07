@@ -2605,6 +2605,41 @@ ADR-071 / in-app-policy-pages step 3. 설정의 "데이터 출처 보기" 외부
 
 ---
 
+### 9.39 `app/sources/[cityId].tsx` — 도시별 출처 화면 (`/sources/[cityId]`)
+
+ADR-071 / in-app-policy-pages step 4. §9.38 목록에서 도시를 탭하면 push 되는 2단계 드릴다운 (설정 배선은 step 7 — 이 시점에는 테스트로만 도달한다). 카테고리 그룹핑·`CATEGORY_ORDER` 정렬·빈 그룹 제외는 §9.37 `getCitySourcesByCategory` 가 끝냈으므로 lib 은 mock (`jest.mock('@/lib')`) 으로 고정하고, **화면이 받은 그대로 그리는지**만 본다. `Linking` 은 `@/lib/linking` wrapper 만 mock (§5 — RN `Linking` 직접 import 금지). fixture 는 실데이터 모양: 서울 = rent 1 / food **2** / transport 1, 도쿄 = food 1 / tuition 1(장문 이름).
+
+**그룹 렌더:**
+
+- [x] `getCitySourcesByCategory()` 가 준 순서 그대로 — `source-group-{rent, food, transport}`
+- [x] 각 그룹에 `CATEGORY_LABEL` 라벨 (월세·식비·교통) + `CATEGORY_ICON` 아이콘 (`source-icon-{category}`)
+- [x] 한 카테고리에 출처 2개 (서울 food) → `source-item-food-0` / `source-item-food-1` 둘 다 렌더
+- [x] `tax` 그룹 미렌더 — v1.0 출처 0개라 lib 이 빈 그룹을 주지 않는다 (화면 분기 없음)
+
+**출처 카드:**
+
+- [x] 출처 이름·`접속일 YYYY-MM-DD` 를 원문 그대로 표시 (번역·축약 없음 — ADR-070). 같은 접속일 3건은 3건 모두 표시
+- [x] 긴 출처명(`東京大学 · … 공식 국제학생 학비 페이지 (정적 추정치)`)에 `numberOfLines` 미적용 — 말줄임 금지 (UI_GUIDE §디자인 원칙 5)
+
+**외부 링크:**
+
+- [x] "페이지 열기 →" 탭 → `openURL(<해당 출처의 정확한 url>)` 1회
+- [x] `openURL` reject → `Alert.alert('링크 열기 실패', '브라우저를 열 수 없습니다.')` (silent fail 금지 — settings 의 `safeOpenURL` 과 동일 패턴)
+
+**헤더 / 푸터:**
+
+- [x] TopBar 에 도시 한국어명 + `출처 N개` (그룹 합산 실측 = 서울 4개)
+- [x] `source-city-footer` 자동 갱신 정책 안내 렌더 (AUTOMATION.md §9 의 실제 주기 인용)
+- [x] back 탭 → `router.back()` 1회
+
+**에러:**
+
+- [x] 미존재 cityId → `getCitySourcesByCategory` 가 `CityNotFoundError` throw → `source-city-error` (ErrorView) 렌더, `source-city-screen` 미렌더, 크래시 없음
+- [x] ErrorView "돌아가기" 탭 → `router.back()`
+- [x] `cityId` 파라미터 없음 → ErrorView + lib 미호출
+
+---
+
 ## 9-A. 자동화 스크립트 (scripts/refresh/_ + scripts/build/_)
 
 ADR-032 / AUTOMATION.md 의 자동화 인프라에 대응하는 테스트 인벤토리. 모든 fetch 는 모킹 (`jest.spyOn(global, 'fetch')`), 시간은 `jest.setSystemTime`, 파일 시스템은 `tmp` 디렉터리 또는 `memfs` 모킹.
