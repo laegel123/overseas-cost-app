@@ -120,6 +120,7 @@ export type CityCostData = {
 | Compare 푸터 | `출처 N개 · 갱신 YYYY-MM-DD` | "출처 보기 →" 는 **비활성** (`disabled`, gray-2, 접근성 라벨 `출처 보기 (준비 중)`) — ADR-071 결정 3 으로 v1.0 에서 그대로 둠 |
 | Detail 푸터 | `출처 N개` + 해당 카테고리 출처 인라인 목록 | 링크 없는 텍스트 목록 |
 | 설정 → 데이터 출처 보기 | 런타임 실측 unique `(name, url)` 출처 수 | **실제 도달 경로.** 앱 내부 화면 `/sources`(도시 목록) → `/sources/[cityId]`(카테고리 그룹 + 출처별 "페이지 열기 →" 외부 링크) — ADR-071 |
+| 출처 화면 /sources 푸터 | Rates By Exchange Rate API 링크 | exchangerate-api.com — 무료 endpoint 약관의 필수 표기 (ADR-076) |
 
 출처명 언어 정책 (ADR-070): 기관·데이터셋 고유명은 **원어 유지**, refresh 스크립트가 짓는 서술형 출처명은 **한국어**. 정적 추정치 caveat 는 "정적 추정치" 마커로 표기한다 (AUTOMATION.md §8). 출처명을 바꿀 때는 `SOURCE.legacyNames` 에 구 이름을 선언해야 항목이 중복되지 않는다.
 

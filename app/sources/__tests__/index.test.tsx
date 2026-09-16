@@ -3,17 +3,23 @@
  *
  * 정렬·집계는 `src/lib/sources.ts` 책임이라 여기서는 mock 으로 고정한 순서가
  * 그대로 렌더되는지만 본다 (화면이 재정렬하지 않는다는 것이 검증 대상).
+ *
+ * 푸터의 ER-API 링크(ADR-076)는 약관 필수 표기라 문구를 정확 일치로 검증한다.
+ * `Linking` 은 `@/lib/linking` wrapper 만 mock (§5 — RN `Linking` 직접 import 금지).
  */
 
 import * as React from 'react';
 
-import { fireEvent, render } from '@testing-library/react-native';
+import { Alert } from 'react-native';
+
+import { act, fireEvent, render } from '@testing-library/react-native';
 
 import {
   countUniqueSources as mockCountUniqueSources,
   getCitySourceGroups as mockGetCitySourceGroups,
 } from '@/lib';
 import type { CitySourceGroup } from '@/lib';
+import { openURL as mockOpenURL } from '@/lib/linking';
 
 import SourcesScreen from '../index';
 
@@ -25,6 +31,10 @@ jest.mock('expo-router', () => ({
     push: mockPush,
     back: mockBack,
   }),
+}));
+
+jest.mock('@/lib/linking', () => ({
+  openURL: jest.fn(() => Promise.resolve(true)),
 }));
 
 jest.mock('@/lib', () => {
@@ -51,6 +61,7 @@ function setupMocks(opts?: { groups?: CitySourceGroup[]; uniqueCount?: number })
 describe('SourcesScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (mockOpenURL as jest.Mock).mockResolvedValue(true);
   });
 
   it('lib 이 준 순서 그대로 렌더한다 (서울이 첫 행)', () => {
@@ -136,5 +147,64 @@ describe('SourcesScreen', () => {
 
     expect(getByTestId('source-city-seoul').props.accessibilityRole).toBe('button');
     expect(getByLabelText('서울 출처 4개 보기')).toBeTruthy();
+  });
+
+  describe('환율 출처 푸터 (ADR-076)', () => {
+    it('링크 텍스트가 약관 원문과 정확히 일치한다 (번역·변형 금지)', () => {
+      setupMocks();
+
+      const { getByTestId, getByText } = render(<SourcesScreen />);
+
+      expect(getByTestId('sources-footer')).toBeTruthy();
+      expect(getByText('환율은 아래 서비스의 무료 API 로 매일 갱신됩니다.')).toBeTruthy();
+      // 문자열 exact match — 번역·"→" 덧붙임이 있으면 실패한다.
+      expect(getByText('Rates By Exchange Rate API')).toBeTruthy();
+    });
+
+    it('탭 → exchangerate-api.com 으로 openURL 호출', () => {
+      setupMocks();
+
+      const { getByTestId } = render(<SourcesScreen />);
+
+      fireEvent.press(getByTestId('fx-attribution-link'));
+
+      expect(mockOpenURL).toHaveBeenCalledTimes(1);
+      expect(mockOpenURL).toHaveBeenCalledWith('https://www.exchangerate-api.com');
+    });
+
+    it('openURL 실패 → Alert 로 알린다 (silent fail 아님)', async () => {
+      setupMocks();
+      (mockOpenURL as jest.Mock).mockRejectedValue(new Error('no browser'));
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+
+      const { getByTestId } = render(<SourcesScreen />);
+
+      fireEvent.press(getByTestId('fx-attribution-link'));
+      // openURL 거절 → catch → Alert 는 전부 마이크로태스크. fake timer 무관.
+      await act(async () => {
+        await Promise.resolve();
+      });
+
+      expect(alertSpy).toHaveBeenCalledWith('링크 열기 실패', '브라우저를 열 수 없습니다.');
+      alertSpy.mockRestore();
+    });
+
+    it('도시 0개(빈 상태)에서도 링크가 보인다 (1차 소스는 언제나 ER-API)', () => {
+      setupMocks({ groups: [], uniqueCount: 0 });
+
+      const { getByTestId } = render(<SourcesScreen />);
+
+      expect(getByTestId('sources-empty')).toBeTruthy();
+      expect(getByTestId('fx-attribution-link')).toBeTruthy();
+    });
+
+    it('링크가 link role 과 a11y 라벨을 갖는다', () => {
+      setupMocks();
+
+      const { getByTestId, getByLabelText } = render(<SourcesScreen />);
+
+      expect(getByTestId('fx-attribution-link').props.accessibilityRole).toBe('link');
+      expect(getByLabelText('Exchange Rate API 페이지 열기')).toBeTruthy();
+    });
   });
 });
