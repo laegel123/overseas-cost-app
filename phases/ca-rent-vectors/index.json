@@ -1,0 +1,21 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "ca-rent-vectors",
+  "steps": [
+    {
+      "step": 0,
+      "name": "vectors-remap",
+      "status": "pending"
+    },
+    {
+      "step": 1,
+      "name": "rent-data-refresh",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "refresh-fail-visibility",
+      "status": "pending"
+    }
+  ]
+}

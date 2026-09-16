@@ -68,6 +68,10 @@
       "completed_at": "2026-09-16T14:33:06+0900"
     },
     {
+      "dir": "ca-rent-vectors",
+      "status": "pending"
+    },
+    {
       "dir": "admob-banner-ads",
       "status": "pending"
     }
