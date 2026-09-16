@@ -8,7 +8,7 @@
       "status": "completed",
       "started_at": "2026-09-16T14:46:31+0900",
       "summary": "ca_cmhc 벡터 9개를 ARCHIVED product 36100480(노동생산성)에서 표 34-10-0133-01 Apartment 6+ 벡터(v3824445/633/821 · v3824443/631/819 · v3824429/617/805)로 재매핑 — getSeriesInfoFromVector 로 9/9 자기검증, dryRun 실호출 errors 0·3도시 값 수신(−9.8~−45.4%). ADR-078 신규 + 인덱스 행, 테스트 3건 추가(벡터 정확 일치·v1114266 회귀 차단·9개 고유성) + 기존 fixture 6곳 새 벡터로 갱신, TESTING §9-A.4 인벤토리 3행 추가. 데이터 무변경(step 1 범위).",
-      "completed_at": "2026-09-16T15:20:00+0900"
+      "completed_at": "2026-09-16T14:51:17+0900"
     },
     {
       "step": 1,
