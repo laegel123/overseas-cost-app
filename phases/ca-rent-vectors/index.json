@@ -13,7 +13,10 @@
     {
       "step": 1,
       "name": "rent-data-refresh",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-16T14:51:17+0900",
+      "summary": "ca_cmhc 실호출로 밴쿠버·토론토·몬트리올 rent 를 시드값 → StatCan 표 34-10-0133-01 Apartment 6+ 실값(참조기간 2025-01-01)으로 1회 정상화 — vancouver share/studio/oneBed/twoBed 1203/1850/2100/2800→1085/1669/1809/2367 (−9.8/−9.8/−13.9/−15.5%), toronto 1235/1900/2200/2900→971/1494/1761/2056 (−21.4/−21.4/−20.0/−29.1%), montreal 1105/1700/1950/2500→655/1008/1200/1364 (−40.7/−40.7/−38.5/−45.4%). 세 도시 모두 기준값과 정확히 일치·studio<oneBed<twoBed 성립, 출처명이 legacyNames 기전으로 'Adapted from Statistics Canada, Table 34-10-0133-01 …' 1건으로 자동 이전(구 이름 0건). build_data+validate_cities 통과, 변경 파일 5개(3도시+all.json+seed/all.json)뿐, 재실행 시 updated 0 (멱등). DATA_SOURCES 3개 도시 절에 Apartment 6+·share=studio×0.65 기준 명시, DATA.md §3.1 캐나다 월세 출처 행을 Kijiji→StatCan 표로 정정.",
+      "completed_at": "2026-09-16T14:55:42+0900"
     },
     {
       "step": 2,

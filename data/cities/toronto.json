@@ -7,12 +7,12 @@
   "country": "CA",
   "currency": "CAD",
   "region": "na",
-  "lastUpdated": "2026-09-07",
+  "lastUpdated": "2026-09-16",
   "rent": {
-    "share": 1235,
-    "studio": 1900,
-    "oneBed": 2200,
-    "twoBed": 2900
+    "share": 971,
+    "studio": 1494,
+    "oneBed": 1761,
+    "twoBed": 2056
   },
   "food": {
     "restaurantMeal": 21,
@@ -57,12 +57,6 @@
   },
   "sources": [
     {
-      "category": "rent",
-      "name": "CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)",
-      "url": "https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market",
-      "accessedAt": "2026-05-02"
-    },
-    {
       "category": "food",
       "name": "Statistics Canada CPI (static fallback, ADR-059)",
       "url": "https://www150.statcan.gc.ca/",
@@ -85,6 +79,12 @@
       "name": "캐나다 이민·난민·시민권부(IRCC) 공식 비자 수수료 페이지 (정적 추정치)",
       "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/study-canada/study-permit.html",
       "accessedAt": "2026-09-07"
+    },
+    {
+      "category": "rent",
+      "name": "Adapted from Statistics Canada, Table 34-10-0133-01 (CMHC 평균 월세 · share 는 studio×0.65 추정)",
+      "url": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3410013301",
+      "accessedAt": "2026-09-16"
     }
   ]
 }
