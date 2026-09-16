@@ -92,3 +92,4 @@
 | [074](adr/074-refresh-data-regression.md) | 강제 새로고침 데이터 퇴행 방지 + 시드 = 실데이터 전량 | Active | 캐시 선삭제 제거, 시드 21개 (ADR-045 supersede) |
 | [075](adr/075-hero-basket-sum-wording.md) | Compare hero 문구 정정 — `평균 가정 기준`/`/월` 폐기 | Active | 합계는 항목 단가 합, Detail 과 동일 footer |
 | [076](adr/076-source-attribution-compliance.md) | 출처 표기 의무 보완 — ER-API 링크 · TfL 출처명 정정 · CMHC → StatCan | Active | 표기 의무 3건 해소, 출처명은 `legacyNames` 로 이전 |
+| [078](adr/078-ca-rent-statcan-vectors.md) | 캐나다 3도시 rent 벡터 재매핑 — 표 34-10-0133-01 `Apartment 6+` | Active | 구 벡터는 ARCHIVED 노동생산성 표, 도입 이래 무동작 |

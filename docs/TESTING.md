@@ -2920,6 +2920,9 @@ afterEach(() => {
 - [x] `SOURCE.url` 이 `cmhc-schl.gc.ca` 미포함 (상업 파생물 금지 포털 약관 회피) + `SOURCE.name` 에 `ADR-` 미포함
 - [x] `SOURCE.legacyNames` 에 구 출처명 포함 (데이터 중복 방지)
 - [x] 값 변동 0 + 구 출처명 잔존: 이름·URL 만 이전 후 재실행은 no-op (ADR-070, ADR-076)
+- [x] `CITY_CONFIGS` 벡터 9개가 표 34-10-0133-01 `Apartment 6+` 벡터와 정확 일치 (ADR-078)
+- [x] 폐기 벡터 접두사 `v1114266` (ARCHIVED 노동생산성 표) 이 `CITY_CONFIGS` 에 부재 — 회귀 차단
+- [x] 벡터 9개 전부 고유 — 도시·unit 간 중복 매핑 없음
 
 #### `ca_statcan.mjs` (StatCan WDS API)
 
