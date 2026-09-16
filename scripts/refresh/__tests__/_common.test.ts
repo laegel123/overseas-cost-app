@@ -23,7 +23,9 @@ import {
   redactErrorMessage,
   createCitySeed,
   hasLegacySourceName,
+  isTotalFailure,
 } from '../_common.mjs';
+import type { RefreshError, RefreshResult } from './_test-types';
 
 setupTestEnv();
 
@@ -536,5 +538,58 @@ describe('createCitySeed', () => {
     expect(seed.food.restaurantMeal).toBe(0);
     expect(seed.transport.monthlyPass).toBe(0);
     expect(seed.sources).toEqual([]);
+  });
+});
+
+describe('isTotalFailure (ADR-078)', () => {
+  const base: RefreshResult = {
+    source: 'ca_cmhc',
+    cities: [],
+    fields: [],
+    changes: [],
+    errors: [],
+  };
+  const noRentData = (cityId: string): RefreshError => ({
+    cityId,
+    reason: 'No rent data found in StatCan response',
+  });
+
+  it('갱신 0 + 에러 3건 → true (ca_cmhc 벡터 결함의 실제 형태)', () => {
+    const result: RefreshResult = {
+      ...base,
+      errors: [noRentData('vancouver'), noRentData('toronto'), noRentData('montreal')],
+    };
+    expect(isTotalFailure(result)).toBe(true);
+  });
+
+  it('갱신 0 + 에러 0건 → false (평상시 무변동 — 모든 cron 이 빨간불이 되면 안 됨)', () => {
+    expect(isTotalFailure(base)).toBe(false);
+  });
+
+  it('갱신 2 + 에러 1건 → false (부분 실패는 기존 정책대로 exit 0)', () => {
+    const result: RefreshResult = {
+      ...base,
+      cities: ['vancouver', 'toronto'],
+      errors: [noRentData('montreal')],
+    };
+    expect(isTotalFailure(result)).toBe(false);
+  });
+
+  it('갱신 0 + 에러 1건 → true (경계)', () => {
+    expect(isTotalFailure({ ...base, errors: [noRentData('montreal')] })).toBe(true);
+  });
+
+  it('undefined / null / {} / cities 가 배열이 아닌 값 → false (판정 불가를 실패로 단정 안 함)', () => {
+    expect(isTotalFailure(undefined)).toBe(false);
+    expect(isTotalFailure(null)).toBe(false);
+    expect(isTotalFailure({} as unknown as RefreshResult)).toBe(false);
+    expect(isTotalFailure({ ...base, cities: 'vancouver' as unknown as string[] })).toBe(false);
+    expect(
+      isTotalFailure({
+        ...base,
+        cities: ['vancouver'],
+        errors: undefined as unknown as RefreshError[],
+      }),
+    ).toBe(false);
   });
 });

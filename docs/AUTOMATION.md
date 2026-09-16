@@ -137,6 +137,7 @@ export async function writeCity(id, data, source): Promise<void>; // sources 자
 //  - legacyNames: 이 출처의 구 이름들. upsert 전에 같은 category 의 해당 항목을 제거해
 //    출처명 변경 시 구/신 항목이 중복 누적되는 것을 막는다. 데이터에는 기록되지 않는다.
 export function hasLegacySourceName(sources, source): boolean; // 이름 이전이 남았는지 판정
+export function isTotalFailure(result): boolean; // 갱신 0건 + 에러 1건 이상 = 대상 전부 실패
 
 // _outlier.mjs — classifyChange 는 oldVal/newVal 두 인자를 받아 분기 분류
 export function classifyChange(
@@ -144,6 +145,15 @@ export function classifyChange(
   newVal: number | null,
 ): 'new' | 'commit' | 'pr-update' | 'pr-outlier' | 'pr-removed';
 ```
+
+**종료 코드 규약 (`_run.mjs`):**
+
+- **부분 실패는 exit 0** — 갱신된 도시가 1개 이상이면 나머지 도시의 `errors` 는 경고만 출력하고 0 으로 끝난다. 다른 source 는 영향 없이 진행 (§7.1).
+- **에러 0건은 항상 exit 0** — 값 변동이 없어 `cities` 가 비는 것은 대부분 fetcher 의 평상시 정상 상태다. 이를 실패로 보면 모든 refresh 워크플로우가 빨간불이 된다.
+- **대상 전부 실패(갱신 0건 + 에러 1건 이상)는 exit 1** — `_common.mjs` 의 `isTotalFailure(result)` 가 판정하고, `_run.mjs` 가 도시별 `reason` 목록을 출력한 뒤 `process.exit(1)`. 워크플로우 step 이 실패하므로 운영자에게 GitHub 기본 알림이 간다 (§7.3).
+- **throw 는 exit 1** — `MissingApiKeyError` 등 fetcher 가 던진 예외.
+
+전부 실패를 구분하는 이유: `ca_cmhc` 가 잘못된 StatCan 벡터로 3개 도시 **전부** 실패하면서도 `errors` 배열에만 기록해 exit 0 으로 끝났고, 월 1회 cron 이 매번 초록불이라 "도입 이래 한 번도 동작한 적 없는 fetcher" 가 수개월간 보이지 않았다 (ADR-078).
 
 **출처 디스크립터의 두 형태:**
 

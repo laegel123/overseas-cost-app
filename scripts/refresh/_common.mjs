@@ -61,6 +61,29 @@ export function getCityPath(id) {
  * @property {RefreshError[]} errors
  */
 
+/**
+ * refresh 결과가 "대상 전부 실패" 인지 판정한다.
+ *
+ * "일부 도시만 실패" 와 "대상 전부 실패" 를 구분하기 위한 순수 함수 — `_run.mjs` 가 종료 코드를
+ * 가르는 데 쓴다. `ca_cmhc` 가 잘못된 StatCan 벡터로 3개 도시 **전부** 실패하면서도 errors 배열에만
+ * 기록해 exit 0 으로 끝났고, 월 1회 cron 이 매번 초록불이라 결함이 수개월간 보이지 않았다 (ADR-078).
+ *
+ * `_run.mjs` 가 top-level await CLI 라 jest 로 import 할 수 없어 판정 로직만 여기로 분리했다.
+ *
+ * 에러가 0건이면 갱신 0건이어도 실패가 아니다 — 값 변동이 없어 `cities` 가 비는 것은 대부분
+ * fetcher 의 평상시 정상 상태이고, 이를 실패로 보면 모든 refresh 워크플로우가 빨간불이 된다.
+ *
+ * @param {RefreshResult | null | undefined} result
+ * @returns {boolean}
+ */
+export function isTotalFailure(result) {
+  // 형태를 알 수 없는 결과는 판정 불가 — 실패로 단정하지 않는다.
+  if (!result || !Array.isArray(result.cities) || !Array.isArray(result.errors)) {
+    return false;
+  }
+  return result.cities.length === 0 && result.errors.length > 0;
+}
+
 const BACKOFF_BASE_MS = 1000;
 const DEFAULT_MAX_RETRIES = 3;
 const DEFAULT_TIMEOUT_MS = 30000;

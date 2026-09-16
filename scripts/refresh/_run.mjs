@@ -15,9 +15,14 @@
  *   node scripts/refresh/_run.mjs visas --useStatic
  *
  * 종료 코드:
- *   0 = 정상 (errors 가 있어도 부분 갱신 성공으로 간주 — fetcher 책임)
+ *   0 = 정상. **부분** 실패 (갱신 1건 이상 + errors) 도 0 — 나머지 도시는 갱신됐으므로 fetcher 책임.
+ *       errors 가 0건이면 갱신 0건이어도 0 (값 변동 없음 = 대부분 fetcher 의 평상시 정상 상태).
  *   1 = throw 발생 (MissingApiKeyError 등)
+ *   1 = 대상 전부 실패 (갱신 0건 + 에러 1건 이상) — `isTotalFailure` 판정. ca_cmhc 가 3개 도시
+ *       전부 실패하면서도 exit 0 이라 결함이 수개월간 숨어 있었다 (ADR-078).
  */
+
+import { isTotalFailure } from './_common.mjs';
 
 const args = process.argv.slice(2);
 const moduleName = args[0];
@@ -85,11 +90,20 @@ try {
 
   if (errors.length > 0) {
     // 부분 실패는 errors 에 기록되지만 종료 코드 0 — 다른 도시는 정상 갱신됐을 수 있음.
+    // 전부 실패는 아래 isTotalFailure 분기가 exit 1 로 구분한다.
     // schema 위반은 별도 validate_cities.mjs 가 fail-fast.
     console.warn(`[${source}] ${errors.length} error(s):`);
     for (const e of errors) {
       console.warn(`  - ${e.cityId}: ${e.reason}`);
     }
+  }
+
+  // 대상 전부 실패는 부분 실패와 달리 워크플로우를 빨간불로 만든다 (ADR-078).
+  if (isTotalFailure(result)) {
+    console.error(
+      `[${source}] total failure: 0 cities updated with ${errors.length} error(s) — exiting 1`,
+    );
+    process.exit(1);
   }
 } catch (err) {
   console.error(`[${moduleName}] failed: ${err.message}`);
