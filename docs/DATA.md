@@ -89,7 +89,7 @@ export type CityCostData = {
 | 한국   | 통계청 KOSIS                              | 식료품 평균 가격, 임차 시세 |
 | 한국   | 부동산플랫폼 (직방·다방 공개 통계)        | 원룸·셰어 시세              |
 | 캐나다 | Statistics Canada                         | CPI, 물가                   |
-| 캐나다 | Kijiji 평균                               | 단기 월세 시세              |
+| 캐나다 | StatCan 표 34-10-0133-01 (CMHC 월세)      | 임차료 (Apartment 6+ 평균)  |
 | 미국   | US BLS CPI                                | 물가                        |
 | 미국   | Zillow                                    | 월세                        |
 | 영국   | Office for National Statistics            | 물가                        |

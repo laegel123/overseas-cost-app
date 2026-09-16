@@ -39,19 +39,19 @@ afterEach(() => {
 const VALID_STATCAN_RESPONSE = [
   {
     object: {
-      vectorId: 111426660,
+      vectorId: 3824445,
       vectorDataPoint: [{ value: '1850.0' }],
     },
   },
   {
     object: {
-      vectorId: 111426661,
+      vectorId: 3824633,
       vectorDataPoint: [{ value: '2100.0' }],
     },
   },
   {
     object: {
-      vectorId: 111426662,
+      vectorId: 3824821,
       vectorDataPoint: [{ value: '2800.0' }],
     },
   },
@@ -60,9 +60,9 @@ const VALID_STATCAN_RESPONSE = [
 describe('parseStatCanResponse', () => {
   it('정상 응답 파싱: vector ID → 값 매핑', () => {
     const result = parseStatCanResponse(VALID_STATCAN_RESPONSE);
-    expect(result.get('v111426660')).toBe(1850);
-    expect(result.get('v111426661')).toBe(2100);
-    expect(result.get('v111426662')).toBe(2800);
+    expect(result.get('v3824445')).toBe(1850);
+    expect(result.get('v3824633')).toBe(2100);
+    expect(result.get('v3824821')).toBe(2800);
   });
 
   it('빈 배열: 빈 Map 반환', () => {
@@ -118,9 +118,9 @@ describe('parseStatCanResponse', () => {
 describe('mapToRent', () => {
   it('정상 매핑: bachelor → studio, share = studio × 0.65', () => {
     const vectorData = new Map([
-      ['v111426660', 1850],
-      ['v111426661', 2100],
-      ['v111426662', 2800],
+      ['v3824445', 1850],
+      ['v3824633', 2100],
+      ['v3824821', 2800],
     ]);
     const vectors = CITY_CONFIGS.vancouver.vectors;
 
@@ -145,7 +145,7 @@ describe('mapToRent', () => {
   });
 
   it('일부 데이터만 있는 경우', () => {
-    const vectorData = new Map([['v111426660', 1500]]);
+    const vectorData = new Map([['v3824445', 1500]]);
     const vectors = CITY_CONFIGS.vancouver.vectors;
 
     const result = mapToRent(vectorData, vectors);
@@ -177,6 +177,34 @@ describe('constants', () => {
       expect(config.vectors.oneBed).toBeDefined();
       expect(config.vectors.twoBed).toBeDefined();
     }
+  });
+
+  it('CITY_CONFIGS: 표 34-10-0133-01 의 Apartment 6+ 벡터와 정확 일치 (ADR-078)', () => {
+    expect(CITY_CONFIGS.vancouver.vectors.bachelor).toBe('v3824445');
+    expect(CITY_CONFIGS.vancouver.vectors.oneBed).toBe('v3824633');
+    expect(CITY_CONFIGS.vancouver.vectors.twoBed).toBe('v3824821');
+
+    expect(CITY_CONFIGS.toronto.vectors.bachelor).toBe('v3824443');
+    expect(CITY_CONFIGS.toronto.vectors.oneBed).toBe('v3824631');
+    expect(CITY_CONFIGS.toronto.vectors.twoBed).toBe('v3824819');
+
+    expect(CITY_CONFIGS.montreal.vectors.bachelor).toBe('v3824429');
+    expect(CITY_CONFIGS.montreal.vectors.oneBed).toBe('v3824617');
+    expect(CITY_CONFIGS.montreal.vectors.twoBed).toBe('v3824805');
+  });
+
+  it('폐기 벡터 미사용: v1114266* 는 ARCHIVED 노동생산성 표를 가리킨다 (ADR-078)', () => {
+    for (const config of Object.values(CITY_CONFIGS)) {
+      for (const vector of Object.values(config.vectors)) {
+        expect(vector.startsWith('v1114266')).toBe(false);
+      }
+    }
+  });
+
+  it('벡터 9개 전부 고유 — 도시·unit 간 중복 매핑 없음', () => {
+    const all = Object.values(CITY_CONFIGS).flatMap((c) => Object.values(c.vectors));
+    expect(all).toHaveLength(9);
+    expect(new Set(all).size).toBe(9);
   });
 
   it('SOURCE 정의: StatCan Open Licence 인용 형식 (ADR-076)', () => {

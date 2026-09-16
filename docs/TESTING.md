@@ -2807,6 +2807,16 @@ afterEach(() => {
 - [x] category 가 다르면 false
 - [x] `legacyNames` 미지정 / `sources` undefined → false
 
+#### `isTotalFailure(result): boolean` (ADR-078)
+
+"대상 전부 실패" 판정 — `_run.mjs` 가 종료 코드를 가르는 데 쓰는 순수 함수. `_run.mjs` 는 top-level await CLI 라 jest 로 import 할 수 없어 판정 로직만 `_common.mjs` 로 분리했다.
+
+- [x] 갱신 0 + 에러 3건 → `true` (ca_cmhc 벡터 결함의 실제 형태)
+- [x] 갱신 0 + 에러 0건 → `false` (평상시 무변동 — 실패로 보면 refresh cron 이 전부 빨간불)
+- [x] 갱신 2 + 에러 1건 → `false` (부분 실패는 기존 정책대로 exit 0)
+- [x] 갱신 0 + 에러 1건 → `true` (경계)
+- [x] `undefined` / `null` / `{}` / `cities`·`errors` 가 배열이 아닌 값 → `false` (판정 불가를 실패로 단정하지 않음)
+
 #### `classifyChange(oldVal, newVal)` (in `_outlier.mjs`)
 
 - [x] `(null, null)` → `'commit'`
@@ -2920,6 +2930,9 @@ afterEach(() => {
 - [x] `SOURCE.url` 이 `cmhc-schl.gc.ca` 미포함 (상업 파생물 금지 포털 약관 회피) + `SOURCE.name` 에 `ADR-` 미포함
 - [x] `SOURCE.legacyNames` 에 구 출처명 포함 (데이터 중복 방지)
 - [x] 값 변동 0 + 구 출처명 잔존: 이름·URL 만 이전 후 재실행은 no-op (ADR-070, ADR-076)
+- [x] `CITY_CONFIGS` 벡터 9개가 표 34-10-0133-01 `Apartment 6+` 벡터와 정확 일치 (ADR-078)
+- [x] 폐기 벡터 접두사 `v1114266` (ARCHIVED 노동생산성 표) 이 `CITY_CONFIGS` 에 부재 — 회귀 차단
+- [x] 벡터 9개 전부 고유 — 도시·unit 간 중복 매핑 없음
 
 #### `ca_statcan.mjs` (StatCan WDS API)
 

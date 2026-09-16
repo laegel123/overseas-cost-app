@@ -7,8 +7,11 @@
  * 출처: Statistics Canada Table 34-10-0133-01 (CMHC RMS 원자료를 StatCan WDS 로 수신 — ADR-076)
  * API 키 불필요 (정부 공개 데이터).
  *
- * 방법: 도시별 CMA 평균 임대료 by # bedrooms
- * Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정
+ * 방법: 도시별 CMA 의 6세대 이상 아파트(`Apartment structures of six units and over`)
+ * 평균 임대료 by # bedrooms. structure 3종(Apartment 3+ / Row and apartment 3+ /
+ * Apartment 6+) 중 CMHC 표준 보도 기준인 6+ 를 쓴다 (ADR-078).
+ * Bachelor → studio, 1BR → oneBed, 2BR → twoBed.
+ * share 는 CMHC 가 직접 제공하지 않아 studio × 0.65 추정이다 (ADR-059).
  */
 
 import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, parseStatCanResponse, hasLegacySourceName } from './_common.mjs';
@@ -23,10 +26,12 @@ export const CITY_CONFIGS = {
     country: 'CA',
     currency: 'CAD',
     region: 'na',
+    // productId 34100133 · coordinate 184.4.<unit>.0.0.0.0.0.0.0
+    // (geo=184 Vancouver CMA, structure=4 Apartment 6+, unit: bachelor=1 / oneBed=2 / twoBed=3)
     vectors: {
-      bachelor: 'v111426660',
-      oneBed: 'v111426661',
-      twoBed: 'v111426662',
+      bachelor: 'v3824445',
+      oneBed: 'v3824633',
+      twoBed: 'v3824821',
     },
   },
   toronto: {
@@ -35,10 +40,12 @@ export const CITY_CONFIGS = {
     country: 'CA',
     currency: 'CAD',
     region: 'na',
+    // productId 34100133 · coordinate 125.4.<unit>.0.0.0.0.0.0.0
+    // (geo=125 Toronto CMA, structure=4 Apartment 6+, unit: bachelor=1 / oneBed=2 / twoBed=3)
     vectors: {
-      bachelor: 'v111426717',
-      oneBed: 'v111426718',
-      twoBed: 'v111426719',
+      bachelor: 'v3824443',
+      oneBed: 'v3824631',
+      twoBed: 'v3824819',
     },
   },
   montreal: {
@@ -47,10 +54,12 @@ export const CITY_CONFIGS = {
     country: 'CA',
     currency: 'CAD',
     region: 'na',
+    // productId 34100133 · coordinate 46.4.<unit>.0.0.0.0.0.0.0
+    // (geo=46 Montréal CMA, structure=4 Apartment 6+, unit: bachelor=1 / oneBed=2 / twoBed=3)
     vectors: {
-      bachelor: 'v111426699',
-      oneBed: 'v111426700',
-      twoBed: 'v111426701',
+      bachelor: 'v3824429',
+      oneBed: 'v3824617',
+      twoBed: 'v3824805',
     },
   },
 };
