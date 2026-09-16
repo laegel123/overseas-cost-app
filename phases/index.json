@@ -64,7 +64,8 @@
     },
     {
       "dir": "source-attribution",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-09-16T14:33:06+0900"
     },
     {
       "dir": "admob-banner-ads",

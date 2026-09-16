@@ -463,6 +463,9 @@ sourcesSubtitle: (n: number) => `출처 ${n}개`,          // n = 런타임 실�
 sourcesCityCount: (n: number) => `${n}개`,               // 행 우측 보조 텍스트
 sourcesCityA11y: (city: string, n: number) => `${city} 출처 ${n}개 보기`,
 sourcesEmpty: '출처 정보를 불러오지 못했어요.\n설정에서 데이터를 새로고침해 주세요',
+sourcesFxNote: '환율은 아래 서비스의 무료 API 로 매일 갱신됩니다.',
+sourcesFxLink: 'Rates By Exchange Rate API',  // 원문 고정 — 번역·변형 금지 (ADR-076)
+sourcesFxLinkA11y: 'Exchange Rate API 페이지 열기',
 
 // /sources/[cityId] — 도시별 출처
 sourceCityTitle: (cityKo: string) => cityKo,             // 도시 한국어명 (영문명 미표기)
@@ -478,6 +481,7 @@ sourceCityNotFound: '출처 정보를 찾을 수 없어요',        // ErrorView
 
 - 출처명(`source.name`)은 **가공하지 않는다** — 원어 고유명 유지(ADR-070), `numberOfLines` 없이 줄바꿈으로 전부 노출(§디자인 원칙 5).
 - 외부 링크 실패 시 네이티브 `Alert('링크 열기 실패', '브라우저를 열 수 없습니다.')`.
+- `/sources` 푸터의 `Rates By Exchange Rate API` 는 환율 1차 출처 open.er-api.com 의 무료 endpoint 약관이 요구하는 **필수 표기**다 (ADR-076). 문구는 원문 그대로 두고 번역하거나 `→` 를 덧붙이지 않으며, 도시 목록이 비어 있어도 항상 노출한다. 링크 스타일은 "페이지 열기 →" 와 동일 (`Small color="orange" font-manrope-bold`).
 
 ### 개인정보 처리방침 화면 (`app/privacy.tsx`)
 

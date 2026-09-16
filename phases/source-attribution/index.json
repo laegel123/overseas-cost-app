@@ -2,7 +2,23 @@
   "project": "overseas-cost-app",
   "phase": "source-attribution",
   "steps": [
-    { "step": 0, "name": "source-scripts", "status": "pending" },
-    { "step": 1, "name": "fx-attribution-link", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "source-scripts",
+      "status": "completed",
+      "started_at": "2026-09-16T14:11:29+0900",
+      "summary": "uk_tfl·ca_cmhc SOURCE 정정(ADR-070 한국어 서술 + legacyNames) + hasLegacySourceName 배선, 테스트 6건 추가(38 pass), london.json 출처명 이전(운임 무변경) + all.json·seed/all.json 재생성, ADR-076 신규 + 인덱스 행, DATA.md §3.1 SUUMO 제거·§9.1 라이선스 요약 신설, DATA_SOURCES.md 런던 교통·캐나다 3도시 임차료 정정, TESTING.md §9-A.4/.6 인벤토리. 캐나다 3개 도시 rent 값·출처명은 미반영 — ca_cmhc.mjs 의 StatCan 벡터 ID 9개가 표 34-10-0133-01 이 아니라 ARCHIVED product 36100480(노동생산성, 전 구간 value=null)을 가리키는 결함 때문이며, 사용자 결정에 따라 벡터 재매핑은 별도 phase 로 분리했다(user-facing rent 숫자를 바꾸는 데이터 결정 + 별도 ADR 필요). 스크립트 쪽 배선은 완료돼 있어 벡터가 고쳐지면 다음 cron 이 캐나다 출처명을 자동 이전한다.",
+      "completed_at": "2026-09-16T14:20:35+0900"
+    },
+    {
+      "step": 1,
+      "name": "fx-attribution-link",
+      "status": "completed",
+      "started_at": "2026-09-16T14:28:14+0900",
+      "summary": "/sources 푸터에 ER-API 필수 표기 추가 (ADR-076 결정 1) — sources-footer 블록 (source-city-footer 와 동일 시각 규격) + Tiny 안내 문구 + fx-attribution-link Pressable(원문 'Rates By Exchange Rate API', accessibilityRole=link, a11y 'Exchange Rate API 페이지 열기') → FX_ATTRIBUTION_URL, safeOpenURL 은 [cityId].tsx 패턴 그대로 복제(@/lib/linking 경유, 실패 시 Alert). 빈 상태에서도 항상 노출. 테스트 5건 추가(app/sources 28 pass, 전체 94 suites/2064 pass). TESTING §9.38 인벤토리·§18.7 수동 항목, DATA.md §3.3 행, UI_GUIDE 출처 화면 절 문구 3개 갱신. Maestro 08-sources-privacy 2/2 통과 — 푸터가 드릴다운 앵커에 영향 없음.",
+      "completed_at": "2026-09-16T14:33:06+0900"
+    }
+  ],
+  "created_at": "2026-09-16T14:11:29+0900",
+  "completed_at": "2026-09-16T14:33:06+0900"
 }

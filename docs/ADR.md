@@ -91,3 +91,4 @@
 | [073](adr/073-harness-single-step-mode.md) | 하네스 단일 step 실행 모드 `run --once` | Active | step 경계에서만 멈춤, 재시도 3회 유지 |
 | [074](adr/074-refresh-data-regression.md) | 강제 새로고침 데이터 퇴행 방지 + 시드 = 실데이터 전량 | Active | 캐시 선삭제 제거, 시드 21개 (ADR-045 supersede) |
 | [075](adr/075-hero-basket-sum-wording.md) | Compare hero 문구 정정 — `평균 가정 기준`/`/월` 폐기 | Active | 합계는 항목 단가 합, Detail 과 동일 footer |
+| [076](adr/076-source-attribution-compliance.md) | 출처 표기 의무 보완 — ER-API 링크 · TfL 출처명 정정 · CMHC → StatCan | Active | 표기 의무 3건 해소, 출처명은 `legacyNames` 로 이전 |

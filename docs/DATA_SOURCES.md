@@ -118,10 +118,12 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
 
 ### 임차료
 
-- **출처**: **CMHC** (Canada Mortgage and Housing Corporation) Rental Market Survey
-- **API**: `https://www03.cmhc-schl.gc.ca/hmip-pimh/en/TableMapChart/RentalMarketAreaTable` (CSV/XML download + parse) 또는 `Statistics Canada Table 34-10-0133` API
+- **출처**: **Statistics Canada Table 34-10-0133-01** (CMHC 평균 월세 원자료, StatCan WDS 벡터 API 수신)
+- **URL**: https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3410013301
+- **API**: `https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods` (키 불필요)
 - **자동화**: `scripts/refresh/ca_cmhc.mjs` — 월 1회
 - **방법**: Vancouver CMA 평균 임대료 by # bedrooms
+- **라이선스**: StatCan Open Licence — `Adapted from Statistics Canada, <product>` 인용 필수. CMHC 포털 약관(상업 파생물 금지)이 아니라 StatCan 라이선스가 적용된다 (ADR-076).
 
 ### 식재료·외식
 
@@ -165,8 +167,9 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
 
 ### 임차료
 
-- **출처**: CMHC Rental Market Survey + Statistics Canada Toronto CMA
-- **자동화**: `ca_cmhc.mjs` (서울과 동일 스크립트, 도시 ID 만 다름)
+- **출처**: Statistics Canada Table 34-10-0133-01 (CMHC 평균 월세 원자료, StatCan WDS 벡터 API 수신) — Toronto CMA
+- **URL**: https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3410013301
+- **자동화**: `ca_cmhc.mjs` (밴쿠버와 동일 스크립트, 벡터 ID 만 다름)
 
 ### 식재료·외식
 
@@ -202,7 +205,8 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
 
 ### 임차료·식재료·외식
 
-- CMHC + StatCan Montreal CMA (자동화 동일)
+- 임차료: Statistics Canada Table 34-10-0133-01 (CMHC 평균 월세 원자료, StatCan WDS 벡터 API 수신) — Montreal CMA, https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3410013301
+- 식재료·외식: StatCan CPI Montreal CMA (자동화 동일)
 
 ### 교통 — STM
 
@@ -402,8 +406,8 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
 
 ### 교통 — TfL
 
-- **출처**: TfL Unified API (https://api.tfl.gov.uk/)
-- **API**: `https://api.tfl.gov.uk/Line/Mode/tube,bus/Status` 등 + fare endpoint
+- **출처**: TfL 운임 안내 페이지 (정적 추정치), https://tfl.gov.uk/fares/ — Unified API 는 운행 상태 연결 확인용, 운임값은 정적 상수
+- **API**: `https://api.tfl.gov.uk/Line/Mode/tube/Status` (연결 확인 전용, 데이터 출처 아님 — ADR-076)
 - **자동화**: `uk_tfl.mjs` — 분기 1회
 
 ### 학비

@@ -8,20 +8,36 @@
  * 권역 그룹 헤더는 두지 않는다 — 평평한 목록이고 권역은 정렬 순서로만 드러난다.
  * 헤더 부제의 출처 수는 런타임 실측이라 번들 시드만 있는 첫 실행에서는 작게
  * 나온다 (ADR-071 결정 2 — 의도된 동작).
+ *
+ * 푸터의 `Rates By Exchange Rate API` 링크는 환율 1차 출처 open.er-api.com 의
+ * 무료 endpoint 약관이 요구하는 필수 표기다 (ADR-076 결정 1) — 원문 그대로 두고
+ * 도시 목록이 비어 있어도 항상 노출한다.
  */
 
 import * as React from 'react';
 
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 
 import { useRouter } from 'expo-router';
 
 import { Icon } from '@/components/Icon';
 import { Screen } from '@/components/Screen';
 import { TopBar } from '@/components/TopBar';
-import { Body, Tiny } from '@/components/typography/Text';
+import { Body, Small, Tiny } from '@/components/typography/Text';
 import { countUniqueSources, getCitySourceGroups } from '@/lib';
+import { openURL } from '@/lib/linking';
 import { colors } from '@/theme/tokens';
+
+const FX_ATTRIBUTION_URL = 'https://www.exchangerate-api.com';
+
+/** 외부 브라우저 열기 — 실패를 사용자에게 알린다 (settings 의 safeOpenURL 과 동일 패턴). */
+async function safeOpenURL(url: string): Promise<void> {
+  try {
+    await openURL(url);
+  } catch {
+    Alert.alert('링크 열기 실패', '브라우저를 열 수 없습니다.');
+  }
+}
 
 export default function SourcesScreen(): React.ReactElement {
   const router = useRouter();
@@ -40,6 +56,10 @@ export default function SourcesScreen(): React.ReactElement {
     },
     [router],
   );
+
+  const handleFxAttributionPress = React.useCallback(() => {
+    void safeOpenURL(FX_ATTRIBUTION_URL);
+  }, []);
 
   return (
     <Screen scroll testID="sources-screen">
@@ -73,6 +93,23 @@ export default function SourcesScreen(): React.ReactElement {
           ))}
         </View>
       )}
+
+      <View className="mt-6 pt-4 border-t border-dashed border-line gap-1" testID="sources-footer">
+        <Tiny>환율은 아래 서비스의 무료 API 로 매일 갱신됩니다.</Tiny>
+        <Pressable
+          onPress={handleFxAttributionPress}
+          accessibilityRole="link"
+          accessibilityLabel="Exchange Rate API 페이지 열기"
+          className="self-start pt-1"
+          testID="fx-attribution-link"
+        >
+          <Small color="orange" className="font-manrope-bold">
+            Rates By Exchange Rate API
+          </Small>
+        </Pressable>
+      </View>
+
+      <View className="h-6" />
     </Screen>
   );
 }

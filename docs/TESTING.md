@@ -2611,6 +2611,17 @@ ADR-071 / in-app-policy-pages step 3. 설정의 "데이터 출처 보기" 외부
 - [x] 각 행이 `accessibilityRole="button"`
 - [x] `accessibilityLabel` 이 행 의미를 담는다 — `서울 출처 4개 보기`
 
+**환율 출처 푸터 (ADR-076 결정 1 — ER-API 약관 필수 표기):**
+
+`Linking` 은 `@/lib/linking` wrapper 만 mock (§5 — RN `Linking` 직접 import 금지).
+
+- [x] `sources-footer` + 안내 문구 `환율은 아래 서비스의 무료 API 로 매일 갱신됩니다.` 렌더
+- [x] `fx-attribution-link` 텍스트가 `Rates By Exchange Rate API` 와 **exact match** (번역·`→` 덧붙임이면 실패)
+- [x] 링크 탭 → `openURL('https://www.exchangerate-api.com')` 1회
+- [x] `openURL` reject → `Alert('링크 열기 실패', '브라우저를 열 수 없습니다.')` (silent fail 아님)
+- [x] 도시 0개(빈 상태)에서도 `fx-attribution-link` 존재 — 1차 소스는 언제나 ER-API
+- [x] 링크가 `accessibilityRole="link"` + `accessibilityLabel="Exchange Rate API 페이지 열기"`
+
 > 권역 그룹 헤더는 없다 (평평한 목록). 화면 이동은 `presentation: 'modal'` 이 아니라 일반 Stack push — UI_GUIDE §Sheet C 명세와의 의도된 편차 (ADR-071 결정 3).
 
 ---
@@ -2905,6 +2916,10 @@ afterEach(() => {
 - [x] Vancouver/Toronto/Montreal CMA 평균 임대료 추출
 - [x] # bedrooms 별 매핑 (Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정)
 - [x] 3개 도시 동시 갱신 지원
+- [x] `SOURCE.name` / `SOURCE.url` 이 StatCan 표 34-10-0133-01 인용 형식과 정확 일치 (ADR-076)
+- [x] `SOURCE.url` 이 `cmhc-schl.gc.ca` 미포함 (상업 파생물 금지 포털 약관 회피) + `SOURCE.name` 에 `ADR-` 미포함
+- [x] `SOURCE.legacyNames` 에 구 출처명 포함 (데이터 중복 방지)
+- [x] 값 변동 0 + 구 출처명 잔존: 이름·URL 만 이전 후 재실행은 no-op (ADR-070, ADR-076)
 
 #### `ca_statcan.mjs` (StatCan WDS API)
 
@@ -2986,6 +3001,10 @@ afterEach(() => {
 - [x] checkTflApiStatus: API connectivity 확인
 - [x] getTransportFares: static 값 반환
 - [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
+- [x] `SOURCE.name` / `SOURCE.url` 이 운임 안내 페이지 + "정적 추정치" 마커와 정확 일치 (ADR-070, ADR-076)
+- [x] `SOURCE.name` 에 `API` 미포함 — Unified API 는 운임 데이터 출처가 아니다 (ADR-076)
+- [x] `SOURCE.legacyNames` 에 구 영문명 포함 (데이터 중복 방지)
+- [x] 값 변동 0 + 구 출처명 잔존: 이름만 이전 후 재실행은 no-op (ADR-070, ADR-076)
 
 ### 9-A.7 출처별 — 유럽 (6 scripts)
 
@@ -3914,6 +3933,7 @@ it('비교 화면 모든 카드에 a11y label', () => {
 - [ ] 도시 행 탭 → `/sources/[cityId]`: 카테고리 그룹 헤더(아이콘 + 라벨)가 월세→식비→교통→학비→비자/정착 순. 출처가 없는 그룹은 아예 렌더 안 됨 — 세금(tax)은 전 도시, 서울은 학비·비자도 없음
 - [ ] 긴 출처명이 말줄임 없이 여러 줄로 전부 보임 (ADR-070 원문 유지)
 - [ ] "페이지 열기 →" 탭 → 외부 브라우저가 **해당 기관 공식 페이지**로 열림 (github.com 아님 — ADR-071 결정 4)
+- [ ] `/sources` 하단 `Rates By Exchange Rate API` 탭 → exchangerate-api.com 이 외부 브라우저로 열림 (ADR-076 필수 표기)
 - [ ] 상단 ← / iOS swipe-back: 도시별 출처 → 출처 목록 → 설정 순으로 복귀 (모달 swipe-down dismiss 아님)
 - [ ] 비행기 모드에서도 두 출처 화면이 정상 렌더 (외부 링크만 실패 → "링크 열기 실패" Alert)
 - [ ] 설정 "개인정보 처리방침" 탭 → **앱을 벗어나지 않고** `/privacy` 화면이 열림
