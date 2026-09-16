@@ -1,0 +1,16 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "admob-banner-ads",
+  "steps": [
+    { "step": 0, "name": "sdk-spike", "status": "pending" },
+    { "step": 1, "name": "ads-lib", "status": "pending" },
+    { "step": 2, "name": "ads-store", "status": "pending" },
+    { "step": 3, "name": "screen-footer", "status": "pending" },
+    { "step": 4, "name": "ad-banner", "status": "pending" },
+    { "step": 5, "name": "ads-bootstrap", "status": "pending" },
+    { "step": 6, "name": "settings-privacy-menu", "status": "pending" },
+    { "step": 7, "name": "privacy-policy", "status": "pending" },
+    { "step": 8, "name": "docs", "status": "pending" },
+    { "step": 9, "name": "release-e2e", "status": "pending" }
+  ]
+}

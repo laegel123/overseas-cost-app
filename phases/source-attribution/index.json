@@ -1,0 +1,8 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "source-attribution",
+  "steps": [
+    { "step": 0, "name": "source-scripts", "status": "pending" },
+    { "step": 1, "name": "fx-attribution-link", "status": "pending" }
+  ]
+}
