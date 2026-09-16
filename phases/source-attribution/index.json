@@ -16,7 +16,7 @@
       "status": "completed",
       "started_at": "2026-09-16T14:28:14+0900",
       "summary": "/sources 푸터에 ER-API 필수 표기 추가 (ADR-076 결정 1) — sources-footer 블록 (source-city-footer 와 동일 시각 규격) + Tiny 안내 문구 + fx-attribution-link Pressable(원문 'Rates By Exchange Rate API', accessibilityRole=link, a11y 'Exchange Rate API 페이지 열기') → FX_ATTRIBUTION_URL, safeOpenURL 은 [cityId].tsx 패턴 그대로 복제(@/lib/linking 경유, 실패 시 Alert). 빈 상태에서도 항상 노출. 테스트 5건 추가(app/sources 28 pass, 전체 94 suites/2064 pass). TESTING §9.38 인벤토리·§18.7 수동 항목, DATA.md §3.3 행, UI_GUIDE 출처 화면 절 문구 3개 갱신. Maestro 08-sources-privacy 2/2 통과 — 푸터가 드릴다운 앵커에 영향 없음.",
-      "completed_at": "2026-09-16T14:31:59+0900"
+      "completed_at": "2026-09-16T14:33:06+0900"
     }
   ],
   "created_at": "2026-09-16T14:11:29+0900"
