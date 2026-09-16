@@ -3,8 +3,8 @@
  *
  * TfL (Transport for London) → 런던 transport 갱신.
  *
- * 출처: TfL Unified API
- * API: https://api.tfl.gov.uk/ (JSON, 키 불필요)
+ * 출처: TfL 운임 안내 페이지 (정적 추정치) — https://tfl.gov.uk/fares/
+ * Unified API (https://api.tfl.gov.uk/) 는 운행 상태 연결 확인 용도이며 운임 데이터 출처가 아니다 (ADR-076).
  *
  * 방법:
  * - monthlyPass: Zone 1-2 월정액 (7-day travelcard × 4.33)
@@ -12,7 +12,7 @@
  * - taxiBase: black cab base fare (정적)
  */
 
-import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage } from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, hasLegacySourceName } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const TFL_API_BASE = 'https://api.tfl.gov.uk';
@@ -33,10 +33,13 @@ export const STATIC_TRANSPORT = {
   taxiBase: 3.80,
 };
 
+// Unified API 는 운행 상태 연결 확인에만 쓰고 운임값은 STATIC_TRANSPORT 정적 상수다 —
+// 출처명에 API 를 적으면 사실과 다르다 (ADR-076). 마커는 한국어 '(정적 추정치)' (ADR-070).
 export const SOURCE = {
   category: 'transport',
-  name: 'TfL Unified API + static estimates',
+  name: 'TfL 운임 안내 페이지 (정적 추정치)',
   url: 'https://tfl.gov.uk/fares/',
+  legacyNames: ['TfL Unified API + static estimates'],
 };
 
 /**
@@ -132,7 +135,10 @@ export default async function refresh(opts = {}) {
       }
     }
 
-    if (!opts.dryRun && hasChanges) {
+    // 값 변동이 없어도 구 출처명이 남아 있으면 한 번은 써서 이름을 이전한다 (ADR-070).
+    const needsSourceRename = hasLegacySourceName(oldData?.sources, SOURCE);
+
+    if (!opts.dryRun && (hasChanges || needsSourceRename)) {
       const base = oldData ?? createCitySeed(config);
       const updatedData = {
         ...base,
@@ -148,7 +154,7 @@ export default async function refresh(opts = {}) {
           reason: `Write failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`,
         });
       }
-    } else if (hasChanges) {
+    } else if (hasChanges || needsSourceRename) {
       updatedCities.push(cityId);
     }
   }

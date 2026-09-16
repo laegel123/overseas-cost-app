@@ -179,11 +179,22 @@ describe('constants', () => {
     }
   });
 
-  it('SOURCE 정의', () => {
+  it('SOURCE 정의: StatCan Open Licence 인용 형식 (ADR-076)', () => {
     expect(SOURCE.category).toBe('rent');
-    expect(SOURCE.name).toContain('CMHC Rental Market Survey');
-    expect(SOURCE.name).toContain('estimated');
-    expect(SOURCE.url).toContain('cmhc');
+    expect(SOURCE.name).toBe(
+      'Adapted from Statistics Canada, Table 34-10-0133-01 (CMHC 평균 월세 · share 는 studio×0.65 추정)',
+    );
+    expect(SOURCE.url).toBe('https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3410013301');
+    // CMHC 포털 약관(상업 파생물 금지) 쪽을 가리키면 안 된다 (ADR-076).
+    expect(SOURCE.url).not.toContain('cmhc-schl.gc.ca');
+    // 내부 ADR 번호는 사용자 화면 노출 대상이 아니다.
+    expect(SOURCE.name).not.toContain('ADR-');
+  });
+
+  it('SOURCE.legacyNames 에 구 출처명 포함 (데이터 중복 방지)', () => {
+    expect(SOURCE.legacyNames).toContain(
+      'CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)',
+    );
   });
 });
 
@@ -296,6 +307,52 @@ describe('refresh (integration)', () => {
     const studioChange = result.changes.find((c: RefreshChange) => c.field === 'rent.studio');
     expect(studioChange).toBeDefined();
     expect(typeof studioChange?.pctChange).toBe('number');
+  }, 30000);
+
+  it('값 변동 0 + 구 출처명 잔존: 이름·URL 만 이전 (ADR-070) — 재실행은 no-op', async () => {
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => VALID_STATCAN_RESPONSE,
+    });
+
+    const cityPath = path.join(testDir, 'cities', 'vancouver.json');
+    const existingData = {
+      id: 'vancouver',
+      name: { ko: '밴쿠버', en: 'Vancouver' },
+      country: 'CA',
+      currency: 'CAD',
+      region: 'na',
+      lastUpdated: '2026-04-01',
+      // VALID_STATCAN_RESPONSE 가 매핑하는 값과 동일 → 숫자 변동 0.
+      rent: { share: Math.round(1850 * 0.65), studio: 1850, oneBed: 2100, twoBed: 2800 },
+      food: { restaurantMeal: 25, cafe: 5, groceries: { milk1L: 3, eggs12: 4, rice1kg: 3.5, chicken1kg: 14, bread: 3.5 } },
+      transport: { monthlyPass: 104, singleRide: 3.35, taxiBase: 3.95 },
+      sources: [
+        {
+          category: 'rent',
+          name: 'CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)',
+          url: 'https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market',
+          accessedAt: '2026-04-01',
+        },
+      ],
+    };
+    fs.writeFileSync(cityPath, JSON.stringify(existingData));
+
+    const first = await refreshCaCmhc({ cities: ['vancouver'] });
+    expect(first.changes).toHaveLength(0);
+    expect(first.cities).toContain('vancouver');
+
+    const written = JSON.parse(fs.readFileSync(cityPath, 'utf-8'));
+    const rentSources = written.sources.filter((s: { category: string }) => s.category === 'rent');
+    expect(rentSources).toHaveLength(1);
+    expect(rentSources[0].name).toBe(SOURCE.name);
+    expect(rentSources[0].url).toBe(SOURCE.url);
+    expect(written.rent).toEqual(existingData.rent);
+
+    // 이전 완료 후 재실행 = 쓸 이유 없음.
+    const second = await refreshCaCmhc({ cities: ['vancouver'] });
+    expect(second.cities).not.toContain('vancouver');
   }, 30000);
 
   it('반환 객체 구조: RefreshResult', async () => {

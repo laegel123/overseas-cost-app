@@ -2905,6 +2905,10 @@ afterEach(() => {
 - [x] Vancouver/Toronto/Montreal CMA 평균 임대료 추출
 - [x] # bedrooms 별 매핑 (Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정)
 - [x] 3개 도시 동시 갱신 지원
+- [x] `SOURCE.name` / `SOURCE.url` 이 StatCan 표 34-10-0133-01 인용 형식과 정확 일치 (ADR-076)
+- [x] `SOURCE.url` 이 `cmhc-schl.gc.ca` 미포함 (상업 파생물 금지 포털 약관 회피) + `SOURCE.name` 에 `ADR-` 미포함
+- [x] `SOURCE.legacyNames` 에 구 출처명 포함 (데이터 중복 방지)
+- [x] 값 변동 0 + 구 출처명 잔존: 이름·URL 만 이전 후 재실행은 no-op (ADR-070, ADR-076)
 
 #### `ca_statcan.mjs` (StatCan WDS API)
 
@@ -2986,6 +2990,10 @@ afterEach(() => {
 - [x] checkTflApiStatus: API connectivity 확인
 - [x] getTransportFares: static 값 반환
 - [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
+- [x] `SOURCE.name` / `SOURCE.url` 이 운임 안내 페이지 + "정적 추정치" 마커와 정확 일치 (ADR-070, ADR-076)
+- [x] `SOURCE.name` 에 `API` 미포함 — Unified API 는 운임 데이터 출처가 아니다 (ADR-076)
+- [x] `SOURCE.legacyNames` 에 구 영문명 포함 (데이터 중복 방지)
+- [x] 값 변동 0 + 구 출처명 잔존: 이름만 이전 후 재실행은 no-op (ADR-070, ADR-076)
 
 ### 9-A.7 출처별 — 유럽 (6 scripts)
 

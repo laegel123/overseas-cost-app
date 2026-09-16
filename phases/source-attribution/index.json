@@ -2,7 +2,19 @@
   "project": "overseas-cost-app",
   "phase": "source-attribution",
   "steps": [
-    { "step": 0, "name": "source-scripts", "status": "pending" },
-    { "step": 1, "name": "fx-attribution-link", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "source-scripts",
+      "status": "blocked",
+      "started_at": "2026-09-16T14:11:29+0900",
+      "blocked_reason": "TfL 쪽은 완료(london.json 출처명 이전, 운임 숫자 무변경). 캐나다 3개 도시는 데이터 반영 불가 — 원인은 네트워크가 아니라 ca_cmhc.mjs 의 StatCan 벡터 ID 결함이다. v111426660 등 9개 벡터는 표 34-10-0133-01 이 아니라 product 36100480 ('Labour productivity …, inactive', ARCHIVED) 에 속하며 2019~2024 전 구간 value=null 이다 (HTTP 200 SUCCESS, 값만 null). 따라서 refresh() 가 'No rent data found' 분기에서 continue 하여 hasLegacySourceName 판정(168행)에 도달하지 못하고, 출처명 이전이 일어나지 않는다. 이 fetcher 는 도입 이래 한 번도 값을 가져온 적이 없고 월 1회 refresh-rent.yml cron 은 매번 'updated 0 cities' 로 조용히 끝나왔다 — 현재 3개 도시 rent 숫자는 초기 시드값이다. 이 때문에 step 지시의 대체안인 'GitHub Actions refresh-rent.yml 수동 실행' 으로는 해소되지 않는다 (같은 API·같은 벡터). 필요한 사용자 결정: 표 34-10-0133-01 의 올바른 벡터/좌표로 재매핑할 것인가 — 이는 3개 도시의 user-facing rent 숫자를 바꾸는 데이터 결정이라 별도 ADR·phase 로 분리해야 하며, 본 step(출처 표기) 범위 밖이다. 스크립트 쪽 SOURCE 정정 + hasLegacySourceName 배선은 완료됐고 단위 테스트(mock 정상 응답)로 이전·멱등성이 검증돼 있어, 벡터가 고쳐지는 순간 다음 cron 이 자동으로 이름을 이전한다. 도시 JSON 은 손대지 않았다 (ADR-032).",
+      "summary": "uk_tfl·ca_cmhc SOURCE 정정(ADR-070 한국어 서술 + legacyNames) + hasLegacySourceName 배선, 테스트 6건 추가(38 pass), london.json 출처명 이전(운임 무변경) + all.json·seed/all.json 재생성, ADR-076 신규 + 인덱스 행, DATA.md §3.1 SUUMO 제거·§9.1 라이선스 요약 신설, DATA_SOURCES.md 런던 교통·캐나다 3도시 임차료 정정, TESTING.md §9-A.4/.6 인벤토리. 캐나다 3개 도시 rent 값·출처명은 미반영 (blocked_reason 참조)."
+    },
+    {
+      "step": 1,
+      "name": "fx-attribution-link",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-09-16T14:11:29+0900"
 }

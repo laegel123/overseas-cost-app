@@ -93,7 +93,7 @@ export type CityCostData = {
 | 미국   | US BLS CPI                                | 물가                        |
 | 미국   | Zillow                                    | 월세                        |
 | 영국   | Office for National Statistics            | 물가                        |
-| 일본   | SUUMO, e-Stat                             | 부동산·통계                 |
+| 일본   | e-Stat                                    | 통계                        |
 | 호주   | ABS                                       | 통계                        |
 | 학비   | 각 대학 공식 international tuition 페이지 | 연간 학비                   |
 | 비자   | 각국 정부 이민·외교부 페이지              | 신청비, 처리기간            |
@@ -338,6 +338,22 @@ v1.0 은 항목별 신고 없음(ADR-010). v1.1:
 - 우리가 큐레이션한 JSON 의 라이선스: **MIT** 또는 **CC-BY 4.0** (출시 전 결정 필요 — 별도 ADR)
 - 출처는 각 출처 라이선스 명시 (sources 배열의 url 로 추적 가능)
 - 사용자 개인정보 수집 0건 (계정·로그인 없음, 분석 도구 없음 — ADR-009/011)
+
+### 9.1 출처별 라이선스 요약
+
+상업 이용(광고 포함) 가부와 요구 표기를 한 표로 모은다. 근거·전문은 ADR-076 참조.
+
+| 출처                                                                     | 상업 이용                    | 요구 표기                                          |
+| ------------------------------------------------------------------------ | ---------------------------- | -------------------------------------------------- |
+| KOSIS · 공공데이터포털 (MOLIT·KCA)                                       | 허용                         | 출처 표시                                          |
+| open.er-api.com (환율 1차)                                               | 허용. 캐시 허용, 재배포 금지 | `Rates By Exchange Rate API` 링크 **필수**         |
+| StatCan Open Licence (CMHC 월세 = 표 34-10-0133-01)                      | 허용                         | `Adapted from Statistics Canada, <product>`        |
+| CMHC 자체 포털                                                           | **상업 파생물 금지**         | — (사용하지 않는다. StatCan WDS 로 수신)           |
+| TfL                                                                      | 허용                         | Unified API 데이터 사용 시 `Powered by TfL Open Data` (우리는 미사용 — ADR-076) |
+| e-Stat, ONS(OGL v3), Eurostat, Destatis, INSEE, CBS·ABS, SingStat        | 허용                         | 출처 표시                                          |
+| 미국 BLS·Census·HUD                                                      | 연방 저작물, 퍼블릭 도메인   | 없음                                               |
+| 교통공사 운임 · 대학 학비 · 비자 수수료                                  | 사실 정보, 저작권 대상 아님  | 없음                                               |
+| ECB (환율 3차 백업)                                                      | 허용                         | 출처 표시                                          |
 
 ## 10. 갱신 이력 (changelog)
 

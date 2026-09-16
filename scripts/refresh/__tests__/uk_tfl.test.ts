@@ -114,10 +114,16 @@ describe('constants', () => {
     expect(STATIC_TRANSPORT.taxiBase).toBeGreaterThan(3);
   });
 
-  it('SOURCE 정의', () => {
+  it('SOURCE 정의: 운임 페이지 + 정적 추정치 마커 (ADR-070, ADR-076)', () => {
     expect(SOURCE.category).toBe('transport');
-    expect(SOURCE.name).toContain('TfL');
-    expect(SOURCE.url).toContain('tfl.gov.uk');
+    expect(SOURCE.name).toBe('TfL 운임 안내 페이지 (정적 추정치)');
+    expect(SOURCE.url).toBe('https://tfl.gov.uk/fares/');
+    // Unified API 는 운임 데이터 출처가 아니므로 출처명에 남으면 안 된다 (ADR-076).
+    expect(SOURCE.name).not.toContain('API');
+  });
+
+  it('SOURCE.legacyNames 에 구 영문명 포함 (데이터 중복 방지)', () => {
+    expect(SOURCE.legacyNames).toContain('TfL Unified API + static estimates');
   });
 });
 
@@ -195,6 +201,46 @@ describe('refresh (integration)', () => {
     const transportChange = result.changes.find((c: RefreshChange) => c.field.startsWith('transport.'));
     expect(transportChange).toBeDefined();
     expect(typeof transportChange?.pctChange).toBe('number');
+  }, 30000);
+
+  it('값 변동 0 + 구 출처명 잔존: 이름만 이전 (ADR-070) — 재실행은 no-op', async () => {
+    const cityPath = path.join(testDir, 'cities', 'london.json');
+    const existingData = {
+      id: 'london',
+      name: { ko: '런던', en: 'London' },
+      country: 'GB',
+      currency: 'GBP',
+      region: 'eu',
+      lastUpdated: '2026-04-01',
+      rent: { share: 1105, studio: 1700, oneBed: 2100, twoBed: 2800 },
+      food: { restaurantMeal: 14, cafe: 3.5, groceries: { milk1L: 1.4, eggs12: 3.2, rice1kg: 2.0, chicken1kg: 5.5, bread: 1.3 } },
+      // STATIC_TRANSPORT 와 동일한 값 → 숫자 변동 0.
+      transport: { ...STATIC_TRANSPORT },
+      sources: [
+        {
+          category: 'transport',
+          name: 'TfL Unified API + static estimates',
+          url: 'https://tfl.gov.uk/fares/',
+          accessedAt: '2026-04-01',
+        },
+      ],
+    };
+    fs.writeFileSync(cityPath, JSON.stringify(existingData));
+
+    const first = await refreshUkTfl({ useStatic: true });
+    expect(first.changes).toHaveLength(0);
+    expect(first.cities).toContain('london');
+
+    const written = JSON.parse(fs.readFileSync(cityPath, 'utf-8'));
+    const transportSources = written.sources.filter((s: { category: string }) => s.category === 'transport');
+    expect(transportSources).toHaveLength(1);
+    expect(transportSources[0].name).toBe(SOURCE.name);
+    expect(transportSources[0].url).toBe(SOURCE.url);
+    expect(written.transport).toEqual(existingData.transport);
+
+    // 이전 완료 후 재실행 = 쓸 이유 없음.
+    const second = await refreshUkTfl({ useStatic: true });
+    expect(second.cities).not.toContain('london');
   }, 30000);
 
   it('알 수 없는 도시: errors에 추가', async () => {

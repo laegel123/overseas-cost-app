@@ -7,7 +7,7 @@
   "country": "GB",
   "currency": "GBP",
   "region": "eu",
-  "lastUpdated": "2026-09-07",
+  "lastUpdated": "2026-09-16",
   "rent": {
     "share": 1105,
     "studio": 1700,
@@ -69,12 +69,6 @@
       "accessedAt": "2026-05-03"
     },
     {
-      "category": "transport",
-      "name": "TfL Unified API + static estimates",
-      "url": "https://tfl.gov.uk/fares/",
-      "accessedAt": "2026-05-03"
-    },
-    {
       "category": "tuition",
       "name": "Imperial College · UCL · King's College 공식 국제학생 학비 페이지 (정적 추정치)",
       "url": "https://www.imperial.ac.uk/study/fees-and-funding/tuition-fees/",
@@ -85,6 +79,12 @@
       "name": "영국 정부(GOV.UK) 공식 비자 수수료 페이지 (정적 추정치)",
       "url": "https://www.gov.uk/government/publications/visa-regulations-revised-table",
       "accessedAt": "2026-09-07"
+    },
+    {
+      "category": "transport",
+      "name": "TfL 운임 안내 페이지 (정적 추정치)",
+      "url": "https://tfl.gov.uk/fares/",
+      "accessedAt": "2026-09-16"
     }
   ]
 }

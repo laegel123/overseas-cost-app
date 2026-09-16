@@ -4,14 +4,14 @@
  * CMHC (Canada Mortgage and Housing Corporation) Rental Market Survey
  * → vancouver.rent, toronto.rent, montreal.rent 갱신.
  *
- * 출처: CMHC Rental Market Report + Statistics Canada Table 34-10-0133
+ * 출처: Statistics Canada Table 34-10-0133-01 (CMHC RMS 원자료를 StatCan WDS 로 수신 — ADR-076)
  * API 키 불필요 (정부 공개 데이터).
  *
  * 방법: 도시별 CMA 평균 임대료 by # bedrooms
  * Bachelor → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정
  */
 
-import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, parseStatCanResponse } from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, parseStatCanResponse, hasLegacySourceName } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const STATCAN_WDS_BASE = 'https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectorsAndLatestNPeriods';
@@ -55,12 +55,15 @@ export const CITY_CONFIGS = {
   },
 };
 
-// share rent 는 CMHC 가 직접 제공 안 함 — studio × 0.65 추정값. ADR-059 마커.
-// 데이터는 StatCan WDS (Table 34-10-0133) 를 통해 게시되는 CMHC RMS 결과를 사용.
+// 데이터는 CMHC 포털이 아니라 StatCan WDS (표 34-10-0133-01) 로 받는다 — CMHC 포털 약관은
+// 상업 파생물을 금지하므로 출처를 StatCan 표로 두어 StatCan Open Licence 아래 놓는다 (ADR-076).
+// 라이선스가 요구하는 `Adapted from Statistics Canada, <product>` 문구를 출처명에 담고,
+// share 는 CMHC 가 직접 제공하지 않아 studio × 0.65 추정임을 한국어로 밝힌다 (ADR-059, ADR-070).
 export const SOURCE = {
   category: 'rent',
-  name: 'CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)',
-  url: 'https://www.cmhc-schl.gc.ca/professionals/housing-markets-data-and-research/housing-data/data-tables/rental-market',
+  name: 'Adapted from Statistics Canada, Table 34-10-0133-01 (CMHC 평균 월세 · share 는 studio×0.65 추정)',
+  url: 'https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3410013301',
+  legacyNames: ['CMHC Rental Market Survey via StatCan WDS (share=studio×0.65 estimated, ADR-059)'],
 };
 
 
@@ -162,7 +165,10 @@ export default async function refresh(opts = {}) {
       }
     }
 
-    if (!opts.dryRun && hasChanges) {
+    // 값 변동이 없어도 구 출처명이 남아 있으면 한 번은 써서 이름을 이전한다 (ADR-070).
+    const needsSourceRename = hasLegacySourceName(oldData?.sources, SOURCE);
+
+    if (!opts.dryRun && (hasChanges || needsSourceRename)) {
       const base = oldData ?? createCitySeed(config);
       const updatedData = { ...base, rent: { ...base.rent, ...newRent } };
 
@@ -172,7 +178,7 @@ export default async function refresh(opts = {}) {
       } catch (err) {
         errors.push({ cityId, reason: `Write failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
       }
-    } else if (hasChanges) {
+    } else if (hasChanges || needsSourceRename) {
       updatedCities.push(cityId);
     }
   }
