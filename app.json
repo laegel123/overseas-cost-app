@@ -3,7 +3,7 @@
     "name": "살까말까",
     "slug": "overseas-cost-app",
     "scheme": "overseascost",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -20,11 +20,12 @@
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.laegel.overseascostapp"
+      "bundleIdentifier": "com.laegel.overseascostapp",
+      "buildNumber": "1"
     },
     "android": {
       "package": "com.laegel.overseascostapp",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FC6011"
