@@ -12,16 +12,30 @@
 
 ## 기술 스택
 
-| 레이어     | 선택                                                 |
-| ---------- | ---------------------------------------------------- |
-| 프레임워크 | React Native (Expo Managed) + Expo Router            |
-| 언어       | TypeScript (strict)                                  |
-| 스타일링   | NativeWind v4                                        |
-| 상태 관리  | Zustand + AsyncStorage                               |
-| 데이터     | GitHub Raw + jsDelivr CDN (단일 `all.json` batch)    |
-| 환율       | open.er-api.com → ECB → 한국은행 (3중 fallback)      |
-| 자동화     | GitHub Actions cron (공공 출처 100% 자동 갱신)       |
-| 테스트     | Jest + @testing-library/react-native (~1,500 케이스) |
+| 레이어     | 선택                                                                       |
+| ---------- | -------------------------------------------------------------------------- |
+| 프레임워크 | React Native (Expo Managed) + Expo Router                                  |
+| 언어       | TypeScript (strict)                                                        |
+| 스타일링   | NativeWind v4                                                              |
+| 상태 관리  | Zustand + AsyncStorage                                                     |
+| 데이터     | GitHub Raw + jsDelivr CDN (단일 `all.json` batch)                          |
+| 환율       | open.er-api.com → ECB → 한국은행 (3중 fallback)                            |
+| 자동화     | GitHub Actions cron (공공 출처 100% 자동 갱신)                             |
+| 테스트     | Jest + @testing-library/react-native (~1,500 케이스)                       |
+| 광고       | Google AdMob (react-native-google-mobile-ads) — dev/preview 는 테스트 광고 |
+
+## 개발 시작
+
+Expo Go 로는 실행할 수 없다 (광고 SDK 가 네이티브 모듈 — ADR-077). dev build 를 설치한 뒤 Metro 를 띄운다.
+
+```bash
+npm install --legacy-peer-deps
+cp .env.example .env                            # EXPO_PUBLIC_ADS_TEST=1 — Google 테스트 광고 단위
+npx expo run:ios --device "iPhone 17 Pro"       # dev build 설치 (최초 1회 · 네이티브 의존성 변경 시)
+npm run dev                                     # Metro
+```
+
+> Xcode 27 에서는 `expo run:ios` 가 Simulator.app 부재로 실패한다. 우회 절차(`prebuild` + `xcodebuild` + `simctl install`)는 `phases/admob-banner-ads/SPIKE_RESULT.md` §4.
 
 ## 데이터 자동화
 

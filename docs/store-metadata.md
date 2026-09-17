@@ -14,7 +14,7 @@ Play Console 의 "스토어 등록정보" 폼에 그대로 복붙할 수 있는 
 | 기본 언어 | 한국어 | 1차 언어 |
 | 카테고리 | **여행 및 지역 정보** | RELEASE.md §5 권장 (검색량 ↑). 대안: 도구 / 라이프스타일 |
 | 콘텐츠 등급 | 전체 이용가 (3+) | 콘텐츠 등급 설문은 모두 "아니오" |
-| 무료/유료 | 무료 | 광고·인앱 결제 없음 |
+| 무료/유료 | 무료 | 광고 포함 (AdMob 배너, ADR-077) · 인앱 결제 없음 |
 | 연락처 이메일 | laegel1@gmail.com | Play Console 필수 |
 | 웹사이트 | (선택) https://github.com/laegel123/overseas-cost-app | optional |
 | 개인정보 처리방침 URL | https://laegel123.github.io/overseas-cost-app/privacy-policy.html | 필수 |

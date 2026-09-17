@@ -10,6 +10,7 @@
 - **Zustand + AsyncStorage** (도메인별 영속화 스토어 — onboarding / favorites / recent / settings)
 - 데이터: **GitHub raw JSON + 24h TTL 캐시 + 번들 시드 fallback**
 - 환율: **open.er-api.com** (무료, API 키 불필요)
+- 광고: **Google AdMob** (react-native-google-mobile-ads, UMP 동의 — ADR-077)
 - 빌드·배포: **EAS Build + EAS Update**
 - 테스트: **Jest + @testing-library/react-native**
 - 폰트: Manrope, Mulish (Google Fonts) + Pretendard (한국어 fallback)
@@ -18,6 +19,7 @@
 
 - **CRITICAL**: 모든 디자인 토큰(색·폰트·간격·라운드·shadow)은 `tailwind.config.js` + `src/theme/tokens.ts` 단일 출처에서만 정의한다. 컴포넌트에 매직 넘버 색상값을 직접 박지 않는다.
 - **CRITICAL**: 외부 데이터(도시 JSON, 환율)는 반드시 `src/lib/data.ts` / `src/lib/currency.ts` 를 경유한다. 컴포넌트가 `fetch` 를 직접 호출하지 않는다.
+- **CRITICAL**: 광고 SDK(`react-native-google-mobile-ads`)는 `src/lib/ads.native.ts` 와 `src/components/AdBanner.native.tsx` 만 import 한다 (ESLint 강제). 광고는 홈·비교·상세 **ready 상태**의 `Screen footer` 에만 둔다. 온보딩·설정·출처·개인정보 화면과 loading·error 화면에 광고 금지. 개발·프리뷰 빌드는 `EXPO_PUBLIC_ADS_TEST=1` (테스트 광고 단위). 개인정보 처리방침 '광고' 섹션의 수집 항목이 SDK 실태와 어긋나면 안 된다 (ADR-077).
 - **CRITICAL**: 데이터는 **공공 출처에서 자동으로** 만 갱신한다 (ADR-032). 정부 통계 API·공식 정부 페이지·공식 교통공사·공식 대학 페이지 외 출처 (Numbeo·Expatistan·Zillow·Kijiji·Yelp 등 상업 플랫폼) 사용 금지. 자동 fetch 는 `scripts/refresh/<source>.mjs` + GitHub Actions cron 으로만 (수동 큐레이션 금지).
 - **CRITICAL**: 페르소나(유학생/취업자/모름) 개념은 **제거됨** (ADR-067). 모든 사용자가 통합 뷰(rent·food·transport·tuition·tax·visa 6 카테고리)를 본다. Compare 는 페르소나로 분기하지 않고, 온보딩은 페르소나 선택이 아니라 **도시 선택**이다. hero 합산 기본 포함은 rent/food/transport = ON, tuition/tax/visa = OFF 고정 (사용자가 카드 토글로 변경 가능). 새 코드는 페르소나를 되살리지 말 것. 이력: ADR-067(ADR-062 부분 supersede), `docs/plans/persona-removal-city-onboarding.md`.
 - **CRITICAL**: Hot 규칙 — 배수 ≥ 2.0× 면 `hot=true` (아이콘 박스 orange tint, 배수 텍스트 orange). 단일 함수 `isHot(mult)` 로 일관 판정.
@@ -49,7 +51,7 @@
 
 ```bash
 npm install --legacy-peer-deps   # ADR-044: expo-router 6 의 react-server-dom-webpack peerOptional 충돌 회피
-npm run dev         # Expo 개발 서버 (Expo Go 또는 iOS/Android 시뮬레이터)
+npm run dev         # Expo 개발 서버 — Expo Go 불가 (네이티브 모듈). `npx expo run:ios` dev build 필요
 npm run typecheck   # tsc --noEmit
 npm run lint        # ESLint
 npm test            # Jest (--passWithNoTests 허용)

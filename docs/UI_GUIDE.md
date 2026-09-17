@@ -32,6 +32,7 @@
 | 검색 debounce | 300ms debounce | debounce 없음 (입력 즉시 필터) | `(tabs)/index.tsx` |
 | 설정 unknown 라벨 | "미선택" | "아직 모름 모드" (`PERSONA_LABEL.unknown`) | `src/lib/persona.ts` |
 | 배수 단위 | PRD 산문 "↑1.9배" | 화면 표기 "↑1.9×" (구현 = UI_GUIDE) | `src/lib/format.ts` |
+| 광고 배너 | 디자인 원본 없음 | 홈·비교·상세 하단 anchored adaptive 배너, 로드 전 0 높이, 탭바 인접 border-t (ADR-077) | `AdBanner.native.tsx`, `Screen.tsx` footer |
 
 ## 디자인 원칙
 
@@ -766,6 +767,7 @@ Compare/Detail 푸터에 데이터 신선도 시각 강조.
 - **VoiceOver / TalkBack**: 모든 카드는 `accessibilityLabel` 으로 도시·항목·배수·차액을 한 문장으로. 예: "밴쿠버 월세, 서울 70만원 대비 180만원으로 약 2.6배."
 - **터치 타겟**: 최소 44×44 (iOS HIG). 작아 보이는 chevron 행도 패딩으로 보장.
 - **색 대비**: 본문(navy on white) WCAG AA 통과. 배수 색 단독으로 정보 전달 금지(앞서 명시).
+- **광고 배너**: 컨테이너 `accessibilityLabel="광고"` + `accessibilityRole="none"` — SDK 배너 뷰가 자체 라벨을 가진다 (ADR-077).
 
 ## 모션
 

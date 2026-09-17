@@ -6,6 +6,7 @@
 - 정식 인벤토리(체크리스트): `docs/TESTING.md §18-A`
 - 러너/빌드 전제: `.maestro/README.md`
 - 도입 근거: `docs/adr/066-maestro-e2e.md`
+- `maestro-debugger` 에이전트에 넘길 때 `ad-banner` 가 요소 트리에 추가됐음을 프롬프트에 명시 — 홈·비교·상세 ready 화면 하단, 광고 로드 전에는 높이 0 으로 접혀 있다 (ADR-077).
 
 ---
 
@@ -43,14 +44,17 @@ npm run e2e                               # 전체 (smoke + flows/**)
 ### 01-onboarding
 - **관찰(ADR-067):** 온보딩은 **도시 선택**이다. `city-select` — 도시 탭 → 서울 vs 그 도시 Compare 직행 + 즐겨찾기 반영. `onboarding-once` — 1회 통과 후 재실행 시 온보딩 skip(`onboarding:v1` 영속).
 - **리스크:** 도시 선택 온보딩은 **즐겨찾기를 반드시 1건 남긴다** → '빈 상태' 전제 플로우(empty-states / tabs-empty-alert / favorite-toggle 말미)와 근본적으로 양립 불가. onboard.yaml 공통 전제는 밴쿠버(시드 보장)로 고정 — 별도 로컬 검증 세션에서 빈-상태 플로우 재작성 필요(아래 §3).
+- **ATT 관찰(ADR-077, admob-banner-ads step 5):** 도시 선택 → Compare 도착 후에도 ATT 다이얼로그 **미표시**. 원인은 샘플 App ID(IDFA 메시지 없음)만이 아니다 — Maestro `launchApp` 기본 permissions(all allow)가 실행 시각에 시뮬레이터 TCC.db 에 `kTCCServiceUserTracking` 허용을 미리 기록하므로 **Maestro 실행에서는 IDFA 메시지 게시 여부와 무관하게 ATT 가 구조적으로 뜨지 않는다.** 그래서 `common/onboard.yaml` 에 ATT `optional: true` 탭을 넣지 않았다. 실 App ID + IDFA 메시지 게시 후라도 `launchApp` 에 추적 권한을 허용하지 않는 `permissions` 를 지정하는 flow 를 만들 때에만 ATT 가 뜰 수 있으니, 그때 optional 탭을 추가한다. ATT 실제 노출 확인은 `docs/TESTING.md §18.9` 수동.
 
 ### 02-home
 - **관찰:** 한글/영문 검색, 빈 결과, 검색어 clear, 권역 필터, 빈 상태 문구.
 - **리스크:** 검색·필터는 밴쿠버(시드 보장)로만 단정. 다른 도시는 네트워크 의존이라 assert 대상에서 제외함.
+- **리스크(광고, ADR-077):** 하단 배너(로드 시 높이 발생)로 스크롤 거리가 달라질 수 있음. 스크린샷에 'Test Ad' 라벨은 정상(dev 빌드).
 
 ### 03-compare
 - **관찰(ADR-067):** hero, **통합 6 카테고리**(페르소나 분기 없음 — `unified-categories`: 학비·비자 항상 노출, tax 는 데이터 부재로 숨김), 배수 3중 인코딩, 뒤로가기.
 - **리스크:** `multiplier-encoding` 은 정규식 `↑\d.*×` — 밴쿠버 총비용>서울이라 방향(↑)은 고정이나, **환율 로드 완료 후**라야 hero 에 배수가 렌더된다(로딩 넘어갈 시간 필요, Maestro 기본 대기로 흡수).
+- **리스크(광고, ADR-077):** 하단 배너(로드 시 높이 발생)로 스크롤 거리가 달라질 수 있음. 스크린샷에 'Test Ad' 라벨은 정상(dev 빌드).
 
 ### 04-favorites-recent
 - **관찰:** ⭐ 토글 → 홈 카드, 최근 누적, 탭 redirect(빈=Alert / 채워짐=Compare).
@@ -62,6 +66,7 @@ npm run e2e                               # 전체 (smoke + flows/**)
   - `tax-nodata` 는 **deep link**(`overseascost://detail/vancouver/tax`)에 의존한다. tax 카드가 어디에도 안 떠(데이터 전무) UI 로는 도달 불가하기 때문. dev client 에서 openLink 라우팅이 앱 내부로 이어지지 않으면(런처 가로채기) 이 flow 는 **'데이터 추가 전 검증 보류'**로 처리하고 TESTING §18-A 에 사유 기록.
   - 섹션 testID 에 한글 라벨 사용(`detail-section-외식` 등). 대부분의 iOS accessibilityIdentifier 는 유니코드를 허용하나, 혹시 매칭 실패 시 텍스트 assert(예: '외식')로 대체 가능.
   - 학교 preset testID 는 `detail-tuition-sheet-preset-UBC/SFU/BCIT`(data/all.json 밴쿠버 기준). 데이터 갱신으로 학교명이 바뀌면 이 리터럴도 갱신 필요.
+- **리스크(광고, ADR-077):** 하단 배너(로드 시 높이 발생)로 스크롤 거리가 달라질 수 있음. 스크린샷에 'Test Ad' 라벨은 정상(dev 빌드).
 
 ### 06-settings
 - **관찰:** 화면 구성, 데이터 새로고침, 외부 링크 이탈/복귀.
@@ -71,6 +76,7 @@ npm run e2e                               # 전체 (smoke + flows/**)
 ### 07-visual-a11y
 - **관찰:** 7개 화면 스크린샷(온보딩/홈/Compare/상세×2/시트/설정). Hot tint·색·레이아웃·그림자 등 **색/픽셀은 사람이 눈으로 리뷰**.
 - **산출물:** `.maestro/.artifacts/` 에 `01-onboarding.png` … `10-privacy.png` (10컷). 리뷰 후 UI_GUIDE 대비 시각 회귀 판단.
+- **리스크(광고, ADR-077):** 하단 배너(로드 시 높이 발생)로 스크롤 거리가 달라질 수 있음. 스크린샷에 'Test Ad' 라벨은 정상(dev 빌드).
 - 08~10 컷은 ADR-071 신규 화면(출처 목록/도시별 출처/처리방침). 도시는 **밴쿠버** — 학비·비자 출처가 있어 도시별 공공 출처가 실제로 렌더되는지 함께 본다.
 
 ### 08-sources-privacy (ADR-071 신규 화면)
@@ -88,6 +94,7 @@ npm run e2e                               # 전체 (smoke + flows/**)
 - 스플래시(네이티브, 콜드 스타트 시 짧게 — 타이밍상 자동 캡처 어려움)
 - 외부 링크 목적지(개인정보 HTML / GitHub 출처 / mailto 컴포저) 실제 오픈
 - 오프라인/비행기 모드 fallback(시드 데이터 동작) — Maestro 네트워크 토글 미지원 → `docs/TESTING.md §18.2` 수동 항목과 연계
+- 광고·동의 흐름 (ADR-077) — 상세 체크리스트는 `docs/TESTING.md §18.9`: (1) iOS 첫 실행 → 도시 선택 → Compare 에서 IDFA 설명 → ATT 순서, 허용/거부 각각 배너 (2) EEA 디버그 지역으로 GDPR 폼 + 설정 `menu-ads-privacy` 노출 (3) 비행기 모드에서 배너 슬롯 0 높이 (4) 온보딩·설정·출처·개인정보 화면에 배너 없음 (5) 로딩·에러 화면에 배너 없음
 
 ---
 

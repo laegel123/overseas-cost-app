@@ -4123,7 +4123,7 @@ it('비교 화면 모든 카드에 a11y label', () => {
 - [ ] 상단 ← / iOS swipe-back: 도시별 출처 → 출처 목록 → 설정 순으로 복귀 (모달 swipe-down dismiss 아님)
 - [ ] 비행기 모드에서도 두 출처 화면이 정상 렌더 (외부 링크만 실패 → "링크 열기 실패" Alert)
 - [ ] 설정 "개인정보 처리방침" 탭 → **앱을 벗어나지 않고** `/privacy` 화면이 열림
-- [ ] `/privacy`: 섹션 번호 1.~7. 순서대로, 부제 `마지막 갱신 YYYY-MM-DD` 가 `docs/privacy-policy.html` 라이브 페이지와 동일
+- [ ] `/privacy`: 섹션 번호 1.~8. 순서대로, 부제 `마지막 갱신 YYYY-MM-DD` 가 `docs/privacy-policy.html` 라이브 페이지와 동일
 - [ ] `/privacy` 이메일 블록 탭 → 메일 앱 컴포저 (실패 시 "링크 열기 실패" Alert). 그 외 본문은 탭 반응 없음
 - [ ] `/privacy` 본문에 "페르소나 / 유학생 / 취업자" 문구가 없음 (ADR-067 · ADR-072)
 
@@ -4133,6 +4133,16 @@ it('비교 화면 모든 카드에 a11y label', () => {
 - [ ] TestFlight / Internal Play 설치 정상
 - [ ] 스토어 메타데이터 + 스크린샷 + 개인정보 처리방침 URL 동작
 - [ ] 심사 거절 사유 (RELEASE.md §6) 모두 검증
+
+### 18.9 광고·동의 흐름 (ADR-077)
+
+Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단위) 기준. ATT·GDPR 폼은 AdMob 콘솔에 실제 App ID 와 IDFA 설명·GDPR 메시지가 게시돼 있어야 뜬다 — 샘플 App ID 빌드에서는 (1)·(2) 의 폼이 나오지 않는다.
+
+- [ ] (1) iOS 첫 실행(앱 삭제 후 재설치) → 도시 선택 → Compare 에서 IDFA 설명 메시지 → ATT 시스템 알림 순서. 온보딩 화면 위에서는 아무 프롬프트도 뜨지 않음. 허용·거부 각각 하단 배너 표시
+- [ ] (2) EEA 지역 시뮬레이션: `src/lib/ads.native.ts` 의 `AdsConsent.gatherConsent()` 에 `{ debugGeography: AdsConsentDebugGeography.EEA, testDeviceIdentifiers: [...] }` 를 **로컬에서만 임시로** 넘긴다 (옵션 타입은 `AdsConsent.requestInfoUpdate` 와 같은 `AdsConsentInfoOptions`. 코드에 dev 전용 경로는 없다 — 커밋 금지). GDPR 동의 폼 표시 + 설정 "광고 개인정보 설정"(`menu-ads-privacy`) 메뉴 노출 → 탭 시 개인정보 옵션 폼 열림
+- [ ] (3) 비행기 모드: 홈·비교·상세의 배너 슬롯 높이 0 (레이아웃이 광고 도입 전과 동일), 앱 동작 정상
+- [ ] (4) 온보딩·설정·출처(`/sources`, `/sources/[cityId]`)·개인정보(`/privacy`) 화면에 배너 없음
+- [ ] (5) 홈·비교·상세의 로딩(skeleton)·에러(ErrorView) 화면에 배너 없음
 
 ---
 
@@ -4146,6 +4156,7 @@ it('비교 화면 모든 카드에 a11y label', () => {
 - **결정성:** 실시간 환율 의존 값(정확한 배수·KRW)은 단정 금지 — 방향(↑/↓)·정규식 패턴·testID 구조만 검증. 도시는 번들 시드 보장 도시(`seoul`/`vancouver`) 우선.
 - **독립성:** 각 flow 는 `launchApp: clearState` 로 시작해 독립. 온보딩·Compare 진입은 `common/` 서브플로우(runFlow 전용, 워크스페이스 글롭 제외) 재사용.
 - **자동 검증 밖(한계):** 색 토큰/그림자/애니메이션/햅틱/폰트 → §18(수동) + `07-visual-a11y` screenshot 수동 리뷰로 보완. `tax` 카테고리는 데이터 부재로 no-data 경로만 검증 가능.
+- **광고는 E2E 단언 대상 아님** — 테스트 광고도 네트워크 의존이라 비결정적. `ad-banner` testID 는 존재 확인용으로만. 동의 폼(ATT·GDPR)은 수동 체크 (§18.9). Maestro `launchApp` 기본 permissions 가 추적 권한을 미리 허용해 ATT 는 flow 안에서 구조적으로 뜨지 않는다 (ADR-077).
 
 ### 18-A.2 재사용 서브플로우 (`.maestro/common/`)
 
