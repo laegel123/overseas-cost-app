@@ -183,6 +183,8 @@ export async function refreshCache(): Promise<{ ok: boolean; lastSync: string }>
 
 모두 `zustand/middleware` 의 `persist` + AsyncStorage 어댑터 사용. 첫 렌더 전 hydration 보장 위해 `_layout.tsx` 에서 `useStore.persist.onFinishHydration` 으로 splash 유지.
 
+`useAdsStore` (`status` · `canRequestAds` · `privacyOptionsRequired`) — 비영속, hydration 합성 미참여, 광고 초기화 상태 — ADR-077. 위 8개와 달리 `persist` 없이 메모리에만 둔다 (동의 상태는 UMP SDK 가 저장). 루트 레이아웃이 `begin()` → `initializeAds().then(settle)` 로 채우고, 부팅(splash)을 막지 않는다.
+
 ## 컴포넌트 위계
 
 ```

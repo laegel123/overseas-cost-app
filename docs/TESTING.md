@@ -2791,6 +2791,25 @@ ADR-077 / admob-banner-ads step 1. 파일: `src/lib/__tests__/ads.web.test.ts`. 
 
 > `ads.web.ts` 는 `ads.native.ts` 도 SDK 도 import 하지 않는다 — 한쪽이 다른 쪽을 import 하면 웹 번들에 네이티브 모듈이 끌려온다. 커버리지 100/100/100/100.
 
+### 9.43 `src/store/ads.ts` — 광고 초기화 상태 (비영속)
+
+ADR-077 / admob-banner-ads step 2. 파일: `src/store/__tests__/ads.test.ts`. 기존 8개 store 와 달리 persist 미들웨어·AsyncStorage 를 쓰지 않고 `waitForAllStoresHydrated` 에도 참여하지 않는다 (영속 데이터 없음, 광고 초기화는 부팅 비차단). 타입 `AdsStatus`·`AdsInitResult` 는 `@/lib` 에서 재사용. 각 테스트 전 `reset()`.
+
+**기본 동작:**
+
+- [x] 초기 상태 = `INITIAL_STATE` (`{ status: 'idle', canRequestAds: false, privacyOptionsRequired: false }`)
+- [x] `begin()` → `status: 'initializing'`, `canRequestAds`·`privacyOptionsRequired` 불변
+- [x] `settle({ status: 'ready', canRequestAds: true, privacyOptionsRequired: true, error: null })` → 세 필드 반영
+- [x] `settle({ status: 'disabled', …, error: new Error('x') })` → `disabled`, `error` 는 store 에 담기지 않음
+- [x] `reset()` → `INITIAL_STATE` 복귀
+
+**비영속:**
+
+- [x] 액션(`begin`·`settle`·`reset`) 호출 후 `AsyncStorage.setItem` mock 호출 0회
+- [x] `useAdsStore.persist` 가 `undefined`
+
+> 본 store 는 throw 하지 않는다. 에러 노출은 lib (`initializeAds` 의 `__DEV__` console.error) 책임이고 화면은 `status` 만 본다. 커버리지 100/100/100/100 (`src/store/**` 임계치 100/90/100/100).
+
 ---
 
 ## 9-A. 자동화 스크립트 (scripts/refresh/_ + scripts/build/_)
