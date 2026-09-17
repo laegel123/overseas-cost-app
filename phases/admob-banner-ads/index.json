@@ -7,7 +7,8 @@
       "name": "sdk-spike",
       "status": "completed",
       "started_at": "2026-09-17T13:53:35+0900",
-      "summary": "react-native-google-mobile-ads 16.3.4 정확 고정(16.5.0/16.4.0 은 play-services-ads 25.4.0 의 Kotlin 2.3 메타데이터가 SDK 54 Kotlin 2.1.20 과 비호환 → Android 빌드 실패) + app.json plugin(샘플 App ID·ATT 문구·SKAdNetwork 50) + tsconfig moduleSuffixes 추가(jest haste 설정 불필요) · iOS: prebuild --clean + xcodebuild(Xcode 27 에 Simulator.app 이 없어 expo run:ios 불가, 기존 pod 포함 deployment target 에러로 IPHONEOS_DEPLOYMENT_TARGET=15.1 명령행 override) BUILD SUCCEEDED·Maestro 스모크 통과·ATT 미표시 · Android: development 프로필은 expo-dev-client 미설치로 거부 → preview 프로필 55d11aac FINISHED(APK 실기기 부팅 미확인) · expo-build-properties 추가 안 함 · 상세 SPIKE_RESULT.md"
+      "summary": "react-native-google-mobile-ads 16.3.4 정확 고정(16.5.0/16.4.0 은 play-services-ads 25.4.0 의 Kotlin 2.3 메타데이터가 SDK 54 Kotlin 2.1.20 과 비호환 → Android 빌드 실패) + app.json plugin(샘플 App ID·ATT 문구·SKAdNetwork 50) + tsconfig moduleSuffixes 추가(jest haste 설정 불필요) · iOS: prebuild --clean + xcodebuild(Xcode 27 에 Simulator.app 이 없어 expo run:ios 불가, 기존 pod 포함 deployment target 에러로 IPHONEOS_DEPLOYMENT_TARGET=15.1 명령행 override) BUILD SUCCEEDED·Maestro 스모크 통과·ATT 미표시 · Android: development 프로필은 expo-dev-client 미설치로 거부 → preview 프로필 55d11aac FINISHED(APK 실기기 부팅 미확인) · expo-build-properties 추가 안 함 · 상세 SPIKE_RESULT.md",
+      "completed_at": "2026-09-17T14:22:55+0900"
     },
     {
       "step": 1,
