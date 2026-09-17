@@ -23,7 +23,8 @@
       "name": "ads-store",
       "status": "completed",
       "started_at": "2026-09-17T14:32:24+0900",
-      "summary": "src/store/ads.ts useAdsStore(비영속 — zustand create 만, AsyncStorage import 없음 · AdsState status/canRequestAds/privacyOptionsRequired · 액션 begin→initializing / settle(result)→세 필드 반영·error 는 store 에 미보관 / reset→INITIAL_STATE · 타입 AdsStatus·AdsInitResult 는 @/lib 에서 import type 재사용, throw 없음) · hydration.ts 대기 목록 미참여(무변경) · src/store/index.ts useAdsStore + AdsState/AdsActions export, 상단 주석 한 줄 · src/store/__tests__/ads.test.ts 7케이스(초기·begin·settle ready/disabled·reset·setItem 0회·persist undefined) + TESTING §9.43 인벤토리 + ARCHITECTURE §상태 관리 useAdsStore 문단 · 커버리지 ads.ts 100/100/100/100 · 주의: AC 커버리지 명령은 categoryInclusion(88.23%)·rentChoice(96.87%)·taxChoice·tuitionChoice(90.38%) 임계치 미달로 exit 1 — HEAD 기준선에서도 동일 수치인 기존 부채, 본 step 무관. 전체 97 suites 2119 passed"
+      "summary": "src/store/ads.ts useAdsStore(비영속 — zustand create 만, AsyncStorage import 없음 · AdsState status/canRequestAds/privacyOptionsRequired · 액션 begin→initializing / settle(result)→세 필드 반영·error 는 store 에 미보관 / reset→INITIAL_STATE · 타입 AdsStatus·AdsInitResult 는 @/lib 에서 import type 재사용, throw 없음) · hydration.ts 대기 목록 미참여(무변경) · src/store/index.ts useAdsStore + AdsState/AdsActions export, 상단 주석 한 줄 · src/store/__tests__/ads.test.ts 7케이스(초기·begin·settle ready/disabled·reset·setItem 0회·persist undefined) + TESTING §9.43 인벤토리 + ARCHITECTURE §상태 관리 useAdsStore 문단 · 커버리지 ads.ts 100/100/100/100 · 주의: AC 커버리지 명령은 categoryInclusion(88.23%)·rentChoice(96.87%)·taxChoice·tuitionChoice(90.38%) 임계치 미달로 exit 1 — HEAD 기준선에서도 동일 수치인 기존 부채, 본 step 무관. 전체 97 suites 2119 passed",
+      "completed_at": "2026-09-17T14:37:42+0900"
     },
     {
       "step": 3,
