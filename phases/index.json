@@ -74,7 +74,8 @@
     },
     {
       "dir": "admob-banner-ads",
-      "status": "pending"
+      "status": "blocked",
+      "blocked_at": "2026-09-17T15:08:04+0900"
     }
   ]
 }
