@@ -31,7 +31,8 @@
       "name": "screen-footer",
       "status": "completed",
       "started_at": "2026-09-17T14:37:42+0900",
-      "summary": "src/components/Screen.tsx footer?: React.ReactNode 슬롯(scroll true/false 두 분기 모두 SafeAreaView 마지막 자식으로 {footer} 직접 렌더 — 래퍼 View·기본 높이·배경·padding 없음, ScrollView/inner View 형제, 광고 import 없음, ReactNode 가 undefined 포함이라 | undefined 불필요) · Screen.test 6케이스 추가(scroll true/false 형제·마지막 자식 순서, 미지정 시 SafeAreaView 자식 1개, footer 부모 className 에 px- 없음 — footer 를 ScrollView/inner View 안으로 옮긴 변형에서 4건 실패 확인) · TESTING §9.11 에 footer 슬롯(§9.45) 블록 + UI_GUIDE §컴포넌트 사양 Screen.footer 한 줄 · 기존 호출부·app/** 무변경, 스냅샷 7개 통과 · 커버리지 Screen.tsx 100/100/100/100 · 주의: src/components 커버리지 명령은 BottomSheet.tsx branches 50%(<75) 로 exit 1 — HEAD 기준선에서도 동일한 기존 부채, 본 step 무관 · docs/TESTING.md·UI_GUIDE.md 는 HEAD 부터 prettier 미준수(기존 표), 추가분은 무관. 전체 97 suites 2125 passed(1 skipped)"
+      "summary": "src/components/Screen.tsx footer?: React.ReactNode 슬롯(scroll true/false 두 분기 모두 SafeAreaView 마지막 자식으로 {footer} 직접 렌더 — 래퍼 View·기본 높이·배경·padding 없음, ScrollView/inner View 형제, 광고 import 없음, ReactNode 가 undefined 포함이라 | undefined 불필요) · Screen.test 6케이스 추가(scroll true/false 형제·마지막 자식 순서, 미지정 시 SafeAreaView 자식 1개, footer 부모 className 에 px- 없음 — footer 를 ScrollView/inner View 안으로 옮긴 변형에서 4건 실패 확인) · TESTING §9.11 에 footer 슬롯(§9.45) 블록 + UI_GUIDE §컴포넌트 사양 Screen.footer 한 줄 · 기존 호출부·app/** 무변경, 스냅샷 7개 통과 · 커버리지 Screen.tsx 100/100/100/100 · 주의: src/components 커버리지 명령은 BottomSheet.tsx branches 50%(<75) 로 exit 1 — HEAD 기준선에서도 동일한 기존 부채, 본 step 무관 · docs/TESTING.md·UI_GUIDE.md 는 HEAD 부터 prettier 미준수(기존 표), 추가분은 무관. 전체 97 suites 2125 passed(1 skipped)",
+      "completed_at": "2026-09-17T14:42:07+0900"
     },
     {
       "step": 4,
