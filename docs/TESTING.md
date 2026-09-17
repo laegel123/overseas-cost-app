@@ -2817,6 +2817,32 @@ ADR-077 / admob-banner-ads step 2. 파일: `src/store/__tests__/ads.test.ts`. �
 
 > 본 store 는 throw 하지 않는다. 에러 노출은 lib (`initializeAds` 의 `__DEV__` console.error) 책임이고 화면은 `status` 만 본다. 커버리지 100/100/100/100 (`src/store/**` 임계치 100/90/100/100).
 
+### 9.44 `src/components/AdBanner.native.tsx` / `AdBanner.web.tsx` — 하단 배너
+
+ADR-077 / admob-banner-ads step 4. 파일: `src/components/__tests__/AdBanner.test.tsx` (`../AdBanner` → jest-expo 가 `.native` 로 해석, 웹 파일은 `jest.isolateModules` + 경로 직접 require). SDK 는 §5.1 전역 mock — 테스트도 SDK 를 import 하지 않고 `jest.requireMock` 으로 `BannerAd` mock 에 접근한다 (`jest.fn(() => null)`). props 는 `mock.calls` 로 검사하고 `onAdLoaded` / `onAdFailedToLoad` 를 `act()` 안에서 직접 호출해 로드·실패를 시뮬레이션한다. 각 테스트 전 `useAdsStore.getState().reset()`.
+
+**렌더 조건 (모두 `BannerAd` 미호출 확인):**
+
+- [x] `status: 'idle'` (초기) → null
+- [x] `status: 'ready'` + `canRequestAds: false` → null
+- [x] `status: 'disabled'` → null
+- [x] `Platform.OS = 'web'` (`jest.replaceProperty`) → ready + canRequestAds 여도 null
+
+**ready + canRequestAds:**
+
+- [x] `BannerAd` 1회 마운트 + `unitId === TestIds.ADAPTIVE_BANNER` (테스트 환경은 `__DEV__` → test 모드) + `size === 'ANCHORED_ADAPTIVE_BANNER'`
+- [x] 로드 전 컨테이너 `h-0 overflow-hidden` → `onAdLoaded()` 후 `h-0` 없음 + `border-t border-line`
+- [x] `onAdFailedToLoad(new Error('no fill'))` → 다시 `h-0` + `__DEV__` console.error 1회 (`jest.spyOn`)
+- [x] 로드 실패 후에도 `BannerAd` 마운트 유지 (SDK 자동 재시도 보존 — 언마운트 회귀 방지)
+- [x] a11y — 컨테이너 `accessibilityLabel="광고"` + `accessibilityRole="none"` (SDK 뷰가 자체 라벨을 가짐)
+- [x] `testID` 기본값 `ad-banner` + prop override
+
+**웹 (`AdBanner.web.tsx`):**
+
+- [x] 항상 null + SDK mock 미호출 (네이티브 모듈 미참조)
+
+> 로드 전·실패 시 높이 0 이 계약이다 — placeholder 높이를 예약하지 않는 대신 로드 후 1회 레이아웃 시프트를 수용한다 (ADR-077). 펼친 높이는 SDK 가 기기 폭에 맞춰 계산하므로 컴포넌트에 px 가 없다. 배너를 화면에 배선하는 쪽 테스트는 §9.45 (`Screen.footer`) 와 화면별 기존 §.
+
 ---
 
 ## 9-A. 자동화 스크립트 (scripts/refresh/_ + scripts/build/_)
