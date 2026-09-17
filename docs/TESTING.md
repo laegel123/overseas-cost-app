@@ -1432,6 +1432,13 @@ chrome 클래스 검증은 inner 노드 기준).
 - [x] `testID` 전달 (inner View / ScrollView)
 - [ ] iOS notch / iPhone SE: SafeAreaView 라이브러리 책임 — 본 컴포넌트는 prop 위임
 
+**`footer` 슬롯 (§9.45 — ADR-077 / admob-banner-ads step 3):** 광고를 모르는 순수 레이아웃 슬롯. SafeAreaView mock 이 children passthrough 라 `UNSAFE_getByType(SafeAreaView).children` 순서로 배치 검증.
+
+- [x] `scroll=true` + `footer` → footer 렌더, ScrollView 안에 없음(`within(sv)` null), SafeAreaView 자식 `[ScrollView, footer]` (마지막)
+- [x] `scroll=false` + `footer` → footer 렌더, inner View 안에 없음, SafeAreaView 자식 `[inner View, footer]` (마지막)
+- [x] `footer` 미지정 (`scroll` true/false) → SafeAreaView 자식 1개 — 래퍼 View 추가 없음, 기존 구조·스냅샷 무변경
+- [x] `padding="screen-x"` + `footer` (`scroll` true/false) → padding 은 ScrollView / inner View 에만, footer 의 부모(SafeAreaView) className 에 `px-` 없음 (폭 전체)
+
 ### 9.12 `src/components/TopBar.tsx` (components phase step 2)
 
 **Prop 조합 매트릭스 (8개):**

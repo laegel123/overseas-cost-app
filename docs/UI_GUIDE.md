@@ -166,6 +166,10 @@ border-radius
 - 36×36 이모지 박스(hot 시 `#FFE9DC`, 정상 `#F0F5F9`), 13px Manrope 700 품목명, `1.2만 → 2.2만` 11px tiny.
 - 우측 배수 13px Manrope 800.
 
+### Screen (화면 chrome wrapper)
+
+- `Screen.footer`: ScrollView 밖·SafeArea 안 하단 고정 슬롯, 폭 전체, 광고 배너용 (ADR-077).
+
 ## 카테고리별 상세 화면 사양
 
 > ⚠ **v1.0 현황:** 아래 hero 라벨·섹션·행 구성은 구현과 다르다. Detail hero 는 카테고리 전용 라벨 대신 `{카테고리} · {선택 항목}` 캡션을 쓰고, rent 는 행 탭 순환(ADR-060), tuition/tax 는 시트 단일 선택(ADR-061)이며, **페르소나 전용 진입 가드는 없다**. tax 는 데이터 부재로 no-data 경로만. (전체 편차: 상단 §v1.0 구현 현황)
