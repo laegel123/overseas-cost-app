@@ -238,8 +238,9 @@ hero 월 합계의 기본 포함(inclusion) 은 `rent/food/transport = ON`, `tui
   │    └─ useSettingsStore.persist.hasHydrated()       ─ Promise E
   ├─ Promise.all([A,B,C,D,E])
   ├─ SplashScreen.hideAsync()
-  └─ if !onboarded → router.replace('/onboarding')
-     else          → router.replace('/(tabs)')
+  ├─ if !onboarded → router.replace('/onboarding')
+  │  else          → router.replace('/(tabs)')
+  └─ bootReady && onboarded → AdsConsent.gatherConsent → mobileAds.initialize (비차단, useAdsStore — ADR-077)
 ```
 
 - 폰트·hydration 미완 상태에서는 **자식 트리를 렌더하지 않는다** (FOUC + AsyncStorage race 방지).

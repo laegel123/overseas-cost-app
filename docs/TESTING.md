@@ -1914,6 +1914,15 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 - [x] meta:lastSync → useSettingsStore.lastSync 단방향 sync (app-shell step 4)
 - [x] bridge 실패 → 부팅 흐름 차단 안 함 + dev 콘솔 로그 (app-shell step 4)
 
+**광고 동의·초기화 트리거 (§9.46 — ADR-077 / admob-banner-ads step 5):** `@/store` mock 에 `useAdsStore` (셀렉터가 매 렌더 같은 `begin`/`settle` jest.fn 참조를 받음), `@/lib` 는 `requireActual` spread + `initializeAds` 만 mock.
+
+- [x] `bootReady && onboarded=true` → `begin` 1회 → `initializeAds` 1회 (`invocationCallOrder` 로 순서) → pending 동안 `settle` 0회 + `hideAsync` 는 이미 호출(비차단) → resolve 후 `settle` 이 결과 객체 그대로 1회
+- [x] `onboarded=false` (bootReady 진입 상태) → `begin`·`initializeAds` 0회 — 온보딩 화면 위 프롬프트 없음
+- [x] `bootReady=false` (hydration pending) 동안 `begin`·`initializeAds` 0회
+- [x] `onboarded` false → true 전이 (`rerender`, 도시 선택 완료) 시점에 `initializeAds` 1회 + `settle` 호출
+
+> `.then(settleAds)` 에 `.catch` 를 붙이지 않는다 — `initializeAds` 는 reject 하지 않는 계약 (§9.42) 이며, 계약이 깨지면 unhandled rejection 으로 드러나야 한다. `waitForStoresOrTimeout` 대기 목록은 무변경 (ads store 비영속·비차단, §9.43).
+
 ### 9.21.1 `app/(tabs)/_layout.tsx` (하단 탭 레이아웃 — BottomTabBar 어댑터)
 
 BottomTabBar(제어형, §9.13)를 expo-router Tabs 의 `tabBar` prop 에 어댑터로 연결.
@@ -2060,6 +2069,13 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 - [x] **서울합=0 케이스 → hero 가운데 mult 영역 미렌더** (ADR-062): 학비/비자만 ON (서울 0원 카테고리만) + 다른 카드 OFF → `centerMult=undefined` 로 HeroCard 호출 → mult 텍스트(`×` 형식) 0개, caption(`만원/월`) 만 표시. rent 추가 ON 하면 mult 복구.
 - [x] 사용자 토글 갱신 (`setInclusion('vancouver', 'rent', false)`) → ComparePair rent 카드 토글 value=false + 배지 즉시 갱신
 - [x] 도시별 inclusion 독립 — vancouver 의 visa ON 토글이 osaka 화면 default 에 영향 없음
+
+**광고 배너 (ADR-077 / admob-banner-ads step 5):** `AdBanner` 는 mock 하지 않고 실제 컴포넌트 + §5.1 전역 SDK mock. 부재 케이스도 `useAdsStore.setState({ status: 'ready', canRequestAds: true })` 주입 상태에서 검증 (화면이 footer 를 안 붙였음을 확인), `afterEach` 에서 `reset()`.
+
+- [x] ready 상태 (`compare-screen`) → `ad-banner` 존재 (접힌 상태여도 testID 있음)
+- [x] loading 상태 (`compare-screen-loading`) → `ad-banner` 부재
+- [x] error 상태 (`compare-screen-error`) → `ad-banner` 부재
+- [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재 (렌더 조건은 `AdBanner` 소유, §9.44)
 
 ### 9.24.1 `src/lib/search.ts` (홈 검색)
 
@@ -2213,6 +2229,13 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] 핵심 contract (hero + 섹션 mount) — food / visa 2 케이스. 전체 트리 snapshot 은 §6.3·§6.4 위반 + ReactTestInstance fiber cyclic 직렬화 RangeError 발생 (PR #17 review 이슈 2) — 정밀 시각 회귀는 v2 스크린샷 도구 (ADR-035).
 - [ ] iOS swipe-back, Compare 스크롤 위치 보존 (수동 e2e — Phase 7)
 
+**광고 배너 (ADR-077 / admob-banner-ads step 5):** §9.24 광고 배너 블록과 같은 방식 (실제 `AdBanner` + 전역 SDK mock, 부재 케이스도 광고 store ready 주입).
+
+- [x] ready 상태 (`detail-screen`) → `ad-banner` 존재
+- [x] loading 상태 (`detail-screen-loading`) → `ad-banner` 부재
+- [x] error 상태 (`detail-screen-error`) → `ad-banner` 부재
+- [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재
+
 ### 9.26 `app/(tabs)/index.tsx` (홈)
 
 screens phase step 2 구현 — 재방문 사용자가 빠르게 즐겨찾기 도시로 진입하거나 새 도시를 검색.
@@ -2275,6 +2298,13 @@ screens phase step 2 구현 — 재방문 사용자가 빠르게 즐겨찾기 �
 **스냅샷:**
 
 - [x] 즐겨찾기 첫 카드 (accent navy) + 권역 pill 컨테이너 — testID 부분 트리만 (PR #18 review round 6, §6.6 100라인 정책)
+
+**광고 배너 (ADR-077 / admob-banner-ads step 5):** §9.24 광고 배너 블록과 같은 방식 (실제 `AdBanner` + 전역 SDK mock, 부재 케이스도 광고 store ready 주입). 홈은 Tabs 안이라 배너가 `BottomTabBar` 바로 위 — 간격 없음, 구분은 `AdBanner` 의 `border-t`.
+
+- [x] ready 상태 (`home-screen`) → `ad-banner` 존재
+- [x] loading 상태 (`home-screen-loading`) → `ad-banner` 부재
+- [x] error 상태 (`home-screen-error`) → `ad-banner` 부재
+- [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재
 
 ### 9.26b `src/lib/errors.ts` — 에러 클래스 카탈로그
 
