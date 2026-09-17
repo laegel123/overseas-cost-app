@@ -452,9 +452,13 @@ menuRefresh: '데이터 새로고침',
 menuSources: '데이터 출처 보기',
 menuFeedback: '피드백 보내기',
 menuPrivacy: '개인정보 처리방침',
+menuAdsPrivacy: '광고 개인정보 설정',   // 조건부 — privacyOptionsRequired 일 때만 (ADR-077)
 menuAppInfo: '앱 정보',
 settingsFooter: 'Made with ♥ in Seoul · 2026',
 ```
+
+- `광고 개인정보 설정`(`menu-ads-privacy`) 은 UMP 가 개인정보 옵션을 요구하는 사용자(EEA·영국·스위스)에게만 보인다 — TCF 동의 철회 진입점 (ADR-077). 한국 사용자에게는 렌더되지 않는다.
+- 광고 설정 폼(`showPrivacyOptionsForm`) 실패 시 네이티브 `Alert('알림', '광고 설정 화면을 열지 못했어요. 잠시 후 다시 시도해 주세요.')`.
 
 ### 출처 화면 (`app/sources/index.tsx`, `app/sources/[cityId].tsx`)
 
@@ -533,6 +537,7 @@ ADR-014·ADR-036 에 따라 사용자에게 보일 모든 에러 메시지를 �
 | `ALL_CITIES_UNAVAILABLE` | "데이터를 불러올 수 없어요\n네트워크 연결을 확인해 주세요" | 전체 ErrorView            |
 | `FAVORITES_LIMIT`        | "즐겨찾기는 최대 50개까지 추가할 수 있어요"                | 토스트                    |
 | `INVARIANT`              | "예기치 못한 문제가 생겼어요\n앱을 다시 실행해 주세요"     | ErrorBoundary fatal       |
+| (코드 없음 — `showPrivacyOptionsForm` reject) | "광고 설정 화면을 열지 못했어요. 잠시 후 다시 시도해 주세요." | 설정 네이티브 `Alert` (제목 "알림") |
 
 규칙:
 
@@ -595,6 +600,7 @@ v1.0 한국어 강제 (ADR-016). 향후 마찰 줄이기 위해:
 | 데이터 출처 보기  | book    | #11263C       | #F0F5F9               | "N개" (런타임 실측 출처 수) | 인앱 화면 `/sources` |
 | 피드백 보내기     | mail    | #11263C       | #F0F5F9               | (없음)                  | mailto    |
 | 개인정보 처리방침 | shield  | #11263C       | #F0F5F9               | (없음)                  | 인앱 화면 `/privacy` |
+| 광고 개인정보 설정 (`menu-ads-privacy`) | shield | #11263C | #F0F5F9 | (없음) | 조건부 — EEA·영국·스위스 사용자만, TCF 동의 철회 진입점 — ADR-077. 탭 → `showPrivacyOptionsForm`, 실패 시 `Alert` |
 | 앱 정보           | info    | #8A98A0 (dim) | #F0F5F9               | "v1.0.0"                | dim 라벨  |
 
 ### RegionPill (홈 권역 필터)

@@ -2510,6 +2510,14 @@ screens phase step 3 구현 — 사용 통계 + 메뉴. 페르소나 배지는 *
 
 - [x] 피드백 보내기 → mailto:laegel1@gmail.com 호출 + `router.push` 미호출 — 인앱 전환 후에도 유지 (ADR-021) (screens step 3, in-app-policy-pages step 7 회귀 가드)
 
+**광고 개인정보 설정 (ADR-077 / admob-banner-ads step 6):** `@/lib` mock 에 `showPrivacyOptionsForm: jest.fn()` 추가, `useAdsStore.setState({ privacyOptionsRequired })` 로 주입 (`resetStores` 에서 `reset()`). 메뉴 순서는 `getAllByRole('button')` 의 `menu-*` testID 트리 순서로 검증.
+
+- [x] `privacyOptionsRequired=false` (기본, 한국 등) → `menu-ads-privacy` 부재 + 메뉴 순서 4개 그대로 (sources·feedback·privacy·app-info) — 기존 "4개 메뉴" 테스트·data-refresh-card 스냅샷 무변경
+- [x] `privacyOptionsRequired=true` (EEA·영국·스위스) → `menu-ads-privacy` 존재 + 라벨 "광고 개인정보 설정" + `menu-privacy` 와 `menu-app-info` 사이 순서
+- [x] `privacyOptionsRequired` false·true 양쪽 → `menu-app-info` 가 여전히 마지막 행 (`border-b` 없음)
+- [x] `menu-ads-privacy` 탭 → `showPrivacyOptionsForm` 1회 + `Alert` 미호출
+- [x] `showPrivacyOptionsForm` reject → `Alert.alert('알림', '광고 설정 화면을 열지 못했어요. 잠시 후 다시 시도해 주세요.')` 1회 (silent fail 아님)
+
 **Footer:**
 
 - [x] "Made with ♥ in Seoul · 2026" 텍스트 표시 (screens step 3)
