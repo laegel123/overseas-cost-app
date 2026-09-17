@@ -150,6 +150,27 @@ jest.mock('expo-splash-screen', () => ({
   hideAsync: jest.fn(() => Promise.resolve()),
 }));
 
+// react-native-google-mobile-ads — 광고 SDK (ADR-077). default 는 `mobileAds()` 호출 형태를 흉내 낸다.
+// initialize 는 호출 순서 검증용으로 factory 밖 변수 (jest 호이스팅 규칙상 `mock` 접두 필수).
+const mockMobileAdsInitialize = jest.fn(async () => []);
+jest.mock('react-native-google-mobile-ads', () => ({
+  __esModule: true,
+  default: () => ({ initialize: mockMobileAdsInitialize }),
+  AdsConsent: {
+    gatherConsent: jest.fn(async () => ({ status: 'NOT_REQUIRED', canRequestAds: true })),
+    getConsentInfo: jest.fn(async () => ({
+      canRequestAds: true,
+      privacyOptionsRequirementStatus: 'NOT_REQUIRED',
+    })),
+    showPrivacyOptionsForm: jest.fn(async () => undefined),
+    reset: jest.fn(),
+  },
+  // 테스트가 mock.calls[0][0].onAdLoaded() 로 로드/실패를 시뮬레이션. NativeWind 제약으로 JSX 미사용
+  BannerAd: jest.fn(() => null),
+  BannerAdSize: { ANCHORED_ADAPTIVE_BANNER: 'ANCHORED_ADAPTIVE_BANNER' },
+  TestIds: { ADAPTIVE_BANNER: 'ca-app-pub-3940256099942544/2435281174' },
+}));
+
 // react-native Linking
 jest.mock('react-native/Libraries/Linking/Linking', () => ({
   openURL: jest.fn(() => Promise.resolve(true)),
@@ -2250,7 +2271,7 @@ screens phase step 2 구현 — 재방문 사용자가 빠르게 즐겨찾기 �
 
 ### 9.26b `src/lib/errors.ts` — 에러 클래스 카탈로그
 
-ARCHITECTURE.md §에러 타입 카탈로그의 15개 클래스 각각:
+ARCHITECTURE.md §에러 타입 카탈로그의 16개 클래스 각각:
 
 - [ ] `instanceof AppError === true`
 - [ ] `instanceof Error === true`
@@ -2261,14 +2282,14 @@ ARCHITECTURE.md §에러 타입 카탈로그의 15개 클래스 각각:
 - [ ] toString 또는 stack 에 `code` 포함 (디버깅성)
 - [ ] JSON 직렬화 시 `code` + `message` 포함 (로깅 시 정보 손실 X)
 
-테스트 매트릭스 (15개 × 위 8개 = 120 케이스 — 헬퍼 함수로 표현):
+테스트 매트릭스 (16개 × 위 8개 = 128 케이스 — 헬퍼 함수로 표현):
 
 ```ts
 const errorCases: Array<[new (msg: string) => AppError, string]> = [
   [InvalidNumberError, 'INVALID_NUMBER'],
   [UnknownCurrencyError, 'UNKNOWN_CURRENCY'],
   [FxFetchError, 'FX_FETCH_FAILED'],
-  // ... 15개
+  // ... 16개
 ];
 
 describe.each(errorCases)('%s', (Ctor, expectedCode) => {
@@ -2710,6 +2731,65 @@ ADR-071·ADR-072 / in-app-policy-pages step 6. 설정의 "개인정보 처리방
 > mock 기법 주석: jest 는 `jest.mock` 팩토리 결과의 프로퍼티를 **값으로 복사**하므로 getter 로 `PRIVACY_POLICY` 를 교체할 수 없다. 정본의 얕은 복사본 객체 하나를 노출하고 테스트가 `Object.assign` 으로 그 내용을 갈아끼운다 (화면이 렌더 시점에 필드를 읽으므로 반영된다).
 >
 > 환율 API 주소 등 이메일 외의 본문 문자열은 링크로 만들지 않는다 (사실 명시일 뿐 실행할 동선이 아님 — ADR-071). 화면 이동은 `presentation: 'modal'` 이 아니라 일반 Stack push (ADR-071 결정 3).
+
+---
+
+### 9.42 `src/lib/ads.native.ts` — 광고 SDK 경유 단일 지점
+
+ADR-077 / admob-banner-ads step 1. 컴포넌트·화면은 `react-native-google-mobile-ads` 를 직접 import 하지 않고 이 모듈을 거친다 (ESLint `no-restricted-imports`). SDK 는 §5.1 전역 mock — 테스트도 SDK 를 import 하지 않고 `jest.requireMock` 으로 mock 함수에 접근한다. 타입·`AD_UNIT_IDS`·`resolveAdsMode`·placeholder 판정은 SDK 미참조 `src/lib/adsConfig.ts` 에 두고 native/web 이 공유한다 (본 §와 §9.42-w 가 함께 커버). 파일: `src/lib/__tests__/ads.test.ts` (`../ads` → jest-expo 가 `.native` 로 해석).
+
+**`resolveAdsMode`:**
+
+- [x] env `'1'` → `test` (dev=false 여도)
+- [x] env 없음 + dev=true → `test`
+- [x] env 없음 + dev=false → `production`
+- [x] env `'0'` + dev=false → `production`
+
+**`resolveBannerUnitId`:**
+
+- [x] `test` → `TestIds.ADAPTIVE_BANNER` (ios·android)
+- [x] `production` + placeholder (ios·android) → `AdsConfigError` throw + `code === 'ADS_CONFIG'`
+- [x] `production` + 실제 형식 (`jest.replaceProperty(AD_UNIT_IDS, …)` 주입) → 그대로 반환
+
+**`initializeAds`:**
+
+- [x] 호출 순서 `gatherConsent → initialize → getConsentInfo` (`mock.invocationCallOrder`) + `ready` 결과
+- [x] `gatherConsent` 를 인자 없이 호출 — 비맞춤형 강제 옵션 없음 (UMP 동의를 SDK 가 직접 읽는다)
+- [x] `gatherConsent` reject 여도 `initialize`·`getConsentInfo` 호출 + 결과 `error` 에 담김 + status `ready`
+- [x] Error 가 아닌 reject 값 → `Error` 로 감싸 `error` 에 담김
+- [x] `initialize` reject → `disabled` + error (`getConsentInfo` 미호출)
+- [x] `getConsentInfo` reject → `disabled` + error
+- [x] `AdsConfigError` (`__DEV__=false` + placeholder) → SDK 3종 **미호출** + `disabled` + 콘솔 로그 없음 (운영 빌드는 결과 `error` 로만 노출)
+- [x] `__DEV__=false` + 실제 단위 ID → SDK 호출 + `ready`
+- [x] `privacyOptionsRequirementStatus: 'REQUIRED'` → `privacyOptionsRequired: true`
+- [x] 동시 2회 호출 → 같은 Promise + SDK 1회 + 같은 결과 객체 (멱등)
+- [x] 완료 후 재호출 → SDK 추가 호출 0 + 캐시 결과 (실패 결과도 캐시 — 재시도 없음)
+- [x] `__resetForTesting` 후 재실행 → SDK 재호출
+- [x] `__DEV__` 에서 error 있으면 `console.error('[ads] …', error)` 1회 — 재호출 시 추가 로그 없음 / error 없으면 미호출
+- [x] `Platform.OS = 'windows'` → `disabled` + `AdsConfigError` + SDK 미호출
+
+**`showPrivacyOptionsForm`:**
+
+- [x] `AdsConsent.showPrivacyOptionsForm` 1회 위임 + `void` resolve (SDK 반환값 버림)
+- [x] reject 는 그대로 전파
+
+> `initializeAds` 는 throw 하지 않는다 — 광고 실패는 부팅을 막지 않고 `disabled` + `error` 로 노출한다 (silent fail 아님, ErrorView 없음). `__resetForTesting` 은 배럴(`@/lib`)에서 export 하지 않는다.
+>
+> 커버리지: `ads.native.ts`·`adsConfig.ts` 100/100/100/100 (`src/lib/**` 임계치 statements 100 / branches 95 / lines 100 / functions 100).
+
+### 9.42-w `src/lib/ads.web.ts` — 웹 빌드 광고 no-op
+
+ADR-077 / admob-banner-ads step 1. 파일: `src/lib/__tests__/ads.web.test.ts`. jest-expo 는 `../ads` 를 `.native` 로 해석하므로 `jest.isolateModules` 안에서 `require('../ads.web')` 로 직접 로드하고, **같은 격리 레지스트리**의 `jest.requireMock('react-native-google-mobile-ads')` 를 함께 꺼낸다 (웹 모듈이 SDK 를 끌어왔다면 같은 인스턴스라 호출이 잡힌다).
+
+- [x] `initializeAds` → `{ status: 'disabled', canRequestAds: false, privacyOptionsRequired: false, error: null }` 즉시 resolve
+- [x] `showPrivacyOptionsForm` → no-op resolve
+- [x] `resolveAdsMode` 는 native 와 동일 로직
+- [x] `resolveBannerUnitId('test', …)` → 문자열 상수 `'ca-app-pub-3940256099942544/2435281174'` (SDK `TestIds` 미참조)
+- [x] `resolveBannerUnitId('production', …)` + placeholder → `code === 'ADS_CONFIG'` (격리 레지스트리라 `instanceof` 대신 `code`·`name`)
+- [x] `AD_UNIT_IDS` 는 placeholder
+- [x] 모든 export 호출 후 SDK mock 함수 6종 (`initialize` + `AdsConsent` 4종 + `BannerAd`) 호출 0회
+
+> `ads.web.ts` 는 `ads.native.ts` 도 SDK 도 import 하지 않는다 — 한쪽이 다른 쪽을 import 하면 웹 번들에 네이티브 모듈이 끌려온다. 커버리지 100/100/100/100.
 
 ---
 

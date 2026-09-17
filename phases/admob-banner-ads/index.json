@@ -13,7 +13,9 @@
     {
       "step": 1,
       "name": "ads-lib",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-17T14:22:55+0900",
+      "summary": "src/lib/ads.native.ts(initializeAds: gatherConsent 실패는 계속·initialize/getConsentInfo 실패는 disabled, throw 없음·결과 error + __DEV__ console.error 1회, 세션 Promise 캐시로 멱등 / showPrivacyOptionsForm 위임 / resolveBannerUnitId / __resetForTesting) + ads.web.ts(disabled·no-op, SDK 미참조) + adsConfig.ts 분리(타입 AdsMode·AdsStatus·AdsInitResult, AD_UNIT_IDS placeholder, resolveAdsMode, resolveProductionUnitId — SDK 미참조) · errors.ts AdsConfigError(ADS_CONFIG) + ARCHITECTURE 카탈로그 행 + errors.test 16클래스 · 배럴 export(initializeAds·showPrivacyOptionsForm·resolveAdsMode·resolveBannerUnitId·AD_UNIT_IDS + 타입 3종, __resetForTesting 제외) · jest.setup.js SDK 전역 mock(initialize 는 mockMobileAdsInitialize 로 외부화) + TESTING §5.1 사본 · .eslintrc no-restricted-imports + ads.native.ts/AdBanner.native.tsx override (__spike-eslint.ts 위반 시 eslint exit 1 확인 후 삭제) · TESTING §9.42/§9.42-w 인벤토리, ads.test 26 + ads.web.test 7 케이스 · 커버리지 ads.native/ads.web/adsConfig 100/100/100/100 (collectCoverageFrom 변경 불필요) · 주의: AC 커버리지 명령은 errors.ts(84%, data-automation 4클래스 100-112행)·currency.ts(98.41%)·format.ts(88.05%) 임계치 미달로 exit 1 — HEAD 기준선에서도 동일(errors 83.33%) 한 기존 부채, 본 step 무관. 전체 96 suites 2112 passed"
     },
     {
       "step": 2,

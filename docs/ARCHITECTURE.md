@@ -291,6 +291,7 @@ export class AppError extends Error {
 | `AllCitiesUnavailableError` | `ALL_CITIES_UNAVAILABLE` | data.ts (모든 도시 fetch 실패)               | 전체 ErrorView + 다시 시도      |
 | `FavoritesLimitError`       | `FAVORITES_LIMIT`        | favorites store (50개 초과 add)              | 토스트 "즐겨찾기 50개 초과"     |
 | `InvariantError`            | `INVARIANT`              | 전역 (도달 불가 코드)                        | ErrorBoundary fatal             |
+| `AdsConfigError`            | `ADS_CONFIG`             | src/lib/ads.native.ts (프로덕션 모드인데 광고 단위 ID 가 placeholder) | 광고 비활성(`disabled`) — ErrorView 없음, 결과 `error` + dev 로그 |
 
 ### 에러 처리 룰
 
