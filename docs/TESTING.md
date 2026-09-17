@@ -2731,7 +2731,10 @@ ADR-071 / in-app-policy-pages step 4. §9.38 목록에서 도시를 탭하면 pu
 
 ADR-072 / in-app-policy-pages step 5. 본문 정본(`privacyPolicy.json`)에 타입을 입혀 노출하는 상수 모듈. TS 는 JSON 을 **타입 단언**으로 받으므로 컴파일러가 형태를 검증하지 않는다 — 런타임 불변조건을 본 인벤토리가 지킨다. 렌더 결과 ↔ 생성 문서 일치는 §9-A.11 `gen_privacy_docs.mjs` 담당.
 
-- [x] 섹션이 7개다 (수집·저장 / 외부 서비스 / 분석·추적 / 정확성 고지 / 보호책임자 / 변경 / 문의)
+- [x] 섹션이 8개다 — 제목 목록을 순서까지 단언 (수집·저장 / 외부 서비스 / 광고 / 분석·추적 / 정확성 고지 / 보호책임자 / 변경 / 문의)
+- [x] `광고` 섹션에 `Google LLC` 포함 — 국외이전 고지 회귀 방지 (ADR-077)
+- [x] `광고` 섹션에 `IDFA` 와 `광고 ID` 포함 — 수집 항목 고지 회귀 방지
+- [x] `lead` 가 구 무수집 문구(`본 앱은 사용자 개인정보를 수집하지 않습니다.`)와 다르고 `광고 SDK` 를 포함한다 — "`수집하지 않습니다.` 로 끝나지 않음" 으로 판정하지 않는다 (정본 lead 도 한정어 뒤에 그 문자열로 끝난다)
 - [x] 모든 섹션에 비어 있지 않은 `title` 과 최소 1개 `block`
 - [x] `title` 에 섹션 번호(`1.` …)를 하드코딩하지 않는다 — 번호는 렌더 시점에 붙는다
 - [x] 모든 block 이 알려진 `kind` 이고 필수 필드를 갖는다 (`paragraph.text` / `list.items` / `email.label`+`email`)
@@ -2751,16 +2754,16 @@ ADR-071·ADR-072 / in-app-policy-pages step 6. 설정의 "개인정보 처리방
 **본문 렌더 (실제 정본 기준):**
 
 - [x] 리드 문단(`privacy-lead`)에 `PRIVACY_POLICY.lead` 가 표시
-- [x] 섹션 7개가 `privacy-section-0` … `privacy-section-6` 순서로 렌더
-- [x] 제목에 `1.` ~ `7.` 번호가 순서대로 붙는다 — 번호는 정본 `title` 에 없고 화면이 붙인다
-- [x] `list` 블록 항목 10개 전량 렌더 + 불릿 마커 10개 (개수 단언)
+- [x] 섹션 8개가 `privacy-section-0` … `privacy-section-7` 순서로 렌더
+- [x] 제목에 `1.` ~ `8.` 번호가 순서대로 붙는다 — 번호는 정본 `title` 에 없고 화면이 붙인다
+- [x] `list` 블록 항목 17개 전량 렌더 + 불릿 마커 17개 (개수 단언)
 - [x] `paragraph` 블록도 전문 그대로 렌더
 - [x] 본문 텍스트에 `numberOfLines` 미적용 — 법적 고지라 말줄임·"더 보기" 접기 금지
 - [x] 헤더 부제에 `마지막 갱신 <updatedAt>` 표시
 
 **이메일 링크 (탭 가능한 유일한 요소):**
 
-- [x] `email` 블록 탭 → `openURL('mailto:<operatorEmail>')` 1회 (`privacy-email-<섹션 인덱스>`, 정본 기준 4·6)
+- [x] `email` 블록 탭 → `openURL('mailto:<operatorEmail>')` 1회 (`privacy-email-<섹션 인덱스>`, 정본 기준 5·7)
 - [x] `accessibilityRole="button"` + `<label> 이메일 보내기` a11y 라벨
 - [x] `openURL` reject → `Alert.alert('링크 열기 실패', '이메일 앱을 찾을 수 없습니다.')` (silent fail 금지)
 
@@ -4205,7 +4208,7 @@ it('비교 화면 모든 카드에 a11y label', () => {
 **08-sources-privacy** (ADR-071 신규 화면)
 
 - [x] `sources-drilldown` — 설정 → `/sources` → `/sources/seoul` 2단계 드릴다운. 그룹·아이콘·출처 카드·갱신 주기 푸터 + **back 으로 목록 → 설정 단계별 복귀**(일반 Stack push 임을 검증 — modal 이면 목록을 건너뛰고 설정으로 떨어진다). 앵커 도시를 서울로 고정: 서울의 rent/food/transport 구성은 번들 시드와 원격 전량 데이터가 동일한 반면, 밴쿠버는 시드에만 `tax` 출처가 있어 그룹 존재 여부가 데이터 출처에 따라 갈린다
-- [x] `privacy-page` — 설정 → `/privacy`. 섹션 7개·화면이 부여하는 번호(1.~7.)·`privacy-email-6`·`마지막 갱신 \d{4}-\d{2}-\d{2}`. **정본 문구를 flow 에 복사하지 않는다** — 방침 개정마다 flow 가 깨지고 그건 이 화면의 검증 대상이 아니다. 이메일 블록은 존재만 확인하고 탭하지 않는다(mailto 외부 전환이 후속 flow 를 오염시킴)
+- [x] `privacy-page` — 설정 → `/privacy`. 섹션 8개·화면이 부여하는 번호(1.~8.)·`privacy-email-7`·`마지막 갱신 \d{4}-\d{2}-\d{2}`. **정본 문구를 flow 에 복사하지 않는다** — 방침 개정마다 flow 가 깨지고 그건 이 화면의 검증 대상이 아니다. 이메일 블록은 존재만 확인하고 탭하지 않는다(mailto 외부 전환이 후속 flow 를 오염시킴)
 
 ---
 

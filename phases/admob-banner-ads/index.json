@@ -61,7 +61,9 @@
     {
       "step": 7,
       "name": "privacy-policy",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-17T15:04:21+0900",
+      "summary": "src/lib/privacyPolicy.json 개정(updatedAt 2026-09-17 · 섹션 8개: 수집·저장/외부 서비스/광고/분석·추적/정확성 고지/보호책임자/변경/문의 · lead·수집 첫 항목·광고 6항목·분석·추적·보호책임자 위탁 항목 10개 문구가 설계 §K 와 글자 단위 일치 스크립트 확인, 오탈자 의심 없음) → npm run gen:privacy 로 docs/privacy-policy.html·PRIVACY.md 재생성(직접 편집 0) · privacyPolicy.test 제목 8개 순서 단언 + 광고 섹션 Google LLC / IDFA·광고 ID + lead 가 구 무수집 문구와 다르고 '광고 SDK' 포함(구 lead 로 되돌린 변형에서 1건 실패 확인) · 섹션 추가로 깨지는 하드코딩 단언만 갱신: app/__tests__/privacy.test.tsx(섹션 8·list 항목 17·email 인덱스 5·7) + .maestro/flows/08-sources-privacy/privacy-page.yaml(privacy-section-7·'8\\.'·privacy-email-7 — 시뮬레이터 iPhone 17 Pro 에서 flow 통과) · docs/RELEASE.md §1 표(네이티브 의존성·권한 추가 행 분리 — 버전은 변경 성격에 따름, 광고 도입 v1.1.0 + runtimeVersion appVersion 규칙 한 줄)·§3 EXPO_PUBLIC_ADS_TEST·§5 iOS App Privacy/ATT 사용·Android Data Safety·§6 5.1.1·§6.1 PIPA 표(수집 동의 필요-ATT·UMP / 국외이전 고지 / 위탁 Google LLC / 정보주체 권리 OS 설정+EEA 메뉴 / 처리방침·아동 행의 '수집 X' 근거도 정정)+심사 시 추가 2줄·§8 이용약관 1항·§13.5 AdMob 정책 위반 대응 · docs/RELEASE_CHECKLIST.md 광고 있음·Data Safety 답안·app-ads.txt/ATT/App ID·AD_UNIT_IDS 교체 3항목 · docs/store-metadata.md §3 '개인정보는 광고 표시에 필요한 최소한만' 4불릿(페르소나 제거)·§6 Data Safety 표+수집 유형별 표(선택적 여부는 Google Play 데이터 공개 문서 기준 — 광고 ID 만 선택) · docs/TESTING.md §9.40 갱신 + §9.41·Maestro 인벤토리 섹션 수 동기화 · AC 전부 통과(typecheck·lint 0, 98 suites 2161 passed/1 skipped, 드리프트 가드 13 passed, Google LLC 각 2건, 금지 문구 grep 0, app-ads.txt 1) · 범위 밖 미수정 잔여: store-metadata.md 17행 '광고·인앱 결제 없음'·33·34·59·62·151·163행 페르소나 서술, RELEASE.md 102·133행 페르소나 서술 — 후속 정리 필요 · 생성물 privacy-policy.html 은 HEAD 부터 prettier 미준수(생성기 출력)"
     },
     {
       "step": 8,
