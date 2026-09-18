@@ -3,7 +3,8 @@
  *
  * 7 도메인 store (onboarding / favorites / recent / settings / rentChoice /
  * tuitionChoice / taxChoice) — 단일 거대 스토어 금지 (ARCHITECTURE.md §상태
- * 관리, ADR-004). 컴포넌트는 본 인덱스에서 import:
+ * 관리, ADR-004). + 비영속 ads store (hydration 미참여, ADR-077).
+ * 컴포넌트는 본 인덱스에서 import:
  *   import { useOnboardingStore, useFavoritesStore } from '@/store';
  *
  * 부트로더 (app-shell phase) 는 7 store 의 hydration 을 동시 await:
@@ -59,6 +60,10 @@ export type {
   CategoryInclusionMap,
   CategoryInclusionState,
 } from './categoryInclusion';
+
+// ADR-077: 비영속 — hydration 합성 미참여.
+export { useAdsStore } from './ads';
+export type { AdsActions, AdsState } from './ads';
 
 export {
   DEFAULT_HYDRATION_TIMEOUT_MS,

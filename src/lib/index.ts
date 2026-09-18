@@ -6,8 +6,17 @@
  * 메모리 맵을 강제 리셋하기 위한 escape hatch 라 프로덕션 import 경로
  * (`@/lib`) 에서 보이면 안 된다. 테스트는 직접 모듈에서 import:
  *   `import { __resetForTesting } from '@/lib/data';`
+ * `__resetForTesting` (ads) 도 같은 이유로 제외 — `./ads` 는 Metro·jest·tsc 가 플랫폼 확장자(.native/.web)를 고른다.
  */
 export * from './errors';
+export type { AdsInitResult, AdsMode, AdsStatus } from './ads';
+export {
+  AD_UNIT_IDS,
+  initializeAds,
+  resolveAdsMode,
+  resolveBannerUnitId,
+  showPrivacyOptionsForm,
+} from './ads';
 export { CATEGORY_ICON, CATEGORY_LABEL, CATEGORY_ORDER } from './categoryMeta';
 export { parseAllCitiesText, validateAllJson, validateCity } from './citySchema';
 export { convertToKRW, fetchExchangeRates, FX_BASELINE_2026Q2, refreshFx } from './currency';

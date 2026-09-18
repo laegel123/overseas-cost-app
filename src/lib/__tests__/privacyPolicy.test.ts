@@ -13,9 +13,35 @@ const REMOVED_TERMS = ['페르소나', '유학생', '취업자'];
 
 const ALL_BLOCKS: PrivacyBlock[] = PRIVACY_POLICY.sections.flatMap((s) => s.blocks);
 
+// 광고 SDK 가 수집하는 정보의 고지 (ADR-077). 문구 회귀 시 법적 고지가 사실과 어긋난다.
+const AD_SECTION_TEXT = JSON.stringify(PRIVACY_POLICY.sections.find((s) => s.title === '광고'));
+
 describe('PRIVACY_POLICY (개인정보 처리방침 정본)', () => {
-  it('섹션이 7개다 (수집·저장 / 외부 서비스 / 분석·추적 / 정확성 고지 / 보호책임자 / 변경 / 문의)', () => {
-    expect(PRIVACY_POLICY.sections).toHaveLength(7);
+  it('섹션이 8개다 (수집·저장 / 외부 서비스 / 광고 / 분석·추적 / 정확성 고지 / 보호책임자 / 변경 / 문의)', () => {
+    expect(PRIVACY_POLICY.sections.map((s) => s.title)).toEqual([
+      '수집·저장 정보',
+      '외부 서비스',
+      '광고',
+      '분석·추적',
+      '데이터 정확성 고지',
+      '개인정보 보호책임자',
+      '변경',
+      '문의',
+    ]);
+  });
+
+  it('광고 섹션이 국외이전 대상 Google LLC 를 고지한다', () => {
+    expect(AD_SECTION_TEXT).toContain('Google LLC');
+  });
+
+  it('광고 섹션이 수집 항목으로 IDFA 와 광고 ID 를 고지한다', () => {
+    expect(AD_SECTION_TEXT).toContain('IDFA');
+    expect(AD_SECTION_TEXT).toContain('광고 ID');
+  });
+
+  it('lead 가 구 무수집 단언으로 회귀하지 않고 광고 SDK 수집을 언급한다', () => {
+    expect(PRIVACY_POLICY.lead).not.toBe('본 앱은 사용자 개인정보를 수집하지 않습니다.');
+    expect(PRIVACY_POLICY.lead).toContain('광고 SDK');
   });
 
   it('모든 섹션에 title 과 최소 1개 block 이 있다', () => {

@@ -9,7 +9,13 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ErrorBoundary } from '@/components';
-import { bridgeLastSyncFromMeta, useOnboardingStore, waitForStoresOrTimeout } from '@/store';
+import { initializeAds } from '@/lib';
+import {
+  bridgeLastSyncFromMeta,
+  useAdsStore,
+  useOnboardingStore,
+  waitForStoresOrTimeout,
+} from '@/store';
 import { useAppFonts } from '@/theme/fonts';
 import { colors } from '@/theme/tokens';
 
@@ -23,6 +29,8 @@ export default function RootLayout() {
   const router = useRouter();
   const segments = useSegments();
   const onboarded = useOnboardingStore((s) => s.onboarded);
+  const beginAds = useAdsStore((s) => s.begin);
+  const settleAds = useAdsStore((s) => s.settle);
 
   useEffect(() => {
     let cancelled = false;
@@ -71,6 +79,14 @@ export default function RootLayout() {
     // 홈에 착지시킬 수 있다(경쟁 조건, ADR-067). 온보딩 세그먼트는 온보딩 완료
     // 사용자에게 도달 불가하므로(진입은 위의 !onboarded 분기뿐) 개입 불필요.
   }, [bootReady, onboarded, segments, router]);
+
+  // 광고 동의·초기화 — bootReady && onboarded 이후 1회, 비차단 (ADR-077)
+  useEffect(() => {
+    if (!bootReady || !onboarded) return;
+    beginAds();
+    // initializeAds 는 throw 하지 않는다 (결과 객체로 실패 전달) — catch 로 삼키지 않는다.
+    initializeAds().then(settleAds);
+  }, [bootReady, onboarded, beginAds, settleAds]);
 
   // meta:lastSync ↔ useSettingsStore.lastSync 단방향 sync (DATA.md §269).
   // 비차단 best-effort — bridge 실패는 부팅 흐름 차단 안 함.

@@ -25,6 +25,8 @@ export type ScreenProps = {
   padding?: ScreenPadding;
   /** SafeArea edges (기본 ['top', 'bottom']) — iPhone notch / home indicator 양쪽 보호 */
   edges?: ScreenEdge[];
+  /** ScrollView 밖, SafeArea 안에 고정 렌더되는 하단 요소 (광고 배너 등). 기본 없음 */
+  footer?: React.ReactNode;
   testID?: string;
 };
 
@@ -45,6 +47,7 @@ export function Screen({
   scroll = false,
   padding = 'screen-x',
   edges,
+  footer,
   testID,
 }: ScreenProps): React.ReactElement {
   const paddingClass = PADDING_CLASS[padding];
@@ -57,6 +60,7 @@ export function Screen({
     // 으로 들여쓰기되는 효과 동일). horizontal scroll 도입 시 contentContainerStyle
     // 로 이동 필요. v1.0 은 vertical 만.
     // contentContainerStyle 의 flexGrow:1 은 children flex 를 유지하기 위함.
+    // footer 는 ScrollView 형제 — 스크롤과 무관하게 하단 고정, padding 미적용(폭 전체).
     return (
       <SafeAreaView edges={[...safeEdges]} className="flex-1 bg-white">
         <ScrollView
@@ -66,6 +70,7 @@ export function Screen({
         >
           {children}
         </ScrollView>
+        {footer}
       </SafeAreaView>
     );
   }
@@ -75,6 +80,7 @@ export function Screen({
       <View className={innerClassName} testID={testID}>
         {children}
       </View>
+      {footer}
     </SafeAreaView>
   );
 }
