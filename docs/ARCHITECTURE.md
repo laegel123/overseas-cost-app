@@ -35,13 +35,16 @@ overseas-cost-app/
 │   │   ├── RecentRow.tsx         # 홈 최근 본 도시 행
 │   │   ├── GroceryRow.tsx        # Detail 식재료 행
 │   │   ├── Empty.tsx / ErrorView.tsx / Skeleton.tsx
+│   │   ├── AdBanner.native.tsx   # 하단 anchored adaptive 배너 — SDK import 허용 파일 (ADR-077)
+│   │   ├── AdBanner.web.tsx      # 웹: 항상 null
 │   │   └── details/{Food,Rent,Transport,Tuition,Tax,Visa}Detail.tsx
 │   │
 │   ├── store/                    # Zustand + AsyncStorage 영속화
 │   │   ├── onboarding.ts
 │   │   ├── favorites.ts
 │   │   ├── recent.ts
-│   │   └── settings.ts
+│   │   ├── settings.ts
+│   │   └── ads.ts                # 광고 초기화 상태 — 비영속, hydration 미참여 (ADR-077)
 │   │
 │   ├── lib/                      # 도메인 로직
 │   │   ├── data.ts               # 도시 JSON fetch + 24h TTL 캐시
@@ -50,7 +53,10 @@ overseas-cost-app/
 │   │   ├── compare.ts            # 카테고리 비교, 월 합계 계산 (PRD 부록 C)
 │   │   ├── categoryMeta.ts       # 카테고리 라벨·아이콘·순서 단일 출처 (ADR-071)
 │   │   ├── sources.ts            # 출처 집계 — /sources 화면용 (ADR-071)
-│   │   └── privacyPolicy.ts      # 처리방침 본문 정본 (+ privacyPolicy.json, ADR-072)
+│   │   ├── privacyPolicy.ts      # 처리방침 본문 정본 (+ privacyPolicy.json, ADR-072)
+│   │   ├── ads.native.ts         # 광고 SDK 경유 단일 지점 — 동의·초기화 (ADR-077)
+│   │   ├── ads.web.ts            # 웹: 광고 no-op (SDK 미참조)
+│   │   └── adsConfig.ts          # 광고 타입·광고 단위 ID·테스트 모드 판정 (SDK 미참조, native/web 공유)
 │   │
 │   ├── types/                    # TypeScript 타입
 │   │   ├── city.ts               # City, CityCostData, CategoryComparison, ItemComparison, ExchangeRates
@@ -183,6 +189,8 @@ export async function refreshCache(): Promise<{ ok: boolean; lastSync: string }>
 
 모두 `zustand/middleware` 의 `persist` + AsyncStorage 어댑터 사용. 첫 렌더 전 hydration 보장 위해 `_layout.tsx` 에서 `useStore.persist.onFinishHydration` 으로 splash 유지.
 
+`useAdsStore` (`status` · `canRequestAds` · `privacyOptionsRequired`) — 비영속, hydration 합성 미참여, 광고 초기화 상태 — ADR-077. 위 8개와 달리 `persist` 없이 메모리에만 둔다 (동의 상태는 UMP SDK 가 저장). 루트 레이아웃이 `begin()` → `initializeAds().then(settle)` 로 채우고, 부팅(splash)을 막지 않는다.
+
 ## 컴포넌트 위계
 
 ```
@@ -236,8 +244,9 @@ hero 월 합계의 기본 포함(inclusion) 은 `rent/food/transport = ON`, `tui
   │    └─ useSettingsStore.persist.hasHydrated()       ─ Promise E
   ├─ Promise.all([A,B,C,D,E])
   ├─ SplashScreen.hideAsync()
-  └─ if !onboarded → router.replace('/onboarding')
-     else          → router.replace('/(tabs)')
+  ├─ if !onboarded → router.replace('/onboarding')
+  │  else          → router.replace('/(tabs)')
+  └─ bootReady && onboarded → begin → initializeAds (gatherConsent → initialize → getConsentInfo) → settle (비차단, useAdsStore — ADR-077)
 ```
 
 - 폰트·hydration 미완 상태에서는 **자식 트리를 렌더하지 않는다** (FOUC + AsyncStorage race 방지).
@@ -291,6 +300,7 @@ export class AppError extends Error {
 | `AllCitiesUnavailableError` | `ALL_CITIES_UNAVAILABLE` | data.ts (모든 도시 fetch 실패)               | 전체 ErrorView + 다시 시도      |
 | `FavoritesLimitError`       | `FAVORITES_LIMIT`        | favorites store (50개 초과 add)              | 토스트 "즐겨찾기 50개 초과"     |
 | `InvariantError`            | `INVARIANT`              | 전역 (도달 불가 코드)                        | ErrorBoundary fatal             |
+| `AdsConfigError`            | `ADS_CONFIG`             | src/lib/ads.native.ts (프로덕션 모드인데 광고 단위 ID 가 placeholder) | 광고 비활성(`disabled`) — ErrorView 없음, 결과 `error` + dev 로그 |
 
 ### 에러 처리 룰
 
@@ -312,6 +322,7 @@ export class AppError extends Error {
   3. 내부 alias (`@/components`, `@/lib`)
   4. 상대 경로 (`./Foo`, `../Bar`)
   - ESLint `import/order` 로 강제.
+- 플랫폼 분기 파일: `.native.ts(x)` / `.web.ts(x)` 쌍으로 두고 확장자 없이 import 한다 (`./ads`, `./AdBanner`). Metro 는 번들 플랫폼으로, jest(jest-expo)는 iOS 기준으로, tsc 는 `tsconfig.json` `moduleSuffixes` (`.ios` → `.android` → `.native` → 없음) 로 파일을 고른다 — tsc 는 `.native` 를 보므로 두 파일의 export 시그니처 일치는 테스트로 지킨다. **웹 파일은 네이티브 모듈(과 `.native` 짝 파일)을 import 하지 않는다** — 웹 번들에 네이티브 모듈이 끌려온다. 공유 로직은 네이티브 모듈을 참조하지 않는 별도 파일(예: `adsConfig.ts`)에 둔다 (ADR-077).
 
 ## 라우팅 디테일
 
@@ -487,7 +498,8 @@ inclusion 토글은 **mid-session reactive** — 별도 새로고침 불필요. 
 - 차트 → 도입하지 않음 (듀얼 바는 단순 View)
 - 날짜 → JS Date + `formatDate` 유틸 (date-fns 도입 보류)
 - HTTP → `fetch` 표준 API
-- 분석/추적 → v1.0 도입 안 함 (개인정보 정책)
+- 분석·오류추적 → 미도입 (ADR-011 유효 부분)
+- 광고 → Google AdMob (`react-native-google-mobile-ads` 16.3.4 고정), `src/lib/ads.native.ts` 경유 단일 지점 + `AdBanner.native.tsx` 만 SDK import (ESLint `no-restricted-imports`) (ADR-077)
 
 ## 변경 가이드
 

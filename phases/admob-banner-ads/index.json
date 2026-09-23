@@ -2,15 +2,87 @@
   "project": "overseas-cost-app",
   "phase": "admob-banner-ads",
   "steps": [
-    { "step": 0, "name": "sdk-spike", "status": "pending" },
-    { "step": 1, "name": "ads-lib", "status": "pending" },
-    { "step": 2, "name": "ads-store", "status": "pending" },
-    { "step": 3, "name": "screen-footer", "status": "pending" },
-    { "step": 4, "name": "ad-banner", "status": "pending" },
-    { "step": 5, "name": "ads-bootstrap", "status": "pending" },
-    { "step": 6, "name": "settings-privacy-menu", "status": "pending" },
-    { "step": 7, "name": "privacy-policy", "status": "pending" },
-    { "step": 8, "name": "docs", "status": "pending" },
-    { "step": 9, "name": "release-e2e", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "sdk-spike",
+      "status": "completed",
+      "started_at": "2026-09-17T13:53:35+0900",
+      "summary": "react-native-google-mobile-ads 16.3.4 정확 고정(16.5.0/16.4.0 은 play-services-ads 25.4.0 의 Kotlin 2.3 메타데이터가 SDK 54 Kotlin 2.1.20 과 비호환 → Android 빌드 실패) + app.json plugin(샘플 App ID·ATT 문구·SKAdNetwork 50) + tsconfig moduleSuffixes 추가(jest haste 설정 불필요) · iOS: prebuild --clean + xcodebuild(Xcode 27 에 Simulator.app 이 없어 expo run:ios 불가, 기존 pod 포함 deployment target 에러로 IPHONEOS_DEPLOYMENT_TARGET=15.1 명령행 override) BUILD SUCCEEDED·Maestro 스모크 통과·ATT 미표시 · Android: development 프로필은 expo-dev-client 미설치로 거부 → preview 프로필 55d11aac FINISHED(APK 실기기 부팅 미확인) · expo-build-properties 추가 안 함 · 상세 SPIKE_RESULT.md",
+      "completed_at": "2026-09-17T14:22:55+0900"
+    },
+    {
+      "step": 1,
+      "name": "ads-lib",
+      "status": "completed",
+      "started_at": "2026-09-17T14:22:55+0900",
+      "summary": "src/lib/ads.native.ts(initializeAds: gatherConsent 실패는 계속·initialize/getConsentInfo 실패는 disabled, throw 없음·결과 error + __DEV__ console.error 1회, 세션 Promise 캐시로 멱등 / showPrivacyOptionsForm 위임 / resolveBannerUnitId / __resetForTesting) + ads.web.ts(disabled·no-op, SDK 미참조) + adsConfig.ts 분리(타입 AdsMode·AdsStatus·AdsInitResult, AD_UNIT_IDS placeholder, resolveAdsMode, resolveProductionUnitId — SDK 미참조) · errors.ts AdsConfigError(ADS_CONFIG) + ARCHITECTURE 카탈로그 행 + errors.test 16클래스 · 배럴 export(initializeAds·showPrivacyOptionsForm·resolveAdsMode·resolveBannerUnitId·AD_UNIT_IDS + 타입 3종, __resetForTesting 제외) · jest.setup.js SDK 전역 mock(initialize 는 mockMobileAdsInitialize 로 외부화) + TESTING §5.1 사본 · .eslintrc no-restricted-imports + ads.native.ts/AdBanner.native.tsx override (__spike-eslint.ts 위반 시 eslint exit 1 확인 후 삭제) · TESTING §9.42/§9.42-w 인벤토리, ads.test 26 + ads.web.test 7 케이스 · 커버리지 ads.native/ads.web/adsConfig 100/100/100/100 (collectCoverageFrom 변경 불필요) · 주의: AC 커버리지 명령은 errors.ts(84%, data-automation 4클래스 100-112행)·currency.ts(98.41%)·format.ts(88.05%) 임계치 미달로 exit 1 — HEAD 기준선에서도 동일(errors 83.33%) 한 기존 부채, 본 step 무관. 전체 96 suites 2112 passed",
+      "completed_at": "2026-09-17T14:32:24+0900"
+    },
+    {
+      "step": 2,
+      "name": "ads-store",
+      "status": "completed",
+      "started_at": "2026-09-17T14:32:24+0900",
+      "summary": "src/store/ads.ts useAdsStore(비영속 — zustand create 만, AsyncStorage import 없음 · AdsState status/canRequestAds/privacyOptionsRequired · 액션 begin→initializing / settle(result)→세 필드 반영·error 는 store 에 미보관 / reset→INITIAL_STATE · 타입 AdsStatus·AdsInitResult 는 @/lib 에서 import type 재사용, throw 없음) · hydration.ts 대기 목록 미참여(무변경) · src/store/index.ts useAdsStore + AdsState/AdsActions export, 상단 주석 한 줄 · src/store/__tests__/ads.test.ts 7케이스(초기·begin·settle ready/disabled·reset·setItem 0회·persist undefined) + TESTING §9.43 인벤토리 + ARCHITECTURE §상태 관리 useAdsStore 문단 · 커버리지 ads.ts 100/100/100/100 · 주의: AC 커버리지 명령은 categoryInclusion(88.23%)·rentChoice(96.87%)·taxChoice·tuitionChoice(90.38%) 임계치 미달로 exit 1 — HEAD 기준선에서도 동일 수치인 기존 부채, 본 step 무관. 전체 97 suites 2119 passed",
+      "completed_at": "2026-09-17T14:37:42+0900"
+    },
+    {
+      "step": 3,
+      "name": "screen-footer",
+      "status": "completed",
+      "started_at": "2026-09-17T14:37:42+0900",
+      "summary": "src/components/Screen.tsx footer?: React.ReactNode 슬롯(scroll true/false 두 분기 모두 SafeAreaView 마지막 자식으로 {footer} 직접 렌더 — 래퍼 View·기본 높이·배경·padding 없음, ScrollView/inner View 형제, 광고 import 없음, ReactNode 가 undefined 포함이라 | undefined 불필요) · Screen.test 6케이스 추가(scroll true/false 형제·마지막 자식 순서, 미지정 시 SafeAreaView 자식 1개, footer 부모 className 에 px- 없음 — footer 를 ScrollView/inner View 안으로 옮긴 변형에서 4건 실패 확인) · TESTING §9.11 에 footer 슬롯(§9.45) 블록 + UI_GUIDE §컴포넌트 사양 Screen.footer 한 줄 · 기존 호출부·app/** 무변경, 스냅샷 7개 통과 · 커버리지 Screen.tsx 100/100/100/100 · 주의: src/components 커버리지 명령은 BottomSheet.tsx branches 50%(<75) 로 exit 1 — HEAD 기준선에서도 동일한 기존 부채, 본 step 무관 · docs/TESTING.md·UI_GUIDE.md 는 HEAD 부터 prettier 미준수(기존 표), 추가분은 무관. 전체 97 suites 2125 passed(1 skipped)",
+      "completed_at": "2026-09-17T14:42:07+0900"
+    },
+    {
+      "step": 4,
+      "name": "ad-banner",
+      "status": "completed",
+      "started_at": "2026-09-17T14:42:07+0900",
+      "summary": "src/components/AdBanner.native.tsx(useAdsStore(s=>status==='ready'&&canRequestAds) 셀렉터 + Platform.OS ios/android 아니면 null — unitId useMemo 에 canShow 를 조건으로 포함해 광고 OFF 상태에서 placeholder AdsConfigError 가 터지지 않게 하고, ready 면 lib 이 이미 검증을 통과한 뒤라 try/catch 없이 ErrorBoundary 로 노출 / 로컬 loaded state: onAdLoaded→true, onAdFailedToLoad→false + __DEV__ console.error 1회, BannerAd 는 언마운트하지 않음(SDK 재시도 보존) / 컨테이너 접힘 'h-0 overflow-hidden' ↔ 펼침 'bg-white border-t border-line items-center' — px·색 리터럴 0건 / size=ANCHORED_ADAPTIVE_BANNER · accessibilityLabel='광고'+role='none' · testID 기본값 'ad-banner') · AdBanner.web.tsx(AdBannerProps 만 동일, 항상 null, SDK·native 파일 미참조 — 문서 주석에도 패키지명 미기재: AC 의 grep -l 이 주석까지 잡는다) · src/components/index.ts 배럴에 AdBanner + AdBannerProps(확장자 없이 './AdBanner') · AdBanner.test.tsx 11케이스(렌더 조건 4: idle/ready+canRequestAds=false/disabled/Platform.OS='web' 모두 BannerAd 미호출 — jest.requireMock 으로 mock 접근, SDK import 0건 / unitId===TestIds.ADAPTIVE_BANNER·size prop / h-0→onAdLoaded→border-t / onAdFailedToLoad→재접힘+console.error 1회 / 실패 후 마운트 유지 / a11y / testID override / web 모듈 jest.isolateModules) + TESTING §9.44 인벤토리 · 커버리지 AdBanner.native 100/92.85(line 51 = __DEV__ false 경로)/100/100, AdBanner.web 100/100/100/100 — 임계치 85/75/85/85 충족 · Screen.tsx·app/** 무변경(배선은 step 5) · 주의: src/components 커버리지 명령은 BottomSheet.tsx branches 50%(<75) 로 exit 1, HEAD 기준선과 동일한 기존 부채 · src/components/index.ts 는 HEAD 부터 prettier 미준수(typography export 블록), 추가분은 prettier clean · 전체 98 suites 2136 passed(1 skipped)",
+      "completed_at": "2026-09-17T14:48:47+0900"
+    },
+    {
+      "step": 5,
+      "name": "ads-bootstrap",
+      "status": "completed",
+      "started_at": "2026-09-17T14:48:47+0900",
+      "summary": "app/_layout.tsx 광고 동의·초기화 effect(beginAds=useAdsStore(s=>s.begin)·settleAds=useAdsStore(s=>s.settle), if (!bootReady || !onboarded) return → begin() → initializeAds().then(settleAds), .catch 없음 · initializeAds 는 @/lib, waitForStoresOrTimeout/hydration.ts 무변경, effect 위 한 줄 주석 ADR-077) · 홈·비교·상세 ready Screen 에만 footer={<AdBanner />}(AdBanner 는 @/components 배럴 import, loading·error Screen 무변경, 파일 상단 doc comment 에 '하단 footer: AdBanner (ready 상태만, ADR-077)' 한 줄) · _layout.test 4케이스(§9.46: begin→initializeAds 순서·pending 중 settle 0회+hideAsync 이미 호출·resolve 후 settle(결과) 1회 / onboarded=false 0회 / bootReady=false 0회 / onboarded false→true rerender 시 1회 — @/store mock 에 useAdsStore 추가, @/lib 는 requireActual spread + initializeAds mock · onboarded 가드 제거 변형·settle 미연결 변형 각 2건 실패 확인) + 화면 3개 테스트 각 4케이스(실제 AdBanner+전역 SDK mock, 광고 store ready 주입 상태에서 ready→ad-banner 존재 / loading·error→부재 / store idle→ready 화면에도 부재 — footer 를 loading·error 로 옮긴 변형에서 9건 실패 확인) · TESTING §9.21 에 §9.46 블록 + §9.24·§9.25·§9.26 광고 배너 블록, ARCHITECTURE §부팅·hydration 순서 마지막 단계 추가 · 시뮬레이터(iPhone 17 Pro iOS 26.5, 기존 dev build + Metro 8081): e2e:smoke 통과, 01-onboarding 2/2·03-compare 4/4·07-visual-a11y/screenshots 통과 · ATT 다이얼로그 관찰 결과: 미표시(Compare 도착 후 8초 대기 + 스크린샷). 원인 판별 — 시뮬레이터 TCC.db 에서 launchApp 시각(14:53:47)에 kTCCServiceUserTracking auth_value=2(허용) 포함 전 권한이 기록됨 = Maestro launchApp 기본 permissions(all allow)가 ATT 를 미리 허용하므로 Maestro 실행에서는 IDFA 메시지 유무와 무관하게 ATT 가 구조적으로 뜨지 않는다(샘플 App ID 라 IDFA 메시지도 없음). ATT 실제 노출은 Maestro 밖 수동 확인 필요 · onboard.yaml 수정 안 함 · 배너 실표시: 홈·비교·상세 하단에 Google 테스트 배너('Test mode'·'AdMob Adaptive Banner'·OPEN) 표시, 온보딩·설정 화면에는 없음 · Compare 진입 직후 스크린샷은 접힘(h-0, 기존 레이아웃과 동일) → 로드 후 border-t 와 함께 펼침(1회 레이아웃 시프트) · Metro 로그 [ads] 에러 0건 · 관찰된 기존 결함(본 step 범위 밖, 미수정): 홈에서 배너와 탭바 사이 약 34pt 흰 띠 — BottomTabBar 가 insets.bottom 을 적용하는데 홈 Screen 도 기본 edges ['top','bottom'] 로 하단 inset 을 중복 적용(배너 추가 전에도 ScrollView 하단이 같은 폭만큼 잘려 있던 기존 상태). 'BottomTabBar 바로 위' 의도와 어긋나므로 홈 ready Screen edges={['top']} 여부는 후속 결정 필요 · typecheck·lint 0 · 전체 98 suites 2152 passed(1 skipped) · 추가분 prettier clean(대상 파일들은 HEAD 부터 prettier 미준수, diff 줄 수 동일)",
+      "completed_at": "2026-09-17T14:59:50+0900"
+    },
+    {
+      "step": 6,
+      "name": "settings-privacy-menu",
+      "status": "completed",
+      "started_at": "2026-09-17T14:59:50+0900",
+      "summary": "app/(tabs)/settings.tsx 메뉴 그룹 menu-privacy 다음·menu-app-info 앞에 {privacyOptionsRequired && <MenuRow icon=\"shield\" label=\"광고 개인정보 설정\" testID=\"menu-ads-privacy\"/>} 조건부 행(privacyOptionsRequired=useAdsStore 셀렉터 @/store · handleAdsPrivacy=useCallback async try { await showPrivacyOptionsForm() (@/lib) } catch { Alert.alert('알림', '광고 설정 화면을 열지 못했어요. 잠시 후 다시 시도해 주세요.') } · 앱 정보 isLast 무변경 · 기존 shield 재사용, 새 아이콘·색 없음 · SDK import 0건 · doc comment 메뉴 서술 '4개 + 조건부 1개' 갱신) · settings.test 6케이스(@/lib mock 에 showPrivacyOptionsForm 추가, resetStores 에 useAdsStore reset: false→부재+menu-* 순서 4개 그대로 / true→존재·라벨·privacy 와 app-info 사이 순서(getAllByRole('button') 트리 순서) / it.each false·true→menu-app-info border-b 없음 / 탭→showPrivacyOptionsForm 1회+Alert 0회 / reject→Alert('알림', 문구) 1회 — 무조건 노출·catch 삼킴·앱 정보 뒤 배치 변형 각 1건 실패 확인) · 기존 '4개 메뉴' 테스트·data-refresh-card 스냅샷 무변경(--ci) · TESTING §9.29 광고 개인정보 설정 블록 + UI_GUIDE §설정 절 menuAdsPrivacy 문자열·조건 노출·Alert 문구 bullet, §에러 메시지 카탈로그 행(코드 없음), §설정 메뉴 정확 매핑 표 조건부 행(EEA·영국·스위스, TCF 동의 철회 진입점 — ADR-077) · .maestro·RELEASE.md·privacyPolicy.json 무변경 · 주의: AC 의 npm test -- \"app/(tabs)\" 는 괄호가 정규식 그룹으로 해석돼 'No tests found' exit 0 — 'app/\\(tabs\\)' 로 이스케이프해 3 suites 67 passed 확인 · 추가분 prettier clean(표 행은 기존 ADR-071 행 선례대로 재정렬 없이 추가, 대상 파일들은 HEAD 부터 prettier 미준수) · typecheck·lint 0 · 전체 98 suites 2158 passed(1 skipped)",
+      "completed_at": "2026-09-17T15:04:21+0900"
+    },
+    {
+      "step": 7,
+      "name": "privacy-policy",
+      "status": "completed",
+      "started_at": "2026-09-17T15:04:21+0900",
+      "summary": "src/lib/privacyPolicy.json 개정(updatedAt 2026-09-17 · 섹션 8개: 수집·저장/외부 서비스/광고/분석·추적/정확성 고지/보호책임자/변경/문의 · lead·수집 첫 항목·광고 6항목·분석·추적·보호책임자 위탁 항목 10개 문구가 설계 §K 와 글자 단위 일치 스크립트 확인, 오탈자 의심 없음) → npm run gen:privacy 로 docs/privacy-policy.html·PRIVACY.md 재생성(직접 편집 0) · privacyPolicy.test 제목 8개 순서 단언 + 광고 섹션 Google LLC / IDFA·광고 ID + lead 가 구 무수집 문구와 다르고 '광고 SDK' 포함(구 lead 로 되돌린 변형에서 1건 실패 확인) · 섹션 추가로 깨지는 하드코딩 단언만 갱신: app/__tests__/privacy.test.tsx(섹션 8·list 항목 17·email 인덱스 5·7) + .maestro/flows/08-sources-privacy/privacy-page.yaml(privacy-section-7·'8\\.'·privacy-email-7 — 시뮬레이터 iPhone 17 Pro 에서 flow 통과) · docs/RELEASE.md §1 표(네이티브 의존성·권한 추가 행 분리 — 버전은 변경 성격에 따름, 광고 도입 v1.1.0 + runtimeVersion appVersion 규칙 한 줄)·§3 EXPO_PUBLIC_ADS_TEST·§5 iOS App Privacy/ATT 사용·Android Data Safety·§6 5.1.1·§6.1 PIPA 표(수집 동의 필요-ATT·UMP / 국외이전 고지 / 위탁 Google LLC / 정보주체 권리 OS 설정+EEA 메뉴 / 처리방침·아동 행의 '수집 X' 근거도 정정)+심사 시 추가 2줄·§8 이용약관 1항·§13.5 AdMob 정책 위반 대응 · docs/RELEASE_CHECKLIST.md 광고 있음·Data Safety 답안·app-ads.txt/ATT/App ID·AD_UNIT_IDS 교체 3항목 · docs/store-metadata.md §3 '개인정보는 광고 표시에 필요한 최소한만' 4불릿(페르소나 제거)·§6 Data Safety 표+수집 유형별 표(선택적 여부는 Google Play 데이터 공개 문서 기준 — 광고 ID 만 선택) · docs/TESTING.md §9.40 갱신 + §9.41·Maestro 인벤토리 섹션 수 동기화 · AC 전부 통과(typecheck·lint 0, 98 suites 2161 passed/1 skipped, 드리프트 가드 13 passed, Google LLC 각 2건, 금지 문구 grep 0, app-ads.txt 1) · 범위 밖 미수정 잔여: store-metadata.md 17행 '광고·인앱 결제 없음'·33·34·59·62·151·163행 페르소나 서술, RELEASE.md 102·133행 페르소나 서술 — 후속 정리 필요 · 생성물 privacy-policy.html 은 HEAD 부터 prettier 미준수(생성기 출력)",
+      "completed_at": "2026-09-17T15:16:58+0900"
+    },
+    {
+      "step": 8,
+      "name": "docs",
+      "status": "completed",
+      "started_at": "2026-09-17T15:16:58+0900",
+      "summary": "ADR-077 신규(docs/adr/077-admob-banner-ads.md — 077 비어 있음 확인, 078 은 ca-rent 선점 · Supersedes ADR-011 광고 부분: 16.3.4 정확 고정 사유(play-services-ads 25.4.0 Kotlin 메타데이터 2.3.0 vs SDK 54 Kotlin 2.1.20)·ANCHORED_ADAPTIVE_BANNER deprecated 표시·ready Screen footer 만·UMP gatherConsent→initialize→getConsentInfo·ATT 는 UMP 경유(앱 코드 직접 호출 없음)·세션 Promise 캐시·menu-ads-privacy TCF·lib 단일 지점+adsConfig.ts 분리(설계에 없던 분리 명시)·ESLint override 2파일·EXPO_PUBLIC_ADS_TEST||__DEV__·placeholder→AdsConfigError 로 광고만 꺼짐·에러=결과 error+store disabled+__DEV__ console.error·px 없음(토큰 규칙 예외 아님)·비영속 store·1.1.0·moduleSuffixes·expo-build-properties 미추가·대안 기각 4·후속) · docs/ADR.md 077 행 + 011 행 'Superseded by ADR-077 (광고 부분)' · adr/011 상태 줄만 · CLAUDE.md 기술 스택 광고 행 + CRITICAL 1항목 + npm run dev 설명 'Expo Go 불가' · ARCHITECTURE 트리(ads.native/web·adsConfig·store/ads·AdBanner.native/web)·부팅 순서 줄을 구현대로(begin→initializeAds(gatherConsent→initialize→getConsentInfo)→settle)·§명명 규약에 플랫폼 분기 파일 단락·§외부 의존성 분석·오류추적 미도입/광고 AdMob (§상태 관리·에러 카탈로그는 step 1·2 가 이미 반영) · UI_GUIDE 편차표 광고 배너 행 + §접근성 배너 label 한 줄 (설정 문구·/sources 푸터 문구는 기존 반영 확인) · TESTING §18-A.1 광고 E2E 비단언 정책 + §18.9 수동 체크 5항(EEA 는 gatherConsent 에 debugGeography 옵션을 로컬 임시로 넘기는 절차 — 코드에 dev 경로 없음 명시) (§5.1 mock·§9.42~9.46 전부 존재 확인) · README 기술 스택 광고 행(표 재정렬) + '개발 시작' 절 신설(Expo Go 불가·.env.example 복사·expo run:ios·Xcode 27 우회는 SPIKE_RESULT §4 안내) · .maestro/PLAN.md 상단 maestro-debugger ad-banner 안내·02/03/05/07 배너 리스크·01 ATT 관찰(Maestro launchApp 기본 permissions 가 추적 권한 사전허용 → 구조적 미표시, onboard.yaml optional 탭 미추가 사유)·§2 §18.9 요약 · plans 상태 줄 '구현 완료' · 체크리스트 잔재 정리(범위 판단): TESTING §18.7 '/privacy 섹션 1.~7.'→'1.~8.'(step 7 이후 stale), DATA.md §9 '개인정보 수집 0건'에 광고 SDK 예외 명시, store-metadata.md 17행 '광고·인앱 결제 없음'→'광고 포함 · 인앱 결제 없음' · AC 전부 통과(typecheck·lint 0, 98 suites 2161 passed/1 skipped, [077]=1, Superseded by ADR-077 각 1, ADR-077 각 ≥1, 'v1.0 도입 안 함' 0, 9.42~9.46 각 ≥1, 18.9 ≥1, README AdMob 1) · 금지 문구 grep 은 docs/plans/admob-banner-ads.md 40·42행(수정 금지 이력 본문)만 남음 · 추가분 prettier clean(ADR-077 clean, 나머지는 HEAD 대비 diff 줄 수 동일 — UI_GUIDE·ADR.md 는 기존 미정렬 표 선례대로 +2) · 코드 무변경 · 범위 밖 미수정 잔여: 홈 ready Screen 하단 inset 중복(ADR-077 후속에 기록, 결정 필요) · store-metadata.md·RELEASE.md 페르소나 서술(step 7 보고분) · RELEASE.md 56행 'Expo Go 로 무료'(M0~M5 이력) · .maestro/README.md 의 expo run:ios 안내는 Xcode 27 에서 미동작",
+      "completed_at": "2026-09-17T15:25:40+0900"
+    },
+    {
+      "step": 9,
+      "name": "release-e2e",
+      "status": "completed",
+      "started_at": "2026-09-17T15:25:40+0900",
+      "summary": "app.json version 1.0.0→1.1.0 · android.versionCode 3→4 · ios.buildNumber '1' 신규 (plugin 블록·샘플 App ID 무변경) · eas.json development·preview 에 env EXPO_PUBLIC_ADS_TEST='1', production 은 env 없음(실 광고 단위) · .env.example 신규 3줄(git check-ignore 무출력 → .gitignore 무변경, .env 미생성) · README '개발 시작' 절 안내(cp .env.example .env · EXPO_PUBLIC_ADS_TEST=1)가 실제 파일·변수명과 일치 → 무변경 · 수동 체크리스트 TESTING §18.9(5항: ATT 순서·허용/거부 배너, EEA debugGeography GDPR 폼+menu-ads-privacy, 비행기 모드 0 높이, 무광고 화면, 로딩·에러 무광고)·.maestro/PLAN.md §2 요약 존재 확인 → 보완 없음 · Maestro 전체(npm run e2e, iPhone 17 Pro iOS 26.5, step 5 의 기존 dev build + Metro 8081): smoke 포함 27개 중 24 통과·3 실패로 exit 1 (flows/** 26개 기준 23/26, smoke 통과) · 실패 3건은 전부 (c) 광고 무관 기존 결함 — 광고 도입 전 실행(~/.maestro/tests 2026-09-06_175912·2026-09-07_131149)에서 같은 명령·같은 메시지로 이미 실패: empty-states(home-favorites-empty 미표시 — 도시 선택 온보딩이 밴쿠버를 즐겨찾기에 넣음), favorite-toggle(첫 ⭐ 탭이 온보딩이 넣은 즐겨찾기를 제거해 home-favcard-vancouver 미표시), tabs-empty-alert(tapOn '비교, tab.*' 미발견 — 커스텀 BottomTabBar 라벨은 '비교', 빈 상태 전제도 불가) = PLAN.md §1·§3 의 빈-상태 flow 재작성 과제, 미수정 · (a) 스크롤·swipe 조정 0건, (b) ATT 미관찰(Maestro launchApp 기본 permissions 사전허용) → onboard.yaml optional 탭 불필요, .maestro 파일 전부 무변경 · 06-settings/overview·08-sources-privacy 2개 무변경 통과 · 광고 단언 flow 신규 없음 · 스크린샷 10컷 육안: 02-home 하단 테스트 배너('Test mode'·OPEN) 표시 + 배너와 탭바 사이 흰 띠(기존 inset 중복, ADR-077 후속), 05-detail-tuition 하단 'AdMob Adaptive Banner' 표시, 03-compare·04-detail-food 는 캡처 시점 접힘(0 높이·기존 레이아웃), 06-tuition-sheet 는 시트가 하단을 덮음, 01-onboarding·07-settings·08-sources·09-source-city·10-privacy 배너 없음 · Metro 로그 [ads] 0건 · 관찰: 설정 앱 정보가 v1.0.0 — 설치된 dev build 의 번들 내장 EXConstants app.config version 이 bump 전 1.0.0 이라서이며 새 바이너리에서 1.1.0 (결함 아님, 재빌드 안 함) · typecheck·lint 0, jest 98 suites 2161 passed/1 skipped, expo config --type public 유효, e2e:check 통과 · 수동 체크 3건(ATT·GDPR 폼·오프라인)은 사용자 수행 대기 — 이 step 에서 수행하지 않음 · 운영자 후속: AdMob 콘솔 실 App ID(app.json plugin)·배너 광고 단위(AD_UNIT_IDS) 교체, GDPR·IDFA 메시지 게시, laegel123.github.io 루트 app-ads.txt, App Store App Privacy·ATT / Play Data safety 라벨 재작성, 프로덕션 빌드 전 RELEASE_CHECKLIST 확인 · 1.1.0 EAS 빌드·스토어 제출은 미실행",
+      "completed_at": "2026-09-17T15:39:42+0900"
+    }
+  ],
+  "created_at": "2026-09-17T13:53:35+0900",
+  "completed_at": "2026-09-17T15:39:42+0900"
 }

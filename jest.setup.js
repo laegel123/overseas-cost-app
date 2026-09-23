@@ -51,6 +51,27 @@ jest.mock('expo-splash-screen', () => ({
   hideAsync: jest.fn(() => Promise.resolve()),
 }));
 
+// react-native-google-mobile-ads — 광고 SDK (ADR-077). default 는 `mobileAds()` 호출 형태를 흉내 낸다.
+// initialize 는 호출 순서 검증용으로 factory 밖 변수 (jest 호이스팅 규칙상 `mock` 접두 필수).
+const mockMobileAdsInitialize = jest.fn(async () => []);
+jest.mock('react-native-google-mobile-ads', () => ({
+  __esModule: true,
+  default: () => ({ initialize: mockMobileAdsInitialize }),
+  AdsConsent: {
+    gatherConsent: jest.fn(async () => ({ status: 'NOT_REQUIRED', canRequestAds: true })),
+    getConsentInfo: jest.fn(async () => ({
+      canRequestAds: true,
+      privacyOptionsRequirementStatus: 'NOT_REQUIRED',
+    })),
+    showPrivacyOptionsForm: jest.fn(async () => undefined),
+    reset: jest.fn(),
+  },
+  // 테스트가 mock.calls[0][0].onAdLoaded() 로 로드/실패를 시뮬레이션. NativeWind 제약으로 JSX 미사용
+  BannerAd: jest.fn(() => null),
+  BannerAdSize: { ANCHORED_ADAPTIVE_BANNER: 'ANCHORED_ADAPTIVE_BANNER' },
+  TestIds: { ADAPTIVE_BANNER: 'ca-app-pub-3940256099942544/2435281174' },
+}));
+
 // react-native Linking (legacy path 보강)
 jest.mock('react-native/Libraries/Linking/Linking', () => ({
   openURL: jest.fn(() => Promise.resolve(true)),

@@ -7,6 +7,7 @@
  * - Favorite cards (horizontal scroll, accent=true 첫 카드)
  * - Recent cities list (vertical, max 5)
  * - Region pills + 권역별 도시 리스트 (PRD F2.2 "지역별 도시 리스트")
+ * - 하단 footer: AdBanner (ready 상태만, ADR-077)
  *
  * 검색 시: 즐겨찾기/최근/권역 섹션을 검색 결과 리스트로 교체.
  */
@@ -17,6 +18,7 @@ import { ActivityIndicator, Pressable, ScrollView, TextInput, View } from 'react
 
 import { useRouter } from 'expo-router';
 
+import { AdBanner } from '@/components';
 import { FavCard } from '@/components/FavCard';
 import { Icon } from '@/components/Icon';
 import { RecentRow } from '@/components/RecentRow';
@@ -253,7 +255,7 @@ export default function HomeScreen(): React.ReactElement {
   }
 
   return (
-    <Screen scroll testID="home-screen">
+    <Screen scroll testID="home-screen" footer={<AdBanner />}>
       {/* Greeting + Avatar */}
       <View className="flex-row items-start justify-between mt-2">
         <View>

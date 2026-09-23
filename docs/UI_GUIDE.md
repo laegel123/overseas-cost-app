@@ -32,6 +32,7 @@
 | 검색 debounce | 300ms debounce | debounce 없음 (입력 즉시 필터) | `(tabs)/index.tsx` |
 | 설정 unknown 라벨 | "미선택" | "아직 모름 모드" (`PERSONA_LABEL.unknown`) | `src/lib/persona.ts` |
 | 배수 단위 | PRD 산문 "↑1.9배" | 화면 표기 "↑1.9×" (구현 = UI_GUIDE) | `src/lib/format.ts` |
+| 광고 배너 | 디자인 원본 없음 | 홈·비교·상세 하단 anchored adaptive 배너, 로드 전 0 높이, 탭바 인접 border-t (ADR-077) | `AdBanner.native.tsx`, `Screen.tsx` footer |
 
 ## 디자인 원칙
 
@@ -165,6 +166,10 @@ border-radius
 
 - 36×36 이모지 박스(hot 시 `#FFE9DC`, 정상 `#F0F5F9`), 13px Manrope 700 품목명, `1.2만 → 2.2만` 11px tiny.
 - 우측 배수 13px Manrope 800.
+
+### Screen (화면 chrome wrapper)
+
+- `Screen.footer`: ScrollView 밖·SafeArea 안 하단 고정 슬롯, 폭 전체, 광고 배너용 (ADR-077).
 
 ## 카테고리별 상세 화면 사양
 
@@ -448,9 +453,13 @@ menuRefresh: '데이터 새로고침',
 menuSources: '데이터 출처 보기',
 menuFeedback: '피드백 보내기',
 menuPrivacy: '개인정보 처리방침',
+menuAdsPrivacy: '광고 개인정보 설정',   // 조건부 — privacyOptionsRequired 일 때만 (ADR-077)
 menuAppInfo: '앱 정보',
 settingsFooter: 'Made with ♥ in Seoul · 2026',
 ```
+
+- `광고 개인정보 설정`(`menu-ads-privacy`) 은 UMP 가 개인정보 옵션을 요구하는 사용자(EEA·영국·스위스)에게만 보인다 — TCF 동의 철회 진입점 (ADR-077). 한국 사용자에게는 렌더되지 않는다.
+- 광고 설정 폼(`showPrivacyOptionsForm`) 실패 시 네이티브 `Alert('알림', '광고 설정 화면을 열지 못했어요. 잠시 후 다시 시도해 주세요.')`.
 
 ### 출처 화면 (`app/sources/index.tsx`, `app/sources/[cityId].tsx`)
 
@@ -529,6 +538,7 @@ ADR-014·ADR-036 에 따라 사용자에게 보일 모든 에러 메시지를 �
 | `ALL_CITIES_UNAVAILABLE` | "데이터를 불러올 수 없어요\n네트워크 연결을 확인해 주세요" | 전체 ErrorView            |
 | `FAVORITES_LIMIT`        | "즐겨찾기는 최대 50개까지 추가할 수 있어요"                | 토스트                    |
 | `INVARIANT`              | "예기치 못한 문제가 생겼어요\n앱을 다시 실행해 주세요"     | ErrorBoundary fatal       |
+| (코드 없음 — `showPrivacyOptionsForm` reject) | "광고 설정 화면을 열지 못했어요. 잠시 후 다시 시도해 주세요." | 설정 네이티브 `Alert` (제목 "알림") |
 
 규칙:
 
@@ -591,6 +601,7 @@ v1.0 한국어 강제 (ADR-016). 향후 마찰 줄이기 위해:
 | 데이터 출처 보기  | book    | #11263C       | #F0F5F9               | "N개" (런타임 실측 출처 수) | 인앱 화면 `/sources` |
 | 피드백 보내기     | mail    | #11263C       | #F0F5F9               | (없음)                  | mailto    |
 | 개인정보 처리방침 | shield  | #11263C       | #F0F5F9               | (없음)                  | 인앱 화면 `/privacy` |
+| 광고 개인정보 설정 (`menu-ads-privacy`) | shield | #11263C | #F0F5F9 | (없음) | 조건부 — EEA·영국·스위스 사용자만, TCF 동의 철회 진입점 — ADR-077. 탭 → `showPrivacyOptionsForm`, 실패 시 `Alert` |
 | 앱 정보           | info    | #8A98A0 (dim) | #F0F5F9               | "v1.0.0"                | dim 라벨  |
 
 ### RegionPill (홈 권역 필터)
@@ -756,6 +767,7 @@ Compare/Detail 푸터에 데이터 신선도 시각 강조.
 - **VoiceOver / TalkBack**: 모든 카드는 `accessibilityLabel` 으로 도시·항목·배수·차액을 한 문장으로. 예: "밴쿠버 월세, 서울 70만원 대비 180만원으로 약 2.6배."
 - **터치 타겟**: 최소 44×44 (iOS HIG). 작아 보이는 chevron 행도 패딩으로 보장.
 - **색 대비**: 본문(navy on white) WCAG AA 통과. 배수 색 단독으로 정보 전달 금지(앞서 명시).
+- **광고 배너**: 컨테이너 `accessibilityLabel="광고"` + `accessibilityRole="none"` — SDK 배너 뷰가 자체 라벨을 가진다 (ADR-077).
 
 ## 모션
 

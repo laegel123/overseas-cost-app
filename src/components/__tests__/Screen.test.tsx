@@ -4,9 +4,10 @@
 
 import * as React from 'react';
 
-import { ScrollView, Text } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
-import { render, screen } from '@testing-library/react-native';
+import { render, screen, within } from '@testing-library/react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Screen } from '../Screen';
 
@@ -122,5 +123,69 @@ describe('Screen', () => {
       </Screen>,
     );
     expect(screen.getByTestId('my-screen')).toBeTruthy();
+  });
+
+  describe('footer 슬롯 (§9.45)', () => {
+    // SafeAreaView mock 은 children passthrough 라 SafeAreaView 인스턴스의 children
+    // 순서 = Screen 이 SafeAreaView 안에 둔 자식 순서.
+    it('scroll=true + footer → ScrollView 밖 형제, SafeAreaView 마지막 자식', () => {
+      render(
+        <Screen scroll testID="s" footer={<View testID="f" />}>
+          <Text>x</Text>
+        </Screen>,
+      );
+      expect(screen.getByTestId('f')).toBeTruthy();
+      const sv = screen.UNSAFE_getByType(ScrollView);
+      expect(within(sv).queryByTestId('f')).toBeNull();
+
+      const safeChildren = screen.UNSAFE_getByType(SafeAreaView).children;
+      expect(safeChildren).toHaveLength(2);
+      expect(safeChildren[0]).toBe(sv);
+      expect(safeChildren[1]).toMatchObject({ props: { testID: 'f' } });
+    });
+
+    it('scroll=false + footer → inner View 밖 형제, SafeAreaView 마지막 자식', () => {
+      render(
+        <Screen testID="s" footer={<View testID="f" />}>
+          <Text>x</Text>
+        </Screen>,
+      );
+      expect(screen.getByTestId('f')).toBeTruthy();
+      expect(within(screen.getByTestId('s')).queryByTestId('f')).toBeNull();
+
+      const safeChildren = screen.UNSAFE_getByType(SafeAreaView).children;
+      expect(safeChildren).toHaveLength(2);
+      expect(safeChildren[0]).toMatchObject({ props: { testID: 's' } });
+      expect(safeChildren[1]).toMatchObject({ props: { testID: 'f' } });
+    });
+
+    it.each([true, false])(
+      'scroll=%s + footer 미지정 → SafeAreaView 자식 1개 (구조 무변경)',
+      (scroll) => {
+        render(
+          <Screen scroll={scroll} testID="s">
+            <Text>x</Text>
+          </Screen>,
+        );
+        const safeChildren = screen.UNSAFE_getByType(SafeAreaView).children;
+        expect(safeChildren).toHaveLength(1);
+        expect(safeChildren[0]).toMatchObject({ props: { testID: 's' } });
+      },
+    );
+
+    it.each([true, false])('scroll=%s → footer 부모에 horizontal padding 클래스 없음', (scroll) => {
+      render(
+        <Screen scroll={scroll} padding="screen-x" testID="s" footer={<View testID="f" />}>
+          <Text>x</Text>
+        </Screen>,
+      );
+      // padding 은 ScrollView / inner View 에만 — footer 의 부모는 SafeAreaView.
+      expect(screen.getByTestId('s').props.className).toContain('px-screen-x');
+      const safeArea = screen.UNSAFE_getByType(SafeAreaView);
+      expect(safeArea.props.className).not.toContain('px-');
+      expect(safeArea.children).toContainEqual(
+        expect.objectContaining({ props: expect.objectContaining({ testID: 'f' }) }),
+      );
+    });
   });
 });

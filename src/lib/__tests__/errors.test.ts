@@ -1,4 +1,5 @@
 import {
+  AdsConfigError,
   AllCitiesUnavailableError,
   AppError,
   CityFetchError,
@@ -35,11 +36,12 @@ const errorCases: [ErrorCtor, string][] = [
   [AllCitiesUnavailableError, 'ALL_CITIES_UNAVAILABLE'],
   [FavoritesLimitError, 'FAVORITES_LIMIT'],
   [InvariantError, 'INVARIANT'],
+  [AdsConfigError, 'ADS_CONFIG'],
 ];
 
-describe('errors 카탈로그 (15 클래스)', () => {
-  it('카탈로그 길이가 정확히 15개', () => {
-    expect(errorCases).toHaveLength(15);
+describe('errors 카탈로그 (16 클래스)', () => {
+  it('카탈로그 길이가 정확히 16개', () => {
+    expect(errorCases).toHaveLength(16);
   });
 
   describe.each(errorCases)('%p', (Ctor, expectedCode) => {

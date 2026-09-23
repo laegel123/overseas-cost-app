@@ -5,7 +5,8 @@
  * 배지 대신 데이터 최신화 카드로 교체.
  * - Data refresh card: navy 히어로 시각 + 마지막 동기화 시각 + 새로고침 버튼
  * - Stat cards: 즐겨찾기 / 최근 본 / 도시 DB count
- * - Menu list: MenuRow 4개 (출처 / 피드백 / 개인정보 / 앱 정보 dim)
+ * - Menu list: MenuRow 4개 (출처 / 피드백 / 개인정보 / 앱 정보 dim) + 조건부 1개(광고 개인정보 설정,
+ *   EEA 등 `privacyOptionsRequired` 만 — TCF 동의 철회 진입점, ADR-077)
  * - Footer: Made with ♥ in Seoul · 2026
  *
  * 출처·개인정보 메뉴는 앱 내부 화면(`/sources`, `/privacy`)으로 push 한다 (ADR-071 —
@@ -25,8 +26,15 @@ import { Icon } from '@/components/Icon';
 import { MenuRow } from '@/components/MenuRow';
 import { Screen } from '@/components/Screen';
 import { H1, H3, Tiny } from '@/components/typography/Text';
-import { countUniqueSources, formatShortDate, getAllCities, refreshCache } from '@/lib';
+import {
+  countUniqueSources,
+  formatShortDate,
+  getAllCities,
+  refreshCache,
+  showPrivacyOptionsForm,
+} from '@/lib';
 import { openURL } from '@/lib/linking';
+import { useAdsStore } from '@/store';
 import { useFavoritesStore } from '@/store/favorites';
 import { useRecentStore } from '@/store/recent';
 import { useSettingsStore } from '@/store/settings';
@@ -43,6 +51,7 @@ export default function SettingsScreen(): React.ReactElement {
   const recentIds = useRecentStore((s) => s.cityIds);
   const lastSync = useSettingsStore((s) => s.lastSync);
   const updateLastSync = useSettingsStore((s) => s.updateLastSync);
+  const privacyOptionsRequired = useAdsStore((s) => s.privacyOptionsRequired);
 
   const [refreshState, setRefreshState] = React.useState<RefreshState>('idle');
 
@@ -91,6 +100,14 @@ export default function SettingsScreen(): React.ReactElement {
   const handlePrivacy = React.useCallback(() => {
     router.push('/privacy');
   }, [router]);
+
+  const handleAdsPrivacy = React.useCallback(async () => {
+    try {
+      await showPrivacyOptionsForm();
+    } catch {
+      Alert.alert('알림', '광고 설정 화면을 열지 못했어요. 잠시 후 다시 시도해 주세요.');
+    }
+  }, []);
 
   const formatLastSync = React.useCallback((): string => {
     if (refreshState === 'loading') return '갱신 중...';
@@ -184,6 +201,14 @@ export default function SettingsScreen(): React.ReactElement {
           onPress={handlePrivacy}
           testID="menu-privacy"
         />
+        {privacyOptionsRequired && (
+          <MenuRow
+            icon="shield"
+            label="광고 개인정보 설정"
+            onPress={handleAdsPrivacy}
+            testID="menu-ads-privacy"
+          />
+        )}
         <MenuRow
           icon="info"
           label="앱 정보"
