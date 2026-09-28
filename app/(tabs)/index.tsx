@@ -23,7 +23,7 @@ import { FavCard } from '@/components/FavCard';
 import { Icon } from '@/components/Icon';
 import { RecentRow } from '@/components/RecentRow';
 import { RegionPill } from '@/components/RegionPill';
-import { Screen } from '@/components/Screen';
+import { Screen, TAB_SCREEN_EDGES } from '@/components/Screen';
 import { Body, H1, Tiny } from '@/components/typography/Text';
 import {
   computeCityTotal,
@@ -219,7 +219,7 @@ export default function HomeScreen(): React.ReactElement {
 
   if (state.status === 'loading') {
     return (
-      <Screen testID="home-screen-loading">
+      <Screen edges={TAB_SCREEN_EDGES} testID="home-screen-loading">
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator
             size="large"
@@ -233,7 +233,7 @@ export default function HomeScreen(): React.ReactElement {
 
   if (state.status === 'error') {
     return (
-      <Screen testID="home-screen-error">
+      <Screen edges={TAB_SCREEN_EDGES} testID="home-screen-error">
         <View className="flex-1 items-center justify-center px-4 gap-4">
           <Body color="gray-2" className="text-center">
             {state.message}
@@ -255,7 +255,7 @@ export default function HomeScreen(): React.ReactElement {
   }
 
   return (
-    <Screen scroll testID="home-screen" footer={<AdBanner />}>
+    <Screen scroll edges={TAB_SCREEN_EDGES} testID="home-screen" footer={<AdBanner />}>
       {/* Greeting + Avatar */}
       <View className="flex-row items-start justify-between mt-2">
         <View>

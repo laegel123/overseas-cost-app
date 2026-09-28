@@ -185,8 +185,8 @@ ADR-011 은 "분석/오류 추적 SDK 를 도입하지 않는다" 를 근거로 
 - 미디에이션, 광고 빈도 제어, 전면·보상형 광고.
 - 다크 모드 배너 배경, 태블릿 레이아웃.
 - 출처명 전반의 ADR 번호·계산식 노출 정리 (HUD·StatCan CPI·BLS) — 별도 부채.
-- 홈 ready `Screen` 의 하단 inset 중복 (`BottomTabBar` 가 `insets.bottom` 을 이미 적용하는데
-  `Screen` 기본 edges 도 bottom 포함 → 배너와 탭바 사이 흰 띠). 광고 도입 전부터 있던 결함 — 수정 여부 결정 필요.
+- ~~홈 ready `Screen` 의 하단 inset 중복~~ — **해결됨**: 탭 화면(홈 3상태·설정)은 `TAB_SCREEN_EDGES`(`['top']`) 사용.
+  `BottomTabBar` 가 `insets.bottom` 을 이미 적용하므로 `Screen` 기본 edges 의 bottom 이 배너와 탭바 사이 흰 띠를 만들었다.
 - `LARGE_ANCHORED_ADAPTIVE_BANNER` 전환, Kotlin ≥ 2.2 Expo SDK 에서 16.4+ 재검토.
 - 운영자 수동 작업 (코드 무관): AdMob 계정·실제 App ID(`app.json`)·배너 광고 단위(`AD_UNIT_IDS`)·
   GDPR/IDFA 메시지 게시·`app-ads.txt`(`laegel123.github.io` 루트)·스토어 개인정보 라벨 —

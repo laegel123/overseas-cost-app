@@ -17,6 +17,7 @@ import { Alert } from 'react-native';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 
 import { jsonByTestId } from '@/__test-utils__/snapshotByTestId';
+import { Screen } from '@/components/Screen';
 import {
   countUniqueSources as mockCountUniqueSources,
   getAllCities as mockGetAllCities,
@@ -88,6 +89,14 @@ describe('SettingsScreen', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetStores();
+  });
+
+  it('Screen edges top 만 — 하단 inset 은 BottomTabBar 가 적용 (중복 시 흰 띠)', () => {
+    setupMocks();
+
+    const { UNSAFE_getByType } = render(<SettingsScreen />);
+
+    expect(UNSAFE_getByType(Screen).props.edges).toEqual(['top']);
   });
 
   describe('데이터 최신화 카드', () => {
