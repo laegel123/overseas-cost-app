@@ -14,7 +14,7 @@ import refreshVisas, {
   getVisaForCity,
   fetchVisaFees,
 } from '../visas.mjs';
-import type { RefreshChange } from './_test-types';
+import type { RefreshChange, RefreshWarning } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -355,17 +355,19 @@ describe('refresh (integration)', () => {
     expect(result.errors.length).toBeGreaterThan(0);
   }, 30000);
 
-  it('페이지 fetch 실패: errors 미추가 + static fallback (v1.0 reachability check 정책)', async () => {
+  it('페이지 fetch 실패: warnings 에 기록 + errors 미추가 + static fallback (v1.0 reachability check 정책)', async () => {
     // v1.0 에서는 HTML 파싱 미구현 — fetchedFromPage:false 든 true 든 동일 static 값 반환.
-    // 정부 사이트 봇 차단으로 reachability 가 자주 실패하므로 errors 가 아니라 console.info 로 기록.
+    // 정부 사이트 봇 차단으로 reachability 가 자주 실패하므로 errors 가 아니라 warnings 로 기록 (ADR-079).
     fetchSpy.mockRejectedValue(new Error('Network error'));
     const infoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
 
     const result = await refreshVisas({ dryRun: true, cities: ['vancouver'] });
 
-    expect(result.errors.length).toBe(0);
+    expect(result.errors).toEqual([]);
+    expect((result.warnings ?? []).some((w: RefreshWarning) => w.reason.includes('page unreachable'))).toBe(
+      true,
+    );
     expect(result.changes.length).toBeGreaterThan(0);
-    expect(infoSpy).toHaveBeenCalledWith(expect.stringContaining('page unreachable'));
     infoSpy.mockRestore();
   }, 30000);
 

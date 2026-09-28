@@ -18,7 +18,7 @@ import refreshSgSingstat, {
   SOURCE_RENT,
   SOURCE_FOOD,
 } from '../sg_singstat.mjs';
-import type { RefreshChange, RefreshError } from './_test-types';
+import type { RefreshChange, RefreshError, RefreshWarning } from './_test-types';
 
 let originalDataDir: string | undefined;
 let originalSgDataGovKey: string | undefined;
@@ -210,10 +210,11 @@ describe('refresh (integration)', () => {
     expect(sgChanges.length).toBeGreaterThan(0);
   }, 30000);
 
-  it('SG_DATA_GOV_KEY 미설정 시 errors에 추가 (useStatic=false)', async () => {
+  it('SG_DATA_GOV_KEY 미설정 시 warnings에 추가 (useStatic=false, errors 는 비어 있음)', async () => {
     const result = await refreshSgSingstat({ dryRun: true, useStatic: false });
 
-    expect(result.errors.some((e: RefreshError) => e.reason.includes('SG_DATA_GOV_KEY'))).toBe(true);
+    expect((result.warnings ?? []).some((w: RefreshWarning) => w.reason.includes('SG_DATA_GOV_KEY'))).toBe(true);
+    expect(result.errors).toEqual([]);
   }, 30000);
 
   it('기존 데이터 대비 changes 계산', async () => {

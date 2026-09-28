@@ -77,6 +77,7 @@ export async function checkRatpFarePage() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -86,7 +87,7 @@ export default async function refresh(opts = {}) {
   if (!opts.useStatic) {
     const pageAvailable = await checkRatpFarePage();
     if (!pageAvailable) {
-      errors.push({
+      warnings.push({
         cityId: 'paris',
         reason: 'RATP fare page unavailable, using static values',
       });
@@ -156,5 +157,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

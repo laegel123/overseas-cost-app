@@ -20,7 +20,7 @@ import refreshVnGso, {
   SOURCE_FOOD,
   SOURCE_TRANSPORT,
 } from '../vn_gso.mjs';
-import type { RefreshChange, RefreshError } from './_test-types';
+import type { RefreshChange, RefreshError, RefreshWarning } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -212,6 +212,16 @@ describe('refresh (integration)', () => {
     const rentChange = result.changes.find((c: RefreshChange) => c.field.startsWith('rent.'));
     expect(rentChange).toBeDefined();
     expect(typeof rentChange?.pctChange).toBe('number');
+  }, 30000);
+
+  it('GSO 사이트 불가 시 static fallback + warnings에 추가 (errors 는 비어 있음)', async () => {
+    fetchSpy.mockRejectedValue(new Error('Network error'));
+
+    const result = await refreshVnGso({ dryRun: true, useStatic: false });
+
+    expect((result.warnings ?? []).some((w: RefreshWarning) => w.reason.includes('unavailable'))).toBe(true);
+    expect(result.errors).toEqual([]);
+    expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 
   it('알 수 없는 도시: errors에 추가', async () => {

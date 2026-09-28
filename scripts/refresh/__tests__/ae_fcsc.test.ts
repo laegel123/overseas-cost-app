@@ -18,7 +18,7 @@ import refreshAeFcsc, {
   SOURCE_RENT,
   SOURCE_FOOD,
 } from '../ae_fcsc.mjs';
-import type { RefreshChange, RefreshError } from './_test-types';
+import type { RefreshChange, RefreshError, RefreshWarning } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -194,12 +194,13 @@ describe('refresh (integration)', () => {
     expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 
-  it('DSC/FCSC 불가 시 static fallback + errors에 추가', async () => {
+  it('DSC/FCSC 불가 시 static fallback + warnings에 추가 (errors 는 비어 있음)', async () => {
     fetchSpy.mockRejectedValue(new Error('Network error'));
 
     const result = await refreshAeFcsc({ dryRun: true, useStatic: false });
 
-    expect(result.errors.some((e: RefreshError) => e.reason.includes('unavailable'))).toBe(true);
+    expect((result.warnings ?? []).some((w: RefreshWarning) => w.reason.includes('unavailable'))).toBe(true);
+    expect(result.errors).toEqual([]);
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 });

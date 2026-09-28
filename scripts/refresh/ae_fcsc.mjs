@@ -122,6 +122,7 @@ export function mapToGroceries() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -141,13 +142,13 @@ export default async function refresh(opts = {}) {
     ]);
 
     if (!dscAvailable) {
-      errors.push({
+      warnings.push({
         cityId: 'all',
         reason: 'DSC site unavailable, using static values for rent',
       });
     }
     if (!fcscAvailable) {
-      errors.push({
+      warnings.push({
         cityId: 'all',
         reason: 'FCSC site unavailable, using static values for food',
       });
@@ -252,5 +253,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

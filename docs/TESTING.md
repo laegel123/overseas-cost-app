@@ -3188,6 +3188,7 @@ afterEach(() => {
 - [x] TfL Unified API (Zone 1-2 monthly/single)
 - [x] taxiBase 별도 (black cab 정적)
 - [x] checkTflApiStatus: API connectivity 확인
+- [x] refresh: TfL API 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 - [x] getTransportFares: static 값 반환
 - [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 - [x] `SOURCE.name` / `SOURCE.url` 이 운임 안내 페이지 + "정적 추정치" 마커와 정확 일치 (ADR-070, ADR-076)
@@ -3205,6 +3206,7 @@ afterEach(() => {
 - [x] parseGenesisXml: wert 태그 추출 (독일 소수점 콤마 지원)
 - [x] getRentForCity: 도시별 보정계수 적용
 - [x] getGroceriesForCity: 도시별 보정계수 적용
+- [x] refresh: GENESIS API 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 - [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 
 #### `de_transit.mjs`
@@ -3212,6 +3214,7 @@ afterEach(() => {
 - [x] BVG (베를린) / MVV (뮌헨) fare page fetch
 - [x] getTransportForCity: 도시별 요금 반환
 - [x] checkBvgFarePage / checkMvvFarePage: connectivity 확인
+- [x] refresh: BVG/MVV 페이지 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 - [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 
 #### `fr_insee.mjs`
@@ -3226,7 +3229,7 @@ afterEach(() => {
 - [x] refresh: dryRun=true 시 파일 미갱신
 - [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
 - [x] refresh: 알 수 없는 도시 → errors에 추가
-- [x] refresh: API 불가 시 static fallback + errors에 추가
+- [x] refresh: API 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 
 #### `fr_ratp.mjs`
 
@@ -3238,7 +3241,7 @@ afterEach(() => {
 - [x] refresh: dryRun=true 시 파일 미갱신
 - [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
 - [x] refresh: 알 수 없는 도시 → errors에 추가
-- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
+- [x] refresh: 페이지 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 
 #### `nl_cbs.mjs`
 
@@ -3252,7 +3255,7 @@ afterEach(() => {
 - [x] refresh: dryRun=true 시 파일 미갱신
 - [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
 - [x] refresh: 알 수 없는 도시 → errors에 추가
-- [x] refresh: API 불가 시 static fallback + errors에 추가
+- [x] refresh: API 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 
 #### `nl_gvb.mjs`
 
@@ -3264,7 +3267,7 @@ afterEach(() => {
 - [x] refresh: dryRun=true 시 파일 미갱신
 - [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
 - [x] refresh: 알 수 없는 도시 → errors에 추가
-- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
+- [x] refresh: 페이지 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 
 ### 9-A.8 출처별 — 호주·아시아·UAE (8 scripts)
 
@@ -3282,7 +3285,7 @@ afterEach(() => {
 - [x] refresh: dryRun/useStatic 옵션
 - [x] refresh: 기존 데이터 대비 changes 계산
 - [x] refresh: 알 수 없는 도시 → errors에 추가
-- [x] refresh: API 불가 시 static fallback + errors에 추가
+- [x] refresh: API 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 
 #### `jp_estat.mjs`, `jp_transit.mjs`
 
@@ -3297,7 +3300,7 @@ afterEach(() => {
 - [x] refresh: JP_ESTAT_APP_ID 미설정 시 errors에 추가
 - [x] refresh: 기존 데이터 대비 changes 계산
 - [x] refresh: 알 수 없는 도시 → errors에 추가
-- [x] refresh: API 불가 시 static fallback + errors에 추가
+- [x] refresh: API 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 - [x] `fetchEstatData` fetch 실패 시 `console.warn` 으로 예외 노출 (silent fail 금지, PR #20 review round 8)
 - [x] v1.0 계약 — e-Stat API sample 응답이 도시 JSON 의 rent/food 값에 미반영 (응답 단위 검증 v1.x)
 
@@ -3314,7 +3317,7 @@ afterEach(() => {
 - [x] refresh: dryRun=true 시 파일 미갱신
 - [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
 - [x] refresh: 알 수 없는 도시 → errors에 추가
-- [x] refresh: SG_DATA_GOV_KEY 미설정 시 errors에 추가
+- [x] refresh: SG_DATA_GOV_KEY 미설정 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 
 #### `sg_lta.mjs`
 
@@ -3326,7 +3329,7 @@ afterEach(() => {
 - [x] refresh: dryRun=true 시 파일 미갱신
 - [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
 - [x] refresh: 알 수 없는 도시 → errors에 추가
-- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
+- [x] refresh: 페이지 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 
 #### `vn_gso.mjs`
 
@@ -3338,7 +3341,8 @@ afterEach(() => {
 - [x] SOURCE_RENT / SOURCE_FOOD: "estimated" 마커 포함 (도시 단위 데이터 부재)
 - [x] SOURCE_TRANSPORT: 정적 추정 명시
 - [x] refresh: rent + food + transport 모두 처리
-- [x] refresh: GSO 도시 단위 데이터 부재 경고 errors에 포함
+- [x] refresh: GSO 도시 단위 데이터 부재는 errors 가 아니라 SOURCE_*.name 의 estimated 마커로만 표기
+- [x] refresh: GSO 사이트 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 - [x] refresh: useStatic=true 시 정상 동작
 - [x] refresh: dryRun=true 시 파일 미갱신
 - [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
@@ -3358,7 +3362,7 @@ afterEach(() => {
 - [x] refresh: dryRun=true 시 파일 미갱신
 - [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
 - [x] refresh: 알 수 없는 도시 → errors에 추가
-- [x] refresh: DSC/FCSC 불가 시 static fallback + errors에 추가
+- [x] refresh: DSC/FCSC 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 
 #### `ae_rta.mjs`
 
@@ -3370,7 +3374,7 @@ afterEach(() => {
 - [x] refresh: dryRun=true 시 파일 미갱신
 - [x] refresh: 기존 데이터 대비 changes 계산 + pctChange
 - [x] refresh: 알 수 없는 도시 → errors에 추가
-- [x] refresh: 페이지 불가 시 static fallback + errors에 추가
+- [x] refresh: 페이지 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
 
 #### `eu_eurostat.mjs`
 
@@ -3413,7 +3417,7 @@ afterEach(() => {
 - [x] 도시별 비자 페이지 매핑 (`VISA_REGISTRY`)
 - [x] 정부 페이지 reachability check (HTML 파싱 미구현, static 항상 반환)
 - [x] 정착 비용 추정 (정적 + 비자료) — VISA_REGISTRY.settlementApprox
-- [x] 페이지 변경 시 graceful fail — fetchedFromPage:false 면 console.info, errors 미추가
+- [x] 페이지 변경 시 graceful fail — fetchedFromPage:false 면 warnings 에 기록, errors 미추가 (ADR-079)
 - [x] 워크플로우에서 `--useStatic` 강제 (refresh-visa.yml, PR #20 review round 7)
 - [x] `VISA_REGISTRY[code].name` 기관 표기 non-empty (11개국)
 - [x] `buildSource(cityId).category` = 'visa'

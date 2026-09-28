@@ -13,7 +13,7 @@ import refreshUkTfl, {
   STATIC_TRANSPORT,
   SOURCE,
 } from '../uk_tfl.mjs';
-import type { RefreshChange, RefreshError } from './_test-types';
+import type { RefreshChange, RefreshError, RefreshWarning } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -154,12 +154,13 @@ describe('refresh (integration)', () => {
     expect(fs.existsSync(londonPath)).toBe(false);
   }, 30000);
 
-  it('API 불가: errors에 추가 + static fallback', async () => {
+  it('API 불가: warnings에 추가 + static fallback (errors 는 비어 있음)', async () => {
     fetchSpy.mockRejectedValue(new Error('Network error'));
 
     const result = await refreshUkTfl({ dryRun: true });
 
-    expect(result.errors.some((e: RefreshError) => e.reason.includes('unavailable'))).toBe(true);
+    expect((result.warnings ?? []).some((w: RefreshWarning) => w.reason.includes('unavailable'))).toBe(true);
+    expect(result.errors).toEqual([]);
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 

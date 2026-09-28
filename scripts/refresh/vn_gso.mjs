@@ -128,18 +128,19 @@ export function getTransportFares() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
 
   const targetCities = opts.cities ?? Object.keys(CITY_CONFIGS);
 
-  // GSO 사이트 가용성 체크 — 실패는 진짜 오류로 errors 에 기록 (silent fail 금지).
-  // "도시 단위 데이터 부재" 자체는 영구적 사실이므로 errors 가 아니라 SOURCE_*.name 의 "estimated" 마커로 표기.
+  // GSO 사이트 가용성 체크 — 값은 항상 정적 추정치라 실패는 warnings 에 기록 (ADR-079, silent fail 금지).
+  // "도시 단위 데이터 부재" 자체는 영구적 사실이므로 SOURCE_*.name 의 "estimated" 마커로 표기.
   if (!opts.useStatic) {
     const gsoAvailable = await checkGsoStatus();
     if (!gsoAvailable) {
-      errors.push({
+      warnings.push({
         cityId: 'all',
         reason: 'GSO site unavailable, using static estimates',
       });
@@ -256,5 +257,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }
