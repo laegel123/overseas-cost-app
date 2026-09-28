@@ -1,0 +1,10 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "refresh-warnings",
+  "steps": [
+    { "step": 0, "name": "warnings-contract", "status": "pending" },
+    { "step": 1, "name": "fetchers-reachability", "status": "pending" },
+    { "step": 2, "name": "fetchers-fallback", "status": "pending" },
+    { "step": 3, "name": "workflow-gate", "status": "pending" }
+  ]
+}
