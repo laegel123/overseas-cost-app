@@ -298,6 +298,22 @@ describe('refresh (integration)', () => {
     expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 
+  it('e-Stat API 무응답: warnings 에 기록 + static 유지 (errors 는 비어 있음)', async () => {
+    process.env.JP_ESTAT_APP_ID = 'test-app-id';
+    const fetchSpy = jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Network timeout'));
+    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    const result = await refreshJpEstat({ dryRun: true, useStatic: false, cities: ['tokyo'] });
+
+    expect((result.warnings ?? [])).toEqual([
+      { cityId: 'tokyo', reason: expect.stringContaining('e-Stat rent API returned no data') },
+    ]);
+    expect(result.errors).toEqual([]);
+    expect(result.changes.length).toBeGreaterThan(0);
+    fetchSpy.mockRestore();
+    warnSpy.mockRestore();
+  }, 30000);
+
   // silent fail 금지 회귀 차단.
   it('fetchEstatData fetch 실패 시 console.warn 으로 예외 노출 (silent fail 금지)', async () => {
     const fetchSpy = jest.spyOn(global, 'fetch').mockRejectedValue(new Error('Network timeout'));

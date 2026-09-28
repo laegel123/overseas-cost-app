@@ -155,6 +155,7 @@ export const SOURCE = {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -191,7 +192,7 @@ export default async function refresh(opts = {}) {
           }
         }
       } catch (err) {
-        errors.push({
+        warnings.push({
           cityId,
           reason: `${config.agency} fare fetch failed, using static fallback: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`,
         });
@@ -252,5 +253,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

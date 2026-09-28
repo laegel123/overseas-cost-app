@@ -86,6 +86,7 @@ export function parseFareHtml(html) {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const newTransport = { ...STATIC_FARES };
   const cityId = 'montreal';
 
@@ -103,7 +104,7 @@ export default async function refresh(opts = {}) {
         }
       }
     } catch (err) {
-      errors.push({
+      warnings.push({
         cityId,
         reason: `STM fare fetch failed, using static fallback: ${redactErrorMessage(String(err?.message ?? "unknown"))}`,
       });
@@ -150,6 +151,7 @@ export default async function refresh(opts = {}) {
     fields,
     changes,
     errors,
+    warnings,
   };
 }
 

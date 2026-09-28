@@ -184,11 +184,14 @@ describe('getTuitionForCity', () => {
     }
   });
 
-  it('알 수 없는 도시: 빈 배열 + 에러', async () => {
+  it('알 수 없는 도시: 빈 배열 + 에러 ({cityId, reason} 객체)', async () => {
     const result = await getTuitionForCity('unknown-city', { useStatic: true });
 
     expect(result.tuition).toHaveLength(0);
-    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors).toEqual([
+      { cityId: 'unknown-city', reason: 'Unknown city: unknown-city' },
+    ]);
+    expect(result.warnings).toEqual([]);
   });
 
   it('독일 도시: 등록비 수준 학비 (700 EUR 내외)', async () => {
@@ -343,12 +346,17 @@ describe('refresh (integration)', () => {
     expect(result.errors.length).toBeGreaterThan(0);
   }, 30000);
 
-  it('페이지 fetch 실패: errors에 추가 + static fallback', async () => {
+  it('페이지 fetch 실패: warnings에 추가 + static fallback (errors 는 비어 있음)', async () => {
     fetchSpy.mockRejectedValue(new Error('Network error'));
 
     const result = await refreshUniversities({ dryRun: true, cities: ['vancouver'] });
 
-    expect(result.errors.length).toBeGreaterThan(0);
+    expect((result.warnings ?? []).length).toBeGreaterThan(0);
+    for (const w of result.warnings ?? []) {
+      expect(w.cityId).toBe('vancouver');
+      expect(w.reason).toContain('page fetch failed, using static value');
+    }
+    expect(result.errors).toEqual([]);
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 });

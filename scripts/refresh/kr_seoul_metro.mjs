@@ -109,6 +109,7 @@ export function parseTaxiFareHtml(html) {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const newTransport = { ...STATIC_FARES };
 
   if (!opts.useStatic) {
@@ -126,14 +127,14 @@ export default async function refresh(opts = {}) {
         }
         // 페이지는 응답했지만 파싱이 모두 실패 — 페이지 구조 변경 가능성, 운영 알림 필요.
         if (parsed.singleRide === undefined && parsed.monthlyPass === undefined) {
-          errors.push({
+          warnings.push({
             cityId: 'seoul',
             reason: 'Metro fare HTML parse returned empty — page structure may have changed; using static fallback',
           });
         }
       }
     } catch (err) {
-      errors.push({
+      warnings.push({
         cityId: 'seoul',
         reason: `Metro fare fetch failed, using static fallback: ${redactErrorMessage(String(err?.message ?? "unknown"))}`,
       });
@@ -148,14 +149,14 @@ export default async function refresh(opts = {}) {
         if (taxiFare) {
           newTransport.taxiBase = taxiFare;
         } else {
-          errors.push({
+          warnings.push({
             cityId: 'seoul',
             reason: 'Taxi fare HTML parse returned null — page structure may have changed; using static fallback',
           });
         }
       }
     } catch (err) {
-      errors.push({
+      warnings.push({
         cityId: 'seoul',
         reason: `Taxi fare fetch failed, using static fallback: ${redactErrorMessage(String(err?.message ?? "unknown"))}`,
       });
@@ -202,6 +203,7 @@ export default async function refresh(opts = {}) {
     fields,
     changes,
     errors,
+    warnings,
   };
 }
 

@@ -251,6 +251,7 @@ export function mapToGroceries(blsData, seriesIds, adjustmentFactor) {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -288,14 +289,14 @@ export default async function refresh(opts = {}) {
         const parsed = parseBlsResponse(data, seriesIds);
         const { valid, invalid } = validateBlsValues(parsed, BLS_SERIES[region]);
         for (const entry of invalid) {
-          errors.push({
+          warnings.push({
             cityId: `region:${region}`,
             reason: `BLS ${entry.seriesId} (${entry.field}) value ${entry.value} out of range [${entry.range.min}, ${entry.range.max}]; using static`,
           });
         }
         regionData.set(region, valid);
       } catch (err) {
-        errors.push({
+        warnings.push({
           cityId: `region:${region}`,
           reason: `BLS API fetch failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`,
         });
@@ -386,5 +387,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

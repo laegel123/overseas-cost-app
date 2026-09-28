@@ -202,6 +202,7 @@ export async function fetchSeriesReferencePeriod(vectorId) {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -279,7 +280,7 @@ export default async function refresh(opts = {}) {
       }
     }
 
-    return { source: 'ca_statcan', cities: updatedCities, fields: [...new Set(fields)], changes, errors };
+    return { source: 'ca_statcan', cities: updatedCities, fields: [...new Set(fields)], changes, errors, warnings };
   }
 
   const allVectors = [];
@@ -294,29 +295,35 @@ export default async function refresh(opts = {}) {
   const vectorIds = uniqueVectors.map((v) => parseInt(v.slice(1), 10));
 
   // ADR-059 §5 해소 — 갱신 시작 시 referencePeriod 인증. ALLOWED_REFERENCE_PERIODS 외 값이면
-  // STATIC_PRICES 와 base period 불일치로 cpiToPrice 결과가 체계적 편향 → errors[] push 후
+  // STATIC_PRICES 와 base period 불일치로 cpiToPrice 결과가 체계적 편향 → warnings[] push 후
   // 정적 fallback 으로 회피. 첫 vector 1개만 조회 (table 18-10-0004 안의 모든 vector 가 동일 base).
   if (vectorIds.length > 0) {
     try {
       const refPeriod = await fetchSeriesReferencePeriod(vectorIds[0]);
       if (refPeriod === null) {
         const reason = `getSeriesInfoFromVector(${vectorIds[0]}) 응답에서 referencePeriod 추출 실패 — base period 인증 불가, 정적 fallback 적용 (ADR-059 §5).`;
-        console.warn(`::warning::${reason}`);
-        errors.push({ cityId: 'all', reason });
+        warnings.push({ cityId: 'all', reason });
         const fallbackResult = await refresh({ ...opts, useStatic: true });
-        return { ...fallbackResult, errors: [...errors, ...fallbackResult.errors] };
+        return {
+          ...fallbackResult,
+          errors: [...errors, ...fallbackResult.errors],
+          warnings: [...warnings, ...(fallbackResult.warnings ?? [])],
+        };
       }
       if (!ALLOWED_REFERENCE_PERIODS.has(refPeriod)) {
         const reason = `StatCan vector ${vectorIds[0]} referencePeriod='${refPeriod}' 가 허용 base [${[...ALLOWED_REFERENCE_PERIODS].join(', ')}] 외 — STATIC_PRICES 와 시점 차이로 cpiToPrice 결과 편향 위험. 정적 fallback 적용 (ADR-059 §5).`;
-        console.warn(`::warning::${reason}`);
-        errors.push({ cityId: 'all', reason });
+        warnings.push({ cityId: 'all', reason });
         const fallbackResult = await refresh({ ...opts, useStatic: true });
-        return { ...fallbackResult, errors: [...errors, ...fallbackResult.errors] };
+        return {
+          ...fallbackResult,
+          errors: [...errors, ...fallbackResult.errors],
+          warnings: [...warnings, ...(fallbackResult.warnings ?? [])],
+        };
       }
     } catch (err) {
       // referencePeriod 조회 자체 실패는 비치명 — 기존 isCpiBasePeriodSuspect 가 2차 방어선.
-      // 단 errors[] 에 기록해 운영자가 누적 모니터링 가능하게 한다.
-      errors.push({
+      // 단 warnings[] 에 기록해 운영자가 누적 모니터링 가능하게 한다.
+      warnings.push({
         cityId: 'all',
         reason: `referencePeriod 조회 실패 (계속 진행, isCpiBasePeriodSuspect 가 2차 방어): ${redactErrorMessage(String(err?.message ?? 'unknown'))}`,
       });
@@ -342,17 +349,20 @@ export default async function refresh(opts = {}) {
     for (const [vector, cpiValue] of vectorData.entries()) {
       if (isCpiBasePeriodSuspect(cpiValue)) {
         const reason = `CPI vector ${vector} value ${cpiValue} >= ${CPI_SANITY_MAX} — StatCan base period 가 2020=100 이 아닐 가능성 (ADR-059 §5 미해소). STATIC_PRICES 적용 결과가 ~45% 부풀려질 수 있음. getSeriesInfoFromVector 로 referencePeriod 검증 필요.`;
-        console.warn(`::warning::${reason}`);
-        errors.push({ cityId: 'all', reason });
-        break; // 한 vector 만 의심돼도 동일 원인 — 중복 errors 회피.
+        warnings.push({ cityId: 'all', reason });
+        break; // 한 vector 만 의심돼도 동일 원인 — 중복 warnings 회피.
       }
     }
   } catch (err) {
+    // STATIC_PRICES 가 있는 도시는 정적값으로 계속 진행 → warnings (2026-09-21 회귀: 이 경로가
+    // errors 였던 탓에 값 동일(cities=0) 시 isTotalFailure 가 exit 1 을 냈다 — ADR-079).
+    // STATIC_PRICES 가 없는 도시는 대체값이 없어 진짜 실패 → errors 유지.
     const apiErrors = [];
+    const apiWarnings = [];
     for (const cityId of targetCities) {
       const staticPrices = STATIC_PRICES[cityId];
       if (staticPrices) {
-        apiErrors.push({ cityId, reason: `StatCan API failed, using static fallback: ${redactErrorMessage(String(err?.message ?? ""))}` });
+        apiWarnings.push({ cityId, reason: `StatCan API failed, using static fallback: ${redactErrorMessage(String(err?.message ?? ""))}` });
       } else {
         apiErrors.push({ cityId, reason: `StatCan API fetch failed: ${redactErrorMessage(String(err?.message ?? "unknown"))}` });
       }
@@ -362,6 +372,7 @@ export default async function refresh(opts = {}) {
     return {
       ...fallbackResult,
       errors: [...apiErrors, ...fallbackResult.errors],
+      warnings: [...warnings, ...apiWarnings, ...(fallbackResult.warnings ?? [])],
     };
   }
 
@@ -451,6 +462,7 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }
 

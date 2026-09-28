@@ -6,7 +6,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 
-import { parseStatCanResponse } from '../_common.mjs';
+import { parseStatCanResponse, isTotalFailure } from '../_common.mjs';
 import refreshCaStatcan, {
   cpiToPrice,
   isCpiBasePeriodSuspect,
@@ -18,6 +18,7 @@ import refreshCaStatcan, {
   STATIC_PRICES,
   SOURCE,
 } from '../ca_statcan.mjs';
+import type { RefreshWarning } from './_test-types';
 
 let originalDataDir: string | undefined;
 let testDir: string;
@@ -261,13 +262,58 @@ describe('refresh (integration)', () => {
     expect(result.cities).not.toContain('montreal');
   }, 30000);
 
-  it('API 오류: 정적 fallback', async () => {
+  it('API 오류: 정적 fallback → warnings (errors 는 비어 있음)', async () => {
     fetchSpy.mockRejectedValue(new Error('Network error'));
 
     const result = await refreshCaStatcan({ dryRun: true });
 
-    expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]?.reason).toContain('static fallback');
+    expect((result.warnings ?? []).some((w: RefreshWarning) => w.reason.includes('static fallback'))).toBe(true);
+    expect(result.errors).toEqual([]);
+  }, 30000);
+
+  // 2026-09-21 Refresh Prices (run 35621047217) 회귀 차단 — StatCan API 네트워크 실패로 3개 도시
+  // 전부 정적값 대체, 값이 기존과 같아 cities=0 이었는데 경고가 errors 에 있어 isTotalFailure 가
+  // exit 1 을 냈다 (ADR-079).
+  it('API 실패 + STATIC 있는 도시: 갱신 0 이어도 isTotalFailure false', async () => {
+    for (const cityId of ['vancouver', 'toronto', 'montreal'] as const) {
+      const prices = STATIC_PRICES[cityId];
+      fs.writeFileSync(
+        path.join(testDir, 'cities', `${cityId}.json`),
+        JSON.stringify({
+          id: cityId,
+          name: CITY_CONFIGS[cityId].name,
+          country: 'CA',
+          currency: 'CAD',
+          region: 'na',
+          lastUpdated: '2026-09-01',
+          rent: { share: 1000, studio: 1500, oneBed: 1800, twoBed: 2200 },
+          food: {
+            restaurantMeal: prices.restaurantMeal,
+            cafe: prices.cafe,
+            groceries: {
+              milk1L: prices.milk1L,
+              eggs12: prices.eggs12,
+              rice1kg: prices.rice1kg,
+              chicken1kg: prices.chicken1kg,
+              bread: prices.bread,
+              onion1kg: prices.onion1kg,
+              apple1kg: prices.apple1kg,
+              ramen: prices.ramen,
+            },
+          },
+          transport: { monthlyPass: 100, singleRide: 3, taxiBase: 4 },
+          sources: [{ category: 'food', name: 'Statistics Canada CPI', url: 'https://www150.statcan.gc.ca/', accessedAt: '2026-09-01' }],
+        }),
+      );
+    }
+    fetchSpy.mockRejectedValue(new Error('Network error'));
+
+    const result = await refreshCaStatcan({ dryRun: true });
+
+    expect(result.cities).toHaveLength(0);
+    expect(result.errors).toEqual([]);
+    expect((result.warnings ?? []).length).toBeGreaterThan(0);
+    expect(isTotalFailure(result)).toBe(false);
   }, 30000);
 
   it('기존 데이터 대비 changes 계산', async () => {
