@@ -29,7 +29,10 @@
     {
       "step": 3,
       "name": "workflow-gate",
-      "status": "pending"
+      "status": "completed",
+      "started_at": "2026-09-29T08:37:24+0900",
+      "summary": "6개 refresh-*.yml 의 _run.mjs 실행 step 에 id:<module> + continue-on-error:true (fx 1·prices 4·rent 13·transit 13·tuition 1·visa 1 = 33, API 키 skip 안내 step 은 제외), 마지막 step 'Fail if any fetcher failed' (if: always()) 가 env FETCHER_OUTCOMES 로 <module>=${{ steps.<module>.outcome }} 목록을 받아 셸에서 failure 만 골라 ::error title=<module>:: 나열 후 exit 1 (skipped 는 실패 아님), build·validate·detect_outliers·PR·commit 은 continue-on-error 없음, SHA pin·push retry·cron·concurrency 불변. integration.test.ts 3케이스 추가 (fetcher step id+continue-on-error / 마지막 step 이 모든 fetcher id outcome 참조하는 always() 게이트 / build·validate·detect_outliers 에 continue-on-error 부재) — 게이트 id 누락·continue-on-error 누락 mutation 으로 실패 확인. AUTOMATION §4.5d 신설·§7.1 최종 동작 표·§12, TESTING §9-A.13, ADR-079 게이트 절 보완. @action-validator/cli 6개 파일 통과 (actionlint 미설치로 생략). §4 dryRun 순회 33개: exit 1 = kr_kca·kr_kosis·us_bls·kr_molit·us_census (API 키 부재 throw — 워크플로우에선 skip) + us_hud (HUD 403, 5개 도시 전부 실패) 뿐, 나머지 27개 exit 0 (경고: ca_statcan 2·de_destatis 1·vn_gso 1·ae_fcsc 1·kr_seoul_metro 2·ca_stm 1·de_transit 2·fr_ratp 1·nl_gvb 1·sg_lta 1) — 경고만으로 exit 1 인 fetcher 없음 (step 1·2 누락 없음). data/ diff 없음.",
+      "completed_at": "2026-09-29T09:30:00+0900"
     }
   ],
   "created_at": "2026-09-28T16:30:35+0900"

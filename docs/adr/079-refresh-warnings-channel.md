@@ -61,7 +61,18 @@ API POST 가 러너에서 네트워크 실패 → 3개 도시 모두 정적값�
    (`us_hud` 의 HUD API 토큰 부재 등) 가 exit 1 을 내고, refresh 워크플로우의 fetcher
    step 에 `continue-on-error` 가 없어 **뒤의 모든 fetcher 와 build·validate·PR step
    이 통째로 skip** 된다. 각 fetcher step 을 격리하고 마지막 step 이 실패를 모아
-   빨간불로 만든다.
+   빨간불로 만든다. 구현 (step 3):
+   - 6개 `refresh-*.yml` 에서 `_run.mjs` 를 실행하는 모든 step 에 `id: <module>` +
+     `continue-on-error: true`. API 키 분기 쌍은 실행 step 에만 (skip 안내 step 은 그대로).
+   - 마지막 step `Fail if any fetcher failed` (`if: always()`) 가 env
+     `FETCHER_OUTCOMES` 로 `<module>=${{ steps.<module>.outcome }}` 목록을 받아 셸에서
+     `failure` 만 골라 `::error title=<module>::` 로 나열 후 exit 1 (없으면 exit 0).
+     `continue-on-error` step 의 `conclusion` 은 항상 success 라 **outcome** 을 본다.
+     skip 된 step 의 outcome 은 `skipped` — 실패로 세지 않는다.
+   - build·validate·detect_outliers·PR·commit step 에는 `continue-on-error` 를 붙이지
+     않는다 (스키마 위반은 fail-fast). 게이트는 fetcher 실패만 집계한다.
+   - 결과: 성공한 fetcher 의 값은 PR/커밋으로 반영되고, 실패는 워크플로우 빨간불로
+     드러난다 (AUTOMATION §4.5d·§7.1).
 
 **대안 (기각):**
 
@@ -94,7 +105,10 @@ API POST 가 러너에서 네트워크 실패 → 3개 도시 모두 정적값�
   `false`, 갱신 0 + errors 1 + warnings 2 → `true`, `warnings` 필드 없음 → 기존 결과
   동일. (`_run.mjs` 는 top-level await CLI 라 jest 로 import 하지 않는다.)
 - `node scripts/refresh/_run.mjs uk_tfl --useStatic --dryRun` → exit 0.
+- `scripts/refresh/__tests__/integration.test.ts` — fetcher step 의 `id` +
+  `continue-on-error`, 마지막 step 이 모든 fetcher id 를 참조하는 `always()` 게이트,
+  build·validate·detect_outliers 에 `continue-on-error` 부재.
 
 **관련:** ADR-032 (공공 출처 100% 자동화), ADR-078 (`isTotalFailure` 도입 — 본 ADR 이
-보완), `docs/AUTOMATION.md` §3·§7.1, `docs/TESTING.md` §9-A.1·§9-A.2,
+보완), `docs/AUTOMATION.md` §3·§4.5d·§7.1, `docs/TESTING.md` §9-A.1·§9-A.2·§9-A.13,
 `docs/plans/refresh-warnings.md`, `phases/refresh-warnings/`.

@@ -47,16 +47,22 @@ jobs:
         run: echo "::warning::KR_DATA_API_KEY not set, skipping kr_molit.mjs"
 
       - name: Refresh KR MOLIT
+        id: kr_molit
         if: env.KR_DATA_API_KEY != ''
         run: node scripts/refresh/_run.mjs kr_molit
+        continue-on-error: true
 
       # Canada - CMHC (no key required)
       - name: Refresh CA CMHC
+        id: ca_cmhc
         run: node scripts/refresh/_run.mjs ca_cmhc
+        continue-on-error: true
 
       # US - HUD (no key required)
       - name: Refresh US HUD
+        id: us_hud
         run: node scripts/refresh/_run.mjs us_hud
+        continue-on-error: true
 
       # US - Census
       - name: Skip us_census if API key absent
@@ -64,30 +70,42 @@ jobs:
         run: echo "::warning::US_CENSUS_API_KEY not set, skipping us_census.mjs"
 
       - name: Refresh US Census
+        id: us_census
         if: env.US_CENSUS_API_KEY != ''
         run: node scripts/refresh/_run.mjs us_census
+        continue-on-error: true
 
       # 통합형 fetcher (rent + food). 이전엔 prices.yml 에도 호출되어 중복 실행됐으나 분리.
 
       # UK - ONS (no key required)
       - name: Refresh UK ONS
+        id: uk_ons
         run: node scripts/refresh/_run.mjs uk_ons
+        continue-on-error: true
 
       # Germany - Destatis (no key required)
       - name: Refresh DE Destatis
+        id: de_destatis
         run: node scripts/refresh/_run.mjs de_destatis
+        continue-on-error: true
 
       # France - INSEE (no key required)
       - name: Refresh FR INSEE
+        id: fr_insee
         run: node scripts/refresh/_run.mjs fr_insee
+        continue-on-error: true
 
       # Netherlands - CBS (no key required)
       - name: Refresh NL CBS
+        id: nl_cbs
         run: node scripts/refresh/_run.mjs nl_cbs
+        continue-on-error: true
 
       # Australia - ABS (no key required)
       - name: Refresh AU ABS
+        id: au_abs
         run: node scripts/refresh/_run.mjs au_abs
+        continue-on-error: true
 
       # Japan - e-Stat — v1.0 정책상 --useStatic 필수.
       # v1.0 의 jp_estat.mjs 는 응답 단위/스케일 (천엔 vs 엔, 도/현 vs 전국 평균) 검증이 미완이라
@@ -96,22 +114,30 @@ jobs:
       # --useStatic 으로 API 키 없이도 동작하므로 conditional skip 불필요. v1.x 별도 phase 에서
       # 응답 단위 검증 + --useStatic 제거.
       - name: Refresh JP e-Stat (useStatic — v1.0)
+        id: jp_estat
         run: node scripts/refresh/_run.mjs jp_estat --useStatic
+        continue-on-error: true
 
       # Singapore - SingStat — v1.0 정책상 --useStatic 필수.
       # sg_singstat.mjs 의 fetchSingStatTable / apiAvailable 는 v1.0 에서 응답 단위 검증 미완으로
       # STATIC 보정에 wire up 되지 않아 항상 STATIC 반환. SingStat tablebuilder API 호출 + 키 노출
       # 위험을 차단하기 위해 jp_estat 와 동일 패턴으로 --useStatic 강제. v1.x 응답 단위 검증 후 제거.
       - name: Refresh SG SingStat (useStatic — v1.0)
+        id: sg_singstat
         run: node scripts/refresh/_run.mjs sg_singstat --useStatic
+        continue-on-error: true
 
       # Vietnam - GSO (rent + food + transport — static estimates)
       - name: Refresh VN GSO
+        id: vn_gso
         run: node scripts/refresh/_run.mjs vn_gso
+        continue-on-error: true
 
       # UAE - FCSC (no key required)
       - name: Refresh AE FCSC
+        id: ae_fcsc
         run: node scripts/refresh/_run.mjs ae_fcsc
+        continue-on-error: true
 
       - name: Build data
         run: node scripts/build_data.mjs
@@ -176,3 +202,36 @@ jobs:
           done
           echo "::error::push failed after 3 attempts"
           exit 1
+
+      # 게이트 — fetcher step 은 continue-on-error 로 격리돼 하나가 실패해도 나머지 fetcher·build·
+      # validate·PR/commit 이 진행된다 (ADR-079). 실패를 숨기지 않도록 마지막에 outcome 을 집계해
+      # 실패 모듈을 ::error:: 로 나열하고 job 을 빨간불로 만든다. continue-on-error step 의
+      # conclusion 은 항상 success 라 outcome 을 본다. skip 된 step 은 outcome=skipped (실패 아님).
+      - name: Fail if any fetcher failed
+        if: always()
+        env:
+          FETCHER_OUTCOMES: >-
+            kr_molit=${{ steps.kr_molit.outcome }}
+            ca_cmhc=${{ steps.ca_cmhc.outcome }}
+            us_hud=${{ steps.us_hud.outcome }}
+            us_census=${{ steps.us_census.outcome }}
+            uk_ons=${{ steps.uk_ons.outcome }}
+            de_destatis=${{ steps.de_destatis.outcome }}
+            fr_insee=${{ steps.fr_insee.outcome }}
+            nl_cbs=${{ steps.nl_cbs.outcome }}
+            au_abs=${{ steps.au_abs.outcome }}
+            jp_estat=${{ steps.jp_estat.outcome }}
+            sg_singstat=${{ steps.sg_singstat.outcome }}
+            vn_gso=${{ steps.vn_gso.outcome }}
+            ae_fcsc=${{ steps.ae_fcsc.outcome }}
+        run: |
+          failed=""
+          for pair in $FETCHER_OUTCOMES; do
+            if [ "${pair#*=}" = "failure" ]; then failed="$failed ${pair%%=*}"; fi
+          done
+          if [ -n "$failed" ]; then
+            for m in $failed; do echo "::error title=$m::fetcher $m failed (exit 1) — 해당 step 로그 확인"; done
+            echo "::error::failed fetchers:$failed"
+            exit 1
+          fi
+          echo "All fetchers succeeded or were skipped."

@@ -3591,6 +3591,9 @@ actionlint 가 CI 워크플로우로 자동화되어 있지 않다 — 본 항�
 - [x] push retry 루프 시작에 `git rebase --abort` 가 있어 in-progress 상태 정리 (PR #20 review round 9)
 - [x] `refresh-rent.yml` 의 sg_singstat 호출은 `--useStatic` 강제 — round 9 의 SG_DATA_GOV_KEY env wire 는 round 13 에서 제거 (sg_singstat 가 jp_estat 와 동일 패턴으로 v1.0 STATIC 모드)
 - [x] HAS_NEW 가 `Create PR for updates` OR 조건 + `Auto commit and push` AND 조건 양쪽에 반영 (PR #20 review round 11)
+- [x] `_run.mjs` 를 run 하는 모든 step 은 `id: <module>` + `continue-on-error: true` 로 격리 — fetcher 1개 exit 1 이 뒤 fetcher·build·PR 을 skip 시키지 않음 (ADR-079, refresh-warnings step 3)
+- [x] 각 워크플로우의 마지막 step 은 `Fail if any fetcher failed` (`if: always()`) 게이트이고 그 워크플로우의 fetcher step id **전부**의 `steps.<id>.outcome` 을 참조 — 새 fetcher step 추가 시 게이트 누락 차단 (ADR-079)
+- [x] build_data / validate_cities / detect_outliers step 에는 `continue-on-error` 없음 — 스키마 위반 fail-fast 유지 (ADR-079)
 
 ### 9-A.14 `_registry.mjs` (도시 ↔ 출처 매핑)
 
