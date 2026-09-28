@@ -260,8 +260,9 @@ describe('refresh (integration)', () => {
   // ADR-079 — CPI fetch 실패가 exit 1 을 내지 않는다. 현재 `fetchAbsSeries` 가 예외를 null 로
   // 흡수하므로 refresh 의 warnings push 까지는 도달하지 않는다 (기존 데드 경로, 본 step 범위 밖).
   // 단언 대상은 관측 가능한 계약: 네트워크 실패에도 errors 가 비고 static 값으로 계속 간다.
+  // 404 (client error, no retry) 로 모킹 — 네트워크 에러는 시리즈마다 실 타이머 backoff 가 누적돼 30s 경계.
   it('ABS CPI fetch 실패: static fallback + errors 비어 있음', async () => {
-    fetchSpy.mockRejectedValue(new Error('Network error'));
+    fetchSpy.mockImplementation(async () => new Response('not found', { status: 404 }));
 
     const result = await refreshAuAbs({ dryRun: true, cities: ['sydney'] });
 

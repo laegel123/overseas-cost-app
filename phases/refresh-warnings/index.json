@@ -21,10 +21,10 @@
     {
       "step": 2,
       "name": "fetchers-fallback",
-      "status": "error",
+      "status": "completed",
       "started_at": "2026-09-28T16:50:47+0900",
-      "error_message": "[3회 시도 후 실패] Step did not update status",
-      "failed_at": "2026-09-28T22:03:59+0900"
+      "summary": "W2/W3 경고를 errors → warnings 로 이전 (12개 모듈). 옮김: ca_stm·ca_translink·ca_ttc·us_transit fare fetch 실패→static, kr_seoul_metro 메트로·택시 fetch/파싱 실패 4곳, ca_statcan API 실패+STATIC 도시·referencePeriod 추출 실패/허용 base 외·조회 실패·CPI≥145 의심 (console.warn('::warning::') 이중 출력 제거, CPI 의심 값 쓰기 동작 불변), us_bls 범위 밖·fetch 실패, au_abs·uk_ons CPI/rent fetch 실패 (fetch*Series 가 예외를 null 로 흡수해 현재 데드 경로), jp_estat rent 무응답, kr_molit 공개 지연 NO_DATA (WARN: 접두어 제거). 남김(errors): Unknown city·Failed to read existing data·Write failed, ca_statcan STATIC 없는 도시, kr_molit 구 단위 fetch 실패, universities No tuition data. universities 판정: 페이지 fetch 실패는 staticAnnual 이 그대로 들어가 값이 유효 → warnings, getTuitionForCity 의 Unknown city 는 errors — 둘 다 {cityId, reason} 객체로 정리. 테스트: 옮긴 경로 warnings + errors 빈 배열 단언, ca_statcan 'API 실패 + STATIC 도시 → 갱신 0 이어도 isTotalFailure false' 로 2026-09-21 회귀 고정, uk_ons·au_abs 신규 실패 케이스는 재시도 backoff 누적 타임아웃 회피 위해 404 모킹. TESTING §9-A.3·9-A.4·9-A.5·9-A.6·9-A.8·9-A.9 갱신. dryRun: 10개 전부 exit 0 (ca_stm 1·kr_seoul_metro 2·ca_statcan 2 warning), data/ diff 없음.",
+      "completed_at": "2026-09-29T00:00:00+0900"
     },
     {
       "step": 3,

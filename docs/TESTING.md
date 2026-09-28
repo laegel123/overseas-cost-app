@@ -3069,7 +3069,7 @@ afterEach(() => {
 
 - [x] 정상 응답: 서울 25개 자치구 평균 → share/studio/oneBed/twoBed 매핑
 - [x] 매물 면적 기반 카테고리 매핑 정확 (10㎡ 이하 = share, 11~30㎡ = studio 등)
-- [x] 응답에 매물 0건 (이상 케이스): errors + 기존값 유지
+- [x] 응답에 매물 0건 (공개 지연): warnings + 기존값 유지, errors 는 비어 있음 · reason 에 `WARN:` 접두어 없음 (ADR-079)
 - [x] 자치구별 데이터 일부 결측: 가용 자치구 평균
 - [x] XML 응답 파싱 (공공데이터포털 일부 XML)
 - [x] API 키 만료 (200 with error message in body): errors
@@ -3092,7 +3092,7 @@ afterEach(() => {
 
 - [x] 정기권·1회권·택시 기본요금 fetch
 - [x] HTML 페이지 fetch + parse (table 또는 JSON-LD)
-- [x] 페이지 구조 변경 (selector 실패): errors + 기존값 유지
+- [x] 페이지 구조 변경 (selector 실패)·fetch 실패·HTTP 4xx: warnings + 정적값 유지, errors 는 비어 있음 (ADR-079)
 
 ### 9-A.4 출처별 — 캐나다 (5 scripts)
 
@@ -3120,12 +3120,16 @@ afterEach(() => {
 - [x] `CPI_SANITY_MAX = 145` 상수 — 2020=100 기준 정상 상한 + 마진
 - [x] `parseSeriesInfoResponse` — getSeriesInfoFromVector 응답 shape 회귀 차단
 - [x] `ALLOWED_REFERENCE_PERIODS = {2002=100, 2020=100}` — 외 값이면 정적 fallback (ADR-059 §5 해소)
+- [x] API 실패 + STATIC 있는 도시: warnings 에 기록 + 정적 fallback, errors 는 비어 있음 (ADR-079)
+- [x] API 실패 + STATIC 있는 도시: 갱신 0 이어도 `isTotalFailure` false — 2026-09-21 Refresh Prices exit 1 회귀 차단 (ADR-079)
+- [x] referencePeriod 조회 실패·base period 불일치·CPI ≥ 145 의심: warnings (`console.warn('::warning::…')` 이중 출력 없음 — `_run.mjs` 가 출력) (ADR-079)
 
 #### `ca_translink.mjs`, `ca_ttc.mjs`, `ca_stm.mjs`
 
 - [x] 각 공식 fare page HTML fetch + parse
 - [x] 1-zone monthly pass / single ride / taxi 추출
 - [x] 페이지 구조 변경 시 정적 fallback (graceful fail)
+- [x] fetch 실패: 정적 fallback + warnings, errors 는 비어 있음 (ADR-079)
 
 ### 9-A.5 출처별 — 미국 (4 scripts)
 
@@ -3162,7 +3166,8 @@ afterEach(() => {
 - [x] `validateBlsValues` sanity range 검증 (BLS_VALUE_RANGES) — 범위 안 값 valid Map 통과 (PR #20 review round 7)
 - [x] `validateBlsValues` chicken1kg > 5 USD/lb 거부 (과거 ~$10/lb → 25.3 USD/kg 회귀 차단)
 - [x] `validateBlsValues` 음수·0 등 min 미만도 invalid 처리
-- [x] refresh: chicken1kg 범위 밖 응답 시 region-level errors 기록 + STATIC×보정계수 결과
+- [x] refresh: chicken1kg 범위 밖 응답 시 region-level warnings 기록 + STATIC×보정계수 결과 (ADR-079)
+- [x] refresh: API 오류 시 region-level warnings + static fallback, errors 는 비어 있음 (ADR-079)
 
 #### `us_transit.mjs`
 
@@ -3171,6 +3176,7 @@ afterEach(() => {
 - [x] 각 도시별 staticFares fallback
 - [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
 - [x] 도시별 SOURCE (agency 이름 + fareUrl)
+- [x] fetch 실패: 정적 fallback + warnings, errors 는 비어 있음 (ADR-079)
 
 ### 9-A.6 출처별 — 영국 (2 scripts)
 
@@ -3182,6 +3188,7 @@ afterEach(() => {
 - [x] mapToRent: share = studio × 0.65
 - [x] mapToGroceries: CPI 데이터 + static fallback
 - [x] useStatic 옵션으로 fetch 없이 정적 데이터 사용
+- [x] refresh: ONS fetch 실패 → static fallback, errors 는 비어 있음 (실패 push 는 warnings, ADR-079)
 
 #### `uk_tfl.mjs`
 
@@ -3286,6 +3293,7 @@ afterEach(() => {
 - [x] refresh: 기존 데이터 대비 changes 계산
 - [x] refresh: 알 수 없는 도시 → errors에 추가
 - [x] refresh: API 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
+- [x] au_abs refresh: ABS CPI fetch 실패 → static fallback, errors 는 비어 있음 (실패 push 는 warnings, ADR-079)
 
 #### `jp_estat.mjs`, `jp_transit.mjs`
 
@@ -3298,6 +3306,7 @@ afterEach(() => {
 - [x] getTransportFares: 도시별 정적 요금
 - [x] refresh: dryRun/useStatic 옵션
 - [x] refresh: JP_ESTAT_APP_ID 미설정 시 errors에 추가
+- [x] refresh: e-Stat API 무응답 → warnings + static 유지, errors 는 비어 있음 (ADR-079)
 - [x] refresh: 기존 데이터 대비 changes 계산
 - [x] refresh: 알 수 없는 도시 → errors에 추가
 - [x] refresh: API 불가 → static fallback + warnings에 추가 (errors 는 비어 있음, ADR-079)
@@ -3396,6 +3405,8 @@ afterEach(() => {
 - [x] 도시별 대학 매핑 (registry from DATA_SOURCES.md)
 - [x] 각 대학 공식 international tuition 페이지 fetch (reachability check 만)
 - [x] `staticAnnual` 항상 반환 — fetch 실패 시 graceful fallback
+- [x] 페이지 fetch 실패: `{cityId, reason}` warnings + static, errors 는 비어 있음 (ADR-079)
+- [x] `getTuitionForCity` 알 수 없는 도시: errors 에 `{cityId, reason}` 객체 (문자열 아님)
 - [x] 워크플로우에서 `--useStatic` 강제 (refresh-tuition.yml, PR #20 review round 7)
 - [x] `buildSource(cityId).category` = 'tuition'
 - [x] `buildSource(cityId).url` = 해당 도시 registry 첫 대학의 실제 페이지 (밴쿠버·도쿄) (ADR-071)
