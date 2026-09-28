@@ -70,7 +70,25 @@ module.exports = {
       'error',
       { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
     ],
+    'no-restricted-imports': [
+      'error',
+      {
+        paths: [
+          {
+            name: 'react-native-google-mobile-ads',
+            message:
+              '광고 SDK 는 src/lib/ads.native.ts 와 src/components/AdBanner.native.tsx 만 import 한다 (ADR-077).',
+          },
+        ],
+      },
+    ],
   },
+  overrides: [
+    {
+      files: ['src/lib/ads.native.ts', 'src/components/AdBanner.native.tsx'],
+      rules: { 'no-restricted-imports': 'off' },
+    },
+  ],
   ignorePatterns: [
     'node_modules/',
     '.expo/',

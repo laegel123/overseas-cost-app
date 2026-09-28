@@ -48,6 +48,10 @@ export type { TuitionChoiceSheetProps } from './TuitionChoiceSheet';
 export { TaxChoiceSheet } from './TaxChoiceSheet';
 export type { TaxChoiceSheetProps } from './TaxChoiceSheet';
 
+// `./AdBanner` — Metro·jest·tsc 가 플랫폼 확장자(.native/.web)를 고른다.
+export { AdBanner } from './AdBanner';
+export type { AdBannerProps } from './AdBanner';
+
 export {
   Body,
   Display,

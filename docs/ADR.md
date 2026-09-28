@@ -26,7 +26,7 @@
 | [008](adr/008-single-compare-mode.md) | 비교 모드 = 단일 (서울 vs 도시) | Active | 예산 시뮬레이터 보류 |
 | [009](adr/009-no-accounts.md) | 사용자 계정·로그인 없음 | Active | 모든 데이터 AsyncStorage 로컬 |
 | [010](adr/010-report-defer-v11.md) | 항목별 신고 기능 v1.1 로 미룸 | Active | v1.0 일반 피드백 이메일만 |
-| [011](adr/011-no-analytics-v1.md) | 분석·추적 도구 v1.0 도입 안 함 | Active | GA·Amplitude·Sentry 0건 |
+| [011](adr/011-no-analytics-v1.md) | 분석·추적 도구 v1.0 도입 안 함 | Superseded by ADR-077 (광고 부분) | GA·Amplitude·Sentry 0건 — 분석·오류 추적 미도입은 유효 |
 | [012](adr/012-hifi-web-reference.md) | 디자인 hifi = 웹 React 레퍼런스 (RN 포팅) | Active | div→View, className→NativeWind |
 | [013](adr/013-test-policy-jest-rntl.md) | 테스트 정책 — Jest + RNTL | Active | 표준 모킹, 신규 모듈 인벤토리 필수 |
 | [014](adr/014-error-handling-typed.md) | 에러 핸들링 — 결정적 에러 타입 + no silent fail | Active | 명시적 throw, ErrorView 노출 |
@@ -92,4 +92,5 @@
 | [074](adr/074-refresh-data-regression.md) | 강제 새로고침 데이터 퇴행 방지 + 시드 = 실데이터 전량 | Active | 캐시 선삭제 제거, 시드 21개 (ADR-045 supersede) |
 | [075](adr/075-hero-basket-sum-wording.md) | Compare hero 문구 정정 — `평균 가정 기준`/`/월` 폐기 | Active | 합계는 항목 단가 합, Detail 과 동일 footer |
 | [076](adr/076-source-attribution-compliance.md) | 출처 표기 의무 보완 — ER-API 링크 · TfL 출처명 정정 · CMHC → StatCan | Active | 표기 의무 3건 해소, 출처명은 `legacyNames` 로 이전 |
+| [077](adr/077-admob-banner-ads.md) | Google AdMob 하단 배너 도입 (Supersedes ADR-011 광고 부분) | Active | 홈·비교·상세 ready 만, UMP+ATT, lib 경유 단일 지점, 16.3.4 고정 |
 | [078](adr/078-ca-rent-statcan-vectors.md) | 캐나다 3도시 rent 벡터 재매핑 — 표 34-10-0133-01 `Apartment 6+` | Active | 구 벡터는 ARCHIVED 노동생산성 표, 도입 이래 무동작 |

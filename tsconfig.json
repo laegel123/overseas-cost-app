@@ -9,6 +9,7 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "moduleResolution": "bundler",
+    "moduleSuffixes": [".ios", ".android", ".native", ""],
     "jsx": "react-native",
     "baseUrl": ".",
     "paths": {

@@ -6,10 +6,13 @@
  * - 메뉴 4개 모두 mount + 라벨 일치 (menu-refresh 는 카드로 승격되어 제거)
  * - formatLastSync (loading / error / null / 날짜) 카드에 표시
  * - 출처·개인정보 메뉴 → 인앱 라우팅 push (ADR-071), 피드백만 mailto 유지
+ * - 광고 개인정보 설정 메뉴 — privacyOptionsRequired 일 때만 노출 (ADR-077)
  * - snapshot 1 케이스 (data-refresh-card + 통계 비어있음)
  */
 
 import * as React from 'react';
+
+import { Alert } from 'react-native';
 
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 
@@ -18,8 +21,10 @@ import {
   countUniqueSources as mockCountUniqueSources,
   getAllCities as mockGetAllCities,
   refreshCache as mockRefreshCache,
+  showPrivacyOptionsForm as mockShowPrivacyOptionsForm,
 } from '@/lib';
 import { openURL as mockOpenURL } from '@/lib/linking';
+import { useAdsStore } from '@/store';
 import { useFavoritesStore } from '@/store/favorites';
 import { useRecentStore } from '@/store/recent';
 import { useSettingsStore } from '@/store/settings';
@@ -51,6 +56,7 @@ jest.mock('@/lib', () => {
     getAllCities: jest.fn(),
     refreshCache: jest.fn(),
     countUniqueSources: jest.fn(),
+    showPrivacyOptionsForm: jest.fn(),
   };
 });
 
@@ -75,6 +81,7 @@ function resetStores() {
   useFavoritesStore.setState({ cityIds: [] });
   useRecentStore.setState({ cityIds: [] });
   useSettingsStore.setState({ lastSync: null });
+  useAdsStore.getState().reset();
 }
 
 describe('SettingsScreen', () => {
@@ -292,6 +299,96 @@ describe('SettingsScreen', () => {
         expect.stringContaining('mailto:laegel1@gmail.com'),
       );
       expect(mockPush).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('광고 개인정보 설정 (ADR-077)', () => {
+    // MenuRow 는 accessibilityRole="button" — 트리 순서대로 menu-* testID 만 추린다.
+    function menuOrder(getAllByRole: ReturnType<typeof render>['getAllByRole']): string[] {
+      return getAllByRole('button')
+        .map((el) => el.props.testID as string | undefined)
+        .filter((id): id is string => id?.startsWith('menu-') === true);
+    }
+
+    it('privacyOptionsRequired=false (기본, 한국 등) → menu-ads-privacy 부재, 메뉴 4개 그대로', () => {
+      setupMocks();
+
+      const { getAllByRole, queryByTestId, queryByText } = render(<SettingsScreen />);
+
+      expect(queryByTestId('menu-ads-privacy')).toBeNull();
+      expect(queryByText('광고 개인정보 설정')).toBeNull();
+      expect(menuOrder(getAllByRole)).toEqual([
+        'menu-sources',
+        'menu-feedback',
+        'menu-privacy',
+        'menu-app-info',
+      ]);
+    });
+
+    it('privacyOptionsRequired=true (EEA 등) → 개인정보 처리방침과 앱 정보 사이에 렌더', () => {
+      setupMocks();
+      useAdsStore.setState({ privacyOptionsRequired: true });
+
+      const { getAllByRole, getByTestId, getByText } = render(<SettingsScreen />);
+
+      expect(getByTestId('menu-ads-privacy')).toBeTruthy();
+      expect(getByText('광고 개인정보 설정')).toBeTruthy();
+      expect(menuOrder(getAllByRole)).toEqual([
+        'menu-sources',
+        'menu-feedback',
+        'menu-privacy',
+        'menu-ads-privacy',
+        'menu-app-info',
+      ]);
+    });
+
+    it.each([false, true])(
+      'privacyOptionsRequired=%s → 앱 정보가 여전히 마지막 행 (border-b 없음)',
+      (required) => {
+        setupMocks();
+        useAdsStore.setState({ privacyOptionsRequired: required });
+
+        const { getByTestId } = render(<SettingsScreen />);
+
+        expect(getByTestId('menu-app-info').props.className).not.toContain('border-b');
+      },
+    );
+
+    it('탭 → showPrivacyOptionsForm 1회 (Alert 없음)', async () => {
+      setupMocks();
+      (mockShowPrivacyOptionsForm as jest.Mock).mockResolvedValue(undefined);
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+      useAdsStore.setState({ privacyOptionsRequired: true });
+
+      const { getByTestId } = render(<SettingsScreen />);
+
+      await act(async () => {
+        fireEvent.press(getByTestId('menu-ads-privacy'));
+      });
+
+      expect(mockShowPrivacyOptionsForm).toHaveBeenCalledTimes(1);
+      expect(alertSpy).not.toHaveBeenCalled();
+      alertSpy.mockRestore();
+    });
+
+    it('showPrivacyOptionsForm reject → Alert 로 알린다 (silent fail 아님)', async () => {
+      setupMocks();
+      (mockShowPrivacyOptionsForm as jest.Mock).mockRejectedValue(new Error('form unavailable'));
+      const alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => {});
+      useAdsStore.setState({ privacyOptionsRequired: true });
+
+      const { getByTestId } = render(<SettingsScreen />);
+
+      await act(async () => {
+        fireEvent.press(getByTestId('menu-ads-privacy'));
+      });
+
+      expect(alertSpy).toHaveBeenCalledTimes(1);
+      expect(alertSpy).toHaveBeenCalledWith(
+        '알림',
+        '광고 설정 화면을 열지 못했어요. 잠시 후 다시 시도해 주세요.',
+      );
+      alertSpy.mockRestore();
     });
   });
 

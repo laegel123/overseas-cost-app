@@ -15,7 +15,7 @@ import {
   getLastSync as mockGetLastSync,
   loadAllCities as mockLoadAllCities,
 } from '@/lib';
-import { useRentChoiceStore, useTaxChoiceStore, useTuitionChoiceStore } from '@/store';
+import { useAdsStore, useRentChoiceStore, useTaxChoiceStore, useTuitionChoiceStore } from '@/store';
 
 import { seoulValid } from '../../../src/__fixtures__/cities/seoul-valid';
 import { vancouverValid } from '../../../src/__fixtures__/cities/vancouver-valid';
@@ -565,6 +565,57 @@ describe('DetailScreen', () => {
       await flush();
       expect(screen.getByText('출처 0개')).toBeTruthy();
       expect(screen.getByText('출처 정보가 없어요')).toBeTruthy();
+    });
+  });
+
+  // ADR-077 — ready 상태 Screen 에만 footer 배선. AdBanner 는 mock 하지 않고 실제 컴포넌트 +
+  // 전역 SDK mock 으로 렌더 (접힌 상태여도 testID 존재). 부재 케이스도 광고 store 를 ready 로
+  // 주입해 "화면이 footer 를 안 붙였다" 만 검증한다.
+  describe('광고 배너 (ADR-077)', () => {
+    beforeEach(() => {
+      useAdsStore.setState({ status: 'ready', canRequestAds: true });
+    });
+
+    afterEach(() => {
+      useAdsStore.getState().reset();
+    });
+
+    it('ready 상태 → ad-banner 존재', async () => {
+      setupMocks();
+      render(<DetailScreen />);
+      await flush();
+
+      expect(screen.getByTestId('detail-screen')).toBeTruthy();
+      expect(screen.getByTestId('ad-banner')).toBeTruthy();
+    });
+
+    it('로딩 상태 → ad-banner 부재', async () => {
+      setupMocks();
+      (mockLoadAllCities as jest.Mock).mockReturnValue(new Promise(() => {}));
+      render(<DetailScreen />);
+      await flush();
+
+      expect(screen.getByTestId('detail-screen-loading')).toBeTruthy();
+      expect(screen.queryByTestId('ad-banner')).toBeNull();
+    });
+
+    it('에러 상태 → ad-banner 부재', async () => {
+      setupMocks({ city: undefined });
+      render(<DetailScreen />);
+      await flush();
+
+      expect(screen.getByTestId('detail-screen-error')).toBeTruthy();
+      expect(screen.queryByTestId('ad-banner')).toBeNull();
+    });
+
+    it('광고 store idle → ready 화면에도 ad-banner 부재 (렌더 조건은 AdBanner 소유)', async () => {
+      useAdsStore.getState().reset();
+      setupMocks();
+      render(<DetailScreen />);
+      await flush();
+
+      expect(screen.getByTestId('detail-screen')).toBeTruthy();
+      expect(screen.queryByTestId('ad-banner')).toBeNull();
     });
   });
 

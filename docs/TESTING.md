@@ -150,6 +150,27 @@ jest.mock('expo-splash-screen', () => ({
   hideAsync: jest.fn(() => Promise.resolve()),
 }));
 
+// react-native-google-mobile-ads — 광고 SDK (ADR-077). default 는 `mobileAds()` 호출 형태를 흉내 낸다.
+// initialize 는 호출 순서 검증용으로 factory 밖 변수 (jest 호이스팅 규칙상 `mock` 접두 필수).
+const mockMobileAdsInitialize = jest.fn(async () => []);
+jest.mock('react-native-google-mobile-ads', () => ({
+  __esModule: true,
+  default: () => ({ initialize: mockMobileAdsInitialize }),
+  AdsConsent: {
+    gatherConsent: jest.fn(async () => ({ status: 'NOT_REQUIRED', canRequestAds: true })),
+    getConsentInfo: jest.fn(async () => ({
+      canRequestAds: true,
+      privacyOptionsRequirementStatus: 'NOT_REQUIRED',
+    })),
+    showPrivacyOptionsForm: jest.fn(async () => undefined),
+    reset: jest.fn(),
+  },
+  // 테스트가 mock.calls[0][0].onAdLoaded() 로 로드/실패를 시뮬레이션. NativeWind 제약으로 JSX 미사용
+  BannerAd: jest.fn(() => null),
+  BannerAdSize: { ANCHORED_ADAPTIVE_BANNER: 'ANCHORED_ADAPTIVE_BANNER' },
+  TestIds: { ADAPTIVE_BANNER: 'ca-app-pub-3940256099942544/2435281174' },
+}));
+
 // react-native Linking
 jest.mock('react-native/Libraries/Linking/Linking', () => ({
   openURL: jest.fn(() => Promise.resolve(true)),
@@ -1411,6 +1432,13 @@ chrome 클래스 검증은 inner 노드 기준).
 - [x] `testID` 전달 (inner View / ScrollView)
 - [ ] iOS notch / iPhone SE: SafeAreaView 라이브러리 책임 — 본 컴포넌트는 prop 위임
 
+**`footer` 슬롯 (§9.45 — ADR-077 / admob-banner-ads step 3):** 광고를 모르는 순수 레이아웃 슬롯. SafeAreaView mock 이 children passthrough 라 `UNSAFE_getByType(SafeAreaView).children` 순서로 배치 검증.
+
+- [x] `scroll=true` + `footer` → footer 렌더, ScrollView 안에 없음(`within(sv)` null), SafeAreaView 자식 `[ScrollView, footer]` (마지막)
+- [x] `scroll=false` + `footer` → footer 렌더, inner View 안에 없음, SafeAreaView 자식 `[inner View, footer]` (마지막)
+- [x] `footer` 미지정 (`scroll` true/false) → SafeAreaView 자식 1개 — 래퍼 View 추가 없음, 기존 구조·스냅샷 무변경
+- [x] `padding="screen-x"` + `footer` (`scroll` true/false) → padding 은 ScrollView / inner View 에만, footer 의 부모(SafeAreaView) className 에 `px-` 없음 (폭 전체)
+
 ### 9.12 `src/components/TopBar.tsx` (components phase step 2)
 
 **Prop 조합 매트릭스 (8개):**
@@ -1886,6 +1914,15 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 - [x] meta:lastSync → useSettingsStore.lastSync 단방향 sync (app-shell step 4)
 - [x] bridge 실패 → 부팅 흐름 차단 안 함 + dev 콘솔 로그 (app-shell step 4)
 
+**광고 동의·초기화 트리거 (§9.46 — ADR-077 / admob-banner-ads step 5):** `@/store` mock 에 `useAdsStore` (셀렉터가 매 렌더 같은 `begin`/`settle` jest.fn 참조를 받음), `@/lib` 는 `requireActual` spread + `initializeAds` 만 mock.
+
+- [x] `bootReady && onboarded=true` → `begin` 1회 → `initializeAds` 1회 (`invocationCallOrder` 로 순서) → pending 동안 `settle` 0회 + `hideAsync` 는 이미 호출(비차단) → resolve 후 `settle` 이 결과 객체 그대로 1회
+- [x] `onboarded=false` (bootReady 진입 상태) → `begin`·`initializeAds` 0회 — 온보딩 화면 위 프롬프트 없음
+- [x] `bootReady=false` (hydration pending) 동안 `begin`·`initializeAds` 0회
+- [x] `onboarded` false → true 전이 (`rerender`, 도시 선택 완료) 시점에 `initializeAds` 1회 + `settle` 호출
+
+> `.then(settleAds)` 에 `.catch` 를 붙이지 않는다 — `initializeAds` 는 reject 하지 않는 계약 (§9.42) 이며, 계약이 깨지면 unhandled rejection 으로 드러나야 한다. `waitForStoresOrTimeout` 대기 목록은 무변경 (ads store 비영속·비차단, §9.43).
+
 ### 9.21.1 `app/(tabs)/_layout.tsx` (하단 탭 레이아웃 — BottomTabBar 어댑터)
 
 BottomTabBar(제어형, §9.13)를 expo-router Tabs 의 `tabBar` prop 에 어댑터로 연결.
@@ -2032,6 +2069,13 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 - [x] **서울합=0 케이스 → hero 가운데 mult 영역 미렌더** (ADR-062): 학비/비자만 ON (서울 0원 카테고리만) + 다른 카드 OFF → `centerMult=undefined` 로 HeroCard 호출 → mult 텍스트(`×` 형식) 0개, caption(`만원/월`) 만 표시. rent 추가 ON 하면 mult 복구.
 - [x] 사용자 토글 갱신 (`setInclusion('vancouver', 'rent', false)`) → ComparePair rent 카드 토글 value=false + 배지 즉시 갱신
 - [x] 도시별 inclusion 독립 — vancouver 의 visa ON 토글이 osaka 화면 default 에 영향 없음
+
+**광고 배너 (ADR-077 / admob-banner-ads step 5):** `AdBanner` 는 mock 하지 않고 실제 컴포넌트 + §5.1 전역 SDK mock. 부재 케이스도 `useAdsStore.setState({ status: 'ready', canRequestAds: true })` 주입 상태에서 검증 (화면이 footer 를 안 붙였음을 확인), `afterEach` 에서 `reset()`.
+
+- [x] ready 상태 (`compare-screen`) → `ad-banner` 존재 (접힌 상태여도 testID 있음)
+- [x] loading 상태 (`compare-screen-loading`) → `ad-banner` 부재
+- [x] error 상태 (`compare-screen-error`) → `ad-banner` 부재
+- [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재 (렌더 조건은 `AdBanner` 소유, §9.44)
 
 ### 9.24.1 `src/lib/search.ts` (홈 검색)
 
@@ -2185,6 +2229,13 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] 핵심 contract (hero + 섹션 mount) — food / visa 2 케이스. 전체 트리 snapshot 은 §6.3·§6.4 위반 + ReactTestInstance fiber cyclic 직렬화 RangeError 발생 (PR #17 review 이슈 2) — 정밀 시각 회귀는 v2 스크린샷 도구 (ADR-035).
 - [ ] iOS swipe-back, Compare 스크롤 위치 보존 (수동 e2e — Phase 7)
 
+**광고 배너 (ADR-077 / admob-banner-ads step 5):** §9.24 광고 배너 블록과 같은 방식 (실제 `AdBanner` + 전역 SDK mock, 부재 케이스도 광고 store ready 주입).
+
+- [x] ready 상태 (`detail-screen`) → `ad-banner` 존재
+- [x] loading 상태 (`detail-screen-loading`) → `ad-banner` 부재
+- [x] error 상태 (`detail-screen-error`) → `ad-banner` 부재
+- [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재
+
 ### 9.26 `app/(tabs)/index.tsx` (홈)
 
 screens phase step 2 구현 — 재방문 사용자가 빠르게 즐겨찾기 도시로 진입하거나 새 도시를 검색.
@@ -2248,9 +2299,16 @@ screens phase step 2 구현 — 재방문 사용자가 빠르게 즐겨찾기 �
 
 - [x] 즐겨찾기 첫 카드 (accent navy) + 권역 pill 컨테이너 — testID 부분 트리만 (PR #18 review round 6, §6.6 100라인 정책)
 
+**광고 배너 (ADR-077 / admob-banner-ads step 5):** §9.24 광고 배너 블록과 같은 방식 (실제 `AdBanner` + 전역 SDK mock, 부재 케이스도 광고 store ready 주입). 홈은 Tabs 안이라 배너가 `BottomTabBar` 바로 위 — 간격 없음, 구분은 `AdBanner` 의 `border-t`.
+
+- [x] ready 상태 (`home-screen`) → `ad-banner` 존재
+- [x] loading 상태 (`home-screen-loading`) → `ad-banner` 부재
+- [x] error 상태 (`home-screen-error`) → `ad-banner` 부재
+- [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재
+
 ### 9.26b `src/lib/errors.ts` — 에러 클래스 카탈로그
 
-ARCHITECTURE.md §에러 타입 카탈로그의 15개 클래스 각각:
+ARCHITECTURE.md §에러 타입 카탈로그의 16개 클래스 각각:
 
 - [ ] `instanceof AppError === true`
 - [ ] `instanceof Error === true`
@@ -2261,14 +2319,14 @@ ARCHITECTURE.md §에러 타입 카탈로그의 15개 클래스 각각:
 - [ ] toString 또는 stack 에 `code` 포함 (디버깅성)
 - [ ] JSON 직렬화 시 `code` + `message` 포함 (로깅 시 정보 손실 X)
 
-테스트 매트릭스 (15개 × 위 8개 = 120 케이스 — 헬퍼 함수로 표현):
+테스트 매트릭스 (16개 × 위 8개 = 128 케이스 — 헬퍼 함수로 표현):
 
 ```ts
 const errorCases: Array<[new (msg: string) => AppError, string]> = [
   [InvalidNumberError, 'INVALID_NUMBER'],
   [UnknownCurrencyError, 'UNKNOWN_CURRENCY'],
   [FxFetchError, 'FX_FETCH_FAILED'],
-  // ... 15개
+  // ... 16개
 ];
 
 describe.each(errorCases)('%s', (Ctor, expectedCode) => {
@@ -2451,6 +2509,14 @@ screens phase step 3 구현 — 사용 통계 + 메뉴. 페르소나 배지는 *
 **외부 링크:**
 
 - [x] 피드백 보내기 → mailto:laegel1@gmail.com 호출 + `router.push` 미호출 — 인앱 전환 후에도 유지 (ADR-021) (screens step 3, in-app-policy-pages step 7 회귀 가드)
+
+**광고 개인정보 설정 (ADR-077 / admob-banner-ads step 6):** `@/lib` mock 에 `showPrivacyOptionsForm: jest.fn()` 추가, `useAdsStore.setState({ privacyOptionsRequired })` 로 주입 (`resetStores` 에서 `reset()`). 메뉴 순서는 `getAllByRole('button')` 의 `menu-*` testID 트리 순서로 검증.
+
+- [x] `privacyOptionsRequired=false` (기본, 한국 등) → `menu-ads-privacy` 부재 + 메뉴 순서 4개 그대로 (sources·feedback·privacy·app-info) — 기존 "4개 메뉴" 테스트·data-refresh-card 스냅샷 무변경
+- [x] `privacyOptionsRequired=true` (EEA·영국·스위스) → `menu-ads-privacy` 존재 + 라벨 "광고 개인정보 설정" + `menu-privacy` 와 `menu-app-info` 사이 순서
+- [x] `privacyOptionsRequired` false·true 양쪽 → `menu-app-info` 가 여전히 마지막 행 (`border-b` 없음)
+- [x] `menu-ads-privacy` 탭 → `showPrivacyOptionsForm` 1회 + `Alert` 미호출
+- [x] `showPrivacyOptionsForm` reject → `Alert.alert('알림', '광고 설정 화면을 열지 못했어요. 잠시 후 다시 시도해 주세요.')` 1회 (silent fail 아님)
 
 **Footer:**
 
@@ -2665,7 +2731,10 @@ ADR-071 / in-app-policy-pages step 4. §9.38 목록에서 도시를 탭하면 pu
 
 ADR-072 / in-app-policy-pages step 5. 본문 정본(`privacyPolicy.json`)에 타입을 입혀 노출하는 상수 모듈. TS 는 JSON 을 **타입 단언**으로 받으므로 컴파일러가 형태를 검증하지 않는다 — 런타임 불변조건을 본 인벤토리가 지킨다. 렌더 결과 ↔ 생성 문서 일치는 §9-A.11 `gen_privacy_docs.mjs` 담당.
 
-- [x] 섹션이 7개다 (수집·저장 / 외부 서비스 / 분석·추적 / 정확성 고지 / 보호책임자 / 변경 / 문의)
+- [x] 섹션이 8개다 — 제목 목록을 순서까지 단언 (수집·저장 / 외부 서비스 / 광고 / 분석·추적 / 정확성 고지 / 보호책임자 / 변경 / 문의)
+- [x] `광고` 섹션에 `Google LLC` 포함 — 국외이전 고지 회귀 방지 (ADR-077)
+- [x] `광고` 섹션에 `IDFA` 와 `광고 ID` 포함 — 수집 항목 고지 회귀 방지
+- [x] `lead` 가 구 무수집 문구(`본 앱은 사용자 개인정보를 수집하지 않습니다.`)와 다르고 `광고 SDK` 를 포함한다 — "`수집하지 않습니다.` 로 끝나지 않음" 으로 판정하지 않는다 (정본 lead 도 한정어 뒤에 그 문자열로 끝난다)
 - [x] 모든 섹션에 비어 있지 않은 `title` 과 최소 1개 `block`
 - [x] `title` 에 섹션 번호(`1.` …)를 하드코딩하지 않는다 — 번호는 렌더 시점에 붙는다
 - [x] 모든 block 이 알려진 `kind` 이고 필수 필드를 갖는다 (`paragraph.text` / `list.items` / `email.label`+`email`)
@@ -2685,16 +2754,16 @@ ADR-071·ADR-072 / in-app-policy-pages step 6. 설정의 "개인정보 처리방
 **본문 렌더 (실제 정본 기준):**
 
 - [x] 리드 문단(`privacy-lead`)에 `PRIVACY_POLICY.lead` 가 표시
-- [x] 섹션 7개가 `privacy-section-0` … `privacy-section-6` 순서로 렌더
-- [x] 제목에 `1.` ~ `7.` 번호가 순서대로 붙는다 — 번호는 정본 `title` 에 없고 화면이 붙인다
-- [x] `list` 블록 항목 10개 전량 렌더 + 불릿 마커 10개 (개수 단언)
+- [x] 섹션 8개가 `privacy-section-0` … `privacy-section-7` 순서로 렌더
+- [x] 제목에 `1.` ~ `8.` 번호가 순서대로 붙는다 — 번호는 정본 `title` 에 없고 화면이 붙인다
+- [x] `list` 블록 항목 17개 전량 렌더 + 불릿 마커 17개 (개수 단언)
 - [x] `paragraph` 블록도 전문 그대로 렌더
 - [x] 본문 텍스트에 `numberOfLines` 미적용 — 법적 고지라 말줄임·"더 보기" 접기 금지
 - [x] 헤더 부제에 `마지막 갱신 <updatedAt>` 표시
 
 **이메일 링크 (탭 가능한 유일한 요소):**
 
-- [x] `email` 블록 탭 → `openURL('mailto:<operatorEmail>')` 1회 (`privacy-email-<섹션 인덱스>`, 정본 기준 4·6)
+- [x] `email` 블록 탭 → `openURL('mailto:<operatorEmail>')` 1회 (`privacy-email-<섹션 인덱스>`, 정본 기준 5·7)
 - [x] `accessibilityRole="button"` + `<label> 이메일 보내기` a11y 라벨
 - [x] `openURL` reject → `Alert.alert('링크 열기 실패', '이메일 앱을 찾을 수 없습니다.')` (silent fail 금지)
 
@@ -2710,6 +2779,110 @@ ADR-071·ADR-072 / in-app-policy-pages step 6. 설정의 "개인정보 처리방
 > mock 기법 주석: jest 는 `jest.mock` 팩토리 결과의 프로퍼티를 **값으로 복사**하므로 getter 로 `PRIVACY_POLICY` 를 교체할 수 없다. 정본의 얕은 복사본 객체 하나를 노출하고 테스트가 `Object.assign` 으로 그 내용을 갈아끼운다 (화면이 렌더 시점에 필드를 읽으므로 반영된다).
 >
 > 환율 API 주소 등 이메일 외의 본문 문자열은 링크로 만들지 않는다 (사실 명시일 뿐 실행할 동선이 아님 — ADR-071). 화면 이동은 `presentation: 'modal'` 이 아니라 일반 Stack push (ADR-071 결정 3).
+
+---
+
+### 9.42 `src/lib/ads.native.ts` — 광고 SDK 경유 단일 지점
+
+ADR-077 / admob-banner-ads step 1. 컴포넌트·화면은 `react-native-google-mobile-ads` 를 직접 import 하지 않고 이 모듈을 거친다 (ESLint `no-restricted-imports`). SDK 는 §5.1 전역 mock — 테스트도 SDK 를 import 하지 않고 `jest.requireMock` 으로 mock 함수에 접근한다. 타입·`AD_UNIT_IDS`·`resolveAdsMode`·placeholder 판정은 SDK 미참조 `src/lib/adsConfig.ts` 에 두고 native/web 이 공유한다 (본 §와 §9.42-w 가 함께 커버). 파일: `src/lib/__tests__/ads.test.ts` (`../ads` → jest-expo 가 `.native` 로 해석).
+
+**`resolveAdsMode`:**
+
+- [x] env `'1'` → `test` (dev=false 여도)
+- [x] env 없음 + dev=true → `test`
+- [x] env 없음 + dev=false → `production`
+- [x] env `'0'` + dev=false → `production`
+
+**`resolveBannerUnitId`:**
+
+- [x] `test` → `TestIds.ADAPTIVE_BANNER` (ios·android)
+- [x] `production` + placeholder (ios·android) → `AdsConfigError` throw + `code === 'ADS_CONFIG'`
+- [x] `production` + 실제 형식 (`jest.replaceProperty(AD_UNIT_IDS, …)` 주입) → 그대로 반환
+
+**`initializeAds`:**
+
+- [x] 호출 순서 `gatherConsent → initialize → getConsentInfo` (`mock.invocationCallOrder`) + `ready` 결과
+- [x] `gatherConsent` 를 인자 없이 호출 — 비맞춤형 강제 옵션 없음 (UMP 동의를 SDK 가 직접 읽는다)
+- [x] `gatherConsent` reject 여도 `initialize`·`getConsentInfo` 호출 + 결과 `error` 에 담김 + status `ready`
+- [x] Error 가 아닌 reject 값 → `Error` 로 감싸 `error` 에 담김
+- [x] `initialize` reject → `disabled` + error (`getConsentInfo` 미호출)
+- [x] `getConsentInfo` reject → `disabled` + error
+- [x] `AdsConfigError` (`__DEV__=false` + placeholder) → SDK 3종 **미호출** + `disabled` + 콘솔 로그 없음 (운영 빌드는 결과 `error` 로만 노출)
+- [x] `__DEV__=false` + 실제 단위 ID → SDK 호출 + `ready`
+- [x] `privacyOptionsRequirementStatus: 'REQUIRED'` → `privacyOptionsRequired: true`
+- [x] 동시 2회 호출 → 같은 Promise + SDK 1회 + 같은 결과 객체 (멱등)
+- [x] 완료 후 재호출 → SDK 추가 호출 0 + 캐시 결과 (실패 결과도 캐시 — 재시도 없음)
+- [x] `__resetForTesting` 후 재실행 → SDK 재호출
+- [x] `__DEV__` 에서 error 있으면 `console.error('[ads] …', error)` 1회 — 재호출 시 추가 로그 없음 / error 없으면 미호출
+- [x] `Platform.OS = 'windows'` → `disabled` + `AdsConfigError` + SDK 미호출
+
+**`showPrivacyOptionsForm`:**
+
+- [x] `AdsConsent.showPrivacyOptionsForm` 1회 위임 + `void` resolve (SDK 반환값 버림)
+- [x] reject 는 그대로 전파
+
+> `initializeAds` 는 throw 하지 않는다 — 광고 실패는 부팅을 막지 않고 `disabled` + `error` 로 노출한다 (silent fail 아님, ErrorView 없음). `__resetForTesting` 은 배럴(`@/lib`)에서 export 하지 않는다.
+>
+> 커버리지: `ads.native.ts`·`adsConfig.ts` 100/100/100/100 (`src/lib/**` 임계치 statements 100 / branches 95 / lines 100 / functions 100).
+
+### 9.42-w `src/lib/ads.web.ts` — 웹 빌드 광고 no-op
+
+ADR-077 / admob-banner-ads step 1. 파일: `src/lib/__tests__/ads.web.test.ts`. jest-expo 는 `../ads` 를 `.native` 로 해석하므로 `jest.isolateModules` 안에서 `require('../ads.web')` 로 직접 로드하고, **같은 격리 레지스트리**의 `jest.requireMock('react-native-google-mobile-ads')` 를 함께 꺼낸다 (웹 모듈이 SDK 를 끌어왔다면 같은 인스턴스라 호출이 잡힌다).
+
+- [x] `initializeAds` → `{ status: 'disabled', canRequestAds: false, privacyOptionsRequired: false, error: null }` 즉시 resolve
+- [x] `showPrivacyOptionsForm` → no-op resolve
+- [x] `resolveAdsMode` 는 native 와 동일 로직
+- [x] `resolveBannerUnitId('test', …)` → 문자열 상수 `'ca-app-pub-3940256099942544/2435281174'` (SDK `TestIds` 미참조)
+- [x] `resolveBannerUnitId('production', …)` + placeholder → `code === 'ADS_CONFIG'` (격리 레지스트리라 `instanceof` 대신 `code`·`name`)
+- [x] `AD_UNIT_IDS` 는 placeholder
+- [x] 모든 export 호출 후 SDK mock 함수 6종 (`initialize` + `AdsConsent` 4종 + `BannerAd`) 호출 0회
+
+> `ads.web.ts` 는 `ads.native.ts` 도 SDK 도 import 하지 않는다 — 한쪽이 다른 쪽을 import 하면 웹 번들에 네이티브 모듈이 끌려온다. 커버리지 100/100/100/100.
+
+### 9.43 `src/store/ads.ts` — 광고 초기화 상태 (비영속)
+
+ADR-077 / admob-banner-ads step 2. 파일: `src/store/__tests__/ads.test.ts`. 기존 8개 store 와 달리 persist 미들웨어·AsyncStorage 를 쓰지 않고 `waitForAllStoresHydrated` 에도 참여하지 않는다 (영속 데이터 없음, 광고 초기화는 부팅 비차단). 타입 `AdsStatus`·`AdsInitResult` 는 `@/lib` 에서 재사용. 각 테스트 전 `reset()`.
+
+**기본 동작:**
+
+- [x] 초기 상태 = `INITIAL_STATE` (`{ status: 'idle', canRequestAds: false, privacyOptionsRequired: false }`)
+- [x] `begin()` → `status: 'initializing'`, `canRequestAds`·`privacyOptionsRequired` 불변
+- [x] `settle({ status: 'ready', canRequestAds: true, privacyOptionsRequired: true, error: null })` → 세 필드 반영
+- [x] `settle({ status: 'disabled', …, error: new Error('x') })` → `disabled`, `error` 는 store 에 담기지 않음
+- [x] `reset()` → `INITIAL_STATE` 복귀
+
+**비영속:**
+
+- [x] 액션(`begin`·`settle`·`reset`) 호출 후 `AsyncStorage.setItem` mock 호출 0회
+- [x] `useAdsStore.persist` 가 `undefined`
+
+> 본 store 는 throw 하지 않는다. 에러 노출은 lib (`initializeAds` 의 `__DEV__` console.error) 책임이고 화면은 `status` 만 본다. 커버리지 100/100/100/100 (`src/store/**` 임계치 100/90/100/100).
+
+### 9.44 `src/components/AdBanner.native.tsx` / `AdBanner.web.tsx` — 하단 배너
+
+ADR-077 / admob-banner-ads step 4. 파일: `src/components/__tests__/AdBanner.test.tsx` (`../AdBanner` → jest-expo 가 `.native` 로 해석, 웹 파일은 `jest.isolateModules` + 경로 직접 require). SDK 는 §5.1 전역 mock — 테스트도 SDK 를 import 하지 않고 `jest.requireMock` 으로 `BannerAd` mock 에 접근한다 (`jest.fn(() => null)`). props 는 `mock.calls` 로 검사하고 `onAdLoaded` / `onAdFailedToLoad` 를 `act()` 안에서 직접 호출해 로드·실패를 시뮬레이션한다. 각 테스트 전 `useAdsStore.getState().reset()`.
+
+**렌더 조건 (모두 `BannerAd` 미호출 확인):**
+
+- [x] `status: 'idle'` (초기) → null
+- [x] `status: 'ready'` + `canRequestAds: false` → null
+- [x] `status: 'disabled'` → null
+- [x] `Platform.OS = 'web'` (`jest.replaceProperty`) → ready + canRequestAds 여도 null
+
+**ready + canRequestAds:**
+
+- [x] `BannerAd` 1회 마운트 + `unitId === TestIds.ADAPTIVE_BANNER` (테스트 환경은 `__DEV__` → test 모드) + `size === 'ANCHORED_ADAPTIVE_BANNER'`
+- [x] 로드 전 컨테이너 `h-0 overflow-hidden` → `onAdLoaded()` 후 `h-0` 없음 + `border-t border-line`
+- [x] `onAdFailedToLoad(new Error('no fill'))` → 다시 `h-0` + `__DEV__` console.error 1회 (`jest.spyOn`)
+- [x] 로드 실패 후에도 `BannerAd` 마운트 유지 (SDK 자동 재시도 보존 — 언마운트 회귀 방지)
+- [x] a11y — 컨테이너 `accessibilityLabel="광고"` + `accessibilityRole="none"` (SDK 뷰가 자체 라벨을 가짐)
+- [x] `testID` 기본값 `ad-banner` + prop override
+
+**웹 (`AdBanner.web.tsx`):**
+
+- [x] 항상 null + SDK mock 미호출 (네이티브 모듈 미참조)
+
+> 로드 전·실패 시 높이 0 이 계약이다 — placeholder 높이를 예약하지 않는 대신 로드 후 1회 레이아웃 시프트를 수용한다 (ADR-077). 펼친 높이는 SDK 가 기기 폭에 맞춰 계산하므로 컴포넌트에 px 가 없다. 배너를 화면에 배선하는 쪽 테스트는 §9.45 (`Screen.footer`) 와 화면별 기존 §.
 
 ---
 
@@ -3950,7 +4123,7 @@ it('비교 화면 모든 카드에 a11y label', () => {
 - [ ] 상단 ← / iOS swipe-back: 도시별 출처 → 출처 목록 → 설정 순으로 복귀 (모달 swipe-down dismiss 아님)
 - [ ] 비행기 모드에서도 두 출처 화면이 정상 렌더 (외부 링크만 실패 → "링크 열기 실패" Alert)
 - [ ] 설정 "개인정보 처리방침" 탭 → **앱을 벗어나지 않고** `/privacy` 화면이 열림
-- [ ] `/privacy`: 섹션 번호 1.~7. 순서대로, 부제 `마지막 갱신 YYYY-MM-DD` 가 `docs/privacy-policy.html` 라이브 페이지와 동일
+- [ ] `/privacy`: 섹션 번호 1.~8. 순서대로, 부제 `마지막 갱신 YYYY-MM-DD` 가 `docs/privacy-policy.html` 라이브 페이지와 동일
 - [ ] `/privacy` 이메일 블록 탭 → 메일 앱 컴포저 (실패 시 "링크 열기 실패" Alert). 그 외 본문은 탭 반응 없음
 - [ ] `/privacy` 본문에 "페르소나 / 유학생 / 취업자" 문구가 없음 (ADR-067 · ADR-072)
 
@@ -3960,6 +4133,16 @@ it('비교 화면 모든 카드에 a11y label', () => {
 - [ ] TestFlight / Internal Play 설치 정상
 - [ ] 스토어 메타데이터 + 스크린샷 + 개인정보 처리방침 URL 동작
 - [ ] 심사 거절 사유 (RELEASE.md §6) 모두 검증
+
+### 18.9 광고·동의 흐름 (ADR-077)
+
+Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단위) 기준. ATT·GDPR 폼은 AdMob 콘솔에 실제 App ID 와 IDFA 설명·GDPR 메시지가 게시돼 있어야 뜬다 — 샘플 App ID 빌드에서는 (1)·(2) 의 폼이 나오지 않는다.
+
+- [ ] (1) iOS 첫 실행(앱 삭제 후 재설치) → 도시 선택 → Compare 에서 IDFA 설명 메시지 → ATT 시스템 알림 순서. 온보딩 화면 위에서는 아무 프롬프트도 뜨지 않음. 허용·거부 각각 하단 배너 표시
+- [ ] (2) EEA 지역 시뮬레이션: `src/lib/ads.native.ts` 의 `AdsConsent.gatherConsent()` 에 `{ debugGeography: AdsConsentDebugGeography.EEA, testDeviceIdentifiers: [...] }` 를 **로컬에서만 임시로** 넘긴다 (옵션 타입은 `AdsConsent.requestInfoUpdate` 와 같은 `AdsConsentInfoOptions`. 코드에 dev 전용 경로는 없다 — 커밋 금지). GDPR 동의 폼 표시 + 설정 "광고 개인정보 설정"(`menu-ads-privacy`) 메뉴 노출 → 탭 시 개인정보 옵션 폼 열림
+- [ ] (3) 비행기 모드: 홈·비교·상세의 배너 슬롯 높이 0 (레이아웃이 광고 도입 전과 동일), 앱 동작 정상
+- [ ] (4) 온보딩·설정·출처(`/sources`, `/sources/[cityId]`)·개인정보(`/privacy`) 화면에 배너 없음
+- [ ] (5) 홈·비교·상세의 로딩(skeleton)·에러(ErrorView) 화면에 배너 없음
 
 ---
 
@@ -3973,6 +4156,7 @@ it('비교 화면 모든 카드에 a11y label', () => {
 - **결정성:** 실시간 환율 의존 값(정확한 배수·KRW)은 단정 금지 — 방향(↑/↓)·정규식 패턴·testID 구조만 검증. 도시는 번들 시드 보장 도시(`seoul`/`vancouver`) 우선.
 - **독립성:** 각 flow 는 `launchApp: clearState` 로 시작해 독립. 온보딩·Compare 진입은 `common/` 서브플로우(runFlow 전용, 워크스페이스 글롭 제외) 재사용.
 - **자동 검증 밖(한계):** 색 토큰/그림자/애니메이션/햅틱/폰트 → §18(수동) + `07-visual-a11y` screenshot 수동 리뷰로 보완. `tax` 카테고리는 데이터 부재로 no-data 경로만 검증 가능.
+- **광고는 E2E 단언 대상 아님** — 테스트 광고도 네트워크 의존이라 비결정적. `ad-banner` testID 는 존재 확인용으로만. 동의 폼(ATT·GDPR)은 수동 체크 (§18.9). Maestro `launchApp` 기본 permissions 가 추적 권한을 미리 허용해 ATT 는 flow 안에서 구조적으로 뜨지 않는다 (ADR-077).
 
 ### 18-A.2 재사용 서브플로우 (`.maestro/common/`)
 
@@ -4035,7 +4219,7 @@ it('비교 화면 모든 카드에 a11y label', () => {
 **08-sources-privacy** (ADR-071 신규 화면)
 
 - [x] `sources-drilldown` — 설정 → `/sources` → `/sources/seoul` 2단계 드릴다운. 그룹·아이콘·출처 카드·갱신 주기 푸터 + **back 으로 목록 → 설정 단계별 복귀**(일반 Stack push 임을 검증 — modal 이면 목록을 건너뛰고 설정으로 떨어진다). 앵커 도시를 서울로 고정: 서울의 rent/food/transport 구성은 번들 시드와 원격 전량 데이터가 동일한 반면, 밴쿠버는 시드에만 `tax` 출처가 있어 그룹 존재 여부가 데이터 출처에 따라 갈린다
-- [x] `privacy-page` — 설정 → `/privacy`. 섹션 7개·화면이 부여하는 번호(1.~7.)·`privacy-email-6`·`마지막 갱신 \d{4}-\d{2}-\d{2}`. **정본 문구를 flow 에 복사하지 않는다** — 방침 개정마다 flow 가 깨지고 그건 이 화면의 검증 대상이 아니다. 이메일 블록은 존재만 확인하고 탭하지 않는다(mailto 외부 전환이 후속 flow 를 오염시킴)
+- [x] `privacy-page` — 설정 → `/privacy`. 섹션 8개·화면이 부여하는 번호(1.~8.)·`privacy-email-7`·`마지막 갱신 \d{4}-\d{2}-\d{2}`. **정본 문구를 flow 에 복사하지 않는다** — 방침 개정마다 flow 가 깨지고 그건 이 화면의 검증 대상이 아니다. 이메일 블록은 존재만 확인하고 탭하지 않는다(mailto 외부 전환이 후속 flow 를 오염시킴)
 
 ---
 

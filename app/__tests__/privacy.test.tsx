@@ -82,11 +82,11 @@ describe('PrivacyScreen', () => {
     expect(getByText(PRIVACY_POLICY.lead)).toBeTruthy();
   });
 
-  it('섹션 7개를 순서대로 렌더하고 제목에 1.~7. 번호를 붙인다', () => {
+  it('섹션 8개를 순서대로 렌더하고 제목에 1.~8. 번호를 붙인다', () => {
     const { getAllByTestId, getByText } = render(<PrivacyScreen />);
 
     const sections = getAllByTestId(/^privacy-section-/);
-    expect(sections).toHaveLength(7);
+    expect(sections).toHaveLength(8);
     expect(sections.map((s) => s.props.testID)).toEqual([
       'privacy-section-0',
       'privacy-section-1',
@@ -95,6 +95,7 @@ describe('PrivacyScreen', () => {
       'privacy-section-4',
       'privacy-section-5',
       'privacy-section-6',
+      'privacy-section-7',
     ]);
     // 번호는 정본의 title 에 없고 렌더 시점에 붙는다 (ADR-072 결정 1).
     PRIVACY_POLICY.sections.forEach((section, idx) => {
@@ -105,7 +106,7 @@ describe('PrivacyScreen', () => {
   it('list 블록의 항목을 하나도 빠짐없이 렌더한다 (말줄임·접기 없음)', () => {
     const { getAllByText, getByText } = render(<PrivacyScreen />);
 
-    expect(ALL_LIST_ITEMS).toHaveLength(10);
+    expect(ALL_LIST_ITEMS).toHaveLength(17);
     expect(getAllByText('•')).toHaveLength(ALL_LIST_ITEMS.length);
     ALL_LIST_ITEMS.forEach((item) => {
       const node = getByText(item);
@@ -128,8 +129,8 @@ describe('PrivacyScreen', () => {
   it('이메일 블록 탭 → mailto 로 openURL 호출', () => {
     const { getByTestId } = render(<PrivacyScreen />);
 
-    expect(EMAIL_SECTION_INDEXES).toEqual([4, 6]);
-    fireEvent.press(getByTestId('privacy-email-4'));
+    expect(EMAIL_SECTION_INDEXES).toEqual([5, 7]);
+    fireEvent.press(getByTestId('privacy-email-5'));
 
     expect(mockOpenURL).toHaveBeenCalledTimes(1);
     expect(mockOpenURL).toHaveBeenCalledWith(`mailto:${PRIVACY_POLICY.operatorEmail}`);
@@ -138,7 +139,7 @@ describe('PrivacyScreen', () => {
   it('이메일 블록이 button role 과 라벨을 담은 a11y 라벨을 갖는다', () => {
     const { getByTestId, getByLabelText } = render(<PrivacyScreen />);
 
-    expect(getByTestId('privacy-email-6').props.accessibilityRole).toBe('button');
+    expect(getByTestId('privacy-email-7').props.accessibilityRole).toBe('button');
     expect(getByLabelText('개인정보 관련 문의 이메일 보내기')).toBeTruthy();
   });
 
@@ -148,7 +149,7 @@ describe('PrivacyScreen', () => {
 
     const { getByTestId } = render(<PrivacyScreen />);
 
-    fireEvent.press(getByTestId('privacy-email-4'));
+    fireEvent.press(getByTestId('privacy-email-5'));
     // openURL 거절 → catch → Alert 는 전부 마이크로태스크. fake timer 무관.
     await act(async () => {
       await Promise.resolve();

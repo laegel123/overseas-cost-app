@@ -29,13 +29,16 @@
 ### 단계 2 — Play Console "앱 콘텐츠" 선언 (콘솔)
 등록정보 외에 아래가 모두 ✅ 되어야 릴리스 생성 가능. 답안은 `docs/store-metadata.md` §6~§8 참조.
 - ⬜ 개인정보처리방침 URL 입력 (단계 0의 live URL)
-- ⬜ 광고: **없음**
+- ⬜ 광고: **있음** (AdMob 배너)
 - ⬜ 앱 액세스 권한: 모든 기능 제한 없이 사용 가능 (로그인 없음)
 - ⬜ 콘텐츠 등급 설문: 전부 "아니오" → 전체 이용가(3+)
 - ⬜ 타겟층 및 콘텐츠: 13세+, 아동 대상 아님
-- ⬜ 데이터 보안(Data Safety): **데이터 수집·공유 안 함** (ADR-009/011)
+- ⬜ 데이터 보안(Data Safety): 기기 또는 기타 ID · 앱 상호작용 · 앱 성능(진단) · 대략적 위치 **수집**, Google 과 **공유** — 목적: 광고·분석·부정행위 방지 (ADR-077)
 - ⬜ 정부 앱 / 금융 기능 / 건강: 모두 해당 없음
 - ⬜ 등록정보 그래픽 업로드: 512 아이콘(`assets/icon-playstore-512.png`), 피처 그래픽(`assets/feature-graphic.png`), 스크린샷 5장(`store-assets/screenshots/`)
+- ⬜ app-ads.txt: laegel123.github.io 루트에 AdMob 콘솔 제공 1줄 게시 + 스토어 등록정보 개발자 웹사이트 = https://laegel123.github.io
+- ⬜ ATT: App Store Connect 에서 추적 사용 표시
+- ⬜ 프로덕션 첫 빌드 전 app.json App ID 2개 + src/lib AD_UNIT_IDS placeholder 교체 확인 (미교체 시 런타임 AdsConfigError 로 광고만 꺼짐 — 빌드는 실패하지 않으므로 이 체크리스트로 강제)
 
 ### 단계 3 — 프로덕션 AAB 빌드  ✅ 완료
 - ✅ 빌드 완료 — ID `aaa0b047-645b-4a13-84fc-d1a764112092`, status `finished`, profile `production`, distribution `store`, versionCode 1

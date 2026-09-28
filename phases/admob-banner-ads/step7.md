@@ -55,7 +55,7 @@ npm run gen:privacy      # docs/privacy-policy.html + docs/PRIVACY.md 재생성 
 - "섹션이 7개다" → **8개** (수집·저장 / 외부 서비스 / **광고** / 분석·추적 / 정확성 고지 / 보호책임자 / 변경 / 문의) — 순서까지 단언
 - `광고` 섹션에 `Google LLC` 문자열 포함 (국외이전 고지 회귀 방지)
 - `광고` 섹션에 `IDFA` 와 `광고 ID` 포함 (수집 항목 회귀 방지)
-- 문서 전체에 `수집하지 않습니다.` 로 **끝나는** lead 가 없음 (`PRIVACY_POLICY.lead` 가 해당 문자열로 끝나지 않음)
+- lead 가 무수집 단언으로 회귀하지 않음 — `PRIVACY_POLICY.lead` 가 구 lead `본 앱은 사용자 개인정보를 수집하지 않습니다.` 와 **다르고**, `광고 SDK` 를 **포함**한다. ("`수집하지 않습니다.` 로 끝나지 않음" 으로 판정하지 마라 — 위 §K 정본 lead 도 한정어 뒤에 그 문자열로 끝난다)
 - 기존 페르소나 회귀 단언 등은 유지
 - `scripts/__tests__/gen_privacy_docs.test.ts` 드리프트 가드가 재생성 후 통과
 
@@ -92,7 +92,7 @@ npm run typecheck
 npm run lint
 npm test
 npm run gen:privacy && npm test -- scripts/__tests__/gen_privacy_docs      # 재생성 후 드리프트 가드 통과 (생성물은 아직 미커밋이므로 git diff 로 판정하지 말 것)
-node -e "const p=require('./src/lib/privacyPolicy.json');const t=p.sections.map(s=>s.title);if(t.length!==8||t[2]!=='광고')process.exit(1);if(/수집하지 않습니다\.$/.test(p.lead))process.exit(1)"
+node -e "const p=require('./src/lib/privacyPolicy.json');const t=p.sections.map(s=>s.title);if(t.length!==8||t[2]!=='광고')process.exit(1);if(p.lead==='본 앱은 사용자 개인정보를 수집하지 않습니다.'||!p.lead.includes('광고 SDK'))process.exit(1)"
 grep -c 'Google LLC' src/lib/privacyPolicy.json docs/privacy-policy.html docs/PRIVACY.md   # 각 ≥ 1
 grep -c '광고·인앱 결제가 없습니다' docs/RELEASE.md                                        # 0
 grep -c 'Data Not Collected' docs/RELEASE.md                                               # 0

@@ -34,15 +34,15 @@ tags:
 - assertVisible:
     id: 'privacy-section-0'
 - assertVisible: '1\. .*'
-# 마지막 섹션(문의)까지 스크롤 — 정본 섹션 7개라 인덱스 6 이 마지막
+# 마지막 섹션(문의)까지 스크롤 — 정본 섹션 8개라 인덱스 7 이 마지막
 - scrollUntilVisible:
     element:
-      id: 'privacy-section-6'
+      id: 'privacy-section-7'
     direction: DOWN
-- assertVisible: '7\. .*'
-# email 블록은 정본 기준 섹션 4(보호책임자)·6(문의) 두 곳
+- assertVisible: '8\. .*'
+# email 블록은 정본 기준 섹션 5(보호책임자)·7(문의) 두 곳
 - assertVisible:
-    id: 'privacy-email-6'
+    id: 'privacy-email-7'
 # back 앵커를 되올린다
 - scrollUntilVisible:
     element:

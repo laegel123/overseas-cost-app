@@ -2,7 +2,7 @@
 
 # ADR-011: 분석·추적 도구 v1.0 도입 안 함
 
-> **상태**: Active
+> **상태**: Superseded by ADR-077 — 광고 SDK(AdMob) 도입. 분석·오류 추적 SDK 미도입 결정은 여전히 유효
 
 **결정**: GA·Amplitude·Sentry 등 어떠한 분석/오류 추적 SDK 도 v1.0 에 도입하지 않는다.
 **이유**:

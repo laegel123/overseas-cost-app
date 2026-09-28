@@ -9,6 +9,8 @@
  *   - rent: 인라인 행 탭으로 4 형태 순환 (ADR-060)
  *   - tuition / tax: 칩 탭 → 바텀시트 (학교/연봉 목록 + 직접 입력) (ADR-061)
  *   서울 데이터 결측 (한국 거주 기준 — 학비/세금 0원) 정책: seoulVal=0 직접 사용.
+ *
+ * 하단 footer: AdBanner (ready 상태만, ADR-077)
  */
 
 import * as React from 'react';
@@ -19,6 +21,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { useShallow } from 'zustand/react/shallow';
 
+import { AdBanner } from '@/components';
 import { HeroCard } from '@/components/cards/HeroCard';
 import { ErrorView } from '@/components/ErrorView';
 import { GroceryRow } from '@/components/GroceryRow';
@@ -495,7 +498,7 @@ export default function DetailScreen(): React.ReactElement {
         : '항목 단가 합';
 
   return (
-    <Screen scroll testID="detail-screen">
+    <Screen scroll testID="detail-screen" footer={<AdBanner />}>
       <TopBar
         title={`${categoryLabel} · ${city.name.ko}`}
         titleVariant="h3"

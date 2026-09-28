@@ -2,6 +2,8 @@
  * Compare 화면 — 서울 vs 도시 1:1 비교 (앱의 메인 화면).
  *
  * design/README §3 + step0.md 구현. 페르소나 분기, Hot 규칙, 데이터 정책 모두 준수.
+ *
+ * 하단 footer: AdBanner (ready 상태만, ADR-077)
  */
 
 import * as React from 'react';
@@ -10,6 +12,7 @@ import { ActivityIndicator, Pressable, View } from 'react-native';
 
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { AdBanner } from '@/components';
 import { HeroCard } from '@/components/cards/HeroCard';
 import { ComparePair } from '@/components/ComparePair';
 import { ErrorView } from '@/components/ErrorView';
@@ -391,7 +394,7 @@ export default function CompareScreen(): React.ReactElement {
   const sourceCount = city.sources.length;
 
   return (
-    <Screen scroll testID="compare-screen">
+    <Screen scroll testID="compare-screen" footer={<AdBanner />}>
       <TopBar
         title={`서울 vs ${city.name.ko}`}
         titleVariant="h3"
