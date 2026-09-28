@@ -24,7 +24,7 @@ import { useRouter } from 'expo-router';
 
 import { Icon } from '@/components/Icon';
 import { MenuRow } from '@/components/MenuRow';
-import { Screen } from '@/components/Screen';
+import { Screen, TAB_SCREEN_EDGES } from '@/components/Screen';
 import { H1, H3, Tiny } from '@/components/typography/Text';
 import {
   countUniqueSources,
@@ -123,7 +123,7 @@ export default function SettingsScreen(): React.ReactElement {
   }, [refreshState, lastSync]);
 
   return (
-    <Screen scroll testID="settings-screen">
+    <Screen scroll edges={TAB_SCREEN_EDGES} testID="settings-screen">
       {/* Header */}
       <View className="flex-row items-center justify-between pt-2 pb-4">
         <H1>설정</H1>

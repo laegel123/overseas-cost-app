@@ -39,6 +39,9 @@ const PADDING_CLASS: Record<ScreenPadding, string> = {
 
 const DEFAULT_EDGES: readonly ScreenEdge[] = ['top', 'bottom'];
 
+/** 탭 화면 전용 edges — 하단 inset 은 `BottomTabBar` 가 이미 적용하므로 top 만 (중복 시 탭바 위 흰 띠). */
+export const TAB_SCREEN_EDGES: ScreenEdge[] = ['top'];
+
 // 모듈 레벨 상수 — 매 렌더 새 객체 참조 회피로 ScrollView 의 불필요한 re-render 방지.
 const SCROLL_CONTENT_STYLE: ViewStyle = { flexGrow: 1 };
 

@@ -1422,7 +1422,7 @@ inner View / ScrollView 에 부여 (jest 의 SafeAreaView mock 이 passthrough �
 chrome 클래스 검증은 inner 노드 기준).
 
 - [x] 자식 렌더
-- [x] SafeAreaView 적용 (default edges `['top', 'bottom']`, prop 으로 override)
+- [x] SafeAreaView 적용 (default edges `['top', 'bottom']`, prop 으로 override) — 탭 화면은 `TAB_SCREEN_EDGES`(`['top']`) 사용 (§9.26·§9.29)
 - [x] 배경색 토큰 + flex-1 (SafeAreaView 의 className)
 - [x] `scroll=true`: ScrollView wrap + `contentContainerStyle.flexGrow=1`
 - [x] `scroll=false` (default): 일반 View
@@ -2306,6 +2306,10 @@ screens phase step 2 구현 — 재방문 사용자가 빠르게 즐겨찾기 �
 - [x] error 상태 (`home-screen-error`) → `ad-banner` 부재
 - [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재
 
+**하단 inset (BottomTabBar 중복 회피):** 하단 inset 은 `BottomTabBar` 가 적용하므로 `Screen` 은 `TAB_SCREEN_EDGES`(`['top']`). 전역 `SafeAreaView` mock 이 edges 를 버리므로 `UNSAFE_getByType(Screen).props.edges` 로 검증.
+
+- [x] ready·loading·error 3상태 모두 `Screen` edges = `['top']` (배너와 탭바 사이 흰 띠 회귀 방지)
+
 ### 9.26b `src/lib/errors.ts` — 에러 클래스 카탈로그
 
 ARCHITECTURE.md §에러 타입 카탈로그의 16개 클래스 각각:
@@ -2517,6 +2521,10 @@ screens phase step 3 구현 — 사용 통계 + 메뉴. 페르소나 배지는 *
 - [x] `privacyOptionsRequired` false·true 양쪽 → `menu-app-info` 가 여전히 마지막 행 (`border-b` 없음)
 - [x] `menu-ads-privacy` 탭 → `showPrivacyOptionsForm` 1회 + `Alert` 미호출
 - [x] `showPrivacyOptionsForm` reject → `Alert.alert('알림', '광고 설정 화면을 열지 못했어요. 잠시 후 다시 시도해 주세요.')` 1회 (silent fail 아님)
+
+**하단 inset:**
+
+- [x] `Screen` edges = `['top']` (`TAB_SCREEN_EDGES` — 하단 inset 은 `BottomTabBar` 가 적용, §9.26 과 동일)
 
 **Footer:**
 

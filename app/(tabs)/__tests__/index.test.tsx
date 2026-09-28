@@ -7,6 +7,7 @@ import * as React from 'react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react-native';
 
 import { jsonByTestId } from '@/__test-utils__/snapshotByTestId';
+import { Screen } from '@/components/Screen';
 import {
   fetchExchangeRates as mockFetchExchangeRates,
   getAllCities as mockGetAllCities,
@@ -652,6 +653,43 @@ describe('HomeScreen', () => {
 
       expect(getByTestId('home-screen')).toBeTruthy();
       expect(queryByTestId('ad-banner')).toBeNull();
+    });
+  });
+
+  describe('하단 inset (BottomTabBar 중복 회피)', () => {
+    // 하단 inset 은 BottomTabBar 가 적용 — Screen 까지 bottom 을 넣으면 탭바 위 흰 띠가 생긴다.
+    it('ready 상태 → Screen edges top 만', async () => {
+      setupMocks();
+
+      const { UNSAFE_getByType } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(UNSAFE_getByType(Screen).props.edges).toEqual(['top']);
+    });
+
+    it('로딩 상태 → Screen edges top 만', () => {
+      (mockLoadAllCities as jest.Mock).mockReturnValue(new Promise(() => {}));
+      (mockFetchExchangeRates as jest.Mock).mockReturnValue(new Promise(() => {}));
+
+      const { UNSAFE_getByType } = render(<HomeScreen />);
+
+      expect(UNSAFE_getByType(Screen).props.edges).toEqual(['top']);
+    });
+
+    it('에러 상태 → Screen edges top 만', async () => {
+      setupMocks({ cities: {} });
+
+      const { getByTestId, UNSAFE_getByType } = render(<HomeScreen />);
+
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('home-screen-error')).toBeTruthy();
+      expect(UNSAFE_getByType(Screen).props.edges).toEqual(['top']);
     });
   });
 
