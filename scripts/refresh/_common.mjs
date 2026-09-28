@@ -47,7 +47,17 @@ export function getCityPath(id) {
  */
 
 /**
- * @typedef {Object} RefreshError 단일 도시·이유 에러 — silent fail 금지 정책상 모든 실패가 여기로.
+ * @typedef {Object} RefreshError 그 도시에 대해 **신뢰할 수 있는 값을 내지 못함** — 대체값(STATIC)
+ * 없음, Unknown city, 기존 파일 읽기 실패, write 실패, 파싱 실패 후 대체 경로 없음 등.
+ * `isTotalFailure` 판정 대상이므로 결과값이 유효한 경고는 `RefreshWarning` 으로 보낸다 (ADR-079).
+ * @property {string} cityId
+ * @property {string} reason
+ */
+
+/**
+ * @typedef {Object} RefreshWarning 결과값은 유효하지만(정적값·기존값·실값) **출처 이상 또는 품질
+ * 의심** — 도달성 확인 실패, 실 fetch 실패 후 STATIC 대체, 보조 호출 실패, 데이터 품질 의심 등.
+ * 종료 코드에 영향 없고 `_run.mjs` 가 `::warning::` annotation 으로 노출한다 (ADR-079).
  * @property {string} cityId
  * @property {string} reason
  */
@@ -59,6 +69,8 @@ export function getCityPath(id) {
  * @property {string[]} fields
  * @property {RefreshChange[]} changes
  * @property {RefreshError[]} errors
+ * @property {RefreshWarning[]} [warnings] 선택 — 미이전 fetcher 가 계약 위반이 되지 않도록
+ * optional 이다. `_run.mjs` 는 `result?.warnings ?? []` 로 읽는다.
  */
 
 /**
@@ -72,6 +84,9 @@ export function getCityPath(id) {
  *
  * 에러가 0건이면 갱신 0건이어도 실패가 아니다 — 값 변동이 없어 `cities` 가 비는 것은 대부분
  * fetcher 의 평상시 정상 상태이고, 이를 실패로 보면 모든 refresh 워크플로우가 빨간불이 된다.
+ *
+ * `warnings` 는 판정 대상이 아니다 — 결과값이 유효한 경고이므로 갱신 0 + warnings 만 있으면
+ * 전부 실패가 아니다 (ADR-079).
  *
  * @param {RefreshResult | null | undefined} result
  * @returns {boolean}

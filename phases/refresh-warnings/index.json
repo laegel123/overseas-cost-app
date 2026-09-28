@@ -2,9 +2,29 @@
   "project": "overseas-cost-app",
   "phase": "refresh-warnings",
   "steps": [
-    { "step": 0, "name": "warnings-contract", "status": "pending" },
-    { "step": 1, "name": "fetchers-reachability", "status": "pending" },
-    { "step": 2, "name": "fetchers-fallback", "status": "pending" },
-    { "step": 3, "name": "workflow-gate", "status": "pending" }
-  ]
+    {
+      "step": 0,
+      "name": "warnings-contract",
+      "status": "completed",
+      "started_at": "2026-09-28T16:30:35+0900",
+      "summary": "RefreshWarning typedef + RefreshResult.warnings 선택 필드 (isTotalFailure 판정 불변), _run.mjs 가 `[src] N warning(s)` + `::warning title=<source>::<cityId>: <reason>` 출력 (종료 코드 무영향), ADR-079 + AUTOMATION §3·§7.1·§12 · TESTING §9-A.1·§9-A.2",
+      "completed_at": "2026-09-28T17:20:00+0900"
+    },
+    {
+      "step": 1,
+      "name": "fetchers-reachability",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "fetchers-fallback",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "workflow-gate",
+      "status": "pending"
+    }
+  ],
+  "created_at": "2026-09-28T16:30:35+0900"
 }

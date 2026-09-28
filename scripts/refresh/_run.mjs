@@ -20,6 +20,9 @@
  *   1 = throw 발생 (MissingApiKeyError 등)
  *   1 = 대상 전부 실패 (갱신 0건 + 에러 1건 이상) — `isTotalFailure` 판정. ca_cmhc 가 3개 도시
  *       전부 실패하면서도 exit 0 이라 결함이 수개월간 숨어 있었다 (ADR-078).
+ *
+ *   `warnings` 는 종료 코드에 영향 없음 — 결과값이 유효한(정적값·기존값) 출처 이상·품질 의심이므로
+ *   `::warning::` annotation 으로만 노출한다 (ADR-079).
  */
 
 import { isTotalFailure } from './_common.mjs';
@@ -85,8 +88,18 @@ try {
   const source = result?.source ?? moduleName;
   const cities = result?.cities ?? [];
   const errors = result?.errors ?? [];
+  const warnings = result?.warnings ?? [];
 
   console.log(`[${source}] updated ${cities.length} cities: ${cities.join(', ') || '(none)'}`);
+
+  if (warnings.length > 0) {
+    // 결과값은 유효하고 종료 코드에도 영향이 없다 (ADR-079). 출처가 조용히 죽는 것을 사람이 볼 수
+    // 있게 GitHub Actions 경고 annotation 으로 남긴다 — 로그 접힘과 무관하게 run 요약에 뜬다.
+    console.warn(`[${source}] ${warnings.length} warning(s)`);
+    for (const w of warnings) {
+      console.warn(`::warning title=${source}::${w.cityId}: ${w.reason}`);
+    }
+  }
 
   if (errors.length > 0) {
     // 부분 실패는 errors 에 기록되지만 종료 코드 0 — 다른 도시는 정상 갱신됐을 수 있음.

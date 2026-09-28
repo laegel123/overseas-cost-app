@@ -23,12 +23,19 @@ export type RefreshError = {
   reason: string;
 };
 
+/** 결과값은 유효하지만 출처 이상·품질 의심 (ADR-079). `isTotalFailure` 판정 대상 아님. */
+export type RefreshWarning = {
+  cityId: string;
+  reason: string;
+};
+
 export type RefreshResult = {
   source: string;
   cities: string[];
   fields: string[];
   changes: RefreshChange[];
   errors: RefreshError[];
+  warnings?: RefreshWarning[];
 };
 
 /** `_outlier.mjs::iterNumericFields` generator 가 yield 하는 entry. */

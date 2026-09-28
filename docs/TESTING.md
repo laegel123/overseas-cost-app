@@ -2988,6 +2988,9 @@ afterEach(() => {
 - [x] 갱신 0 + 에러 0건 → `false` (평상시 무변동 — 실패로 보면 refresh cron 이 전부 빨간불)
 - [x] 갱신 2 + 에러 1건 → `false` (부분 실패는 기존 정책대로 exit 0)
 - [x] 갱신 0 + 에러 1건 → `true` (경계)
+- [x] 갱신 0 + 에러 0 + **경고 3건** → `false` (2026-09-21 `ca_statcan` 실패가 경고로 옮겨진 뒤의 모습 — ADR-079)
+- [x] 갱신 0 + 에러 1 + **경고 2건** → `true` (경고가 진짜 실패를 가리지 않음 — ADR-079)
+- [x] `warnings` 필드 없음 (미이전 fetcher 의 기존 형태) → 기존 결과와 동일 (선택 필드 회귀 차단 — ADR-079)
 - [x] `undefined` / `null` / `{}` / `cities`·`errors` 가 배열이 아닌 값 → `false` (판정 불가를 실패로 단정하지 않음)
 
 #### `classifyChange(oldVal, newVal)` (in `_outlier.mjs`)
@@ -3047,7 +3050,7 @@ afterEach(() => {
 
 - [ ] **표준 인터페이스**: `default export async function refresh(): Promise<RefreshResult>`
 - [ ] **정상 fetch + transform**: API 응답 fixture → 우리 스키마로 변환 후 cities 파일 갱신
-- [ ] **반환 객체**: `{ source, cities[], fields[], changes[], errors[] }` 정확
+- [ ] **반환 객체**: `{ source, cities[], fields[], changes[], errors[], warnings?[] }` 정확 — `warnings` 는 선택 필드이고, 결과값이 유효한 경고는 `errors` 가 아니라 `warnings` 에 들어간다 (ADR-079 분류 규칙)
 - [ ] **변동 없음** (oldVal === newVal): changes 배열 비어 있음
 - [ ] **변동 있음**: changes 에 `{ cityId, field, oldValue, newValue, pctChange }` 정확
 - [ ] **HTTP 4xx**: 재시도 없이 errors 에 추가, 다른 도시는 계속
