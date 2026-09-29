@@ -129,6 +129,7 @@ export async function checkCbsApiStatus() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -139,7 +140,7 @@ export default async function refresh(opts = {}) {
   if (!opts.useStatic) {
     apiAvailable = await checkCbsApiStatus();
     if (!apiAvailable) {
-      errors.push({
+      warnings.push({
         cityId: 'amsterdam',
         reason: 'CBS API unavailable, using static values',
       });
@@ -241,5 +242,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

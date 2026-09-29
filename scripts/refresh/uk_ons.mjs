@@ -146,6 +146,7 @@ export function mapToGroceries(cpiData) {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -163,7 +164,7 @@ export default async function refresh(opts = {}) {
           rentData.set(field, value);
         }
       } catch (err) {
-        errors.push({
+        warnings.push({
           cityId: 'london',
           reason: `ONS rent fetch failed for ${field}: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`,
         });
@@ -177,7 +178,7 @@ export default async function refresh(opts = {}) {
           cpiData.set(field, value);
         }
       } catch (err) {
-        errors.push({
+        warnings.push({
           cityId: 'london',
           reason: `ONS CPI fetch failed for ${field}: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`,
         });
@@ -280,5 +281,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

@@ -73,6 +73,7 @@ export function getTransportFares() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -83,7 +84,7 @@ export default async function refresh(opts = {}) {
   if (!opts.useStatic) {
     pageAvailable = await checkRtaFarePage();
     if (!pageAvailable) {
-      errors.push({
+      warnings.push({
         cityId: 'all',
         reason: 'RTA fare page unavailable, using static values',
       });
@@ -153,5 +154,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

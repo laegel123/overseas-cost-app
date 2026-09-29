@@ -1,0 +1,40 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "refresh-warnings",
+  "steps": [
+    {
+      "step": 0,
+      "name": "warnings-contract",
+      "status": "completed",
+      "started_at": "2026-09-28T16:30:35+0900",
+      "summary": "RefreshWarning typedef + RefreshResult.warnings 선택 필드 (isTotalFailure 판정 불변), _run.mjs 가 `[src] N warning(s)` + `::warning title=<source>::<cityId>: <reason>` 출력 (종료 코드 무영향), ADR-079 + AUTOMATION §3·§7.1·§12 · TESTING §9-A.1·§9-A.2",
+      "completed_at": "2026-09-28T16:38:39+0900"
+    },
+    {
+      "step": 1,
+      "name": "fetchers-reachability",
+      "status": "completed",
+      "started_at": "2026-09-28T16:38:40+0900",
+      "summary": "W1 도달성 경고를 errors → warnings 로 이전 (15개 모듈: ae_fcsc·ae_rta·au_transit·de_destatis·de_transit·fr_insee·fr_ratp·jp_transit·nl_cbs·nl_gvb·sg_lta·uk_tfl·vn_gso·sg_singstat + visas). visas 는 console.info 강등을 warnings 로 통일 (getVisaForCity 반환 계약에 warnings 추가). 남긴 예외: Unknown city·Failed to read existing data·Write failed 는 errors 유지, visas fetchVisaFees 의 Unknown country 는 값을 못 내므로 errors 유지, visas.mjs 의 fetch 실패 상세 console.info 는 redact 된 디버깅 단서라 warnings 와 병존. 테스트 15개 파일 단언을 warnings + errors 빈 배열로 전환 (vn_gso 는 도달성 테스트 신규 추가), TESTING §9-A.6·9-A.7·9-A.8·9-A.9 인벤토리 갱신. dryRun 검증: 15개 모듈 전부 exit 0 (de_transit 2·vn_gso 1·ae_fcsc 1·sg_singstat 1·visas 6 warning), data/ diff 없음.",
+      "completed_at": "2026-09-28T16:50:46+0900"
+    },
+    {
+      "step": 2,
+      "name": "fetchers-fallback",
+      "status": "completed",
+      "started_at": "2026-09-28T16:50:47+0900",
+      "summary": "W2/W3 경고를 errors → warnings 로 이전 (12개 모듈). 옮김: ca_stm·ca_translink·ca_ttc·us_transit fare fetch 실패→static, kr_seoul_metro 메트로·택시 fetch/파싱 실패 4곳, ca_statcan API 실패+STATIC 도시·referencePeriod 추출 실패/허용 base 외·조회 실패·CPI≥145 의심 (console.warn('::warning::') 이중 출력 제거, CPI 의심 값 쓰기 동작 불변), us_bls 범위 밖·fetch 실패, au_abs·uk_ons CPI/rent fetch 실패 (fetch*Series 가 예외를 null 로 흡수해 현재 데드 경로), jp_estat rent 무응답, kr_molit 공개 지연 NO_DATA (WARN: 접두어 제거). 남김(errors): Unknown city·Failed to read existing data·Write failed, ca_statcan STATIC 없는 도시, kr_molit 구 단위 fetch 실패, universities No tuition data. universities 판정: 페이지 fetch 실패는 staticAnnual 이 그대로 들어가 값이 유효 → warnings, getTuitionForCity 의 Unknown city 는 errors — 둘 다 {cityId, reason} 객체로 정리. 테스트: 옮긴 경로 warnings + errors 빈 배열 단언, ca_statcan 'API 실패 + STATIC 도시 → 갱신 0 이어도 isTotalFailure false' 로 2026-09-21 회귀 고정, uk_ons·au_abs 신규 실패 케이스는 재시도 backoff 누적 타임아웃 회피 위해 404 모킹. TESTING §9-A.3·9-A.4·9-A.5·9-A.6·9-A.8·9-A.9 갱신. dryRun: 10개 전부 exit 0 (ca_stm 1·kr_seoul_metro 2·ca_statcan 2 warning), data/ diff 없음.",
+      "completed_at": "2026-09-29T08:37:24+0900"
+    },
+    {
+      "step": 3,
+      "name": "workflow-gate",
+      "status": "completed",
+      "started_at": "2026-09-29T08:37:24+0900",
+      "summary": "6개 refresh-*.yml 의 _run.mjs 실행 step 에 id:<module> + continue-on-error:true (fx 1·prices 4·rent 13·transit 13·tuition 1·visa 1 = 33, API 키 skip 안내 step 은 제외), 마지막 step 'Fail if any fetcher failed' (if: always()) 가 env FETCHER_OUTCOMES 로 <module>=${{ steps.<module>.outcome }} 목록을 받아 셸에서 failure 만 골라 ::error title=<module>:: 나열 후 exit 1 (skipped 는 실패 아님), build·validate·detect_outliers·PR·commit 은 continue-on-error 없음, SHA pin·push retry·cron·concurrency 불변. integration.test.ts 3케이스 추가 (fetcher step id+continue-on-error / 마지막 step 이 모든 fetcher id outcome 참조하는 always() 게이트 / build·validate·detect_outliers 에 continue-on-error 부재) — 게이트 id 누락·continue-on-error 누락 mutation 으로 실패 확인. AUTOMATION §4.5d 신설·§7.1 최종 동작 표·§12, TESTING §9-A.13, ADR-079 게이트 절 보완. @action-validator/cli 6개 파일 통과 (actionlint 미설치로 생략). §4 dryRun 순회 33개: exit 1 = kr_kca·kr_kosis·us_bls·kr_molit·us_census (API 키 부재 throw — 워크플로우에선 skip) + us_hud (HUD 403, 5개 도시 전부 실패) 뿐, 나머지 27개 exit 0 (경고: ca_statcan 2·de_destatis 1·vn_gso 1·ae_fcsc 1·kr_seoul_metro 2·ca_stm 1·de_transit 2·fr_ratp 1·nl_gvb 1·sg_lta 1) — 경고만으로 exit 1 인 fetcher 없음 (step 1·2 누락 없음). data/ diff 없음.",
+      "completed_at": "2026-09-29T08:45:35+0900"
+    }
+  ],
+  "created_at": "2026-09-28T16:30:35+0900",
+  "completed_at": "2026-09-29T08:45:35+0900"
+}

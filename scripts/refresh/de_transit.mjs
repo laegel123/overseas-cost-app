@@ -106,6 +106,7 @@ export async function checkMvvFarePage() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -115,13 +116,13 @@ export default async function refresh(opts = {}) {
   if (!opts.useStatic) {
     const [bvgOk, mvvOk] = await Promise.all([checkBvgFarePage(), checkMvvFarePage()]);
     if (!bvgOk) {
-      errors.push({
+      warnings.push({
         cityId: 'berlin',
         reason: 'BVG fare page unavailable, using static values',
       });
     }
     if (!mvvOk) {
-      errors.push({
+      warnings.push({
         cityId: 'munich',
         reason: 'MVV fare page unavailable, using static values',
       });
@@ -197,5 +198,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

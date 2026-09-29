@@ -159,7 +159,7 @@ export function buildSource(cityId) {
  * 대학 페이지 도달 가능성(reachability) 체크 — v1.0 에서는 파싱 미구현.
  *
  * `fetchedFromPage` 가 true 라도 HTML 파싱은 하지 않으며, 항상 university.staticAnnual 을 반환한다.
- * 페이지 응답이 200 인지를 확인하는 의미만 가진다 (대학 사이트 다운 시 errors 에 기록).
+ * 페이지 응답이 200 인지를 확인하는 의미만 가진다 (대학 사이트 다운 시 warnings 에 기록).
  *
  * TODO(v1.x): 학교별 selector 정의 후 실제 학비 추출. 현재는 "갱신 자동화" 의 첫 단계로
  * fetcher 골조와 sources.accessedAt 갱신만 맞춰 둠 — ADR-032 의 자동 fetch 정책에 맞춘
@@ -186,19 +186,24 @@ export async function fetchUniversityTuition(university) {
 }
 
 /**
- * 도시별 tuition 배열 생성
+ * 도시별 tuition 배열 생성.
+ *
+ * 페이지 fetch 실패는 `staticAnnual` 이 그대로 tuition 에 들어가므로 **결과값이 유효** →
+ * `warnings`. 대학 레지스트리에 없는 도시는 낼 값이 없으므로 `errors` (ADR-079).
+ *
  * @param {string} cityId
  * @param {{useStatic?: boolean}} [opts]
- * @returns {Promise<{tuition: Array<{school: string, level: string, annual: number}>, errors: string[]}>}
+ * @returns {Promise<{tuition: Array<{school: string, level: string, annual: number}>, errors: import('./_common.mjs').RefreshError[], warnings: import('./_common.mjs').RefreshWarning[]}>}
  */
 export async function getTuitionForCity(cityId, opts = {}) {
   const universities = UNIVERSITY_REGISTRY[cityId];
   if (!universities) {
-    return { tuition: [], errors: [`Unknown city: ${cityId}`] };
+    return { tuition: [], errors: [{ cityId, reason: `Unknown city: ${cityId}` }], warnings: [] };
   }
 
   const tuition = [];
   const errors = [];
+  const warnings = [];
 
   for (const uni of universities) {
     if (opts.useStatic) {
@@ -207,12 +212,12 @@ export async function getTuitionForCity(cityId, opts = {}) {
       const result = await fetchUniversityTuition(uni);
       tuition.push({ school: result.school, level: result.level, annual: result.annual });
       if (!result.fetchedFromPage) {
-        errors.push(`${uni.school}: page fetch failed, using static value`);
+        warnings.push({ cityId, reason: `${uni.school}: page fetch failed, using static value` });
       }
     }
   }
 
-  return { tuition, errors };
+  return { tuition, errors, warnings };
 }
 
 /**
@@ -226,6 +231,7 @@ export async function getTuitionForCity(cityId, opts = {}) {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -239,11 +245,12 @@ export default async function refresh(opts = {}) {
       continue;
     }
 
-    const { tuition, errors: tuitionErrors } = await getTuitionForCity(cityId, { useStatic: opts.useStatic });
+    const { tuition, errors: tuitionErrors, warnings: tuitionWarnings } = await getTuitionForCity(cityId, {
+      useStatic: opts.useStatic,
+    });
 
-    for (const err of tuitionErrors) {
-      errors.push({ cityId, reason: err });
-    }
+    errors.push(...tuitionErrors);
+    warnings.push(...tuitionWarnings);
 
     if (tuition.length === 0) {
       errors.push({ cityId, reason: 'No tuition data found' });
@@ -311,5 +318,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

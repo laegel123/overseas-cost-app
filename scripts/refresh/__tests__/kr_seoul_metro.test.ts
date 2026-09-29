@@ -186,7 +186,7 @@ describe('refresh (integration)', () => {
     expect(fs.existsSync(seoulPath)).toBe(false);
   });
 
-  it('fetch 실패: 정적 fallback 사용 + errors 기록', async () => {
+  it('fetch 실패: 정적 fallback 사용 + warnings 기록 (errors 는 비어 있음)', async () => {
     fetchSpy.mockResolvedValue({
       ok: false,
       status: 400,
@@ -195,8 +195,9 @@ describe('refresh (integration)', () => {
     const result = await refreshKrSeoulMetro({ dryRun: true });
 
     expect(result.changes.length).toBeGreaterThan(0);
-    expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]?.reason).toContain('fallback');
+    expect((result.warnings ?? []).length).toBeGreaterThan(0);
+    expect((result.warnings ?? [])[0]?.reason).toContain('fallback');
+    expect(result.errors).toEqual([]);
   }, 15000);
 
   it('빈 HTML 응답: 정적 fallback 사용', async () => {
@@ -274,7 +275,7 @@ describe('refresh (integration)', () => {
     expect(Array.isArray(result.errors)).toBe(true);
   });
 
-  it('HTTP 4xx: errors에 추가, 정적 fallback 사용', async () => {
+  it('HTTP 4xx: warnings에 추가, 정적 fallback 사용', async () => {
     fetchSpy.mockResolvedValue({
       ok: false,
       status: 400,
@@ -282,6 +283,7 @@ describe('refresh (integration)', () => {
 
     const result = await refreshKrSeoulMetro({ dryRun: true });
 
-    expect(result.errors.length).toBeGreaterThan(0);
+    expect((result.warnings ?? []).length).toBeGreaterThan(0);
+    expect(result.errors).toEqual([]);
   });
 });

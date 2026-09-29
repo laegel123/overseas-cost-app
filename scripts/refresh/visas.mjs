@@ -7,7 +7,7 @@
  * API 키: 불필요 (페이지 scraping)
  *
  * 방법: 각국 정부 비자 페이지 HTML fetch → 정규식/static 매핑 → visa{} 객체 생성
- * 한계: 페이지 구조 변경 시 static fallback + errors (silent fail 금지)
+ * 한계: 페이지 구조 변경 시 static fallback + warnings (ADR-079, silent fail 금지)
  *
  * **현재 상태 (v1.0)**: 페이지 fetch 는 도달 가능성(reachability) 확인 용도이며,
  * HTML 파싱은 미구현 — 모든 도시가 VISA_REGISTRY 의 static 값을 사용한다.
@@ -163,7 +163,7 @@ export function buildSource(cityId) {
  * 국가 비자 페이지 도달 가능성(reachability) 체크 — v1.0 에서는 파싱 미구현.
  *
  * `fetchedFromPage` 가 true 라도 HTML 파싱은 하지 않으며, 항상 VISA_REGISTRY 의 static 값을 반환한다.
- * 페이지 응답이 200 인지를 확인하는 의미만 가진다 (정부 사이트 다운 시 errors 에 기록).
+ * 페이지 응답이 200 인지를 확인하는 의미만 가진다 (정부 사이트 다운 시 warnings 에 기록).
  *
  * TODO(v1.x): 국가별 selector 정의 후 실제 fee 추출. 현재는 "갱신 자동화" 의 첫 단계로
  * fetcher 골조와 sources.accessedAt 갱신만 맞춰 둠 — ADR-032 의 자동 fetch 정책에 맞춘
@@ -219,20 +219,21 @@ export async function fetchVisaFees(countryCode) {
  * 도시별 visa 객체 생성
  * @param {string} cityId
  * @param {{useStatic?: boolean}} [opts]
- * @returns {Promise<{visa: {studentApplicationFee: number, workApplicationFee: number, settlementApprox: number} | null, errors: string[]}>}
+ * @returns {Promise<{visa: {studentApplicationFee: number, workApplicationFee: number, settlementApprox: number} | null, errors: string[], warnings: string[]}>}
  */
 export async function getVisaForCity(cityId, opts = {}) {
   const countryCode = CITY_TO_COUNTRY[cityId];
   if (!countryCode) {
-    return { visa: null, errors: [`Unknown city: ${cityId}`] };
+    return { visa: null, errors: [`Unknown city: ${cityId}`], warnings: [] };
   }
 
   const registry = VISA_REGISTRY[countryCode];
   if (!registry) {
-    return { visa: null, errors: [`No visa data for country: ${countryCode}`] };
+    return { visa: null, errors: [`No visa data for country: ${countryCode}`], warnings: [] };
   }
 
   const errors = [];
+  const warnings = [];
 
   if (opts.useStatic) {
     return {
@@ -242,6 +243,7 @@ export async function getVisaForCity(cityId, opts = {}) {
         settlementApprox: registry.settlementApprox,
       },
       errors,
+      warnings,
     };
   }
 
@@ -250,12 +252,12 @@ export async function getVisaForCity(cityId, opts = {}) {
     errors.push(result.error);
   }
   // v1.0: HTML 파싱 미구현 — fetchedFromPage:false 든 true 든 동일 static 값 반환.
-  // 정부 사이트의 봇 차단으로 reachability 가 실패하는 게 정상이라 errors 에 기록하지 않고 info 로그만.
+  // 값이 유효한 도달성 경고이므로 errors 가 아니라 warnings 로 보고한다 (ADR-079).
   if (!result.fetchedFromPage) {
-    console.info(`[visas] ${countryCode}: page unreachable, using static value`);
+    warnings.push(`${countryCode}: page unreachable, using static value`);
   }
 
-  return { visa: result.visa, errors };
+  return { visa: result.visa, errors, warnings };
 }
 
 /**
@@ -269,6 +271,7 @@ export async function getVisaForCity(cityId, opts = {}) {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -282,10 +285,15 @@ export default async function refresh(opts = {}) {
       continue;
     }
 
-    const { visa, errors: visaErrors } = await getVisaForCity(cityId, { useStatic: opts.useStatic });
+    const { visa, errors: visaErrors, warnings: visaWarnings } = await getVisaForCity(cityId, {
+      useStatic: opts.useStatic,
+    });
 
     for (const err of visaErrors) {
       errors.push({ cityId, reason: err });
+    }
+    for (const warning of visaWarnings) {
+      warnings.push({ cityId, reason: warning });
     }
 
     if (!visa) {
@@ -342,5 +350,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

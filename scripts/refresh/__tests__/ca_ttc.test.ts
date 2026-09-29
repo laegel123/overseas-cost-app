@@ -134,13 +134,14 @@ describe('refresh (integration)', () => {
     expect(fs.existsSync(torontoPath)).toBe(false);
   }, 30000);
 
-  it('fetch 실패: 정적 fallback + errors', async () => {
+  it('fetch 실패: 정적 fallback + warnings (errors 는 비어 있음)', async () => {
     fetchSpy.mockRejectedValue(new Error('Network error'));
 
     const result = await refreshCaTtc({ dryRun: true });
 
-    expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]?.reason).toContain('static fallback');
+    expect((result.warnings ?? []).length).toBeGreaterThan(0);
+    expect((result.warnings ?? [])[0]?.reason).toContain('static fallback');
+    expect(result.errors).toEqual([]);
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 

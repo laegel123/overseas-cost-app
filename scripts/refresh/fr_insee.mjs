@@ -128,6 +128,7 @@ export async function checkInseeApiStatus() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -138,7 +139,7 @@ export default async function refresh(opts = {}) {
   if (!opts.useStatic) {
     apiAvailable = await checkInseeApiStatus();
     if (!apiAvailable) {
-      errors.push({
+      warnings.push({
         cityId: 'paris',
         reason: 'INSEE API unavailable, using static values',
       });
@@ -240,5 +241,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

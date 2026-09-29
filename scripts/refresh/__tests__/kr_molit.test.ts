@@ -248,7 +248,7 @@ describe('refresh (integration)', () => {
     expect(result.errors[0]?.reason).toContain('API key');
   }, 30000);
 
-  it('매물 0건: errors 추가 + 빈 cities', async () => {
+  it('매물 0건 (공개 지연): warnings 추가 + 빈 cities, errors 는 비어 있음', async () => {
     const emptyXml = `<resultCode>00</resultCode><body><items></items></body>`;
     fetchSpy.mockResolvedValue({
       ok: true,
@@ -259,8 +259,10 @@ describe('refresh (integration)', () => {
     const result = await refreshKrMolit({ dryRun: true });
 
     expect(result.cities).toHaveLength(0);
-    expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]?.reason).toContain('No rental data');
+    expect((result.warnings ?? []).length).toBeGreaterThan(0);
+    expect((result.warnings ?? [])[0]?.reason).toContain('No rental data');
+    expect((result.warnings ?? [])[0]?.reason).not.toContain('WARN:');
+    expect(result.errors).toEqual([]);
   }, 30000);
 
   it('일부 자치구 실패: 나머지 정상 처리', async () => {

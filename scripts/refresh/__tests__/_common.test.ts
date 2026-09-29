@@ -579,6 +579,36 @@ describe('isTotalFailure (ADR-078)', () => {
     expect(isTotalFailure({ ...base, errors: [noRentData('montreal')] })).toBe(true);
   });
 
+  it('갱신 0 + 에러 0 + 경고 3건 → false (2026-09-21 ca_statcan 실패가 경고로 옮겨진 뒤의 모습)', () => {
+    const result: RefreshResult = {
+      ...base,
+      warnings: [
+        { cityId: 'vancouver', reason: 'StatCan API 실패, 정적값 사용' },
+        { cityId: 'toronto', reason: 'StatCan API 실패, 정적값 사용' },
+        { cityId: 'montreal', reason: 'StatCan API 실패, 정적값 사용' },
+      ],
+    };
+    expect(isTotalFailure(result)).toBe(false);
+  });
+
+  it('갱신 0 + 에러 1 + 경고 2건 → true (경고가 진짜 실패를 가리지 않음)', () => {
+    const result: RefreshResult = {
+      ...base,
+      errors: [noRentData('montreal')],
+      warnings: [
+        { cityId: 'vancouver', reason: 'StatCan API 실패, 정적값 사용' },
+        { cityId: 'toronto', reason: 'StatCan API 실패, 정적값 사용' },
+      ],
+    };
+    expect(isTotalFailure(result)).toBe(true);
+  });
+
+  it('warnings 필드 없음 (미이전 fetcher 의 기존 형태) → 기존 결과와 동일', () => {
+    expect('warnings' in base).toBe(false);
+    expect(isTotalFailure(base)).toBe(false);
+    expect(isTotalFailure({ ...base, errors: [noRentData('montreal')] })).toBe(true);
+  });
+
   it('undefined / null / {} / cities 가 배열이 아닌 값 → false (판정 불가를 실패로 단정 안 함)', () => {
     expect(isTotalFailure(undefined)).toBe(false);
     expect(isTotalFailure(null)).toBe(false);

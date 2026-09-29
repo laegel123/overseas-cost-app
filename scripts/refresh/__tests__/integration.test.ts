@@ -274,6 +274,54 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
+  // ADR-079 워크플로우 게이트 — fetcher step 을 continue-on-error 로 격리하고 마지막 게이트가
+  // 실패를 집계한다. step 은 `      - name:` 줄 단위로 분할 (jobs.refresh.steps 들여쓰기 고정).
+  const splitSteps = (content: string): string[] =>
+    content.split(/^(?=      - name: )/m).slice(1);
+  const fetcherIdOf = (step: string): string | null =>
+    step.match(/^\s+run: node scripts\/refresh\/_run\.mjs (\w+)/m)?.[1] ?? null;
+
+  it('_run.mjs 를 run 하는 step 은 id: <module> + continue-on-error: true 로 격리', () => {
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      const fetchers = splitSteps(content).filter((s) => fetcherIdOf(s) !== null);
+      expect(fetchers.length).toBeGreaterThan(0);
+      for (const step of fetchers) {
+        expect(step).toMatch(new RegExp(`^\\s+id: ${fetcherIdOf(step)}$`, 'm'));
+        expect(step).toMatch(/^\s+continue-on-error: true$/m);
+      }
+    }
+  });
+
+  it('마지막 step 은 if: always() 게이트이고 모든 fetcher step id 의 outcome 을 참조', () => {
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      const steps = splitSteps(content);
+      const gate = steps[steps.length - 1]!;
+      expect(gate).toMatch(/^      - name: Fail if any fetcher failed$/m);
+      expect(gate).toMatch(/^\s+if: always\(\)$/m);
+      expect(gate).toContain('exit 1');
+      const ids = steps.map(fetcherIdOf).filter((id): id is string => id !== null);
+      for (const id of ids) {
+        // continue-on-error step 의 conclusion 은 항상 success — outcome 을 봐야 실패가 보인다.
+        expect(gate).toContain(`\${{ steps.${id}.outcome }}`);
+      }
+    }
+  });
+
+  it('build / validate / detect_outliers step 에는 continue-on-error 없음 (스키마 위반 fail-fast)', () => {
+    for (const workflow of REFRESH_WORKFLOWS) {
+      const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
+      const guarded = splitSteps(content).filter((s) =>
+        /node scripts\/(build_data|validate_cities|detect_outliers)\.mjs/.test(s),
+      );
+      expect(guarded).toHaveLength(3);
+      for (const step of guarded) {
+        expect(step).not.toContain('continue-on-error');
+      }
+    }
+  });
+
   // GitHub Actions 기본 timeout (360분/6시간) 으로 hang 시 분 소모 + 다음
   // cron 대기. 합리적 범위 (5~60분) 안에 설정되어 있어야 함. 누락 회귀 차단.
   it('각 워크플로우의 jobs.refresh 에 timeout-minutes 가 합리적 범위(5~60)로 설정', () => {

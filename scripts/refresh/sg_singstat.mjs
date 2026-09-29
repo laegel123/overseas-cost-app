@@ -87,7 +87,7 @@ export const SOURCE_FOOD = {
 /**
  * SingStat API 상태 체크 — reachability 만 확인.
  *
- * **v1.0 한계**: 본 함수의 반환값은 `refresh()` 내에서 errors 기록 +
+ * **v1.0 한계**: 본 함수의 반환값은 `refresh()` 내에서 warnings 기록 (ADR-079) +
  * 가용성 로깅 목적으로만 사용되며, **STATIC vs API 분기에 wire up 되지 않는다**. 즉 `apiAvailable`
  * 가 `true` 여도 도시 JSON 에는 항상 STATIC_RENT / STATIC_GROCERIES 가 적재된다 (헤더 주석 참조).
  * v1.x 응답 단위 검증 후 실제 분기에 연결.
@@ -172,6 +172,7 @@ export function mapToGroceries() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -185,14 +186,14 @@ export default async function refresh(opts = {}) {
   // v1.x 응답 단위 검증 후 본 분기에서 STATIC 대체.
   if (!opts.useStatic) {
     if (!apiKey) {
-      errors.push({
+      warnings.push({
         cityId: 'all',
         reason: 'SG_DATA_GOV_KEY environment variable not set, using static values',
       });
     } else {
       const apiAvailable = await checkSingStatStatus();
       if (!apiAvailable) {
-        errors.push({
+        warnings.push({
           cityId: 'all',
           reason: 'SingStat API unavailable, using static values',
         });
@@ -297,5 +298,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

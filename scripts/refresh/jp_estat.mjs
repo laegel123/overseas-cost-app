@@ -116,7 +116,7 @@ export async function fetchEstatData(statsDataId, areaCode, appId) {
     return parseEstatValue(data);
   } catch (err) {
     // CLAUDE.md "silent fail 금지" — 예외 원인 (timeout / 5xx / JSON 파싱 실패) 을 log 로 보존.
-    // 호출자(refresh)는 null 을 받아 errors 에 cityId 단위로 기록하므로 여기서 throw 하지 않고
+    // 호출자(refresh)는 null 을 받아 warnings 에 cityId 단위로 기록하므로 여기서 throw 하지 않고
     // graceful degradation 유지. URL 의 appId 는 redactErrorMessage 로 마스킹.
     console.warn(
       `[jp_estat] fetchEstatData ${statsDataId}/${areaCode} failed: ${redactErrorMessage(String(err?.message ?? 'unknown'))}`,
@@ -159,6 +159,7 @@ export function mapToGroceries() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -182,7 +183,7 @@ export default async function refresh(opts = {}) {
       // v1.0: e-Stat 응답을 sample 로만 수집 (응답 스케일 검증은 v1.x). 도시 JSON 에 반영 안 됨.
       const rentVal = await fetchEstatData(ESTAT_STATS_ID.rent, config.estatArea, appId);
       if (rentVal === null) {
-        errors.push({ cityId, reason: `e-Stat rent API returned no data for area ${config.estatArea}; using static` });
+        warnings.push({ cityId, reason: `e-Stat rent API returned no data for area ${config.estatArea}; using static` });
       } else {
         console.info(`[jp_estat] ${cityId}: e-Stat rent sample=${rentVal} (not wired to STATIC in v1.0)`);
       }
@@ -277,5 +278,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

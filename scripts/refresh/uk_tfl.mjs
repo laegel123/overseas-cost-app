@@ -82,6 +82,7 @@ export async function checkTflApiStatus() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -92,7 +93,7 @@ export default async function refresh(opts = {}) {
   if (!opts.useStatic) {
     apiAvailable = await checkTflApiStatus();
     if (!apiAvailable) {
-      errors.push({
+      warnings.push({
         cityId: 'london',
         reason: 'TfL API unavailable, using static values',
       });
@@ -165,5 +166,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

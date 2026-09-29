@@ -40,55 +40,81 @@ jobs:
 
       # Korea - Seoul Metro (no key required)
       - name: Refresh KR Seoul Metro
+        id: kr_seoul_metro
         run: node scripts/refresh/_run.mjs kr_seoul_metro
+        continue-on-error: true
 
       # Canada - TransLink (no key required)
       - name: Refresh CA TransLink
+        id: ca_translink
         run: node scripts/refresh/_run.mjs ca_translink
+        continue-on-error: true
 
       # Canada - TTC (no key required)
       - name: Refresh CA TTC
+        id: ca_ttc
         run: node scripts/refresh/_run.mjs ca_ttc
+        continue-on-error: true
 
       # Canada - STM (no key required)
       - name: Refresh CA STM
+        id: ca_stm
         run: node scripts/refresh/_run.mjs ca_stm
+        continue-on-error: true
 
       # US - Transit (MTA/LA Metro/SFMTA/King County/MBTA)
       - name: Refresh US Transit
+        id: us_transit
         run: node scripts/refresh/_run.mjs us_transit
+        continue-on-error: true
 
       # UK - TfL (no key required)
       - name: Refresh UK TfL
+        id: uk_tfl
         run: node scripts/refresh/_run.mjs uk_tfl
+        continue-on-error: true
 
       # Germany - Transit (BVG/MVV)
       - name: Refresh DE Transit
+        id: de_transit
         run: node scripts/refresh/_run.mjs de_transit
+        continue-on-error: true
 
       # France - RATP (no key required)
       - name: Refresh FR RATP
+        id: fr_ratp
         run: node scripts/refresh/_run.mjs fr_ratp
+        continue-on-error: true
 
       # Netherlands - GVB (no key required)
       - name: Refresh NL GVB
+        id: nl_gvb
         run: node scripts/refresh/_run.mjs nl_gvb
+        continue-on-error: true
 
       # Australia - Transit (Transport NSW/PTV)
       - name: Refresh AU Transit
+        id: au_transit
         run: node scripts/refresh/_run.mjs au_transit
+        continue-on-error: true
 
       # Japan - Transit (Tokyo Metro/Osaka Metro)
       - name: Refresh JP Transit
+        id: jp_transit
         run: node scripts/refresh/_run.mjs jp_transit
+        continue-on-error: true
 
       # Singapore - LTA (no key required)
       - name: Refresh SG LTA
+        id: sg_lta
         run: node scripts/refresh/_run.mjs sg_lta
+        continue-on-error: true
 
       # UAE - RTA Dubai (no key required)
       - name: Refresh AE RTA
+        id: ae_rta
         run: node scripts/refresh/_run.mjs ae_rta
+        continue-on-error: true
 
       - name: Build data
         run: node scripts/build_data.mjs
@@ -153,3 +179,36 @@ jobs:
           done
           echo "::error::push failed after 3 attempts"
           exit 1
+
+      # 게이트 — fetcher step 은 continue-on-error 로 격리돼 하나가 실패해도 나머지 fetcher·build·
+      # validate·PR/commit 이 진행된다 (ADR-079). 실패를 숨기지 않도록 마지막에 outcome 을 집계해
+      # 실패 모듈을 ::error:: 로 나열하고 job 을 빨간불로 만든다. continue-on-error step 의
+      # conclusion 은 항상 success 라 outcome 을 본다. skip 된 step 은 outcome=skipped (실패 아님).
+      - name: Fail if any fetcher failed
+        if: always()
+        env:
+          FETCHER_OUTCOMES: >-
+            kr_seoul_metro=${{ steps.kr_seoul_metro.outcome }}
+            ca_translink=${{ steps.ca_translink.outcome }}
+            ca_ttc=${{ steps.ca_ttc.outcome }}
+            ca_stm=${{ steps.ca_stm.outcome }}
+            us_transit=${{ steps.us_transit.outcome }}
+            uk_tfl=${{ steps.uk_tfl.outcome }}
+            de_transit=${{ steps.de_transit.outcome }}
+            fr_ratp=${{ steps.fr_ratp.outcome }}
+            nl_gvb=${{ steps.nl_gvb.outcome }}
+            au_transit=${{ steps.au_transit.outcome }}
+            jp_transit=${{ steps.jp_transit.outcome }}
+            sg_lta=${{ steps.sg_lta.outcome }}
+            ae_rta=${{ steps.ae_rta.outcome }}
+        run: |
+          failed=""
+          for pair in $FETCHER_OUTCOMES; do
+            if [ "${pair#*=}" = "failure" ]; then failed="$failed ${pair%%=*}"; fi
+          done
+          if [ -n "$failed" ]; then
+            for m in $failed; do echo "::error title=$m::fetcher $m failed (exit 1) — 해당 step 로그 확인"; done
+            echo "::error::failed fetchers:$failed"
+            exit 1
+          fi
+          echo "All fetchers succeeded or were skipped."

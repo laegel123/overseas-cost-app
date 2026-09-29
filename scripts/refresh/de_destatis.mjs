@@ -162,6 +162,7 @@ export async function checkDestatisApiStatus() {
  */
 export default async function refresh(opts = {}) {
   const errors = [];
+  const warnings = [];
   const changes = [];
   const fields = [];
   const updatedCities = [];
@@ -172,7 +173,7 @@ export default async function refresh(opts = {}) {
   if (!opts.useStatic) {
     apiAvailable = await checkDestatisApiStatus();
     if (!apiAvailable) {
-      errors.push({
+      warnings.push({
         cityId: 'all',
         reason: 'Destatis GENESIS API unavailable, using static values',
       });
@@ -274,5 +275,6 @@ export default async function refresh(opts = {}) {
     fields: [...new Set(fields)],
     changes,
     errors,
+    warnings,
   };
 }

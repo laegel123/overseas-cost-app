@@ -34,7 +34,9 @@ jobs:
         run: npm ci
 
       - name: Refresh FX backup fallback
+        id: fx_backup
         run: node scripts/refresh/_run.mjs fx_backup
+        continue-on-error: true
 
       - name: Build data
         run: node scripts/build_data.mjs
@@ -99,3 +101,24 @@ jobs:
           done
           echo "::error::push failed after 3 attempts"
           exit 1
+
+      # 게이트 — fetcher step 은 continue-on-error 로 격리돼 하나가 실패해도 나머지 fetcher·build·
+      # validate·PR/commit 이 진행된다 (ADR-079). 실패를 숨기지 않도록 마지막에 outcome 을 집계해
+      # 실패 모듈을 ::error:: 로 나열하고 job 을 빨간불로 만든다. continue-on-error step 의
+      # conclusion 은 항상 success 라 outcome 을 본다. skip 된 step 은 outcome=skipped (실패 아님).
+      - name: Fail if any fetcher failed
+        if: always()
+        env:
+          FETCHER_OUTCOMES: >-
+            fx_backup=${{ steps.fx_backup.outcome }}
+        run: |
+          failed=""
+          for pair in $FETCHER_OUTCOMES; do
+            if [ "${pair#*=}" = "failure" ]; then failed="$failed ${pair%%=*}"; fi
+          done
+          if [ -n "$failed" ]; then
+            for m in $failed; do echo "::error title=$m::fetcher $m failed (exit 1) — 해당 step 로그 확인"; done
+            echo "::error::failed fetchers:$failed"
+            exit 1
+          fi
+          echo "All fetchers succeeded or were skipped."

@@ -119,11 +119,21 @@ export interface RefreshResult {
     pctChange: number; // 변동률 (0.05 = 5%)
   }>;
   errors: Array<{ cityId: string; reason: string }>;
+  warnings?: Array<{ cityId: string; reason: string }>; // 선택 — ADR-079
 }
 
 // 모든 스크립트 default export:
 export default async function refresh(): Promise<RefreshResult>;
 ```
+
+**`errors` vs `warnings` 분류 규칙 (ADR-079, 단일 기준):**
+
+| 채널 | 의미 | 예 | 종료 코드 영향 |
+| --- | --- | --- | --- |
+| `errors` | 그 도시에 대해 **신뢰할 수 있는 값을 내지 못함** | 대체값(STATIC) 없음, Unknown city, 기존 파일 읽기 실패, write 실패, 파싱 실패 후 대체 경로 없음 | `isTotalFailure` 대상 — 전부 실패면 exit 1 |
+| `warnings` | 결과값은 유효(정적값·기존값·실값)하지만 **출처 이상 또는 품질 의심** | 도달성 확인 실패(값은 원래 STATIC), 실 fetch 실패 → STATIC 대체, 보조 호출 실패, 데이터 품질 의심 | 없음. `_run.mjs` 가 `::warning title=<source>::<cityId>: <reason>` 으로 노출 |
+
+`warnings` 는 **선택 필드**다 — `_run.mjs` 는 `result?.warnings ?? []` 로 읽는다. 결과값이 유효한 경고를 `errors` 에 담으면 정적값이 main 과 같아 `cities=0` 일 때 `isTotalFailure` 가 정상 동작을 실패로 오인한다 (2026-09-21 `ca_statcan`).
 
 공통 헬퍼 (`_common.mjs` / `_outlier.mjs`):
 
@@ -138,6 +148,7 @@ export async function writeCity(id, data, source): Promise<void>; // sources 자
 //    출처명 변경 시 구/신 항목이 중복 누적되는 것을 막는다. 데이터에는 기록되지 않는다.
 export function hasLegacySourceName(sources, source): boolean; // 이름 이전이 남았는지 판정
 export function isTotalFailure(result): boolean; // 갱신 0건 + 에러 1건 이상 = 대상 전부 실패
+//  - warnings 는 판정 대상이 아니다 (애초에 errors 에 없으므로 자연히 빠진다 — ADR-079)
 
 // _outlier.mjs — classifyChange 는 oldVal/newVal 두 인자를 받아 분기 분류
 export function classifyChange(
@@ -152,6 +163,7 @@ export function classifyChange(
 - **에러 0건은 항상 exit 0** — 값 변동이 없어 `cities` 가 비는 것은 대부분 fetcher 의 평상시 정상 상태다. 이를 실패로 보면 모든 refresh 워크플로우가 빨간불이 된다.
 - **대상 전부 실패(갱신 0건 + 에러 1건 이상)는 exit 1** — `_common.mjs` 의 `isTotalFailure(result)` 가 판정하고, `_run.mjs` 가 도시별 `reason` 목록을 출력한 뒤 `process.exit(1)`. 워크플로우 step 이 실패하므로 운영자에게 GitHub 기본 알림이 간다 (§7.3).
 - **throw 는 exit 1** — `MissingApiKeyError` 등 fetcher 가 던진 예외.
+- **`warnings` 는 종료 코드에 무영향** — 결과값이 유효한 출처 이상·품질 의심이므로 건수 요약(`[src] N warning(s)`) + 도시별 `::warning::` annotation 으로만 노출한다 (ADR-079).
 
 전부 실패를 구분하는 이유: `ca_cmhc` 가 잘못된 StatCan 벡터로 3개 도시 **전부** 실패하면서도 `errors` 배열에만 기록해 exit 0 으로 끝났고, 월 1회 cron 이 매번 초록불이라 "도입 이래 한 번도 동작한 적 없는 fetcher" 가 수개월간 보이지 않았다 (ADR-078).
 
@@ -352,6 +364,31 @@ PR 환경 (fork 의 PR 등) 에서 secrets 노출 안 됨:
 - 키 없는 source 는 **skip + warning** (워크플로우 fail 안 함)
 - main branch 의 scheduled trigger 에서는 secrets 항상 가용
 
+### 4.5d fetcher step 격리 + 실패 집계 게이트 (ADR-079)
+
+fetcher 하나의 exit 1 이 뒤의 fetcher·build·validate·PR/commit 을 통째로 skip 시키지 않도록, `_run.mjs` 를 실행하는 **모든 step** 은 격리한다. 마지막 step 이 실패를 모아 빨간불로 만든다 — 성공한 fetcher 의 결과는 PR/커밋으로 반영되고 실패는 숨지 않는다.
+
+```yaml
+- name: Refresh US HUD
+  id: us_hud                       # 모듈명 그대로 (워크플로우 내 유일)
+  run: node scripts/refresh/_run.mjs us_hud
+  continue-on-error: true
+# … build → validate → detect_outliers → PR/commit (continue-on-error 없음) …
+- name: Fail if any fetcher failed  # 항상 마지막 step
+  if: always()
+  env:
+    FETCHER_OUTCOMES: >-
+      ca_cmhc=${{ steps.ca_cmhc.outcome }}
+      us_hud=${{ steps.us_hud.outcome }}
+  run: |
+    # outcome == failure 인 모듈을 ::error title=<module>:: 로 나열 후 exit 1, 없으면 exit 0
+```
+
+- **outcome 을 본다** — `continue-on-error` step 의 `conclusion` 은 항상 `success` 라 실패가 가려진다. skip 된 step (API 키 부재) 의 outcome 은 `skipped` 로 실패가 아니다.
+- API 키 분기 쌍 (§4.5c) 은 **실행 step 에만** `id` + `continue-on-error` 를 붙인다. skip 안내 step 은 그대로.
+- build·validate·detect_outliers·PR·commit step 에는 `continue-on-error` 를 붙이지 않는다 — 스키마 위반은 fail-fast. 이들이 실패해도 게이트는 `always()` 라 실행돼 fetcher 실패를 함께 보고한다.
+- 새 fetcher step 추가 시 게이트의 `FETCHER_OUTCOMES` 에도 한 줄 추가. `integration.test.ts` 가 (1) fetcher step 의 `id`·`continue-on-error`, (2) 마지막 step 이 모든 fetcher id 를 참조하는 `always()` 게이트인지, (3) build·validate·detect_outliers 에 `continue-on-error` 가 없는지 회귀 검증한다.
+
 ### 4.6 `refresh-fx.yml` — 일 1회 (백업)
 
 클라이언트가 일별 fetch 하지만, GitHub Actions 도 백업으로 fallback 값 갱신:
@@ -419,9 +456,19 @@ PR 자동 생성: `peter-evans/create-pull-request@v6` 액션 사용. 라벨 자
 
 ### 7.1 fetch 실패
 
-- exponential backoff (1s, 2s, 4s) 3회 재시도
-- 4회 실패 시 해당 source 스킵 + 워크플로우 결과에 warning
-- 다른 source 는 영향 없이 진행 (각 source 독립)
+- exponential backoff (1s, 2s, 4s) 3회 재시도 → 4회 모두 실패 시 `fetchWithRetry` 가 `FetchRetryExhaustedError` throw.
+- fetcher 가 그 예외를 도시 단위로 잡아 §3 분류 규칙대로 보고한다 (ADR-079):
+  - **정적값·기존값으로 대체할 수 있으면** → `warnings` 에 기록하고 계속. `_run.mjs` 가 `::warning title=<source>::<cityId>: <reason>` 으로 노출하고 **종료 코드는 0**.
+  - **대체 경로가 없으면** → `errors` 에 기록. 일부 도시만이면 exit 0, 대상 전부면 `isTotalFailure` 로 exit 1.
+- 워크플로우 수준 최종 동작 (§4.5d):
+
+| 상황 | fetcher step | 이후 step | 워크플로우 결과 |
+| --- | --- | --- | --- |
+| 경고만 (`warnings`) | `::warning::` 노란 표시, exit 0 | 정상 진행 | 초록 (annotation 에 경고) |
+| 일부 도시 `errors` | exit 0 | 정상 진행 | 초록 |
+| 진짜 실패 (throw / `isTotalFailure`) | exit 1 → `continue-on-error` 로 격리 (outcome=failure) | 나머지 fetcher·build·validate·detect_outliers·PR/commit 계속 — 성공분은 반영 | 게이트가 `::error title=<module>::` 나열 후 **빨간불** |
+| API 키 부재 | 실행 step skip (outcome=skipped), 안내 step 이 `::warning::` | 정상 진행 | 초록 |
+| build·validate 실패 | — | fail-fast (이후 PR/commit skip) | 빨간불 (게이트는 `always()` 로 fetcher 실패도 함께 보고) |
 
 ### 7.2 스키마·outlier
 
@@ -516,5 +563,7 @@ PR #20 round 11 review 에서 확인된 후속 phase 항목. 각 항목은 별�
 | 일자       | 변경                           |
 | ---------- | ------------------------------ |
 | 2026-04-28 | v1.0 — 자동화 인프라 초기 명세 |
+| 2026-09-28 | 경고 채널 분리 — `RefreshResult.warnings` 선택 필드 추가, `errors` 는 "값 못 냄" 으로 한정, `warnings` 는 종료 코드 무영향 (§3·§7.1, ADR-079) |
+| 2026-09-29 | 워크플로우 게이트 — 6개 `refresh-*.yml` 의 fetcher step 에 `id` + `continue-on-error: true`, 마지막 step `Fail if any fetcher failed` (`if: always()`, outcome 집계) 추가. 한 fetcher 실패가 나머지 갱신을 막지 않고 실패는 빨간불로 노출 (§4.5d·§7.1, ADR-079) |
 
 새 source 추가·schedule 변경·정책 변경 시 본 표 + ADR 갱신.

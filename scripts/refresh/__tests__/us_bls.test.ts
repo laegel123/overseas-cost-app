@@ -17,7 +17,7 @@ import refreshUsBls, {
   STATIC_FOOD,
   SOURCE,
 } from '../us_bls.mjs';
-import type { RefreshChange, RefreshError } from './_test-types';
+import type { RefreshChange, RefreshWarning } from './_test-types';
 
 let originalDataDir: string | undefined;
 let originalApiKey: string | undefined;
@@ -300,16 +300,17 @@ describe('refresh (integration)', () => {
     expect(fs.existsSync(nycPath)).toBe(false);
   }, 30000);
 
-  it('API 오류: 지역 에러 추가 + static fallback', async () => {
+  it('API 오류: 지역 경고 추가 + static fallback (errors 는 비어 있음)', async () => {
     fetchSpy.mockRejectedValue(new Error('Network error'));
 
     const result = await refreshUsBls({ dryRun: true, cities: ['nyc'] });
 
-    expect(result.errors.some((e: RefreshError) => e.cityId.startsWith('region:'))).toBe(true);
+    expect((result.warnings ?? []).some((w: RefreshWarning) => w.cityId.startsWith('region:'))).toBe(true);
+    expect(result.errors).toEqual([]);
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 
-  it('chicken1kg 가 sanity 범위 밖: errors 기록 + 결과는 STATIC×보정계수 (PR #20 회귀 차단)', async () => {
+  it('chicken1kg 가 sanity 범위 밖: warnings 기록 + 결과는 STATIC×보정계수 (PR #20 회귀 차단)', async () => {
     // BLS API 가 의도와 다른 시리즈를 반환하는 시나리오 — chicken1kg 가 $10/lb 처럼 비정상이면
     // 원래 코드: 25.3 USD/kg 적재 (= 10 × 2.2 × 1.15). 수정 후: 11.5 USD/kg (= 10 × 1.15, STATIC 사용).
     const responseWithInvalidChicken = {
@@ -329,11 +330,12 @@ describe('refresh (integration)', () => {
     const result = await refreshUsBls({ dryRun: true, cities: ['nyc'] });
 
     expect(
-      result.errors.some(
-        (e: RefreshError) =>
-          e.cityId.startsWith('region:') && e.reason.includes('chicken1kg') && e.reason.includes('out of range'),
+      (result.warnings ?? []).some(
+        (w: RefreshWarning) =>
+          w.cityId.startsWith('region:') && w.reason.includes('chicken1kg') && w.reason.includes('out of range'),
       ),
     ).toBe(true);
+    expect(result.errors).toEqual([]);
 
     const chickenChange = result.changes.find((c: RefreshChange) => c.field === 'food.groceries.chicken1kg');
     expect(chickenChange).toBeDefined();
