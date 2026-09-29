@@ -38,7 +38,7 @@
 - ⬜ 등록정보 그래픽 업로드: 512 아이콘(`assets/icon-playstore-512.png`), 피처 그래픽(`assets/feature-graphic.png`), 스크린샷 5장(`store-assets/screenshots/`)
 - ⬜ app-ads.txt: laegel123.github.io 루트에 AdMob 콘솔 제공 1줄 게시 + 스토어 등록정보 개발자 웹사이트 = https://laegel123.github.io
 - ⬜ ATT: App Store Connect 에서 추적 사용 표시
-- ⬜ 프로덕션 첫 빌드 전 app.json App ID 2개 + src/lib AD_UNIT_IDS placeholder 교체 확인 (미교체 시 런타임 AdsConfigError 로 광고만 꺼짐 — 빌드는 실패하지 않으므로 이 체크리스트로 강제)
+- ✅ 프로덕션 첫 빌드 전 app.json App ID 2개 + src/lib AD_UNIT_IDS placeholder 교체 확인 — 2026-09-29 교체 완료, `ads.test.ts` 정합성 테스트가 샘플 재유입 차단 (미교체 시 런타임 AdsConfigError 로 광고만 꺼짐 — 빌드는 실패하지 않으므로 이 체크리스트로 강제)
 
 ### 단계 3 — 프로덕션 AAB 빌드  ✅ 완료
 - ✅ 빌드 완료 — ID `aaa0b047-645b-4a13-84fc-d1a764112092`, status `finished`, profile `production`, distribution `store`, versionCode 1

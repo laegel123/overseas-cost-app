@@ -2804,8 +2804,13 @@ ADR-077 / admob-banner-ads step 1. 컴포넌트·화면은 `react-native-google-
 **`resolveBannerUnitId`:**
 
 - [x] `test` → `TestIds.ADAPTIVE_BANNER` (ios·android)
-- [x] `production` + placeholder (ios·android) → `AdsConfigError` throw + `code === 'ADS_CONFIG'`
+- [x] `production` + placeholder (`jest.replaceProperty(AD_UNIT_IDS, …)` 주입, ios·android) → `AdsConfigError` throw + `code === 'ADS_CONFIG'`
 - [x] `production` + 실제 형식 (`jest.replaceProperty(AD_UNIT_IDS, …)` 주입) → 그대로 반환
+
+**운영 광고 ID 정합성 (app.json App ID ↔ `AD_UNIT_IDS`):** 샘플 ID 재유입·App ID/광고 단위 혼동을 CI 로 차단 (PR #50 리뷰 제안).
+
+- [x] ios·android — App ID `ca-app-pub-<16>~<10>`, 광고 단위 `ca-app-pub-<16>/<10>` 형식
+- [x] ios·android — Google 샘플 퍼블리셔(`3940256099942544`) 아님 + 광고 단위와 App ID 의 퍼블리셔 일치
 
 **`initializeAds`:**
 
@@ -2841,8 +2846,8 @@ ADR-077 / admob-banner-ads step 1. 파일: `src/lib/__tests__/ads.web.test.ts`. 
 - [x] `showPrivacyOptionsForm` → no-op resolve
 - [x] `resolveAdsMode` 는 native 와 동일 로직
 - [x] `resolveBannerUnitId('test', …)` → 문자열 상수 `'ca-app-pub-3940256099942544/2435281174'` (SDK `TestIds` 미참조)
-- [x] `resolveBannerUnitId('production', …)` + placeholder → `code === 'ADS_CONFIG'` (격리 레지스트리라 `instanceof` 대신 `code`·`name`)
-- [x] `AD_UNIT_IDS` 는 placeholder
+- [x] `resolveBannerUnitId('production', …)` + placeholder (`jest.replaceProperty` 주입) → `code === 'ADS_CONFIG'` (격리 레지스트리라 `instanceof` 대신 `code`·`name`)
+- [x] `AD_UNIT_IDS` 는 실제 광고 단위 → `resolveBannerUnitId('production', …)` 가 그대로 반환
 - [x] 모든 export 호출 후 SDK mock 함수 6종 (`initialize` + `AdsConsent` 4종 + `BannerAd`) 호출 0회
 
 > `ads.web.ts` 는 `ads.native.ts` 도 SDK 도 import 하지 않는다 — 한쪽이 다른 쪽을 import 하면 웹 번들에 네이티브 모듈이 끌려온다. 커버리지 100/100/100/100.

@@ -40,8 +40,8 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "androidAppId": "ca-app-pub-4496015343771810~7245257081",
+          "iosAppId": "ca-app-pub-4496015343771810~8470708845",
           "userTrackingUsageDescription": "광고 식별자를 이용해 관련성 높은 광고를 표시하고 광고 성과를 측정하기 위해 사용됩니다.",
           "skAdNetworkItems": [
             "cstr6suwn9.skadnetwork",

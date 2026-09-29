@@ -32,6 +32,7 @@ const initialize = sdk.default().initialize;
 const { gatherConsent, getConsentInfo } = sdk.AdsConsent;
 
 const REAL_UNIT_ID = 'ca-app-pub-1234567890123456/1234567890';
+const PLACEHOLDER_UNIT_ID = 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY';
 
 function setDev(value: boolean): void {
   jest.replaceProperty(globalThis as unknown as { __DEV__: boolean }, '__DEV__', value);
@@ -74,6 +75,11 @@ describe('resolveBannerUnitId', () => {
   it.each(['ios', 'android'] as const)(
     'production + placeholder (%s) → AdsConfigError (code ADS_CONFIG)',
     (platform) => {
+      jest.replaceProperty(
+        AD_UNIT_IDS as { ios: string; android: string },
+        platform,
+        PLACEHOLDER_UNIT_ID,
+      );
       try {
         resolveBannerUnitId('production', platform);
         throw new Error('should not reach');
@@ -88,6 +94,34 @@ describe('resolveBannerUnitId', () => {
     jest.replaceProperty(AD_UNIT_IDS as { ios: string; android: string }, 'android', REAL_UNIT_ID);
     expect(resolveBannerUnitId('production', 'android')).toBe(REAL_UNIT_ID);
   });
+});
+
+describe('운영 광고 ID 정합성 (app.json App ID ↔ AD_UNIT_IDS)', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+  const appJson = require('../../../app.json') as {
+    expo: { plugins: (string | [string, Record<string, unknown>])[] };
+  };
+  const adsPlugin = appJson.expo.plugins.find(
+    (p): p is [string, Record<string, unknown>] =>
+      Array.isArray(p) && p[0] === 'react-native-google-mobile-ads',
+  );
+  const appIds = { ios: adsPlugin?.[1].iosAppId, android: adsPlugin?.[1].androidAppId };
+  const SAMPLE_PUBLISHER = '3940256099942544';
+
+  it.each(['ios', 'android'] as const)('%s — App ID 는 `~`, 광고 단위는 `/` 형식', (platform) => {
+    expect(appIds[platform]).toMatch(/^ca-app-pub-\d{16}~\d{10}$/);
+    expect(AD_UNIT_IDS[platform]).toMatch(/^ca-app-pub-\d{16}\/\d{10}$/);
+  });
+
+  it.each(['ios', 'android'] as const)(
+    '%s — Google 샘플 퍼블리셔가 아니고 App ID 와 같은 퍼블리셔',
+    (platform) => {
+      const publisher = (id: unknown): string =>
+        String(id).slice('ca-app-pub-'.length, 'ca-app-pub-'.length + 16);
+      expect(publisher(appIds[platform])).not.toBe(SAMPLE_PUBLISHER);
+      expect(publisher(AD_UNIT_IDS[platform])).toBe(publisher(appIds[platform]));
+    },
+  );
 });
 
 describe('initializeAds', () => {
@@ -169,6 +203,11 @@ describe('initializeAds', () => {
 
   it('AdsConfigError (production + placeholder) → SDK 3종 미호출 + disabled', async () => {
     setDev(false);
+    jest.replaceProperty(
+      AD_UNIT_IDS as { ios: string; android: string },
+      'ios',
+      PLACEHOLDER_UNIT_ID,
+    );
     const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     const result = await initializeAds();
