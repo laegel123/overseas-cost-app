@@ -74,18 +74,21 @@ describe('ads.web', () => {
 
   it('resolveBannerUnitId: production + placeholder → ADS_CONFIG', () => {
     const { web } = loadWeb();
+    jest.replaceProperty(
+      web.AD_UNIT_IDS as { ios: string; android: string },
+      'android',
+      'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
+    );
     // isolateModules 레지스트리의 errors 클래스는 본 파일 import 와 별개 객체 → code 로 검증
     expect(() => web.resolveBannerUnitId('production', 'android')).toThrow(
       expect.objectContaining({ code: 'ADS_CONFIG', name: AdsConfigError.name }),
     );
   });
 
-  it('AD_UNIT_IDS 는 placeholder', () => {
+  it('AD_UNIT_IDS 는 실제 광고 단위 → production 에서 그대로 반환', () => {
     const { web } = loadWeb();
-    expect(web.AD_UNIT_IDS).toEqual({
-      ios: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
-      android: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
-    });
+    expect(web.resolveBannerUnitId('production', 'ios')).toBe(web.AD_UNIT_IDS.ios);
+    expect(web.resolveBannerUnitId('production', 'android')).toBe(web.AD_UNIT_IDS.android);
   });
 
   it('광고 SDK mock 의 어떤 함수도 호출되지 않는다', async () => {

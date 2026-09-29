@@ -95,7 +95,8 @@ ADR-011 은 "분석/오류 추적 SDK 를 도입하지 않는다" 를 근거로 
    가 `env === '1' || dev` 면 `'test'` → `TestIds.ADAPTIVE_BANNER`, 아니면 `'production'` →
    `AD_UNIT_IDS[platform]`. 개발·프리뷰 빌드는 `EXPO_PUBLIC_ADS_TEST=1` 로 빌드해 Google
    테스트 광고 단위만 쓴다 (프리뷰를 지인에게 배포해도 무효 트래픽 없음).
-   - `AD_UNIT_IDS` 는 placeholder(`ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY`)로 커밋돼 있다.
+   - `AD_UNIT_IDS` 는 placeholder(`ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY`)로 커밋됐다가 2026-09-29 실제 광고 단위로
+     교체됐다 (app.json App ID 2개 동시 교체, 정합성은 `ads.test.ts` 가 강제).
      프로덕션 모드에서 placeholder 패턴(`/X{16}\/Y{10}/`)이면 `AdsConfigError`
      (`ADS_CONFIG`) → `initializeAds` 가 SDK 호출 없이 `disabled`. ios/android 외
      플랫폼도 같은 에러로 `disabled`.

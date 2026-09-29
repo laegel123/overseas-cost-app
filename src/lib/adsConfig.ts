@@ -19,10 +19,10 @@ export type AdsInitResult = {
   error: Error | null;
 };
 
-/** 운영자가 AdMob 콘솔 값으로 교체. placeholder 패턴은 resolveBannerUnitId 가 거부한다. */
+/** AdMob 콘솔의 배너 광고 단위 ID (비밀 아님). placeholder 패턴은 resolveBannerUnitId 가 거부한다. */
 export const AD_UNIT_IDS = {
-  ios: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
-  android: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
+  ios: 'ca-app-pub-4496015343771810/3613308845',
+  android: 'ca-app-pub-4496015343771810/9752000920',
 } as const;
 
 const PLACEHOLDER_UNIT_ID_RE = /X{16}\/Y{10}/;
