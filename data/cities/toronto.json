@@ -7,7 +7,7 @@
   "country": "CA",
   "currency": "CAD",
   "region": "na",
-  "lastUpdated": "2026-09-16",
+  "lastUpdated": "2026-10-02",
   "rent": {
     "share": 971,
     "studio": 1494,
@@ -29,8 +29,8 @@
     }
   },
   "transport": {
-    "monthlyPass": 156.3,
-    "singleRide": 3.5,
+    "monthlyPass": 143,
+    "singleRide": 3.35,
     "taxiBase": 4.75
   },
   "tuition": [
@@ -66,7 +66,7 @@
       "category": "transport",
       "name": "TTC (Toronto Transit Commission)",
       "url": "https://www.ttc.ca/",
-      "accessedAt": "2026-05-02"
+      "accessedAt": "2026-10-02"
     },
     {
       "category": "tuition",
