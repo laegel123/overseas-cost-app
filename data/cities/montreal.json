@@ -7,7 +7,7 @@
   "country": "CA",
   "currency": "CAD",
   "region": "na",
-  "lastUpdated": "2026-09-16",
+  "lastUpdated": "2026-10-05",
   "rent": {
     "share": 655,
     "studio": 1008,
@@ -16,7 +16,7 @@
   },
   "food": {
     "restaurantMeal": 19,
-    "cafe": 5.5,
+    "cafe": 9.34,
     "groceries": {
       "milk1L": 3.1,
       "eggs12": 4.2,
@@ -85,6 +85,12 @@
       "name": "Adapted from Statistics Canada, Table 34-10-0133-01 (CMHC 평균 월세 · share 는 studio×0.65 추정)",
       "url": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3410013301",
       "accessedAt": "2026-09-16"
+    },
+    {
+      "category": "food",
+      "name": "Statistics Canada CPI",
+      "url": "https://www150.statcan.gc.ca/",
+      "accessedAt": "2026-10-05"
     }
   ]
 }
