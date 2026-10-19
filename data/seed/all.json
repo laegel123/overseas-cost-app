@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-19T02:47:19.154Z",
+  "generatedAt": "2026-10-19T16:19:32.723Z",
   "fxBaseDate": "2026-10-19",
   "cities": {
     "amsterdam": {
@@ -727,7 +727,7 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-09-16",
+      "lastUpdated": "2026-10-19",
       "rent": {
         "share": 655,
         "studio": 1008,
@@ -736,7 +736,7 @@
       },
       "food": {
         "restaurantMeal": 19,
-        "cafe": 5.5,
+        "cafe": 9.35,
         "groceries": {
           "milk1L": 3.1,
           "eggs12": 4.2,
@@ -805,6 +805,12 @@
           "name": "Adapted from Statistics Canada, Table 34-10-0133-01 (CMHC 평균 월세 · share 는 studio×0.65 추정)",
           "url": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3410013301",
           "accessedAt": "2026-09-16"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI",
+          "url": "https://www150.statcan.gc.ca/",
+          "accessedAt": "2026-10-19"
         }
       ]
     },
@@ -1769,7 +1775,7 @@
       "country": "CA",
       "currency": "CAD",
       "region": "na",
-      "lastUpdated": "2026-09-16",
+      "lastUpdated": "2026-10-19",
       "rent": {
         "share": 1085,
         "studio": 1669,
@@ -1777,14 +1783,14 @@
         "twoBed": 2367
       },
       "food": {
-        "restaurantMeal": 22,
-        "cafe": 6,
+        "restaurantMeal": 18.9,
+        "cafe": 5.35,
         "groceries": {
-          "milk1L": 3.25,
-          "eggs12": 4.5,
-          "rice1kg": 3.8,
-          "chicken1kg": 15,
-          "bread": 3.5,
+          "milk1L": 6.5,
+          "eggs12": 8.55,
+          "rice1kg": 6.82,
+          "chicken1kg": 30.54,
+          "bread": 6.24,
           "onion1kg": 2.8,
           "apple1kg": 4.5,
           "ramen": 1.5
@@ -1847,6 +1853,12 @@
           "name": "Adapted from Statistics Canada, Table 34-10-0133-01 (CMHC 평균 월세 · share 는 studio×0.65 추정)",
           "url": "https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3410013301",
           "accessedAt": "2026-09-16"
+        },
+        {
+          "category": "food",
+          "name": "Statistics Canada CPI",
+          "url": "https://www150.statcan.gc.ca/",
+          "accessedAt": "2026-10-19"
         }
       ]
     }
