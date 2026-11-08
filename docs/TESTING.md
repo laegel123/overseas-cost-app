@@ -1382,7 +1382,7 @@ tailwind.config.js 토큰 — 매직 hex / px 금지 (CLAUDE.md CRITICAL).
 - [x] `className` prop composed (추가 클래스 결합)
 - [x] `accessibilityRole` (heading 류 default 'header', body/small/tiny default 'text', override 가능)
 - [x] `displayName` — 8 variant 모두 export 이름과 일치 (`Display` / `H1` / `H2` / `H3` / `Body` / `Small` / `Tiny` / `MonoLabel`) — React DevTools 가독성
-- [ ] 한국어 단어 단위 wrap 동작 (RN Text 기본 — 검증 불요)
+- [x] 한국어 어절 단위 줄바꿈 — 8 variant 모두 `lineBreakStrategyIOS="hangul-word"` (RN 기본값은 iOS 에서 음절 단위로 끊음)
 - [ ] 매우 긴 텍스트: `numberOfLines` 없을 때 wrap 됨 (RN Text 기본 — 검증 불요)
 - [ ] snapshot per component (TESTING.md §6 안티패턴 — 핵심 텍스트 검증으로 대체)
 
@@ -3125,6 +3125,7 @@ afterEach(() => {
 
 #### `ca_statcan.mjs` (StatCan WDS API)
 
+- [x] 출처명에 내부 참조(`ADR-`) 없음 + 구 이름 `legacyNames` 등록
 - [x] CPI Vector ID 별 fetch
 - [x] Vancouver/Toronto/Montreal CMA 데이터
 - [x] 식재료 8개 매핑 (Vector ID 매핑 표 상수 정의)
@@ -3148,6 +3149,7 @@ afterEach(() => {
 
 #### `us_hud.mjs`
 
+- [x] 출처명에 내부 참조(`ADR-`) 없음 + 구 이름 `legacyNames` 등록
 - [x] HUD FMR API 응답 파싱 (`parseHudResponse`)
 - [x] MSA entityId 별 매핑 (NYC, LA, SF, Seattle, Boston — 5 cities)
 - [x] # bedrooms 매핑 (Efficiency → studio, One-Bedroom → oneBed, Two-Bedroom → twoBed)
@@ -3169,6 +3171,7 @@ afterEach(() => {
 
 #### `us_bls.mjs`
 
+- [x] 출처명에 내부 참조(`ADR-`) 없음 + 구 이름 `legacyNames` 등록
 - [x] `US_BLS_API_KEY` 환경변수 필수 (또는 useStatic=true)
 - [x] Series ID 별 fetch (milk, eggs, bread, chicken)
 - [x] Region 별 데이터 (Northeast, West — BLS_SERIES)

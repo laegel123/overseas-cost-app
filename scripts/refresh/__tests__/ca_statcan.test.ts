@@ -17,6 +17,7 @@ import refreshCaStatcan, {
   CPI_VECTORS,
   STATIC_PRICES,
   SOURCE,
+  SOURCE_STATIC,
 } from '../ca_statcan.mjs';
 import type { RefreshWarning } from './_test-types';
 
@@ -204,6 +205,11 @@ describe('constants', () => {
     expect(SOURCE.category).toBe('food');
     expect(SOURCE.name).toBe('Statistics Canada CPI');
     expect(SOURCE.url).toContain('statcan');
+  });
+
+  it('SOURCE_STATIC 출처명에 내부 참조가 없고 구 이름을 legacyNames 로 이전', () => {
+    expect(SOURCE_STATIC.name).not.toContain('ADR-');
+    expect(SOURCE_STATIC.legacyNames).toContain('Statistics Canada CPI (static fallback, ADR-059)');
   });
 });
 

@@ -58,6 +58,7 @@ exports[`HomeScreen 스냅샷 권역 pill 컨테이너 — 5개 pill 회귀 감�
       <Text
         accessibilityRole="text"
         className="font-mulish text-small text-white"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         전체 (4)
@@ -109,6 +110,7 @@ exports[`HomeScreen 스냅샷 권역 pill 컨테이너 — 5개 pill 회귀 감�
       <Text
         accessibilityRole="text"
         className="font-mulish text-small text-navy"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         북미 (1)
@@ -160,6 +162,7 @@ exports[`HomeScreen 스냅샷 권역 pill 컨테이너 — 5개 pill 회귀 감�
       <Text
         accessibilityRole="text"
         className="font-mulish text-small text-navy"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         유럽 (1)
@@ -211,6 +214,7 @@ exports[`HomeScreen 스냅샷 권역 pill 컨테이너 — 5개 pill 회귀 감�
       <Text
         accessibilityRole="text"
         className="font-mulish text-small text-navy"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         아시아 (1)
@@ -262,6 +266,7 @@ exports[`HomeScreen 스냅샷 권역 pill 컨테이너 — 5개 pill 회귀 감�
       <Text
         accessibilityRole="text"
         className="font-mulish text-small text-navy"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         오세아니아 (1)
@@ -313,6 +318,7 @@ exports[`HomeScreen 스냅샷 권역 pill 컨테이너 — 5개 pill 회귀 감�
       <Text
         accessibilityRole="text"
         className="font-mulish text-small text-navy"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         중동
@@ -337,6 +343,7 @@ exports[`HomeScreen 스냅샷 즐겨찾기 첫 카드 (accent navy) — 회귀 �
       <Text
         accessibilityRole="text"
         className="font-mulish text-tiny text-white font-manrope-extrabold"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         CA
@@ -378,6 +385,7 @@ exports[`HomeScreen 스냅샷 즐겨찾기 첫 카드 (accent navy) — 회귀 �
   <Text
     accessibilityRole="header"
     className="font-manrope-bold text-h3 text-white font-manrope-extrabold"
+    lineBreakStrategyIOS="hangul-word"
     numberOfLines={1}
   >
     밴쿠버
@@ -385,6 +393,7 @@ exports[`HomeScreen 스냅샷 즐겨찾기 첫 카드 (accent navy) — 회귀 �
   <Text
     accessibilityRole="text"
     className="font-mulish text-tiny text-white"
+    lineBreakStrategyIOS="hangul-word"
     numberOfLines={1}
     style={
       {
@@ -401,6 +410,7 @@ exports[`HomeScreen 스냅샷 즐겨찾기 첫 카드 (accent navy) — 회귀 �
     <Text
       accessibilityRole="header"
       className="font-manrope-bold text-h3 text-orange text-2xl font-manrope-extrabold"
+      lineBreakStrategyIOS="hangul-word"
       numberOfLines={1}
       testID="home-favcard-vancouver-mult"
     >
@@ -409,6 +419,7 @@ exports[`HomeScreen 스냅샷 즐겨찾기 첫 카드 (accent navy) — 회귀 �
     <Text
       accessibilityRole="text"
       className="font-mulish text-tiny text-white"
+      lineBreakStrategyIOS="hangul-word"
       numberOfLines={1}
       style={
         {

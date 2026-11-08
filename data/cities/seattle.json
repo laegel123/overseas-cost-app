@@ -53,13 +53,13 @@
   "sources": [
     {
       "category": "rent",
-      "name": "HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)",
+      "name": "HUD Fair Market Rents (share 는 studio×0.65 추정)",
       "url": "https://www.huduser.gov/portal/datasets/fmr.html",
       "accessedAt": "2026-05-03"
     },
     {
       "category": "food",
-      "name": "US BLS CPI + static estimates (ADR-059 adjustment)",
+      "name": "US BLS CPI + 정적 추정치",
       "url": "https://www.bls.gov/cpi/",
       "accessedAt": "2026-05-04"
     },

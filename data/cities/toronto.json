@@ -58,7 +58,7 @@
   "sources": [
     {
       "category": "food",
-      "name": "Statistics Canada CPI (static fallback, ADR-059)",
+      "name": "Statistics Canada CPI (정적 추정치)",
       "url": "https://www150.statcan.gc.ca/",
       "accessedAt": "2026-05-02"
     },

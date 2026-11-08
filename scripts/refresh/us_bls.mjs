@@ -141,8 +141,9 @@ export const STATIC_FOOD = {
 
 export const SOURCE = {
   category: 'food',
-  name: 'US BLS CPI + static estimates (ADR-059 adjustment)',
+  name: 'US BLS CPI + 정적 추정치',
   url: 'https://www.bls.gov/cpi/',
+  legacyNames: ['US BLS CPI + static estimates (ADR-059 adjustment)'],
 };
 
 /**
