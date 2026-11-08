@@ -142,7 +142,8 @@ describe('constants', () => {
   it('SOURCE 정의', () => {
     expect(SOURCE.category).toBe('rent');
     expect(SOURCE.name).toContain('HUD Fair Market Rents');
-    expect(SOURCE.name).toContain('ADR-059');
+    expect(SOURCE.name).not.toContain('ADR-');
+    expect(SOURCE.legacyNames).toContain('HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)');
     expect(SOURCE.url).toContain('hud');
   });
 });

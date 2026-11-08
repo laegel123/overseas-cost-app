@@ -121,11 +121,12 @@ export const SOURCE = {
 };
 
 // onion1kg / apple1kg / ramen — StatCan CPI 미제공 항목. ADR-059 §4 static 마커.
-// CPI fetch 전체 실패로 useStatic fallback 진입 시도 동일 출처 사용 (구분: name 의 'static' 키워드).
+// CPI fetch 전체 실패로 useStatic fallback 진입 시도 동일 출처 사용 (구분: name 의 '정적 추정치' 문구).
 export const SOURCE_STATIC = {
   category: 'food',
-  name: 'Statistics Canada CPI (static fallback, ADR-059)',
+  name: 'Statistics Canada CPI (정적 추정치)',
   url: 'https://www150.statcan.gc.ca/',
+  legacyNames: ['Statistics Canada CPI (static fallback, ADR-059)'],
 };
 
 

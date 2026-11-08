@@ -61,8 +61,9 @@ export const CITY_CONFIGS = {
 
 export const SOURCE = {
   category: 'rent',
-  name: 'HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)',
+  name: 'HUD Fair Market Rents (share 는 studio×0.65 추정)',
   url: 'https://www.huduser.gov/portal/datasets/fmr.html',
+  legacyNames: ['HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)'],
 };
 
 /**

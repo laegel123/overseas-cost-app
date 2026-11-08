@@ -241,7 +241,8 @@ describe('constants', () => {
   it('SOURCE 정의', () => {
     expect(SOURCE.category).toBe('food');
     expect(SOURCE.name).toContain('BLS CPI');
-    expect(SOURCE.name).toContain('ADR-059');
+    expect(SOURCE.name).not.toContain('ADR-');
+    expect(SOURCE.legacyNames).toContain('US BLS CPI + static estimates (ADR-059 adjustment)');
     expect(SOURCE.url).toContain('bls.gov');
   });
 });
