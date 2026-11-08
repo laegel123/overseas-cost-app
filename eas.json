@@ -10,6 +10,9 @@
       "android": {
         "buildType": "apk"
       },
+      "ios": {
+        "image": "sdk-54"
+      },
       "env": {
         "EXPO_PUBLIC_ADS_TEST": "1"
       }
@@ -19,6 +22,9 @@
       "android": {
         "buildType": "apk"
       },
+      "ios": {
+        "image": "sdk-54"
+      },
       "env": {
         "EXPO_PUBLIC_ADS_TEST": "1"
       }
@@ -27,6 +33,9 @@
       "channel": "production",
       "android": {
         "buildType": "app-bundle"
+      },
+      "ios": {
+        "image": "sdk-54"
       }
     }
   },
