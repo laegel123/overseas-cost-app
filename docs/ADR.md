@@ -96,3 +96,4 @@
 | [078](adr/078-ca-rent-statcan-vectors.md) | 캐나다 3도시 rent 벡터 재매핑 — 표 34-10-0133-01 `Apartment 6+` | Active | 구 벡터는 ARCHIVED 노동생산성 표, 도입 이래 무동작 |
 | [079](adr/079-refresh-warnings-channel.md) | refresh 경고 채널 분리 — `warnings` 를 `errors` 에서 떼어냄 | Active | 판정(ADR-078) 불변, 선택 필드, `::warning::` 노출 |
 | [080](adr/080-eas-ios-image-pin-sdk54.md) | EAS iOS 빌드 이미지 `sdk-54`(Xcode 26.0) 고정 | Active | Xcode 27 SDK 빌드는 UIScene 미채택 시 iOS 27 실행 크래시, SDK 57+ 업그레이드 전까지 |
+| [081](adr/081-eas-remote-app-version.md) | 빌드 번호 EAS 원격 관리 + production 자동 증가 | Active | `appVersionSource: remote`, 사용자 버전은 app.json 유지 |
