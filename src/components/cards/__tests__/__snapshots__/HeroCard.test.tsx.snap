@@ -22,6 +22,7 @@ exports[`HeroCard snapshot navy variant — full props 1`] = `
     <Text
       accessibilityRole="text"
       className="font-manrope-semibold text-mono-label text-white"
+      lineBreakStrategyIOS="hangul-word"
     >
       한눈에 보는 물가 비교
     </Text>
@@ -35,12 +36,14 @@ exports[`HeroCard snapshot navy variant — full props 1`] = `
       <Text
         accessibilityRole="text"
         className="font-mulish text-tiny text-white"
+        lineBreakStrategyIOS="hangul-word"
       >
         서울
       </Text>
       <Text
         accessibilityRole="header"
         className="font-manrope-bold text-h2 text-white"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         175만/월
@@ -53,6 +56,7 @@ exports[`HeroCard snapshot navy variant — full props 1`] = `
       <Text
         accessibilityRole="header"
         className="font-manrope-extrabold text-display text-orange"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         ↑1.9×
@@ -60,6 +64,7 @@ exports[`HeroCard snapshot navy variant — full props 1`] = `
       <Text
         accessibilityRole="text"
         className="font-manrope-semibold text-mono-label text-white"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         +165만원
@@ -71,12 +76,14 @@ exports[`HeroCard snapshot navy variant — full props 1`] = `
       <Text
         accessibilityRole="text"
         className="font-mulish text-tiny text-white"
+        lineBreakStrategyIOS="hangul-word"
       >
         밴쿠버
       </Text>
       <Text
         accessibilityRole="header"
         className="font-manrope-bold text-h2 text-white"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
         style={
           {
@@ -137,6 +144,7 @@ exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
     <Text
       accessibilityRole="text"
       className="font-manrope-semibold text-mono-label text-white"
+      lineBreakStrategyIOS="hangul-word"
     >
       한눈에 보는 물가 비교
     </Text>
@@ -150,12 +158,14 @@ exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
       <Text
         accessibilityRole="text"
         className="font-mulish text-tiny text-white"
+        lineBreakStrategyIOS="hangul-word"
       >
         서울
       </Text>
       <Text
         accessibilityRole="header"
         className="font-manrope-bold text-h2 text-white"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         175만/월
@@ -168,6 +178,7 @@ exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
       <Text
         accessibilityRole="header"
         className="font-manrope-extrabold text-display text-white"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         ↑1.9×
@@ -175,6 +186,7 @@ exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
       <Text
         accessibilityRole="text"
         className="font-manrope-semibold text-mono-label text-white"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
       >
         +165만원
@@ -186,12 +198,14 @@ exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
       <Text
         accessibilityRole="text"
         className="font-mulish text-tiny text-white"
+        lineBreakStrategyIOS="hangul-word"
       >
         밴쿠버
       </Text>
       <Text
         accessibilityRole="header"
         className="font-manrope-bold text-h2 text-white"
+        lineBreakStrategyIOS="hangul-word"
         numberOfLines={1}
         style={
           {
@@ -239,6 +253,7 @@ exports[`HeroCard snapshot orange variant — full props (footer 포함) 1`] = `
     <Text
       accessibilityRole="text"
       className="font-mulish text-tiny text-white"
+      lineBreakStrategyIOS="hangul-word"
     >
       항목 단가 합
     </Text>

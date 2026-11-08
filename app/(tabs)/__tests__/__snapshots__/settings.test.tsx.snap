@@ -74,6 +74,7 @@ exports[`SettingsScreen 스냅샷 data-refresh-card — 회귀 감지 1`] = `
       <Text
         accessibilityRole="header"
         className="font-manrope-bold text-h3 text-white"
+        lineBreakStrategyIOS="hangul-word"
         testID="data-refresh-title"
       >
         데이터 최신화
@@ -81,6 +82,7 @@ exports[`SettingsScreen 스냅샷 data-refresh-card — 회귀 감지 1`] = `
       <Text
         accessibilityRole="text"
         className="font-mulish text-tiny text-white opacity-70"
+        lineBreakStrategyIOS="hangul-word"
         testID="data-refresh-last-sync"
       >
         동기화 전
@@ -124,6 +126,7 @@ exports[`SettingsScreen 스냅샷 data-refresh-card — 회귀 감지 1`] = `
       <Text
         accessibilityRole="text"
         className="font-mulish text-tiny text-white"
+        lineBreakStrategyIOS="hangul-word"
       >
         새로고침
       </Text>

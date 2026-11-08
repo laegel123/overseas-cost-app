@@ -47,6 +47,7 @@ exports[`RegionPill snapshot active=false (default) 1`] = `
   <Text
     accessibilityRole="text"
     className="font-mulish text-small text-navy"
+    lineBreakStrategyIOS="hangul-word"
     numberOfLines={1}
   >
     북미 (8)
@@ -101,6 +102,7 @@ exports[`RegionPill snapshot active=true 1`] = `
   <Text
     accessibilityRole="text"
     className="font-mulish text-small text-white"
+    lineBreakStrategyIOS="hangul-word"
     numberOfLines={1}
   >
     북미 (8)
