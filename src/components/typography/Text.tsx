@@ -142,6 +142,8 @@ function makeVariant(variant: Variant) {
         className={composedClassName}
         accessibilityRole={role}
         numberOfLines={numberOfLines}
+        // iOS 기본 줄바꿈은 한글을 음절 단위로 끊는다 ("비/교해") — 어절 단위로 고정. Android 는 무시.
+        lineBreakStrategyIOS="hangul-word"
         style={style}
         testID={testID}
       >

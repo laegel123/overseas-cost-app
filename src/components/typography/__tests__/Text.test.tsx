@@ -241,3 +241,10 @@ describe('Text 8 variant', () => {
     });
   });
 });
+
+describe('Text — 한글 줄바꿈', () => {
+  it.each(VARIANTS)('$name: iOS 어절 단위 줄바꿈 적용', ({ Component }) => {
+    render(<Component testID="t">서울 기준으로 비교해 드려요</Component>);
+    expect(screen.getByTestId('t').props.lineBreakStrategyIOS).toBe('hangul-word');
+  });
+});
