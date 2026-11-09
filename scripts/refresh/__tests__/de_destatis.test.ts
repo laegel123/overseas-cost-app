@@ -87,7 +87,11 @@ describe('getRentForCity', () => {
     expect(result.twoBed).toBe(STATIC_RENT.berlin.twoBed);
   });
 
-  it('뮌헨: 보정계수 1.35', () => {
+  it('뮌헨: 설정된 보정계수로는 STATIC_RENT 값 유지 (이중 보정 회귀 방지)', () => {
+    expect(getRentForCity('munich', CITY_CONFIGS.munich.rentAdjustment)).toEqual(STATIC_RENT.munich);
+  });
+
+  it('보정계수 인자를 곱한다', () => {
     const result = getRentForCity('munich', 1.35);
 
     expect(result.share).toBe(Math.round(STATIC_RENT.munich.share * 1.35));
@@ -152,8 +156,7 @@ describe('constants', () => {
     }
   });
 
-  it('뮌헨 보정계수가 베를린보다 높음', () => {
-    expect(CITY_CONFIGS.munich.rentAdjustment).toBeGreaterThan(CITY_CONFIGS.berlin.rentAdjustment);
+  it('뮌헨 식비 보정계수가 베를린보다 높음', () => {
     expect(CITY_CONFIGS.munich.foodAdjustment).toBeGreaterThan(CITY_CONFIGS.berlin.foodAdjustment);
   });
 

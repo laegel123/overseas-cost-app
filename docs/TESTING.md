@@ -3125,6 +3125,7 @@ afterEach(() => {
 
 #### `ca_statcan.mjs` (StatCan WDS API)
 
+- [x] 기본 호출은 StatCan API 미호출 — `allowLiveCpi` 없으면 정적값 (ADR-082)
 - [x] 출처명에 내부 참조(`ADR-`) 없음 + 구 이름 `legacyNames` 등록
 - [x] CPI Vector ID 별 fetch
 - [x] Vancouver/Toronto/Montreal CMA 데이터
@@ -3187,6 +3188,7 @@ afterEach(() => {
 
 #### `us_transit.mjs`
 
+- [x] 저소득층 정기권(Lifeline)을 일반 월 정기권으로 읽지 않음
 - [x] MTA, LA Metro, SFMTA, King County Metro, MBTA 5개 fare 페이지
 - [x] `parseFareHtml` HTML 파싱 (singleRide, monthlyPass 패턴 매칭)
 - [x] 각 도시별 staticFares fallback
@@ -3198,6 +3200,7 @@ afterEach(() => {
 
 #### `uk_ons.mjs`
 
+- [x] 조회 실패·useStatic 시 기존 월세를 null 로 덮어쓰지 않음 + 조회 실패는 warnings
 - [x] ONS Private Rental Market Statistics API (London)
 - [x] CPI by item (COICOP 코드 매핑)
 - [x] parseOnsValue: 마지막 observation 추출
@@ -3223,6 +3226,7 @@ afterEach(() => {
 
 #### `de_destatis.mjs`
 
+- [x] 뮌헨 설정 보정계수로 `STATIC_RENT.munich` 유지 (이중 보정 회귀 방지)
 - [x] GENESIS API XML 응답 파싱
 - [x] Berlin / Munich Bundesland 매핑
 - [x] 임차료 + CPI

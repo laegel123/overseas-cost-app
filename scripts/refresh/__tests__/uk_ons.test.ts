@@ -245,7 +245,11 @@ describe('refresh (integration)', () => {
       JSON.stringify(existingData),
     );
 
-    const result = await refreshUkOns({ dryRun: true, useStatic: true });
+    fetchSpy.mockImplementation(
+      async () => new Response(JSON.stringify(VALID_ONS_RESPONSE), { status: 200 }),
+    );
+
+    const result = await refreshUkOns({ dryRun: true });
 
     expect(result.changes.length).toBeGreaterThan(0);
     const rentChange = result.changes.find((c: RefreshChange) => c.field.startsWith('rent.'));
@@ -259,9 +263,7 @@ describe('refresh (integration)', () => {
     expect(result.errors.some((e: RefreshError) => e.cityId === 'unknown-city')).toBe(true);
   }, 30000);
 
-  // ADR-079 — rent/CPI fetch 실패가 exit 1 을 내지 않는다. 현재 `fetchOnsSeries` 가 예외를 null 로
-  // 흡수하므로 refresh 의 warnings push 까지는 도달하지 않는다 (기존 데드 경로, 본 step 범위 밖).
-  // 단언 대상은 관측 가능한 계약: 네트워크 실패에도 errors 가 비고 static 값으로 계속 간다.
+  // ADR-079 — rent/CPI fetch 실패가 exit 1 을 내지 않는다. 실패는 warnings 로 드러나고 errors 는 빈다.
   // 404 (client error, no retry) 로 모킹 — 네트워크 에러는 시리즈마다 실 타이머 backoff 가 누적돼 30s 초과.
   it('ONS fetch 실패: static fallback + errors 비어 있음', async () => {
     fetchSpy.mockImplementation(async () => new Response('not found', { status: 404 }));
@@ -269,6 +271,37 @@ describe('refresh (integration)', () => {
     const result = await refreshUkOns({ dryRun: true, cities: ['london'] });
 
     expect(result.errors).toEqual([]);
-    expect(result.changes.length).toBeGreaterThan(0);
+    expect((result.warnings ?? []).some((w: { reason: string }) => w.reason.includes('ONS rent fetch failed'))).toBe(true);
+  }, 30000);
+
+  it.each([
+    ['조회 실패', { useStatic: false }],
+    ['useStatic', { useStatic: true }],
+  ])('%s: 기존 월세를 null 로 덮어쓰지 않는다', async (_label, opts) => {
+    fetchSpy.mockImplementation(async () => new Response('not found', { status: 404 }));
+    const rent = { share: 1105, studio: 1700, oneBed: 2100, twoBed: 2800 };
+    const cityPath = path.join(testDir, 'cities', 'london.json');
+    fs.writeFileSync(
+      cityPath,
+      JSON.stringify({
+        id: 'london',
+        name: { ko: '런던', en: 'London' },
+        country: 'GB',
+        currency: 'GBP',
+        region: 'eu',
+        lastUpdated: '2026-04-01',
+        rent,
+        food: { restaurantMeal: 14, cafe: 3.5, groceries: { milk1L: 9, eggs12: 3.2, rice1kg: 2.0, chicken1kg: 5.5, bread: 1.3 } },
+        transport: { monthlyPass: 160, singleRide: 2.7, taxiBase: 3.6 },
+        sources: [{ category: 'rent', name: 'ONS', url: 'https://ons.gov.uk/', accessedAt: '2026-04-01' }],
+      }),
+    );
+
+    const result = await refreshUkOns({ ...opts, cities: ['london'] });
+
+    expect(result.errors).toEqual([]);
+    expect(result.cities).toContain('london'); // groceries 변동으로 실제 쓰기 경로를 탄다
+    expect(result.changes.some((c: RefreshChange) => c.field.startsWith('rent.'))).toBe(false);
+    expect(JSON.parse(fs.readFileSync(cityPath, 'utf8')).rent).toEqual(rent);
   }, 30000);
 });

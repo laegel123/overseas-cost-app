@@ -98,6 +98,9 @@ export const CITY_CONFIGS = {
  * @param {string} agency
  * @returns {{singleRide?: number, monthlyPass?: number}}
  */
+// 할인 요금 문구 — 일반 성인 요금으로 오인 금지 (SFMTA 의 Lifeline Pass $43 회귀).
+const DISCOUNT_FARE_PATTERN = /lifeline|low[- ]income|limited income|reduced|senior|youth|student|disabled/i;
+
 export function parseFareHtml(html, agency) {
   const fares = {};
 
@@ -126,7 +129,7 @@ export function parseFareHtml(html, agency) {
 
   for (const pattern of monthlyPassPatterns) {
     const match = pattern.exec(html);
-    if (match) {
+    if (match && !DISCOUNT_FARE_PATTERN.test(match[0])) {
       const value = parseFloat(match[1]);
       if (value > 30 && value < 300) {
         fares.monthlyPass = value;

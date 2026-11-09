@@ -93,13 +93,9 @@ export function parseOnsValue(data) {
  */
 async function fetchOnsSeries(seriesId) {
   const url = `${ONS_API_BASE}/timeseries/${seriesId}/data`;
-  try {
-    const response = await fetchWithRetry(url);
-    const data = await response.json();
-    return parseOnsValue(data);
-  } catch {
-    return null;
-  }
+  const response = await fetchWithRetry(url);
+  const data = await response.json();
+  return parseOnsValue(data);
 }
 
 /**
@@ -162,6 +158,8 @@ export default async function refresh(opts = {}) {
         const value = await fetchOnsSeries(seriesId);
         if (value !== null) {
           rentData.set(field, value);
+        } else {
+          warnings.push({ cityId: 'london', reason: `ONS rent response has no usable value for ${field}` });
         }
       } catch (err) {
         warnings.push({
@@ -193,7 +191,7 @@ export default async function refresh(opts = {}) {
       continue;
     }
 
-    const newRent = mapToRent(rentData);
+    const mappedRent = mapToRent(rentData);
     const newGroceries = mapToGroceries(cpiData);
     const newFood = {
       restaurantMeal: STATIC_FOOD.restaurantMeal,
@@ -214,6 +212,13 @@ export default async function refresh(opts = {}) {
     }
 
     const oldRent = oldData?.rent ?? {};
+    // ONS 조회 실패·부재 필드(null) 가 기존 월세를 지우면 안 된다 — 2026-11-08 런던 4개 값 소실 회귀.
+    const newRent = {
+      share: mappedRent.share ?? oldRent.share ?? null,
+      studio: mappedRent.studio ?? oldRent.studio ?? null,
+      oneBed: mappedRent.oneBed ?? oldRent.oneBed ?? null,
+      twoBed: mappedRent.twoBed ?? oldRent.twoBed ?? null,
+    };
     const oldFood = oldData?.food ?? {};
     const oldGroceries = oldFood.groceries ?? {};
     let hasChanges = false;
