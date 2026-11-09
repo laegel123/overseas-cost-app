@@ -226,6 +226,12 @@ describe('refresh (integration)', () => {
     jest.useFakeTimers();
   });
 
+  it('기본 호출은 StatCan API 를 호출하지 않는다 (ADR-082)', async () => {
+    await refreshCaStatcan({ dryRun: true });
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+  }, 30000);
+
   it('useStatic=true: 정적 데이터 사용', async () => {
     const result = await refreshCaStatcan({ dryRun: true, useStatic: true });
 
@@ -248,7 +254,7 @@ describe('refresh (integration)', () => {
       } as unknown as Response;
     });
 
-    const result = await refreshCaStatcan({ dryRun: true });
+    const result = await refreshCaStatcan({ dryRun: true, allowLiveCpi: true });
 
     expect(result.source).toBe('ca_statcan');
   }, 30000);
@@ -271,7 +277,7 @@ describe('refresh (integration)', () => {
   it('API 오류: 정적 fallback → warnings (errors 는 비어 있음)', async () => {
     fetchSpy.mockRejectedValue(new Error('Network error'));
 
-    const result = await refreshCaStatcan({ dryRun: true });
+    const result = await refreshCaStatcan({ dryRun: true, allowLiveCpi: true });
 
     expect((result.warnings ?? []).some((w: RefreshWarning) => w.reason.includes('static fallback'))).toBe(true);
     expect(result.errors).toEqual([]);
@@ -314,7 +320,7 @@ describe('refresh (integration)', () => {
     }
     fetchSpy.mockRejectedValue(new Error('Network error'));
 
-    const result = await refreshCaStatcan({ dryRun: true });
+    const result = await refreshCaStatcan({ dryRun: true, allowLiveCpi: true });
 
     expect(result.cities).toHaveLength(0);
     expect(result.errors).toEqual([]);

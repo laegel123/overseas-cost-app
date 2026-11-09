@@ -198,7 +198,7 @@ export async function fetchSeriesReferencePeriod(vectorId) {
 
 /**
  * Statistics Canada CPI → 3개 캐나다 도시 food 갱신.
- * @param {{dryRun?: boolean, cities?: string[], useStatic?: boolean}} [opts]
+ * @param {{dryRun?: boolean, cities?: string[], useStatic?: boolean, allowLiveCpi?: boolean}} [opts]
  * @returns {Promise<RefreshResult>}
  */
 export default async function refresh(opts = {}) {
@@ -210,7 +210,9 @@ export default async function refresh(opts = {}) {
 
   const targetCities = opts.cities ?? Object.keys(CITY_CONFIGS);
 
-  if (opts.useStatic) {
+  // ADR-082 — CPI_VECTORS 가 잘못됐고 지수×현재가 공식도 틀려 실시간 경로를 기본 비활성화한다.
+  // `_run.mjs` 는 allowLiveCpi 를 넘기지 않으므로 cron 은 항상 정적값을 쓴다.
+  if (opts.useStatic || !opts.allowLiveCpi) {
     for (const cityId of targetCities) {
       const config = CITY_CONFIGS[cityId];
       const staticPrices = STATIC_PRICES[cityId];

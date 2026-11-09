@@ -129,7 +129,7 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
 
 - **출처**: **Statistics Canada CPI by item** (Vancouver CMA)
 - **API**: `https://www150.statcan.gc.ca/t1/wds/rest/getDataFromVectors` (StatCan WDS API, 키 불필요)
-- **자동화**: `scripts/refresh/ca_statcan.mjs` — 주 1회
+- **자동화**: `scripts/refresh/ca_statcan.mjs` — 주 1회. **현재 정적값 고정, 실시간 CPI 비활성 (ADR-082)**
 - **방법**: CPI 항목별 (밀크, 계란, 쌀, 치킨, 빵, 양파, 사과) Vancouver CMA 평균가. ramen 은 정적 (한인 마트 평균).
 
 ### 교통 — TransLink

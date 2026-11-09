@@ -46,6 +46,11 @@ const VALID_FARE_HTML = `
 `;
 
 describe('parseFareHtml', () => {
+  it('저소득층 정기권(Lifeline)을 일반 월 정기권으로 읽지 않는다', () => {
+    const html = '<h3>Lifeline Pass</h3><p>Monthly pass for qualified customers on a limited income</p><b>$43.00</b>';
+    expect(parseFareHtml(html, 'SFMTA').monthlyPass).toBeUndefined();
+  });
+
   it('정상 HTML 파싱: 1회권 + 월정기권', () => {
     const fares = parseFareHtml(VALID_FARE_HTML, 'MTA');
     expect(fares.singleRide).toBe(2.9);

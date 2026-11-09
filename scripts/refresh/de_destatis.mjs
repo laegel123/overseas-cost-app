@@ -34,7 +34,7 @@ export const CITY_CONFIGS = {
     currency: 'EUR',
     region: 'eu',
     bundesland: 'BY',
-    rentAdjustment: 1.35,
+    rentAdjustment: 1.0, // STATIC_RENT.munich 가 이미 뮌헨 수준 — 1.35 를 곱하면 이중 보정
     foodAdjustment: 1.10,
   },
 };
