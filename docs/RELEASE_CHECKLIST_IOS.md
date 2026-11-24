@@ -2,7 +2,7 @@
 
 > **목적:** App Store 첫 출시 진행 상황과 실제 제출값을 기록하는 living 문서. 진행하면서 상태를 갱신한다.
 >
-> **현재 상태 (2026-11-09):** 심사 대기 (`Waiting for Review`). 수동 출시로 설정돼 있어 승인돼도 자동 공개되지 않는다.
+> **현재 상태 (2026-11-24):** 재제출 후 심사 대기 (`Waiting for Review`). 첫 제출은 2026-11-10 Guideline 2.1 정보 요청으로 거절됐다 (아래 [심사 이력](#심사-이력)). 수동 출시로 설정돼 있어 승인돼도 자동 공개되지 않는다.
 >
 > **Android:** `docs/RELEASE_CHECKLIST.md` 참조.
 
@@ -13,7 +13,7 @@
 ### 출시(Release This Version) 전 — 필수
 
 - ⬜ **GDPR 동의 폼 확인** — EU 를 판매 국가에 포함했다. 2026-09-29 EEA 시험에서 폼이 뜨지 않았고(`status:OBTAINED`, `isConsentFormAvailable:false`) 원인은 추정(게시 반영 지연)에 그쳤다. AdMob 콘솔에서 GDPR 메시지 게시 상태·대상 iOS 앱을 확인하고 `docs/TESTING.md` §18.9 절차로 재시험한다.
-- ⬜ **EU Trader 신고** — App Store Connect → Business → Compliance → Digital Services Act. 주소·전화번호·이메일이 EU 스토어에 공개된다. 판매 국가는 175개(EU 포함).
+- ⬜ **EU Trader 신고** — App Store Connect → Business → Compliance → Digital Services Act. 주소·전화번호·이메일이 EU 스토어에 공개된다. 판매 국가는 EU 포함, 중국 본토 제외.
 
 ### 승인 후
 
@@ -23,7 +23,30 @@
 
 ### 기한이 있는 후속
 
+- ⬜ **연령 등급 응답 업데이트 (위치 공유·데이팅)** — ASC 안내상 2027-01-15 부터 요구된다. 다음 버전 제출 전에 앱 정보 → 연령 등급에서 답한다.
 - ⬜ **Expo SDK 57+ 업그레이드 + UIScene 채택** — `sdk-54` 이미지 고정(ADR-080)은 Apple 이 업로드 최소 요건을 Xcode 27 로 올리면(예년 패턴상 2027-04 경) 제출을 통과하지 못한다.
+
+---
+
+## 심사 이력
+
+| 날짜 | 결과 | 내용 |
+|---|---|---|
+| 2026-11-09 | 제출 | 1.1.0 (2) |
+| 2026-11-10 | 거절 | Guideline 2.1 Information Needed (2.1.0 Performance: App Completeness). 앱 결함 지적이 아니라 정보 요청이다 |
+| 2026-11-24 | 재제출 | 같은 빌드. 심사 메모 교체, App Review 메시지에 답장, 판매 국가에서 중국 본토 제외 |
+
+**Apple 이 요청한 정보 (심사 메모에 기입):**
+1. 실기기·최신 OS 화면 녹화 — 앱 실행부터 시작해 주요 흐름을 보여 줄 것
+2. 앱의 목적과 대상 사용자
+3. 주요 기능 사용 방법 (로그인 정보·샘플 파일 포함)
+4. 핵심 기능에 쓰는 외부 서비스 목록
+5. 지역별 기능·콘텐츠 차이
+6. 규제 산업·제3자 보호 자료 여부와 관련 증빙
+
+**화면 녹화:** iPhone, iOS 27.2.1. TestFlight 1.1.0 (2) 를 삭제 후 재설치해 첫 실행(ATT 팝업)부터 녹화했다. 흐름은 온보딩 도시 선택 → 비교 화면 토글 → 상세 → 즐겨찾기 → 홈 → 설정의 데이터 출처·개인정보 처리방침. Google Drive 에 올려 링크가 있는 모든 사용자에게 보기 권한을 줬다 (`https://drive.google.com/file/d/1CCaL8uEQllND6uWrJ8ZZdtY7qaE4HmCw/view`). 심사가 끝날 때까지 링크를 유지한다.
+
+**중국 본토 제외:** 재제출 시 "중국 본토 보안 평가 완료 증명·보고서"와 "AI 생성·합성 콘텐츠(AIGC) 서비스 신고"가 없어 심사에 추가할 수 없었다. 개인 개발자가 준비하기 어렵고, 대상 사용자가 아니며, AdMob·GitHub 가 중국 본토에서 정상 동작하지 않아 판매 국가에서 뺐다.
 
 ---
 
@@ -70,7 +93,7 @@ IPA 에서 함께 확인한 값: `ITSAppUsesNonExemptEncryption=false`, AdMob �
 | 부제 | `서울 vs 해외, 한 달에 얼마?` |
 | 카테고리 | Travel |
 | 가격 | 무료 |
-| 판매 국가 | 175개 (EU 포함) |
+| 판매 국가 | EU 포함, 중국 본토 제외 (2026-11-24 재제출 때 제외) |
 | 지원 URL | `https://github.com/laegel123/overseas-cost-app/issues` |
 | 마케팅 URL | `https://laegel123.github.io` (`app-ads.txt` 도메인) |
 | 개인정보 처리방침 URL | `https://laegel123.github.io/overseas-cost-app/privacy-policy.html` |
@@ -155,15 +178,36 @@ laegel1@gmail.com
 
 ### 심사 메모
 
+2026-11-24 재제출본. Apple 이 요청한 6개 항목 순서를 따른다. `Salkka Malkka` 는 앱 이름의 영문 표기로 이 메모에서만 쓴다.
+
 ```
-No account or login is required.
+1. Screen recording (physical iPhone, iOS 27.2.1, starting from app launch):
+https://drive.google.com/file/d/1CCaL8uEQllND6uWrJ8ZZdtY7qaE4HmCw/view
 
-On first launch, select any city on the onboarding screen to open the comparison view.
+2. Purpose and target audience
+Salkka Malkka helps Korean residents of Seoul who are preparing to study or work abroad compare the cost of living in Seoul with 20 overseas cities. It compares rent, food, transport, tuition, tax, and visa costs item by item, with values converted to KRW and a multiplier versus Seoul. It solves the problem of scattered, hard-to-compare cost information by putting public data side by side in one view.
 
-The app shows Google AdMob banner ads on the Home, Compare, and Detail screens only. The App Tracking Transparency prompt appears through Google UMP around first launch. Declining tracking does not limit any feature. Banner ads may not appear during review if no ad is available; the layout is unaffected.
+3. How to use the app
+No account, login, or sample files are required. There is no user-generated content and no paid content or in-app purchase.
+- On first launch, select any city on the onboarding screen. The comparison screen opens.
+- Tap a category card to open the detail screen. Use the card toggles to include or exclude a category from the total.
+- Tap the star to add a city to Favorites (Favorites tab).
+- Settings shows data sources, the privacy policy, and ad privacy options.
 
-Cost data comes from public sources such as government statistics and official transit and university pages. Sources are shown in Settings and on each detail screen. Some values are estimates based on official figures and are labeled as such.
+4. External services
+- GitHub (raw.githubusercontent.com): hosts the app's city cost data as static JSON files. A copy of the data is bundled in the app as a fallback.
+- open.er-api.com: currency exchange rates.
+- Google AdMob and Google User Messaging Platform (UMP): banner ads on the Home, Compare, and Detail screens, and the ad consent form.
+- The cost data itself comes from public sources such as government statistics agencies and official transit operator and university websites. The data is refreshed automatically from these sources. Sources are listed in Settings and on each detail screen.
+
+5. Regional differences
+The app's features and content are the same in all regions. The only difference is legal: users in the EEA, UK, and Switzerland see the Google UMP ad consent form as required by law. The App Tracking Transparency prompt is shown in all regions, and declining it does not limit any feature.
+
+6. Regulated industry / third-party material
+The app does not operate in a regulated industry and does not provide financial, legal, or immigration advice. It uses only publicly available government and official institution data, with attribution shown in the app. Some values are estimates derived from official figures and are labeled as estimates. Banner ads may not appear during review if no ad is available; the layout is unaffected.
 ```
+
+5번의 "EEA·영국·스위스에서만 동의 폼" 은 Google UMP 기본 동작 기준이다. 실제로 폼이 뜨는지는 위 GDPR 확인 항목에서 검증한다.
 
 ---
 
@@ -171,6 +215,8 @@ Cost data comes from public sources such as government statistics and official t
 
 - `eas build` 는 사용자 터미널에서 실행한다 (에이전트 셸에서 제출 단계가 멈춘 이력). 인증서·프로필은 EAS 저장본을 재사용한다.
 - 로컬 Xcode 27 빌드는 iOS 27 실기기에서 실행되지 않는다. 실기기 검증은 TestFlight 로 한다 (ADR-080).
+- 심사 메모는 위 6개 항목 형식을 유지한다. 화면 흐름이 바뀌면 실기기 화면 녹화도 다시 찍는다.
+- 판매 국가에 중국 본토를 다시 넣으면 보안 평가·AIGC 신고 없이는 심사에 추가할 수 없다.
 - EAS 가 만든 앱은 기본 언어가 영어이고 이름에 임의 문자가 붙을 수 있다. 이번 버전에서 정리했다.
 
 ## 알려진 후속
