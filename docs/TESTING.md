@@ -1461,7 +1461,7 @@ chrome 클래스 검증은 inner 노드 기준).
 
 - [x] back 버튼 탭 → onBack 호출
 - [x] back 버튼 시각: 36×36, `bg-light` (디자인 토큰)
-- [x] right accent='star' → `bg-orange-soft`
+- [x] right accent='star' → 배경 `bg-light` 유지, 아이콘 stroke·fill = `colors.yellow` (ADR-083)
 - [x] right accent='default' → `bg-light`
 - [x] right 버튼 탭 → onRightPress 호출
 - [x] **`rightIcon` + `onRightPress` 둘 다 있어야 버튼 렌더** — 한쪽만 주면 silent no-op 회피 차원에서 버튼 미렌더 (rightIcon-only / onRightPress-only 두 케이스 모두 검증)

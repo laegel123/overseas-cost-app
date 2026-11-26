@@ -63,7 +63,7 @@ PRD 기준 5개 핵심 화면을 hi-fi로 mock한 상태입니다.
 - **Purpose**: 앱의 심장. 한눈에 "서울 vs 도시 X" 한 달 비용 배수를 보여주고, 카테고리별로 SEO/CITY 두 막대를 나란히 비교.
 - **Layout**: top bar(back / title / star) → 주황 hero card → 카테고리 듀얼 바 4개 → 출처 영역 → 하단 탭 바.
 - **Components**:
-  - **Top bar**: 36×36 아이콘 버튼 두 개(좌 back / 우 star), 가운데 `서울 vs 밴쿠버` 14px Manrope 700 + `1 CAD = 980원 · 04-27` 10px tiny. **아이콘 버튼 색이 다름**: back = `#F0F5F9` light, star = `#FFE9DC` orange-soft.
+  - **Top bar**: 36×36 아이콘 버튼 두 개(좌 back / 우 star), 가운데 `서울 vs 밴쿠버` 14px Manrope 700 + `1 CAD = 980원 · 04-27` 10px tiny. 아이콘 버튼 배경은 둘 다 `#F0F5F9` light. 즐겨찾기가 켜지면 star 아이콘을 `#FFC107` yellow 로 채운다 (ADR-083). *이전: star 버튼 배경 `#FFE9DC` orange-soft — 되돌리지 말 것.*
   - **Hero card (orange fill)**: padding 18, border-radius 22px, background `#FC6011`, color white, shadow `0 12px 32px rgba(252,96,17,0.25)`. 우상단에 반투명 흰 원(120×120, opacity 0.08) decorative.
     - 위 라벨: `한눈에 보는 물가 비교` 11px uppercase letter-spacing 0.08em + info icon
     - 3-column row (모두 `whiteSpace: nowrap`, `flexShrink: 0`로 squeeze 방지):
@@ -181,6 +181,7 @@ type ItemComparison = {
 --orange:        #FC6011  /* primary, hot, accent */
 --orange-soft:   #FFE9DC  /* hot icon container bg */
 --orange-tint:   #FFF4ED  /* primary persona card bg */
+--yellow:        #FFC107  /* favorite star fill (ADR-083) */
 --navy:          #11263C  /* text primary, bottom-tab inactive bg, hero */
 --navy-2:        #1d3a55  /* gradient end (settings persona card) */
 --gray:          #52616B  /* secondary text, ghost button */

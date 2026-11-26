@@ -6,6 +6,8 @@ import * as React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
+import { colors } from '@/theme/tokens';
+
 import { TopBar } from '../TopBar';
 
 describe('TopBar', () => {
@@ -133,10 +135,10 @@ describe('TopBar', () => {
       );
       const right = screen.getByTestId('tb-right');
       expect(right.props.className).toContain('bg-light');
-      expect(right.props.className).not.toContain('bg-orange-soft');
+      expect(JSON.stringify(screen.toJSON())).not.toContain(colors.yellow);
     });
 
-    it('right accent="star" → bg-orange-soft', () => {
+    it('right accent="star" → 배경은 bg-light 유지, 아이콘만 yellow 채움', () => {
       render(
         <TopBar
           title="x"
@@ -147,7 +149,11 @@ describe('TopBar', () => {
         />,
       );
       const right = screen.getByTestId('tb-right');
-      expect(right.props.className).toContain('bg-orange-soft');
+      expect(right.props.className).toContain('bg-light');
+      expect(right.props.className).not.toContain('bg-orange-soft');
+      const tree = JSON.stringify(screen.toJSON());
+      expect(tree).toContain(`"fill":"${colors.yellow}"`);
+      expect(tree).toContain(`"stroke":"${colors.yellow}"`);
     });
 
     it('title 긴 문자열 → numberOfLines={1}', () => {
