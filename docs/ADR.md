@@ -98,3 +98,4 @@
 | [080](adr/080-eas-ios-image-pin-sdk54.md) | EAS iOS 빌드 이미지 `sdk-54`(Xcode 26.0) 고정 | Active | Xcode 27 SDK 빌드는 UIScene 미채택 시 iOS 27 실행 크래시, SDK 57+ 업그레이드 전까지 |
 | [081](adr/081-eas-remote-app-version.md) | 빌드 번호 EAS 원격 관리 + production 자동 증가 | Active | `appVersionSource: remote`, 사용자 버전은 app.json 유지 |
 | [082](adr/082-ca-statcan-live-cpi-disabled.md) | `ca_statcan` 실시간 CPI 임시 비활성 (ADR-032 예외) | Active | vector 전부 오류·지수×현재가 공식 오류, 재구현 전까지 정적값 고정 |
+| [083](adr/083-favorite-star-yellow-fill.md) | 즐겨찾기 별 — 배경 강조 대신 아이콘 yellow 채움 | Active | `yellow` 토큰 추가, `Icon` `fill` prop, TopBar accent='star' 배경은 `bg-light` 유지 |

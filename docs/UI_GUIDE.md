@@ -63,6 +63,7 @@
 --orange:        #FC6011   /* primary CTA, hot threshold */
 --orange-soft:   #FFE9DC   /* hot icon container bg */
 --orange-tint:   #FFF4ED   /* primary persona card bg */
+--yellow:        #FFC107   /* favorite star fill (ADR-083) */
 --navy:          #11263C   /* primary text, hero card */
 --navy-2:        #1d3a55   /* gradient end (settings persona card) */
 --gray:          #52616B   /* secondary text */

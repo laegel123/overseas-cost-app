@@ -5,7 +5,7 @@
  * 은 tailwind config — 매직 hex / px 금지.
  *
  * 좌측 back 버튼: 36×36 light bg + Icon 'back'.
- * 우측 버튼: 36×36, 기본 bg-light. accent='star' 일 때 orange-soft bg (즐겨찾기 강조).
+ * 우측 버튼: 36×36 bg-light. accent='star' 일 때 아이콘을 yellow 로 채움 (즐겨찾기 강조, ADR-083).
  * title: H2 navy, 가운데 정렬, 1줄 ellipsis.
  * subtitle: title 아래 Tiny gray-2, 1줄 ellipsis.
  */
@@ -13,6 +13,8 @@
 import * as React from 'react';
 
 import { Pressable, View } from 'react-native';
+
+import { colors } from '@/theme/tokens';
 
 import { Icon, type IconName } from './Icon';
 import { H2, H3, Tiny } from './typography/Text';
@@ -62,8 +64,7 @@ export function TopBar({
   // 이라 디버깅 어렵고 의미 없음. 의도적 read-only icon 이 필요한 케이스가
   // 생기면 별도 prop (`rightIconReadOnly`) 추가 후 ADR.
   const showRight = rightIcon !== undefined && onRightPress !== undefined;
-  const rightBgClass =
-    rightIconAccent === 'star' ? 'bg-orange-soft' : 'bg-light';
+  const rightStarred = rightIconAccent === 'star';
   const TitleComponent = titleVariant === 'h3' ? H3 : H2;
 
   return (
@@ -99,10 +100,16 @@ export function TopBar({
             onPress={onRightPress}
             accessibilityRole="button"
             accessibilityLabel={rightIconAccessibilityLabel ?? '우측 메뉴'}
-            className={`${BUTTON_SIZE_CLASS} ${rightBgClass}`}
+            className={`${BUTTON_SIZE_CLASS} bg-light`}
             testID={testID !== undefined ? `${testID}-right` : undefined}
           >
-            <Icon name={rightIcon} size={22} />
+            <Icon
+              name={rightIcon}
+              size={22}
+              {...(rightStarred
+                ? { color: colors.yellow, fill: colors.yellow }
+                : {})}
+            />
           </Pressable>
         )}
       </View>

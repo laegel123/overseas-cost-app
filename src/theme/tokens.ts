@@ -12,6 +12,7 @@ export const colors = {
   orange: '#FC6011',
   orangeSoft: '#FFE9DC',
   orangeTint: '#FFF4ED',
+  yellow: '#FFC107',
   navy: '#11263C',
   navy2: '#1d3a55',
   gray: '#52616B',

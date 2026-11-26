@@ -91,6 +91,8 @@ export type IconProps = {
    * 못하도록 좁힘 (CLAUDE.md CRITICAL).
    */
   color?: (typeof colors)[ColorToken];
+  /** 채움 색. 미제공 시 lucide 기본 (outline). */
+  fill?: (typeof colors)[ColorToken];
   strokeWidth?: number;
   testID?: string;
   accessibilityLabel?: string;
@@ -134,6 +136,7 @@ export function Icon({
   name,
   size = DEFAULT_SIZE,
   color = colors.navy,
+  fill,
   strokeWidth = DEFAULT_STROKE_WIDTH,
   testID,
   accessibilityLabel,
@@ -157,7 +160,12 @@ export function Icon({
       testID={testID}
       accessibilityLabel={accessibilityLabel}
     >
-      <Component size={size} color={color} strokeWidth={strokeWidth} />
+      <Component
+        size={size}
+        color={color}
+        strokeWidth={strokeWidth}
+        {...(fill !== undefined ? { fill } : {})}
+      />
     </View>
   );
 }
