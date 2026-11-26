@@ -1934,13 +1934,12 @@ wiring 계약: `onSelect(tab)` → 대상 route 로 `tabPress` emit → screen `
 
 - [x] route name ↔ Tab 매핑 — index 스크린 active → 홈 탭 `selected` 파생
 - [x] settings 스크린 active → 설정 탭 `selected`
-- [x] 비focus 탭 선택 → `navigation.navigate(<routeName>)` (home=`index` / settings)
+- [x] 비focus 탭 선택 → `navigation.navigate(<routeName>)` (home=`index` / favorites / settings)
 - [x] 이미 focus 된 탭 재선택 → navigate no-op (중복 push 방지)
 - [x] compare 선택 → `tabPress` emit → listener preventDefault + redirect → 기본 navigate 억제
 - [x] compare 타깃 = `recent[0] ?? favorites[0]` (recent 우선, 없으면 favorites fallback)
 - [x] compare + 도시 0개 → `router.replace('/')` + Alert
-- [x] favorites 선택 → `/compare/<favorites[0]>` (recent 무시)
-- [x] favorites + 즐겨찾기 0개 → `router.replace('/')` + Alert
+- [x] favorites 선택 → 기본 `navigate('favorites')`, redirect·Alert 없음 — 즐겨찾기 유무 무관 (ADR-084)
 
 ### 9.22 `app/onboarding.tsx` — placeholder spec (deprecated)
 
@@ -2236,6 +2235,17 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] error 상태 (`detail-screen-error`) → `ad-banner` 부재
 - [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재
 
+### 9.26.1 `app/(tabs)/favorites.tsx` (즐겨찾기 탭 — 목록 화면, ADR-084)
+
+- [x] 로딩 중 → `favorites-screen-loading` 스피너
+- [x] 즐겨찾기 0개 → `favorites-empty` + CTA, CTA 탭 → `router.navigate('/')`
+- [x] 즐겨찾기 여러 개 → 스토어 순서대로 `favorites-row-<id>` 전부 표시
+- [x] 행 탭 → `router.push('/compare/<id>')`
+- [x] 데이터에 없는 도시 id · `seoul` 은 목록에서 제외
+- [x] 서울 데이터 없음 → `favorites-screen-error`
+- [x] 로드 실패 → 에러 메시지 + "다시 시도" → 재로드 후 ready
+- [x] 광고 footer 없음 (ADR-077)
+
 ### 9.26 `app/(tabs)/index.tsx` (홈)
 
 screens phase step 2 구현 — 재방문 사용자가 빠르게 즐겨찾기 도시로 진입하거나 새 도시를 검색.
@@ -2462,13 +2472,12 @@ UI_GUIDE.md §에러 메시지 한국어 표준 카탈로그 검증.
 ### 9.27.3 하단 탭 동작 정책 (ARCHITECTURE.md §하단 탭)
 
 > 어댑터 wiring(route↔Tab 매핑, `tabPress` emit 계약, focus 시 navigate 억제) 테스트는 §9.21.1.
-> 아래는 정책 명세이며, 토스트 문구는 v1.0 에서 네이티브 `Alert` 로 대체(ADR-041).
+> 아래는 정책 명세이며, 토스트 문구는 v1.0 에서 네이티브 `Alert` 로 대체(ADR-041). 즐겨찾기 탭은 ADR-084.
 
 - [ ] 홈 탭 → `/(tabs)/index`
 - [ ] 비교 탭 + 최근 본 ≥1 → `/compare/<recent[0]>`
 - [ ] 비교 탭 + 최근 본 0개 → 홈 + "먼저 도시를 선택해 주세요" 토스트
-- [ ] 즐겨찾기 탭 + 즐겨찾기 ≥1 → `/compare/<favorites[0]>`
-- [ ] 즐겨찾기 탭 + 즐겨찾기 0개 → 홈 + "즐겨찾기를 먼저 추가해 주세요" 토스트
+- [x] 즐겨찾기 탭 → `/(tabs)/favorites` 목록 화면 (행 탭 → `/compare/<id>`, 0개 → 화면 내 빈 상태) — §9.26.1
 - [ ] 설정 탭 → `/(tabs)/settings`
 
 ### 9.28 환경변수 / 설정
@@ -4236,7 +4245,8 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 
 - [x] `favorite-toggle` — ⭐ 추가/제거 → 홈 즐겨찾기 카드 반영 (복귀 후 검색어 clear 필요)
 - [x] `recent-tracking` — Compare 진입 → 최근 본 목록 + 설정 통계 (복귀 후 검색어 clear 필요)
-- [x] `tabs-empty-alert` — 최근/즐겨찾기 없을 때 탭 → 네이티브 Alert (탭 라벨 '비교, tab.*')
+- [x] `tabs-empty-alert` — 최근/즐겨찾기 없을 때 비교 탭 → 네이티브 Alert (탭 라벨 '비교, tab.*')
+- [x] `favorites-tab-list` — 즐겨찾기 탭 → 목록 → 행 탭 → Compare (ADR-084)
 - [x] `tabs-populated-redirect` — 최근 있으면 비교 탭이 Compare 로 redirect (탭 라벨 '비교, tab.*')
 
 **05-detail**

@@ -12,6 +12,7 @@ overseas-cost-app/
 │   ├── (tabs)/                   # 하단 탭 그룹
 │   │   ├── _layout.tsx           # BottomTabBar (홈/비교/즐겨찾기/설정)
 │   │   ├── index.tsx             # 홈
+│   │   ├── favorites.tsx         # 즐겨찾기 목록 (ADR-084)
 │   │   └── settings.tsx          # 설정
 │   ├── compare/[cityId].tsx      # 비교 화면 (서울 vs 도시)
 │   ├── detail/[cityId]/[category].tsx  # 항목 상세 (식비, 월세, ...)
@@ -103,6 +104,7 @@ overseas-cost-app/
 
 /onboarding                     # 1회성 도시 선택, 즐겨찾기 추가 + onboarded=true 후 /compare/[cityId] 로 이동 (ADR-067)
 /(tabs)/index                   # 홈 (즐겨찾기·검색·최근)
+/(tabs)/favorites               # 즐겨찾기 목록 → 행 탭 시 /compare/[cityId] (ADR-084)
 /(tabs)/settings                # 설정
 /compare/[cityId]               # 비교 (서울 vs city)
 /detail/[cityId]/[category]     # 항목 상세 (food | rent | transport | tuition | tax | visa)
@@ -111,7 +113,7 @@ overseas-cost-app/
 /privacy                        # 개인정보 처리방침
 ```
 
-- 즐겨찾기·비교 탭은 v1.0 에서 **홈을 재사용**한다(필터 전환만). 별도 화면 추가는 v2 이후.
+- 비교 탭은 별도 화면 없이 라우팅 단축으로 동작한다 (ADR-041). 즐겨찾기 탭은 목록 화면이다 (ADR-084).
 - Stack 기반 push/pop. 비교 → 상세 → 비교 → 홈 백 스택 보존.
 
 ## 데이터 흐름
@@ -337,10 +339,10 @@ export class AppError extends Error {
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **홈**       | `/(tabs)/index` 로 이동. 항상 활성.                                                                                                                                                            |
 | **비교**     | 마지막으로 본 비교 도시(`useRecentStore.cityIds[0]`)로 `/compare/<id>` 이동. 최근 본 도시 0개일 때 → 홈의 "관심 도시 골라보기" CTA 영역으로 스크롤 + 안내 토스트 ("먼저 도시를 선택해 주세요") |
-| **즐겨찾기** | 즐겨찾기 1개+ 일 때: 첫 즐겨찾기 도시로 `/compare/<id>`. 즐겨찾기 0개일 때: 홈 + "즐겨찾기를 먼저 추가해 주세요" 토스트                                                                        |
+| **즐겨찾기** | `/(tabs)/favorites` 목록 화면. 행 탭 → `/compare/<id>`. 즐겨찾기 0개일 때: 화면 내 빈 상태 + "도시 둘러보기" CTA(홈으로) (ADR-084) |
 | **설정**     | `/(tabs)/settings`                                                                                                                                                                             |
 
-별도 즐겨찾기·비교 화면은 v1.0 미도입 (ADR-038). v2 에서 본격적인 즐겨찾기 화면(목록 편집·정렬) 검토.
+별도 비교 탭 화면은 미도입 (ADR-038). 즐겨찾기 목록의 편집·정렬은 미도입 (ADR-084).
 
 ### 화면별 백 동작
 

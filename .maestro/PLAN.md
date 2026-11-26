@@ -57,7 +57,7 @@ npm run e2e                               # 전체 (smoke + flows/**)
 - **리스크(광고, ADR-077):** 하단 배너(로드 시 높이 발생)로 스크롤 거리가 달라질 수 있음. 스크린샷에 'Test Ad' 라벨은 정상(dev 빌드).
 
 ### 04-favorites-recent
-- **관찰:** ⭐ 토글 → 홈 카드, 최근 누적, 탭 redirect(빈=Alert / 채워짐=Compare).
+- **관찰:** ⭐ 토글 → 홈 카드, 최근 누적, 비교 탭 redirect(빈=Alert / 채워짐=Compare), 즐겨찾기 탭 목록 → Compare (ADR-084).
 - **리스크:** `tabs-empty-alert` 의 확인 버튼은 시뮬레이터 로케일에 따라 `확인`/`OK` — 정규식 `확인|OK` 로 대응. 탭 탭은 라벨 텍스트('비교'/'즐겨찾기')로 탭.
 
 ### 05-detail

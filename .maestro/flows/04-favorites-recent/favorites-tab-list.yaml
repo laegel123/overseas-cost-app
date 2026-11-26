@@ -1,0 +1,25 @@
+# UC: 즐겨찾기 탭 → 즐겨찾기 목록 → 행 탭 → 그 도시 Compare (ADR-084).
+appId: com.laegel.overseascostapp
+tags:
+  - favorites
+  - tabs
+---
+# 온보딩이 밴쿠버를 즐겨찾기에 1건 남긴다 (common/onboard.yaml).
+- runFlow: ../../common/onboard.yaml
+# 탭에는 testID 가 없고 라벨 '즐겨찾기' 는 홈의 섹션 헤더와 겹친다 — 화면 아래쪽(탭 바)의
+# 것을 고르기 위해 index 로 한정한다.
+- tapOn:
+    text: '즐겨찾기'
+    index: 1
+- assertVisible:
+    id: 'favorites-screen'
+- tapOn:
+    id: 'favorites-row-vancouver'
+- assertVisible:
+    id: 'compare-screen'
+- assertVisible: '서울 vs 밴쿠버'
+# 뒤로가기 → 즐겨찾기 목록으로 복귀
+- tapOn:
+    id: 'compare-topbar-back'
+- assertVisible:
+    id: 'favorites-screen'

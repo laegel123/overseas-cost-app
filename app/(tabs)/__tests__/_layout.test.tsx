@@ -5,9 +5,9 @@
  * 검증 대상(리뷰 회귀 방지):
  *   - route name ↔ Tab 매핑 (index 스크린 = 'home' 탭), active 파생
  *   - onSelect → 대상 라우트로 tabPress emit
- *   - home/settings: 기본 navigate (focus 시 no-op)
- *   - compare/favorites: listeners 가 preventDefault + redirect → 기본 navigate 억제
- *   - compare 타깃 = recent[0] ?? favorites[0], favorites 타깃 = favorites[0]
+ *   - home/favorites/settings: 기본 navigate (focus 시 no-op)
+ *   - compare: listener 가 preventDefault + redirect → 기본 navigate 억제
+ *   - compare 타깃 = recent[0] ?? favorites[0]
  *   - 도시 0개 → router.replace('/') + Alert
  *
  * expo-router Tabs 는 react-navigation 의 custom tabBar 계약(emit('tabPress') →
@@ -186,21 +186,20 @@ describe('TabsLayout — BottomTabBar 어댑터', () => {
     expect(mockTabNavigate).not.toHaveBeenCalled();
   });
 
-  it('즐겨찾기 탭 선택 + favorites 존재 → router.navigate("/compare/<favorites[0]>")', () => {
-    favoriteIds = ['seoul'];
-    render(<TabsLayout />);
+  it('즐겨찾기 탭 선택 → 기본 navigate("favorites"), redirect 없음 (favorites 유무 무관)', () => {
+    favoriteIds = ['tokyo'];
+    const { unmount } = render(<TabsLayout />);
     fireEvent.press(screen.getByLabelText('즐겨찾기'));
-    expect(mockRouterNavigate).toHaveBeenCalledWith('/compare/seoul');
-    expect(mockTabNavigate).not.toHaveBeenCalled();
-  });
+    expect(mockTabNavigate).toHaveBeenCalledWith('favorites');
+    expect(mockRouterNavigate).not.toHaveBeenCalled();
+    unmount();
 
-  it('즐겨찾기 탭 선택 + favorites 없음 → router.replace("/") + Alert (recent 무시)', () => {
-    recentIds = ['tokyo'];
+    mockTabNavigate.mockClear();
     favoriteIds = [];
     render(<TabsLayout />);
     fireEvent.press(screen.getByLabelText('즐겨찾기'));
-    expect(mockRouterReplace).toHaveBeenCalledWith('/');
-    expect(alertSpy).toHaveBeenCalledTimes(1);
-    expect(mockRouterNavigate).not.toHaveBeenCalled();
+    expect(mockTabNavigate).toHaveBeenCalledWith('favorites');
+    expect(mockRouterReplace).not.toHaveBeenCalled();
+    expect(alertSpy).not.toHaveBeenCalled();
   });
 });

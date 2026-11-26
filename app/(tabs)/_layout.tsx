@@ -6,10 +6,10 @@
  * (active=orange / inactive=gray-2, icon 22px, label 10px Mulish) 은 BottomTabBar
  * 단일 출처 — _layout 에 중복 구현하지 않는다.
  *
- * ADR-041: v1.0 비교·즐겨찾기 탭은 라우팅 단축으로 동작.
+ * ADR-041: 비교 탭은 라우팅 단축으로 동작.
  * - 비교 탭 = recent[0] 또는 favorites[0]으로 redirect
- * - 즐겨찾기 탭 = favorites[0]으로 redirect
  * - 도시 0개 시 = 홈으로 이동 + Alert 안내 (토스트 미구현)
+ * ADR-084: 즐겨찾기 탭은 일반 탭 화면(목록)이다 — redirect 하지 않는다.
  */
 
 import * as React from 'react';
@@ -65,24 +65,9 @@ export default function TabsLayout(): React.ReactElement {
     [router, recentIds, favoriteIds],
   );
 
-  const handleFavoritesTabPress = React.useCallback(
-    (e: TabPressEvent) => {
-      e.preventDefault();
-
-      const targetId = favoriteIds[0];
-      if (targetId) {
-        router.navigate(`/compare/${targetId}`);
-      } else {
-        router.replace('/');
-        Alert.alert('알림', '즐겨찾기가 없어요.\n홈에서 별 아이콘을 눌러 추가해 주세요.');
-      }
-    },
-    [router, favoriteIds],
-  );
-
   // BottomTabBar 를 Tabs 에 어댑터로 연결. onSelect → 대상 라우트로 tabPress emit →
-  // compare/favorites 의 listeners 가 preventDefault + redirect 를 그대로 수행
-  // (redirect 로직 단일 출처 유지). 그 외(home/settings)는 기본 navigate.
+  // compare 의 listener 가 preventDefault + redirect 를 그대로 수행
+  // (redirect 로직 단일 출처 유지). 그 외(home/favorites/settings)는 기본 navigate.
   const renderTabBar = React.useCallback(
     ({ state, navigation }: BottomTabBarProps): React.ReactElement => {
       // noUncheckedIndexedAccess: 인덱스 접근 결과가 `T | undefined` 라 두 fallback
@@ -121,11 +106,7 @@ export default function TabsLayout(): React.ReactElement {
         options={{ title: '비교' }}
         listeners={{ tabPress: handleCompareTabPress }}
       />
-      <Tabs.Screen
-        name="favorites"
-        options={{ title: '즐겨찾기' }}
-        listeners={{ tabPress: handleFavoritesTabPress }}
-      />
+      <Tabs.Screen name="favorites" options={{ title: '즐겨찾기' }} />
       <Tabs.Screen name="settings" options={{ title: '설정' }} />
     </Tabs>
   );
