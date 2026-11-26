@@ -99,3 +99,4 @@
 | [081](adr/081-eas-remote-app-version.md) | 빌드 번호 EAS 원격 관리 + production 자동 증가 | Active | `appVersionSource: remote`, 사용자 버전은 app.json 유지 |
 | [082](adr/082-ca-statcan-live-cpi-disabled.md) | `ca_statcan` 실시간 CPI 임시 비활성 (ADR-032 예외) | Active | vector 전부 오류·지수×현재가 공식 오류, 재구현 전까지 정적값 고정 |
 | [083](adr/083-favorite-star-yellow-fill.md) | 즐겨찾기 별 — 배경 강조 대신 아이콘 yellow 채움 | Active | `yellow` 토큰 추가, `Icon` `fill` prop, TopBar accent='star' 배경은 `bg-light` 유지 |
+| [084](adr/084-favorites-tab-list-screen.md) | 즐겨찾기 탭 — 라우팅 단축 대신 목록 화면 | Active | ADR-041 부분 대체(비교 탭 단축은 유지), `RecentRow` 재사용, 빈 상태는 화면 내 CTA, 광고 없음 |
