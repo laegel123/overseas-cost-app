@@ -8,7 +8,9 @@
  * API 키: `US_HUD_API_KEY` 필요 — HUD User 계정에서 발급한 access token 을
  * `Authorization: Bearer` 헤더로 보낸다. 없으면 401 (ADR-085).
  *
- * 방법: MSA 별 FMR by # bedrooms
+ * 방법: 도시 중심 HUD 하위 FMR 지역(HMFA) 의 FMR by # bedrooms (ADR-086). 5개 도시 모두 HUD 가
+ * MSA 를 HMFA 로 나누는 곳이라 MSA 코드(`METRO#####M#####`)는 404 — `GET /fmr/listMetroAreas` 의 코드를 쓴다.
+ * 값은 월세 USD (40th percentile gross rent, 연도 미지정 시 최신 회계연도).
  * 0BR → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정 (ADR-059)
  */
 
@@ -24,7 +26,8 @@ export const CITY_CONFIGS = {
     country: 'US',
     currency: 'USD',
     region: 'na',
-    entityId: 'METRO35620M35620',
+    // New York, NY HUD Metro FMR Area — Bronx·Kings·New York·Putnam·Queens·Richmond·Rockland·Westchester
+    entityId: 'METRO35620MM5600',
   },
   la: {
     id: 'la',
@@ -32,7 +35,8 @@ export const CITY_CONFIGS = {
     country: 'US',
     currency: 'USD',
     region: 'na',
-    entityId: 'METRO31080M31080',
+    // Los Angeles-Long Beach-Glendale, CA HUD Metro FMR Area — LA 카운티 (Small Area FMR 지역)
+    entityId: 'METRO31080MM4480',
   },
   sf: {
     id: 'sf',
@@ -40,7 +44,8 @@ export const CITY_CONFIGS = {
     country: 'US',
     currency: 'USD',
     region: 'na',
-    entityId: 'METRO41860M41860',
+    // San Francisco, CA HUD Metro FMR Area — Marin·San Francisco·San Mateo
+    entityId: 'METRO41860MM7360',
   },
   seattle: {
     id: 'seattle',
@@ -48,7 +53,8 @@ export const CITY_CONFIGS = {
     country: 'US',
     currency: 'USD',
     region: 'na',
-    entityId: 'METRO42660M42660',
+    // Seattle-Bellevue, WA HUD Metro FMR Area — King·Snohomish (Small Area FMR 지역)
+    entityId: 'METRO42660MM7600',
   },
   boston: {
     id: 'boston',
@@ -56,7 +62,8 @@ export const CITY_CONFIGS = {
     country: 'US',
     currency: 'USD',
     region: 'na',
-    entityId: 'METRO14460M14460',
+    // Boston-Cambridge-Quincy, MA-NH HUD Metro FMR Area — Essex·Middlesex·Norfolk·Plymouth·Suffolk(MA)·Rockingham(NH)
+    entityId: 'METRO14460MM1120',
   },
 };
 
@@ -67,8 +74,15 @@ export const SOURCE = {
   legacyNames: ['HUD Fair Market Rents (share=studio×0.65 estimated, ADR-059)'],
 };
 
+/** Small Area FMR 응답에서 지역 전체 FMR 행의 `zip_code` 값. */
+const AREA_WIDE_ZIP_CODE = 'MSA level';
+
 /**
- * HUD FMR 응답 파싱. basicdata.{Efficiency, One-Bedroom, Two-Bedroom}.
+ * HUD FMR 응답 파싱.
+ * - 일반 FMR 지역: `data.basicdata` 가 객체 `{Efficiency, One-Bedroom, Two-Bedroom, ..., year}`.
+ * - Small Area FMR 지역 (`smallarea_status: "1"` — LA·시애틀): `data.basicdata` 가 우편번호별 행 배열.
+ *   `zip_code: "MSA level"` 행이 지역 전체 FMR (`/fmr/statedata` 의 같은 지역 값과 같음) 이라 그 행만 쓴다.
+ *   행이 없으면 null — 우편번호 값으로 대체하지 않는다.
  * @param {unknown} data
  * @returns {{studio: number|null, oneBed: number|null, twoBed: number|null}}
  */
@@ -78,11 +92,14 @@ export function parseHudResponse(data) {
   if (!data || typeof data !== 'object') return result;
 
   const basicData = data.data?.basicdata;
-  if (!basicData || typeof basicData !== 'object') return result;
+  const rents = Array.isArray(basicData)
+    ? basicData.find((row) => row?.zip_code === AREA_WIDE_ZIP_CODE)
+    : basicData;
+  if (!rents || typeof rents !== 'object') return result;
 
-  const efficiency = parseFloat(basicData.Efficiency);
-  const oneBed = parseFloat(basicData['One-Bedroom']);
-  const twoBed = parseFloat(basicData['Two-Bedroom']);
+  const efficiency = parseFloat(rents.Efficiency);
+  const oneBed = parseFloat(rents['One-Bedroom']);
+  const twoBed = parseFloat(rents['Two-Bedroom']);
 
   if (Number.isFinite(efficiency) && efficiency > 0) {
     result.studio = Math.round(efficiency);
