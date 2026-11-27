@@ -1,7 +1,7 @@
 /**
  * docs/TESTING.md §9.4.2 매트릭스 — waitForAllStoresHydrated.
  *
- * 8 store 의 hydration 동시 await — app-shell phase 의 부트로더가 useFonts 와
+ * 9 store 의 hydration 동시 await — app-shell phase 의 부트로더가 useFonts 와
  * Promise.all 로 합성하기 위한 boundary helper.
  *
  * 자동 hydration 은 모듈 로딩 시점에 시작 — 테스트에서는 jest.spyOn 으로
@@ -14,6 +14,10 @@ import {
   INITIAL_STATE as CATEGORY_INCLUSION_INITIAL,
   useCategoryInclusionStore,
 } from '../categoryInclusion';
+import {
+  INITIAL_STATE as COMPARE_PAIR_INITIAL,
+  useComparePairStore,
+} from '../comparePair';
 import { INITIAL_STATE as FAVORITES_INITIAL, useFavoritesStore } from '../favorites';
 import {
   DEFAULT_HYDRATION_TIMEOUT_MS,
@@ -48,6 +52,7 @@ const ALL_STORES = [
   useTuitionChoiceStore,
   useTaxChoiceStore,
   useCategoryInclusionStore,
+  useComparePairStore,
 ] as const;
 
 beforeEach(async () => {
@@ -98,7 +103,7 @@ describe('waitForAllStoresHydrated', () => {
     expect(resolved).toBe(true);
   });
 
-  it('8 store 모두 미완 → 모두 완료 후에야 resolve', async () => {
+  it('9 store 모두 미완 → 모두 완료 후에야 resolve', async () => {
     let onboardingCb: (() => void) | undefined;
     let favoritesCb: (() => void) | undefined;
     let recentCb: (() => void) | undefined;
@@ -107,6 +112,7 @@ describe('waitForAllStoresHydrated', () => {
     let tuitionCb: (() => void) | undefined;
     let taxCb: (() => void) | undefined;
     let inclusionCb: (() => void) | undefined;
+    let comparePairCb: (() => void) | undefined;
 
     jest.spyOn(useOnboardingStore.persist, 'hasHydrated').mockReturnValue(false);
     jest.spyOn(useOnboardingStore.persist, 'onFinishHydration').mockImplementation((fn) => {
@@ -160,6 +166,14 @@ describe('waitForAllStoresHydrated', () => {
         return () => {};
       });
 
+    jest.spyOn(useComparePairStore.persist, 'hasHydrated').mockReturnValue(false);
+    jest
+      .spyOn(useComparePairStore.persist, 'onFinishHydration')
+      .mockImplementation((fn) => {
+        comparePairCb = () => fn(useComparePairStore.getState());
+        return () => {};
+      });
+
     let resolved = false;
     const promise = waitForAllStoresHydrated().then(() => {
       resolved = true;
@@ -176,8 +190,9 @@ describe('waitForAllStoresHydrated', () => {
     expect(tuitionCb).toBeDefined();
     expect(taxCb).toBeDefined();
     expect(inclusionCb).toBeDefined();
+    expect(comparePairCb).toBeDefined();
 
-    // 7개 완료 — 아직 resolve 안 됨
+    // 8개 완료 — 아직 resolve 안 됨
     onboardingCb?.();
     favoritesCb?.();
     recentCb?.();
@@ -185,12 +200,13 @@ describe('waitForAllStoresHydrated', () => {
     rentCb?.();
     tuitionCb?.();
     taxCb?.();
+    inclusionCb?.();
     await Promise.resolve();
     await Promise.resolve();
     expect(resolved).toBe(false);
 
-    // 8번째 완료 → resolve
-    inclusionCb?.();
+    // 9번째 완료 → resolve
+    comparePairCb?.();
     await promise;
     expect(resolved).toBe(true);
   });
@@ -258,6 +274,7 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
       jest.spyOn(useTuitionChoiceStore, 'setState'),
       jest.spyOn(useTaxChoiceStore, 'setState'),
       jest.spyOn(useCategoryInclusionStore, 'setState'),
+      jest.spyOn(useComparePairStore, 'setState'),
     ];
   });
 
@@ -291,7 +308,7 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
     setStateSpies.slice(1).forEach((spy) => expect(spy).not.toHaveBeenCalled());
   });
 
-  it('8 store 모두 미완 + timeout → 8 store 모두 INITIAL_STATE 강제', async () => {
+  it('9 store 모두 미완 + timeout → 9 store 모두 INITIAL_STATE 강제', async () => {
     [
       useOnboardingStore,
       useFavoritesStore,
@@ -301,6 +318,7 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
       useTuitionChoiceStore,
       useTaxChoiceStore,
       useCategoryInclusionStore,
+      useComparePairStore,
     ].forEach((store) => {
       jest.spyOn(store.persist, 'hasHydrated').mockReturnValue(false);
       jest
@@ -321,6 +339,7 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
     expect(setStateSpies[5]).toHaveBeenCalledWith(TUITION_CHOICE_INITIAL);
     expect(setStateSpies[6]).toHaveBeenCalledWith(TAX_CHOICE_INITIAL);
     expect(setStateSpies[7]).toHaveBeenCalledWith(CATEGORY_INCLUSION_INITIAL);
+    expect(setStateSpies[8]).toHaveBeenCalledWith(COMPARE_PAIR_INITIAL);
   });
 
   it('timeout 만료 후에도 정상 hydrated store 는 fallback 에서 보존', async () => {
@@ -386,6 +405,7 @@ describe('waitForStoresOrTimeout (ADR-052 timeout guard)', () => {
       useTuitionChoiceStore,
       useTaxChoiceStore,
       useCategoryInclusionStore,
+      useComparePairStore,
     ].forEach((store) => {
       jest.spyOn(store.persist, 'hasHydrated').mockReturnValue(false);
       jest

@@ -3,7 +3,8 @@
  *
  * 7 도메인 store (onboarding / favorites / recent / settings / rentChoice /
  * tuitionChoice / taxChoice) — 단일 거대 스토어 금지 (ARCHITECTURE.md §상태
- * 관리, ADR-004). + 비영속 ads store (hydration 미참여, ADR-077).
+ * 관리, ADR-004). + 도시끼리 비교 쌍 store (comparePair — 비교 탭의 두 칸).
+ * + 비영속 ads store (hydration 미참여, ADR-077).
  * 컴포넌트는 본 인덱스에서 import:
  *   import { useOnboardingStore, useFavoritesStore } from '@/store';
  *
@@ -60,6 +61,8 @@ export type {
   CategoryInclusionMap,
   CategoryInclusionState,
 } from './categoryInclusion';
+export { useComparePairStore } from './comparePair';
+export type { ComparePairActions, ComparePairState } from './comparePair';
 
 // ADR-077: 비영속 — hydration 합성 미참여.
 export { useAdsStore } from './ads';

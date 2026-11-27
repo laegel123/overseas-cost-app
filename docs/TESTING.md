@@ -1364,6 +1364,48 @@ step 시점엔 persona/onboarding 두 store 가 공존.
 
 - [ ] (step 2) `waitForAllStoresHydrated` 가 본 store 도 동시 await + forceInitial 적용 cover
 
+### 9.8.6 `src/store/comparePair.ts` (city-pair-compare phase step 0)
+
+비교 탭(도시끼리 비교)에서 마지막으로 고른 두 도시를 기억하는 store — 왼쪽
+`baseId`(기준) / 오른쪽 `cityId`(대상), 미선택은 `null`. 칸을 고를 때마다 저장.
+store 는 도시 id 의 존재 여부도 `baseId === cityId` 도 검증하지 않는다 (존재
+검증·같은 도시 방지는 선택 화면 책임, `src/lib/data.ts` 의존 금지).
+
+**기본 동작:**
+
+- [x] 초기 상태 `{ baseId: null, cityId: null }`
+- [x] `setBase('vancouver')` → baseId 만 변경
+- [x] `setCity('toronto')` → cityId 만 변경
+- [x] 두 칸 모두 채우면 둘 다 보관
+- [x] 같은 칸 재선택 → 마지막 값으로 교체
+- [x] 도시 목록에 없는 id 도 그대로 보관 (존재 검증은 화면 책임)
+- [x] 두 칸에 같은 도시도 허용 (같은 도시 방지는 화면 규칙)
+
+**영속화:**
+
+- [x] persist key 정확히 `comparePair:v1`
+- [x] partialize: 액션 미영속화, baseId/cityId 만 저장
+- [x] round-trip: 저장된 v1 entry → rehydrate 후 두 칸 복원
+- [x] 한 칸만 고른 상태 (`cityId: null`) 도 round-trip
+
+**손상 캐시 — INITIAL fallback, 부분 복구 금지 (silent fail 금지, CLAUDE.md CRITICAL):**
+
+- [x] 잘못된 JSON → INITIAL + INITIAL 직렬화로 정리
+- [x] 저장된 state 가 객체 아님 → INITIAL
+- [x] baseId 가 `string | null` 아님 (number) → **두 칸 모두** 초기화 (살아남은 반대편 칸도 버린다)
+- [x] cityId 가 `string | null` 아님 (객체) → 두 칸 모두 초기화
+- [x] 필드 누락 → 그 칸은 미선택 (`null`) 으로 복원 (merge 가 INITIAL 로 채움 — 타입 위반 아님)
+
+**Hydration:**
+
+- [x] `hasHydrated()` 가 rehydrate 후 true
+- [x] `waitForAllStoresHydrated` 대기 목록 포함 + timeout 시 forceInitial 적용 — §9.4.2 / §9.4.3
+
+**마이그레이션 (deferred):**
+
+- [x] v0 entry → migrate stub 통과 + 메모리 반영
+- [ ] (v2 도입 시 추가) v1 → v2: migrate 함수 spy + 새 필드 기본값 검증
+
 ### 9.9 `src/components/typography/Text.tsx` (components phase step 0)
 
 8 variant — Display / H1 / H2 / H3 / Body / Small / Tiny / MonoLabel. 단일 base

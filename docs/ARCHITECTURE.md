@@ -186,8 +186,9 @@ export async function refreshCache(): Promise<{ ok: boolean; lastSync: string }>
 | `useFavoritesStore` | `cityIds: string[]`                                                 | ✅     | 홈 즐겨찾기 카드, Compare ⭐ 토글 |
 | `useRecentStore`    | `cityIds: string[]` (max 5, FIFO)                                   | ✅     | 홈 최근 본 도시                   |
 | `useSettingsStore`  | `lastSync: ISOString \| null`                                       | ✅     | 설정 화면, 데이터 새로고침 표시   |
+| `useComparePairStore` | `baseId: string \| null` · `cityId: string \| null`              | ✅     | 비교 탭(도시끼리 비교) 의 두 칸 — 마지막으로 고른 기준·대상 도시 |
 
-위 4개가 부팅 hydration 합성(`waitForAllStoresHydrated`)에 참여하는 코어 store. 이 외에 Compare/Detail 상호작용용 도시별 선택 store (`useRentChoiceStore` / `useTuitionChoiceStore` / `useTaxChoiceStore` / `useCategoryInclusionStore` — ADR-060~062) 도 동일 hydration 합성에 포함된다.
+위 표의 앞 4개가 부팅 hydration 합성(`waitForAllStoresHydrated`)에 참여하는 코어 store. 이 외에 Compare/Detail 상호작용용 도시별 선택 store (`useRentChoiceStore` / `useTuitionChoiceStore` / `useTaxChoiceStore` / `useCategoryInclusionStore` — ADR-060~062) 도 동일 hydration 합성에 포함된다. 비교 탭의 `useComparePairStore` (`comparePair:v1`) 도 같은 합성에 참여한다 — 도시 id 의 존재 여부와 `baseId === cityId` 는 store 가 검증하지 않고 선택 화면이 판단한다.
 
 모두 `zustand/middleware` 의 `persist` + AsyncStorage 어댑터 사용. 첫 렌더 전 hydration 보장 위해 `_layout.tsx` 에서 `useStore.persist.onFinishHydration` 으로 splash 유지.
 
