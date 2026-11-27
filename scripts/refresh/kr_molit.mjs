@@ -158,8 +158,12 @@ export default async function refresh(opts = {}) {
           return { items: [], error: { reason: `API error for ${lawd}: ${result.code} ${result.msg}` } };
         }
         items.push(...parseRentXml(xml));
-        const totalCount = Number(/<totalCount>(\d+)<\/totalCount>/.exec(xml)?.[1] ?? 0);
-        if (pageNo * NUM_OF_ROWS >= totalCount) return { items };
+        const totalCountMatch = /<totalCount>(\d+)<\/totalCount>/.exec(xml);
+        if (!totalCountMatch) {
+          // 기술문서상 필수 항목 — 없으면 다음 페이지가 있는지 알 수 없어 자치구 전체를 오류로 남긴다.
+          return { items: [], error: { reason: `Missing totalCount for ${lawd} (page ${pageNo})` } };
+        }
+        if (pageNo * NUM_OF_ROWS >= Number(totalCountMatch[1])) return { items };
       }
     } catch (err) {
       return {

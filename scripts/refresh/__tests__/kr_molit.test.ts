@@ -326,6 +326,17 @@ describe('refresh (integration)', () => {
     expect(twoBed?.newValue).toBe(1800000);
   }, 30000);
 
+  it('정상 응답에 totalCount 누락: 페이지가 잘렸는지 알 수 없으므로 errors 에 추가', async () => {
+    const noTotalCount = VALID_RENT_XML.replace(/<totalCount>\d+<\/totalCount>/, '');
+    fetchSpy.mockResolvedValue({ ok: true, status: 200, text: async () => noTotalCount });
+
+    const result = await refreshKrMolit({ dryRun: true });
+
+    expect(result.errors).toHaveLength(25);
+    expect(result.errors[0]?.reason).toContain('totalCount');
+    expect(result.cities).toHaveLength(0);
+  }, 30000);
+
   it('결과 코드 03 (No Data): 오류가 아닌 매물 0건으로 처리', async () => {
     fetchSpy.mockResolvedValue({
       ok: true,
