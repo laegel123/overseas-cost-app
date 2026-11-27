@@ -85,7 +85,8 @@
     },
     {
       "dir": "city-pair-compare",
-      "status": "pending"
+      "status": "completed",
+      "completed_at": "2026-11-27T15:42:28+0900"
     }
   ]
 }
