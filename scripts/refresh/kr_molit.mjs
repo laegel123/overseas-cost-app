@@ -153,6 +153,7 @@ export default async function refresh(opts = {}) {
             return { items: [], error: { reason: `API key invalid or expired: ${result.msg}` } };
           }
           if (result.code === '03') {
+            // 1페이지면 매물 0건, 이후 페이지면 앞서 받은 페이지까지가 전부 — 둘 다 오류 아님.
             return { items };
           }
           return { items: [], error: { reason: `API error for ${lawd}: ${result.code} ${result.msg}` } };
