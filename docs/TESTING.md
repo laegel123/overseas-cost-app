@@ -1969,19 +1969,20 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 BottomTabBar(제어형, §9.13)를 expo-router Tabs 의 `tabBar` prop 에 어댑터로 연결.
 §125 스펙(active=orange / inactive=gray-2, icon 22px, label 10px Mulish)은
-BottomTabBar 단일 출처 — `_layout` 에 중복 구현하지 않는다. 리다이렉트 정책은 §9.27.3.
+BottomTabBar 단일 출처 — `_layout` 에 중복 구현하지 않는다. 탭 동작 정책은 §9.27.3.
 
 wiring 계약: `onSelect(tab)` → 대상 route 로 `tabPress` emit → screen `listeners` 가
 `preventDefault` 시 기본 `navigate` 억제(`event.defaultPrevented`), 아니면 navigate.
+ADR-089 이후 네 탭 모두 listener 가 없어 항상 기본 navigate 로 끝나지만, emit 계약은
+그대로 mock 으로 재현해 검증한다.
 
 - [x] route name ↔ Tab 매핑 — index 스크린 active → 홈 탭 `selected` 파생
 - [x] settings 스크린 active → 설정 탭 `selected`
-- [x] 비focus 탭 선택 → `navigation.navigate(<routeName>)` (home=`index` / favorites / settings)
+- [x] 비focus 탭 선택 → `navigation.navigate(<routeName>)` (home=`index` / settings)
 - [x] 이미 focus 된 탭 재선택 → navigate no-op (중복 push 방지)
-- [x] compare 선택 → `tabPress` emit → listener preventDefault + redirect → 기본 navigate 억제
-- [x] compare 타깃 = `recent[0] ?? favorites[0]` (recent 우선, 없으면 favorites fallback)
-- [x] compare + 도시 0개 → `router.replace('/')` + Alert
-- [x] favorites 선택 → 기본 `navigate('favorites')`, redirect·Alert 없음 — 즐겨찾기 유무 무관 (ADR-084)
+- [x] compare 선택 → 기본 `navigate('compare')` — redirect·Alert 없음 (ADR-089)
+- [x] compare 스크린에 `tabPress` listener 부재 (navigate 1회 호출로 증명 — redirect 제거 회귀 방지)
+- [x] favorites 선택 → 기본 `navigate('favorites')` (ADR-084)
 
 ### 9.22 `app/onboarding.tsx` — placeholder spec (deprecated)
 
@@ -2288,6 +2289,25 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] 로드 실패 → 에러 메시지 + "다시 시도" → 재로드 후 ready
 - [x] 광고 footer 없음 (ADR-077)
 
+### 9.26.2 `app/(tabs)/compare.tsx` (비교 탭 — 두 도시 선택 화면, ADR-089)
+
+로드 패턴은 §9.26.1 과 동일(타이머 역전 + `setImmediate` flush). 환율은 이 화면이 읽지
+않으므로 `fetchExchangeRates` 를 mock 하지 않는다.
+
+- [x] 로딩 중 → `compare-tab-screen-loading` 스피너
+- [x] 로드 실패 → `compare-tab-screen-error` + `ErrorView`(screen) 메시지, "다시 시도" → 재로드 후 ready
+- [x] 초기 상태 → 두 칸 모두 `도시 선택`, `compare-tab-submit` 이 `accessibilityState.disabled`
+- [x] 칸 탭 → 도시 목록 시트에 `compare-tab-option-<id>` 전부(서울 포함) 한글 가나다순
+- [x] 도시 선택 → `useComparePairStore` 반영 + 시트 닫힘 (base·city 칸 각각)
+- [x] 반대편 칸에 든 도시는 `disabled` — 눌러도 store 가 바뀌지 않음, 나머지는 `disabled: false`
+- [x] 저장된 id 가 도시 목록에 없으면 그 칸은 빈 칸 + submit 비활성 (store 값은 유지)
+- [x] 두 칸 모두 유효 → submit 활성
+- [x] 도시끼리 → `router.push('/compare/<대상>?base=<기준>')`
+- [x] 왼쪽이 서울 → `router.push('/compare/<대상>')` (`?base` 없음)
+- [x] 오른쪽이 서울 → `router.push('/compare/<왼쪽>')` (서울은 항상 기준)
+- [x] 비활성 submit 탭 → push 없음
+- [x] 광고 footer 없음 (ADR-077 — 선택 화면은 광고 대상이 아니다)
+
 ### 9.26 `app/(tabs)/index.tsx` (홈)
 
 screens phase step 2 구현 — 재방문 사용자가 빠르게 즐겨찾기 도시로 진입하거나 새 도시를 검색.
@@ -2514,11 +2534,11 @@ UI_GUIDE.md §에러 메시지 한국어 표준 카탈로그 검증.
 ### 9.27.3 하단 탭 동작 정책 (ARCHITECTURE.md §하단 탭)
 
 > 어댑터 wiring(route↔Tab 매핑, `tabPress` emit 계약, focus 시 navigate 억제) 테스트는 §9.21.1.
-> 아래는 정책 명세이며, 토스트 문구는 v1.0 에서 네이티브 `Alert` 로 대체(ADR-041). 즐겨찾기 탭은 ADR-084.
+> 아래는 정책 명세다. ADR-041 의 redirect·`Alert` 는 즐겨찾기 탭이 ADR-084, 비교 탭이
+> ADR-089 로 대체되면서 모두 사라졌다 — 네 탭 전부 일반 탭 화면이다.
 
 - [ ] 홈 탭 → `/(tabs)/index`
-- [ ] 비교 탭 + 최근 본 ≥1 → `/compare/<recent[0]>`
-- [ ] 비교 탭 + 최근 본 0개 → 홈 + "먼저 도시를 선택해 주세요" 토스트
+- [x] 비교 탭 → `/(tabs)/compare` 선택 화면 (두 칸 선택 → `?base=` 또는 서울 모드 주소) — §9.26.2
 - [x] 즐겨찾기 탭 → `/(tabs)/favorites` 목록 화면 (행 탭 → `/compare/<id>`, 0개 → 화면 내 빈 상태) — §9.26.1
 - [ ] 설정 탭 → `/(tabs)/settings`
 

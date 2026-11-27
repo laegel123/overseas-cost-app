@@ -10,7 +10,7 @@
 
 | 영역 | 문서 명세 | v1.0 실제 구현 | 근거 |
 | --- | --- | --- | --- |
-| 토스트 | success/error/info 하단 토스트 (§토스트) | 토스트 없음. 탭 redirect 안내만 네이티브 `Alert` | `app/(tabs)/_layout.tsx` |
+| 토스트 | success/error/info 하단 토스트 (§토스트) | 토스트 없음. 화면 피드백은 설정 새로고침 rightText 상태뿐 (탭 redirect `Alert` 는 ADR-089 로 제거) | `app/(tabs)/settings.tsx` |
 | 페르소나 변경 | Sheet B (라디오 + 취소/변경) (§Sheet B) | 시트 아님 — `persona-change-btn` → `setOnboarded(false)` → `/onboarding` 재진입 | `settings.tsx`, `onboarding.tsx` |
 | 가정값 ❓ 시트 | Compare hero ❓ → Sheet A | Compare hero 에 ❓ 없음. footer "항목 단가 합"만 (ADR-075) | `compare/[cityId].tsx` |
 | 출처 보기 모달 | 전체화면 Sheet C (`presentation: 'modal'`) | 설정 → `/sources` → `/sources/[cityId]` **2단계 일반 push 화면** (modal 아님). Compare "출처 보기 →" 는 여전히 **비활성**, Detail 은 인라인 텍스트 목록 유지 (ADR-071 결정 3) | `app/sources/index.tsx`, `app/sources/[cityId].tsx`, `compare/[cityId].tsx`, `detail/…/[category].tsx` |
@@ -26,6 +26,7 @@
 | Detail hero 라벨 | "월 임차료 (메디안)"·"연간 학비 (국제학생)" 등 | `{카테고리} · {선택 항목}` 캡션 (예: "월세 · 셰어하우스") | `detail/…/[category].tsx` |
 | Compare hero 라벨 | "한눈에 보는 물가 비교" + "❓ 자세히" | HeroCard 좌/우 라벨 + footer "항목 단가 합" · 가운데 caption 은 차액만 (`/월` 미표기, ADR-075) | `compare/[cityId].tsx` |
 | 홈 빈 즐겨찾기 | "관심 있는 도시를 골라보세요" | "아직 즐겨찾기가 없어요.\n도시를 탭해 ⭐ 추가해보세요" | `(tabs)/index.tsx` |
+| 비교 탭 | (디자인 없음 — 원래 라우팅 단축) | 선택 화면 — H1 `도시끼리 비교` + 좌/우 선택 칸(`기준 도시` / `비교 도시`, 비면 `도시 선택`) + `vs` + `비교하기` 버튼. 칸 탭 → 도시 목록 `BottomSheet`(21개, 한글 가나다순, 반대편 칸 도시는 비활성). 광고 없음 (ADR-089) | `(tabs)/compare.tsx` |
 | 즐겨찾기 탭 | (디자인 없음) | 목록 화면 — H1 `즐겨찾기` + `RecentRow` 세로 목록, 0개면 "아직 즐겨찾기가 없어요.\n비교 화면에서 ⭐ 를 눌러 추가해보세요" + `도시 둘러보기` CTA (ADR-084) | `(tabs)/favorites.tsx` |
 | 홈 최근 0개 | 섹션 미표시 | "최근 본 도시가 없어요" 빈 상태 표시 | `(tabs)/index.tsx` |
 | 홈 검색 0건 | "'○○'에 해당하는 도시가 없어요…" | "검색 결과가 없어요" | `(tabs)/index.tsx` |
@@ -733,6 +734,7 @@ Compare/Detail 푸터에 데이터 신선도 시각 강조.
 | ------ | ---------------------- | --------------------------------------------- | --------------------- | -------------------------------------------- |
 | 온보딩 | 3 카드                 | —                                             | 폰트 로딩 splash      | rare (스토어 hydration 실패 → 초기화 재시도) |
 | 홈     | 즐겨찾기 + 최근        | "관심 도시 골라보기" CTA + 권역 그리드        | 카드 skeleton         | inline 배지 (시드 fallback)                  |
+| 비교 탭 | 선택 칸 2개 + 비교하기 | (해당 없음 — 칸이 비면 `도시 선택`)           | 스피너                | `ErrorView`(screen) + 다시 시도              |
 | 비교   | hero + 카드들 + 출처   | (해당 없음)                                   | hero+카드 skeleton    | 카드 영역에 ErrorView + 다시 시도            |
 | 상세   | hero + 섹션 + 출처     | 해당 카테고리 데이터 결측 시 "데이터 준비 중" | 섹션 skeleton         | ErrorView                                    |
 | 설정   | 페르소나 + 통계 + 메뉴 | 통계는 항상 0 가능                            | hydration 동안 splash | rare                                         |
@@ -749,7 +751,7 @@ Compare/Detail 푸터에 데이터 신선도 시각 강조.
 
 ## 토스트
 
-> ⚠ **v1.0 현황:** 토스트 컴포넌트 미구현. 명시된 사용처 중 실제 화면 피드백은 새로고침 rightText 상태('갱신 중…'/'갱신 실패'/갱신일)와, 최근 본 도시·즐겨찾기가 모두 없을 때 비교 탭 진입 시 네이티브 `Alert` 뿐. 즐겨찾기/페르소나 변경 토스트는 없다. (상단 §v1.0 구현 현황)
+> ⚠ **v1.0 현황:** 토스트 컴포넌트 미구현. 명시된 사용처 중 실제 화면 피드백은 새로고침 rightText 상태('갱신 중…'/'갱신 실패'/갱신일) 뿐이다. 비교 탭 진입 시의 네이티브 `Alert` 는 ADR-089 로 없어졌다 (탭이 선택 화면이 되어 안내할 것이 없다). 즐겨찾기/페르소나 변경 토스트는 없다. (상단 §v1.0 구현 현황)
 
 - 위치: 화면 상단 (status bar 아래) 또는 하단 (탭 바 위) — 일관 정책: **하단** (사용자 손가락 가까움).
 - 타입: `success` (orange), `error` (navy + 빨강 텍스트 미사용 — 우리 팔레트 안에서 dim navy), `info` (light bg).

@@ -5,18 +5,15 @@
  * 검증 대상(리뷰 회귀 방지):
  *   - route name ↔ Tab 매핑 (index 스크린 = 'home' 탭), active 파생
  *   - onSelect → 대상 라우트로 tabPress emit
- *   - home/favorites/settings: 기본 navigate (focus 시 no-op)
- *   - compare: listener 가 preventDefault + redirect → 기본 navigate 억제
- *   - compare 타깃 = recent[0] ?? favorites[0]
- *   - 도시 0개 → router.replace('/') + Alert
+ *   - 4개 탭 전부 기본 navigate (focus 시 no-op) — 비교 탭도 일반 탭 화면이다
+ *     (ADR-089 가 ADR-041 의 redirect 를 제거)
  *
  * expo-router Tabs 는 react-navigation 의 custom tabBar 계약(emit('tabPress') →
- * screen listeners 발화, preventDefault → defaultPrevented)을 mock 으로 재현.
+ * screen listeners 발화, preventDefault → defaultPrevented)을 mock 으로 재현 —
+ * 어댑터가 계약을 지키는지 보려면 listener 가 없는 현재도 필요하다.
  */
 
 import * as React from 'react';
-
-import { Alert } from 'react-native';
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
@@ -25,8 +22,6 @@ import TabsLayout from '../_layout';
 // mock 접두사 규칙(babel-plugin-jest-hoist): 팩토리에서 참조하려면 `mock*`.
 let mockTabIndex = 0;
 const mockTabNavigate = jest.fn();
-const mockRouterNavigate = jest.fn();
-const mockRouterReplace = jest.fn();
 
 jest.mock('expo-router', () => {
   const ReactLocal = jest.requireActual('react') as typeof import('react');
@@ -89,40 +84,13 @@ jest.mock('expo-router', () => {
     return null;
   };
 
-  return {
-    Tabs,
-    useRouter: () => ({ navigate: mockRouterNavigate, replace: mockRouterReplace }),
-  };
+  return { Tabs };
 });
 
-jest.mock('@/store/recent', () => ({ useRecentStore: jest.fn() }));
-jest.mock('@/store/favorites', () => ({ useFavoritesStore: jest.fn() }));
-
-const mockedUseRecentStore = jest.requireMock('@/store/recent').useRecentStore as jest.Mock;
-const mockedUseFavoritesStore = jest.requireMock('@/store/favorites')
-  .useFavoritesStore as jest.Mock;
-
 describe('TabsLayout — BottomTabBar 어댑터', () => {
-  let recentIds: string[] = [];
-  let favoriteIds: string[] = [];
-  let alertSpy: jest.SpyInstance;
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockTabIndex = 0;
-    recentIds = [];
-    favoriteIds = [];
-    mockedUseRecentStore.mockImplementation((sel: (s: { cityIds: string[] }) => unknown) =>
-      sel({ cityIds: recentIds }),
-    );
-    mockedUseFavoritesStore.mockImplementation((sel: (s: { cityIds: string[] }) => unknown) =>
-      sel({ cityIds: favoriteIds }),
-    );
-    alertSpy = jest.spyOn(Alert, 'alert').mockImplementation(() => undefined);
-  });
-
-  afterEach(() => {
-    alertSpy.mockRestore();
   });
 
   it('index 스크린이 active → 홈 탭 selected (route→Tab 매핑)', () => {
@@ -138,13 +106,11 @@ describe('TabsLayout — BottomTabBar 어댑터', () => {
     expect(screen.getByLabelText('설정').props.accessibilityState).toEqual({ selected: true });
   });
 
-  it('설정 탭 선택(비focus) → navigation.navigate("settings"), redirect 미발생', () => {
+  it('설정 탭 선택(비focus) → navigation.navigate("settings")', () => {
     mockTabIndex = 0; // 홈 active
     render(<TabsLayout />);
     fireEvent.press(screen.getByLabelText('설정'));
     expect(mockTabNavigate).toHaveBeenCalledWith('settings');
-    expect(mockRouterNavigate).not.toHaveBeenCalled();
-    expect(mockRouterReplace).not.toHaveBeenCalled();
   });
 
   it('홈 탭 선택(비focus, index=설정) → navigation.navigate("index")', () => {
@@ -161,45 +127,24 @@ describe('TabsLayout — BottomTabBar 어댑터', () => {
     expect(mockTabNavigate).not.toHaveBeenCalled();
   });
 
-  it('비교 탭 선택 + recent 존재 → router.navigate("/compare/<recent[0]>"), 기본 navigate 억제', () => {
-    recentIds = ['tokyo'];
-    favoriteIds = ['osaka'];
+  it('비교 탭 선택 → 기본 navigate("compare") (ADR-089 — redirect 없음)', () => {
+    mockTabIndex = 0; // 홈 active
     render(<TabsLayout />);
     fireEvent.press(screen.getByLabelText('비교'));
-    expect(mockRouterNavigate).toHaveBeenCalledWith('/compare/tokyo');
-    expect(mockTabNavigate).not.toHaveBeenCalled();
+    expect(mockTabNavigate).toHaveBeenCalledWith('compare');
   });
 
-  it('비교 탭 선택 + recent 없음 → favorites[0] fallback', () => {
-    recentIds = [];
-    favoriteIds = ['osaka'];
-    render(<TabsLayout />);
-    fireEvent.press(screen.getByLabelText('비교'));
-    expect(mockRouterNavigate).toHaveBeenCalledWith('/compare/osaka');
-  });
-
-  it('비교 탭 선택 + 도시 0개 → router.replace("/") + Alert, 기본 navigate 억제', () => {
-    render(<TabsLayout />);
-    fireEvent.press(screen.getByLabelText('비교'));
-    expect(mockRouterReplace).toHaveBeenCalledWith('/');
-    expect(alertSpy).toHaveBeenCalledTimes(1);
-    expect(mockTabNavigate).not.toHaveBeenCalled();
-  });
-
-  it('즐겨찾기 탭 선택 → 기본 navigate("favorites"), redirect 없음 (favorites 유무 무관)', () => {
-    favoriteIds = ['tokyo'];
-    const { unmount } = render(<TabsLayout />);
-    fireEvent.press(screen.getByLabelText('즐겨찾기'));
-    expect(mockTabNavigate).toHaveBeenCalledWith('favorites');
-    expect(mockRouterNavigate).not.toHaveBeenCalled();
-    unmount();
-
-    mockTabNavigate.mockClear();
-    favoriteIds = [];
+  it('즐겨찾기 탭 선택 → 기본 navigate("favorites") (ADR-084)', () => {
     render(<TabsLayout />);
     fireEvent.press(screen.getByLabelText('즐겨찾기'));
     expect(mockTabNavigate).toHaveBeenCalledWith('favorites');
-    expect(mockRouterReplace).not.toHaveBeenCalled();
-    expect(alertSpy).not.toHaveBeenCalled();
+  });
+
+  it('compare 스크린에 tabPress listener 가 없다 (redirect 제거 회귀 방지)', () => {
+    render(<TabsLayout />);
+    fireEvent.press(screen.getByLabelText('비교'));
+    // listener 가 preventDefault 하면 기본 navigate 가 억제된다 → 호출됐다는 것이
+    // 곧 listener 부재의 증거.
+    expect(mockTabNavigate).toHaveBeenCalledTimes(1);
   });
 });

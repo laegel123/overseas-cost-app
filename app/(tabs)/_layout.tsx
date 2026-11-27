@@ -6,27 +6,20 @@
  * (active=orange / inactive=gray-2, icon 22px, label 10px Mulish) 은 BottomTabBar
  * 단일 출처 — _layout 에 중복 구현하지 않는다.
  *
- * ADR-041: 비교 탭은 라우팅 단축으로 동작.
- * - 비교 탭 = recent[0] 또는 favorites[0]으로 redirect
- * - 도시 0개 시 = 홈으로 이동 + Alert 안내 (토스트 미구현)
- * ADR-084: 즐겨찾기 탭은 일반 탭 화면(목록)이다 — redirect 하지 않는다.
+ * ADR-089: 비교 탭은 두 도시를 고르는 일반 탭 화면이다 — ADR-041 의 라우팅 단축
+ * (recent[0] ?? favorites[0] 으로 redirect, 도시 0개면 홈으로 튕기며 네이티브
+ * 경고창 안내) 을 제거했다.
+ * ADR-084: 즐겨찾기 탭도 일반 탭 화면(목록)이다 — redirect 하지 않는다.
+ * 즉 4개 탭 모두 기본 navigate 로만 동작한다.
  */
 
 import * as React from 'react';
 
-import { Alert } from 'react-native';
-
-import { Tabs, useRouter } from 'expo-router';
+import { Tabs } from 'expo-router';
 
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
 import { BottomTabBar, type Tab } from '@/components/BottomTabBar';
-import { useFavoritesStore } from '@/store/favorites';
-import { useRecentStore } from '@/store/recent';
-
-type TabPressEvent = {
-  preventDefault: () => void;
-};
 
 // expo-router route name ↔ BottomTabBar Tab 매핑 (index 스크린 = 'home' 탭).
 const ROUTE_TO_TAB: Record<string, Tab> = {
@@ -43,31 +36,9 @@ const TAB_TO_ROUTE: Record<Tab, string> = {
 };
 
 export default function TabsLayout(): React.ReactElement {
-  const router = useRouter();
-  const recentIds = useRecentStore((s) => s.cityIds);
-  const favoriteIds = useFavoritesStore((s) => s.cityIds);
-
-  // 탭 반복 누름 시 navigation 스택이 중복 누적되지 않도록 router.navigate 사용
-  // (PR #17 review round 3 이슈 1). expo-router 6 의 navigate 는 이미 동일 라우트
-  // 가 스택 상단이면 no-op + 다른 라우트면 push 와 동일.
-  const handleCompareTabPress = React.useCallback(
-    (e: TabPressEvent) => {
-      e.preventDefault();
-
-      const targetId = recentIds[0] ?? favoriteIds[0];
-      if (targetId) {
-        router.navigate(`/compare/${targetId}`);
-      } else {
-        router.replace('/');
-        Alert.alert('알림', '최근 본 도시나 즐겨찾기가 없어요.\n홈에서 도시를 선택해 주세요.');
-      }
-    },
-    [router, recentIds, favoriteIds],
-  );
-
-  // BottomTabBar 를 Tabs 에 어댑터로 연결. onSelect → 대상 라우트로 tabPress emit →
-  // compare 의 listener 가 preventDefault + redirect 를 그대로 수행
-  // (redirect 로직 단일 출처 유지). 그 외(home/favorites/settings)는 기본 navigate.
+  // BottomTabBar 를 Tabs 에 어댑터로 연결. onSelect → 대상 라우트로 tabPress emit
+  // (react-navigation 계약 유지 — 화면이 listener 를 붙일 여지를 남긴다) → 기본
+  // navigate. 이미 focus 된 탭 재선택은 no-op (중복 push 방지).
   const renderTabBar = React.useCallback(
     ({ state, navigation }: BottomTabBarProps): React.ReactElement => {
       // noUncheckedIndexedAccess: 인덱스 접근 결과가 `T | undefined` 라 두 fallback
@@ -101,11 +72,7 @@ export default function TabsLayout(): React.ReactElement {
   return (
     <Tabs screenOptions={{ headerShown: false }} tabBar={renderTabBar}>
       <Tabs.Screen name="index" options={{ title: '홈' }} />
-      <Tabs.Screen
-        name="compare"
-        options={{ title: '비교' }}
-        listeners={{ tabPress: handleCompareTabPress }}
-      />
+      <Tabs.Screen name="compare" options={{ title: '비교' }} />
       <Tabs.Screen name="favorites" options={{ title: '즐겨찾기' }} />
       <Tabs.Screen name="settings" options={{ title: '설정' }} />
     </Tabs>
