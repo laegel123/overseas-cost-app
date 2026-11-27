@@ -11,6 +11,8 @@ import refreshKrMolit, {
   parseResultCode,
   areaToCategory,
   median,
+  toConvertedRent,
+  DEPOSIT_CONVERSION_RATE,
   SEOUL_DISTRICT_CODES,
   SOURCE,
 } from '../kr_molit.mjs';
@@ -100,11 +102,11 @@ const VALID_RENT_XML = rentResponse([
 ]);
 
 describe('parseRentXml', () => {
-  it('정상 XML 파싱: 매물 데이터 추출 — 월세 만원 → 원 환산, 전세(월세 0) 제외', () => {
+  it('정상 XML 파싱: 매물 데이터 추출 — 보증금·월세 만원 → 원 환산, 전세(월세 0) 제외', () => {
     const items = parseRentXml(VALID_RENT_XML);
     expect(items).toHaveLength(4);
-    expect(items[0]).toEqual({ area: 8.5, monthlyRent: 350000 });
-    expect(items[1]).toEqual({ area: 25.0, monthlyRent: 650000 });
+    expect(items[0]).toEqual({ area: 8.5, deposit: 5000000, monthlyRent: 350000 });
+    expect(items[1]).toEqual({ area: 25.0, deposit: 10000000, monthlyRent: 650000 });
   });
 
   it('빈 XML: 빈 배열 반환', () => {
@@ -131,10 +133,32 @@ describe('parseRentXml', () => {
   });
 
   it('콤마 포함 숫자 처리 (만원 단위)', () => {
-    const xml = `<item><excluUseAr>30</excluUseAr><monthlyRent>1,050</monthlyRent></item>`;
+    const xml = `<item><deposit>24,500</deposit><excluUseAr>30</excluUseAr><monthlyRent>1,050</monthlyRent></item>`;
     const items = parseRentXml(xml);
     expect(items).toHaveLength(1);
+    expect(items[0]?.deposit).toBe(245000000);
     expect(items[0]?.monthlyRent).toBe(10500000);
+  });
+
+  it('보증금 0 (무보증 월세) 은 유효한 계약으로 포함', () => {
+    const xml = `<item><deposit>0</deposit><excluUseAr>20</excluUseAr><monthlyRent>60</monthlyRent></item>`;
+    expect(parseRentXml(xml)).toEqual([{ area: 20, deposit: 0, monthlyRent: 600000 }]);
+  });
+
+  it('보증금 누락 item 무시 — 월세만 남기면 환산 월세가 낮게 치우친다', () => {
+    const xml = `<item><excluUseAr>30</excluUseAr><monthlyRent>50</monthlyRent></item>`;
+    expect(parseRentXml(xml)).toEqual([]);
+  });
+});
+
+describe('toConvertedRent', () => {
+  it('환산 월세 = 월세 + 보증금 × 전월세전환율 ÷ 12 (원 단위 반올림)', () => {
+    // 2억 4,500만 × 4.6% ÷ 12 = 939,166.67 → 350,000 + 939,167
+    expect(toConvertedRent({ deposit: 245000000, monthlyRent: 350000 })).toBe(1289167);
+  });
+
+  it('보증금 0 이면 월세 그대로', () => {
+    expect(toConvertedRent({ deposit: 0, monthlyRent: 600000 })).toBe(600000);
   });
 });
 
@@ -217,6 +241,10 @@ describe('constants', () => {
     expect(SEOUL_DISTRICT_CODES[0]).toBe('11110');
   });
 
+  it('DEPOSIT_CONVERSION_RATE: 한국부동산원 서울 연립·다세대 전월세전환율 2026년 9월 4.6% (ADR-086)', () => {
+    expect(DEPOSIT_CONVERSION_RATE).toBe(0.046);
+  });
+
   it('SOURCE 정의', () => {
     expect(SOURCE.category).toBe('rent');
     expect(SOURCE.name).toBe('국토교통부 실거래가 공개시스템');
@@ -237,7 +265,7 @@ describe('refresh (integration)', () => {
     await expect(refreshKrMolit()).rejects.toThrow('KR_DATA_API_KEY');
   });
 
-  it('정상 응답 (000 OK): 오류 없이 25개 자치구 메디안 → rent 원 단위 매핑', async () => {
+  it('정상 응답 (000 OK): 오류 없이 25개 자치구 환산 월세 메디안 → rent 원 단위 매핑', async () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
@@ -252,12 +280,32 @@ describe('refresh (integration)', () => {
     const newValues = Object.fromEntries(
       result.changes.map((c: RefreshChange) => [c.field, c.newValue]),
     );
+    // 월세 + 보증금 × 4.6% ÷ 12 — 예: share 35만 + 500만 × 0.046 / 12 = 369,167
     expect(newValues).toEqual({
-      'rent.share': 350000,
-      'rent.studio': 650000,
-      'rent.oneBed': 1200000,
-      'rent.twoBed': 1800000,
+      'rent.share': 369167,
+      'rent.studio': 688333,
+      'rent.oneBed': 1315000,
+      'rent.twoBed': 1991667,
     });
+  }, 30000);
+
+  it('보증금이 큰 반전세가 섞임: 월세만의 메디안(40만)이 아니라 환산 월세 메디안', async () => {
+    // 같은 31~50㎡ 구간에 보증금 1,000만 / 2억 / 2억 4,500만 계약이 섞인 경우 (2억 4,500만·35만·40.96㎡
+    // 는 2026-10 실제 응답에 있던 계약). 월세만 보면 [35, 40, 90]만 → 메디안 40만으로 실제 주거비보다 낮다.
+    // 환산: 90만 + 1,000만×4.6%/12 = 938,333 · 40만 + 2억×4.6%/12 = 1,166,667 · 35만 + 2.45억×4.6%/12 = 1,289,167
+    const mixedXml = rentResponse([
+      rentItem('45.0', '1,000', '90'),
+      rentItem('40.96', '24,500', '35'),
+      rentItem('42.0', '20,000', '40'),
+    ]);
+    fetchSpy.mockResolvedValue({ ok: true, status: 200, text: async () => mixedXml });
+
+    const result = await refreshKrMolit({ dryRun: true });
+
+    expect(result.errors).toEqual([]);
+    const oneBed = result.changes.find((c: RefreshChange) => c.field === 'rent.oneBed');
+    expect(oneBed?.newValue).not.toBe(400000);
+    expect(oneBed?.newValue).toBe(1166667);
   }, 30000);
 
   it('dryRun=true: 파일 미갱신', async () => {
@@ -323,7 +371,7 @@ describe('refresh (integration)', () => {
     expect(result.errors).toEqual([]);
     expect(fetchSpy).toHaveBeenCalledTimes(50);
     const twoBed = result.changes.find((c: RefreshChange) => c.field === 'rent.twoBed');
-    expect(twoBed?.newValue).toBe(1800000);
+    expect(twoBed?.newValue).toBe(1991667);
   }, 30000);
 
   it('정상 응답에 totalCount 누락: 페이지가 잘렸는지 알 수 없으므로 errors 에 추가', async () => {
