@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-27T01:16:41.099Z",
+  "generatedAt": "2026-11-27T01:21:37.825Z",
   "fxBaseDate": "2026-11-27",
   "cities": {
     "amsterdam": {
@@ -192,12 +192,13 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-09-07",
+      "lastUpdated": "2026-11-27",
       "rent": {
         "share": 1300,
         "studio": 2000,
         "oneBed": 2500,
-        "twoBed": 3100
+        "twoBed": 3100,
+        "censusMedian": 2023
       },
       "food": {
         "restaurantMeal": 19.8,
@@ -270,6 +271,12 @@
           "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
           "accessedAt": "2026-09-07"
+        },
+        {
+          "category": "rent",
+          "name": "US Census ACS 5-Year Median Gross Rent (cross-validation)",
+          "url": "https://www.census.gov/programs-surveys/acs",
+          "accessedAt": "2026-11-27"
         }
       ]
     },
@@ -457,12 +464,13 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-09-07",
+      "lastUpdated": "2026-11-27",
       "rent": {
         "share": 1170,
         "studio": 1800,
         "oneBed": 2300,
-        "twoBed": 2900
+        "twoBed": 2900,
+        "censusMedian": 2063
       },
       "food": {
         "restaurantMeal": 18.9,
@@ -535,6 +543,12 @@
           "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
           "accessedAt": "2026-09-07"
+        },
+        {
+          "category": "rent",
+          "name": "US Census ACS 5-Year Median Gross Rent (cross-validation)",
+          "url": "https://www.census.gov/programs-surveys/acs",
+          "accessedAt": "2026-11-27"
         }
       ]
     },
@@ -902,12 +916,13 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-09-07",
+      "lastUpdated": "2026-11-27",
       "rent": {
         "share": 1430,
         "studio": 2200,
         "oneBed": 2800,
-        "twoBed": 3500
+        "twoBed": 3500,
+        "censusMedian": 1830
       },
       "food": {
         "restaurantMeal": 20.7,
@@ -980,6 +995,12 @@
           "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
           "accessedAt": "2026-09-07"
+        },
+        {
+          "category": "rent",
+          "name": "US Census ACS 5-Year Median Gross Rent (cross-validation)",
+          "url": "https://www.census.gov/programs-surveys/acs",
+          "accessedAt": "2026-11-27"
         }
       ]
     },
@@ -1172,12 +1193,13 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-09-07",
+      "lastUpdated": "2026-11-27",
       "rent": {
         "share": 1170,
         "studio": 1800,
         "oneBed": 2200,
-        "twoBed": 2800
+        "twoBed": 2800,
+        "censusMedian": 2000
       },
       "food": {
         "restaurantMeal": 18,
@@ -1245,6 +1267,12 @@
           "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
           "accessedAt": "2026-09-07"
+        },
+        {
+          "category": "rent",
+          "name": "US Census ACS 5-Year Median Gross Rent (cross-validation)",
+          "url": "https://www.census.gov/programs-surveys/acs",
+          "accessedAt": "2026-11-27"
         }
       ]
     },
@@ -1319,12 +1347,13 @@
       "country": "US",
       "currency": "USD",
       "region": "na",
-      "lastUpdated": "2026-09-07",
+      "lastUpdated": "2026-11-27",
       "rent": {
         "share": 1560,
         "studio": 2400,
         "oneBed": 3000,
-        "twoBed": 3800
+        "twoBed": 3800,
+        "censusMedian": 2474
       },
       "food": {
         "restaurantMeal": 22.5,
@@ -1397,6 +1426,12 @@
           "name": "미국 국무부 영사국 공식 비자 수수료 페이지 (정적 추정치)",
           "url": "https://travel.state.gov/content/travel/en/us-visas/visa-information-resources/fees.html",
           "accessedAt": "2026-09-07"
+        },
+        {
+          "category": "rent",
+          "name": "US Census ACS 5-Year Median Gross Rent (cross-validation)",
+          "url": "https://www.census.gov/programs-surveys/acs",
+          "accessedAt": "2026-11-27"
         }
       ]
     },
