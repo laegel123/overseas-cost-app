@@ -102,3 +102,4 @@
 | [084](adr/084-favorites-tab-list-screen.md) | 즐겨찾기 탭 — 라우팅 단축 대신 목록 화면 | Active | ADR-041 부분 대체(비교 탭 단축은 유지), `RecentRow` 재사용, 빈 상태는 화면 내 CTA, 광고 없음 |
 | [085](adr/085-refresh-rent-hud-token-cron.md) | refresh-rent — `us_hud` Bearer 토큰 인증 + 실행 시각 14:00 UTC | Active | `US_HUD_API_KEY` 없으면 skip + 경고, cron `0 14 1 * *` 로 StatCan WDS 점검 구간 회피 |
 | [086](adr/086-us-hud-hmfa-entity-ids.md) | `us_hud` — 도시 중심 HMFA 코드 + Small Area FMR 의 `MSA level` 행 | Active | MSA 코드는 404, `listMetroAreas` 확인값 사용, `basicdata` 배열이면 `MSA level` 행만, 연도 미지정 |
+| [087](adr/087-kr-molit-deposit-conversion.md) | 서울 월세 = 보증금 환산 월세 메디안 (전환율 4.6%) | Active | 월세 + 보증금 × 4.6% ÷ 12, 한국부동산원 서울 연립·다세대 2026-09, 상수로 고정 |
