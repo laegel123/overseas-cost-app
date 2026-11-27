@@ -9,10 +9,10 @@
   "region": "na",
   "lastUpdated": "2026-11-27",
   "rent": {
-    "share": 1170,
-    "studio": 1800,
-    "oneBed": 2200,
-    "twoBed": 2800,
+    "share": 1359,
+    "studio": 2091,
+    "oneBed": 2180,
+    "twoBed": 2549,
     "censusMedian": 2000
   },
   "food": {
@@ -56,7 +56,7 @@
       "category": "rent",
       "name": "HUD Fair Market Rents (share 는 studio×0.65 추정)",
       "url": "https://www.huduser.gov/portal/datasets/fmr.html",
-      "accessedAt": "2026-05-03"
+      "accessedAt": "2026-11-27"
     },
     {
       "category": "food",
