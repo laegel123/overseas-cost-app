@@ -411,6 +411,22 @@ describe('refresh (integration)', () => {
       ]);
     }, 30000);
 
+    it('seoul.json 이 없음 + share 3건: share 는 시드 placeholder null (값을 만들지 않음), 나머지 구간만 채움', async () => {
+      mockFirstDistrictOnly([
+        rentItem('8.0', '1,000', '65'),
+        rentItem('9.5', '500', '60'),
+        rentItem('7.2', '2,000', '70'),
+        ...BINS.filter((b) => b !== 'share').flatMap((b) => repeat(MIN_SAMPLE_SIZE, rentItem(BIN_AREAS[b], '0', '50'))),
+      ]);
+
+      const result = await refreshKrMolit();
+
+      expect(result.errors).toEqual([]);
+      expect(result.fields).toEqual(['studio', 'oneBed', 'twoBed']);
+      expect(readSeoulRent()).toEqual({ share: null, studio: 500000, oneBed: 500000, twoBed: 500000 });
+      expect((result.warnings ?? []).map((w: { reason: string }) => w.reason.split(':')[0])).toEqual(['rent.share']);
+    }, 30000);
+
     it('네 구간 모두 MIN_SAMPLE_SIZE 미만: 파일 미갱신 + warnings 4건, 전부 실패가 아님 (exit 0)', async () => {
       writeExistingSeoul(EXISTING_RENT);
       mockFirstDistrictOnly(BINS.flatMap((b) => repeat(MIN_SAMPLE_SIZE - 1, rentItem(BIN_AREAS[b], '0', '50'))));
