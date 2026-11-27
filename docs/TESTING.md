@@ -3097,6 +3097,9 @@ afterEach(() => {
 - [x] deposit·monthlyRent 만원 단위 → 원 환산, 월세 0 (전세) 제외, 보증금 0 은 포함, 보증금 태그 누락 item 제외
 - [x] 환산 월세 = 월세 + 보증금 × `DEPOSIT_CONVERSION_RATE`(4.6%, ADR-087) ÷ 12 — 구간 메디안은 환산 월세로 계산
 - [x] 보증금이 큰 반전세가 섞임: 월세만의 메디안이 아니라 환산 월세 메디안 (재현 테스트)
+- [x] share 월세 계약 3건 (2026-10 실제 응답 규모): share 는 기존 값 유지 + warnings (구간·표본 수), 나머지 구간만 갱신 (재현 테스트, ADR-088)
+- [x] 구간별 `MIN_SAMPLE_SIZE`(30) - 1 건: 네 구간 각각 그 구간만 기존 값 유지 + warnings — 네 구간 같은 기준
+- [x] 네 구간 모두 정확히 `MIN_SAMPLE_SIZE` 건: 전부 갱신, warnings 없음 (경계값)
 - [x] totalCount 가 numOfRows(1000) 초과: pageNo 를 올려 다음 페이지까지 집계
 - [x] 정상 응답에 totalCount 누락: 잘림 여부를 알 수 없으므로 errors (silent fail 금지)
 - [x] 결과 코드 03 (No Data): errors 아님 — 매물 0건과 같이 warnings
