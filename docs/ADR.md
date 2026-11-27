@@ -100,3 +100,4 @@
 | [082](adr/082-ca-statcan-live-cpi-disabled.md) | `ca_statcan` 실시간 CPI 임시 비활성 (ADR-032 예외) | Active | vector 전부 오류·지수×현재가 공식 오류, 재구현 전까지 정적값 고정 |
 | [083](adr/083-favorite-star-yellow-fill.md) | 즐겨찾기 별 — 배경 강조 대신 아이콘 yellow 채움 | Active | `yellow` 토큰 추가, `Icon` `fill` prop, TopBar accent='star' 배경은 `bg-light` 유지 |
 | [084](adr/084-favorites-tab-list-screen.md) | 즐겨찾기 탭 — 라우팅 단축 대신 목록 화면 | Active | ADR-041 부분 대체(비교 탭 단축은 유지), `RecentRow` 재사용, 빈 상태는 화면 내 CTA, 광고 없음 |
+| [085](adr/085-refresh-rent-hud-token-cron.md) | refresh-rent — `us_hud` Bearer 토큰 인증 + 실행 시각 14:00 UTC | Active | `US_HUD_API_KEY` 없으면 skip + 경고, cron `0 14 1 * *` 로 StatCan WDS 점검 구간 회피 |

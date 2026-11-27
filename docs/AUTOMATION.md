@@ -233,7 +233,7 @@ jobs:
 name: Refresh Rent
 on:
   schedule:
-    - cron: '0 18 1 * *' # 매월 1일 18:00 KST
+    - cron: '0 14 1 * *' # 매월 1일 14:00 UTC (= 23:00 KST, 09:00 EST / 10:00 EDT)
   workflow_dispatch:
 jobs:
   refresh:
@@ -243,6 +243,7 @@ jobs:
       - run: node scripts/refresh/kr_molit.mjs
       - run: node scripts/refresh/ca_cmhc.mjs
       - run: node scripts/refresh/us_hud.mjs
+        env: { US_HUD_API_KEY: ${{ secrets.US_HUD_API_KEY }} } # Bearer 토큰, 없으면 skip (§4.5c)
       - run: node scripts/refresh/us_census.mjs
       - run: node scripts/refresh/uk_ons.mjs # rent dataset
       - run: node scripts/refresh/de_destatis.mjs
@@ -253,6 +254,10 @@ jobs:
       - run: node scripts/refresh/sg_singstat.mjs
       - ...
 ```
+
+**실행 시각 — StatCan WDS 점검 시간대 회피 (ADR-085).** `ca_cmhc` 가 부르는 StatCan WDS 는 미 동부 기준 00:00~08:30 에 일부 메서드가 데이터를 주지 않는다 (HTTP 409/503, [WDS 사용자 가이드](https://www.statcan.gc.ca/en/developers/wds/user-guide) Availability 절). 정기 실행은 이 구간 밖인 14:00 UTC 로 둔다. 지금까지 GitHub 가 정기 실행을 1.5~7시간 늦게 시작했는데, 그만큼 늦어도 다음 점검 구간(04:00 UTC~) 한참 전에 끝난다.
+
+- **수동 실행 (`workflow_dispatch`) 도 점검 구간을 피한다.** 한국 시간으로 **14:00~22:30**, 미국 서머타임 기간(3월 둘째 일요일~11월 첫째 일요일)에는 **13:00~21:30** 이 점검 구간이다. 이 시간에 돌리면 `ca_cmhc` 가 503 으로 실패할 수 있다 — 실패해도 다른 fetcher 결과는 반영되고(§4.5d) 게이트만 빨간불이다.
 
 ### 4.3 `refresh-transit.yml` — 분기 1회
 
@@ -371,6 +376,7 @@ fetcher 하나의 exit 1 이 뒤의 fetcher·build·validate·PR/commit 을 통�
 ```yaml
 - name: Refresh US HUD
   id: us_hud                       # 모듈명 그대로 (워크플로우 내 유일)
+  if: env.US_HUD_API_KEY != ''     # API 키 분기 쌍의 실행 step (§4.5c)
   run: node scripts/refresh/_run.mjs us_hud
   continue-on-error: true
 # … build → validate → detect_outliers → PR/commit (continue-on-error 없음) …
@@ -417,6 +423,7 @@ GitHub Actions Secrets 로 관리. 무료 키들이라 비용 0.
 | `KR_DATA_API_KEY`   | 공공데이터포털 (KOSIS·국토부·KCA) | https://www.data.go.kr — 무료, 즉시                      |
 | `US_BLS_API_KEY`    | US BLS API                        | https://www.bls.gov/developers/ — 무료, 이메일 인증      |
 | `US_CENSUS_API_KEY` | US Census                         | https://api.census.gov/data/key_signup.html — 무료, 즉시 |
+| `US_HUD_API_KEY`    | HUD User FMR API (`us_hud`)       | https://www.huduser.gov/hudapi/public/register — 무료, 가입·메일 인증 후 access token 생성. `Authorization: Bearer` 로 전송 (ADR-085) |
 | `JP_ESTAT_APP_ID`   | 일본 e-Stat                       | https://www.e-stat.go.jp/api/ — 무료, 가입               |
 | `SG_DATA_GOV_KEY`   | data.gov.sg                       | https://data.gov.sg — 일부 dataset 키 필요               |
 
@@ -565,5 +572,6 @@ PR #20 round 11 review 에서 확인된 후속 phase 항목. 각 항목은 별�
 | 2026-04-28 | v1.0 — 자동화 인프라 초기 명세 |
 | 2026-09-28 | 경고 채널 분리 — `RefreshResult.warnings` 선택 필드 추가, `errors` 는 "값 못 냄" 으로 한정, `warnings` 는 종료 코드 무영향 (§3·§7.1, ADR-079) |
 | 2026-09-29 | 워크플로우 게이트 — 6개 `refresh-*.yml` 의 fetcher step 에 `id` + `continue-on-error: true`, 마지막 step `Fail if any fetcher failed` (`if: always()`, outcome 집계) 추가. 한 fetcher 실패가 나머지 갱신을 막지 않고 실패는 빨간불로 노출 (§4.5d·§7.1, ADR-079) |
+| 2026-11-27 | refresh-rent — `us_hud` 가 `US_HUD_API_KEY` 를 `Authorization: Bearer` 로 전송, 키 없으면 skip + warning (§4.5c·§5). cron `0 9 1 * *` → `0 14 1 * *` (StatCan WDS 점검 시간대 회피), 수동 실행 시간 안내 (§4.2, ADR-085) |
 
 새 source 추가·schedule 변경·정책 변경 시 본 표 + ADR 갱신.

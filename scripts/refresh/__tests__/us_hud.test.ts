@@ -15,7 +15,10 @@ import refreshUsHud, {
 import type { RefreshChange } from './_test-types';
 
 let originalDataDir: string | undefined;
+let originalApiKey: string | undefined;
 let testDir: string;
+
+const TEST_TOKEN = 'test-hud-token';
 
 beforeEach(() => {
   testDir = path.join(
@@ -25,7 +28,9 @@ beforeEach(() => {
   fs.mkdirSync(path.join(testDir, 'cities'), { recursive: true });
 
   originalDataDir = process.env.DATA_DIR;
+  originalApiKey = process.env.US_HUD_API_KEY;
   process.env.DATA_DIR = path.join(testDir, 'cities');
+  process.env.US_HUD_API_KEY = TEST_TOKEN;
 });
 
 afterEach(() => {
@@ -33,6 +38,8 @@ afterEach(() => {
     fs.rmSync(testDir, { recursive: true, force: true });
   }
   process.env.DATA_DIR = originalDataDir;
+  if (originalApiKey === undefined) delete process.env.US_HUD_API_KEY;
+  else process.env.US_HUD_API_KEY = originalApiKey;
   jest.restoreAllMocks();
 });
 
@@ -159,6 +166,43 @@ describe('refresh (integration)', () => {
   afterEach(() => {
     jest.useFakeTimers();
   });
+
+  it('API 키 없음: throw MissingApiKeyError, fetch 호출 안 함', async () => {
+    delete process.env.US_HUD_API_KEY;
+
+    await expect(refreshUsHud({ dryRun: true })).rejects.toMatchObject({
+      code: 'MISSING_API_KEY',
+      message: expect.stringContaining('US_HUD_API_KEY'),
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
+  }, 30000);
+
+  it('Authorization: Bearer <US_HUD_API_KEY> 헤더 전송', async () => {
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => VALID_HUD_RESPONSE,
+    });
+
+    await refreshUsHud({ dryRun: true, cities: ['nyc'] });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchSpy.mock.calls[0]!;
+    expect(url).toBe(`https://www.huduser.gov/hudapi/public/fmr/data/${CITY_CONFIGS.nyc.entityId}`);
+    expect(init.headers).toMatchObject({ Authorization: `Bearer ${TEST_TOKEN}` });
+  }, 30000);
+
+  it('HTTP 401: 재시도 없이 errors 기록, 토큰은 메시지에 노출 안 함', async () => {
+    fetchSpy.mockResolvedValue({ ok: false, status: 401 });
+
+    const result = await refreshUsHud({ dryRun: true, cities: ['nyc'] });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(result.cities).toHaveLength(0);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0]?.reason).toContain('HTTP 401');
+    expect(result.errors[0]?.reason).not.toContain(TEST_TOKEN);
+  }, 30000);
 
   it('정상 응답: 5개 도시 rent 매핑', async () => {
     fetchSpy.mockResolvedValue({

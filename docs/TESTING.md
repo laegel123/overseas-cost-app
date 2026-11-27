@@ -3169,6 +3169,9 @@ afterEach(() => {
 - [x] `SOURCE` 정의 (HUD Fair Market Rents)
 - [x] `refresh` 함수: dryRun, cities 옵션
 - [x] RefreshResult 반환 구조
+- [x] `US_HUD_API_KEY` 환경변수 필수 — 없으면 fetch 전에 MissingApiKeyError (ADR-085)
+- [x] `Authorization: Bearer <US_HUD_API_KEY>` 헤더 전송 (ADR-085)
+- [x] HTTP 401: 재시도 없이 errors 기록, 에러 메시지에 토큰 미노출
 
 #### `us_census.mjs`
 
@@ -3623,6 +3626,7 @@ actionlint 가 CI 워크플로우로 자동화되어 있지 않다 — 본 항�
 - [x] `_run.mjs` 를 run 하는 모든 step 은 `id: <module>` + `continue-on-error: true` 로 격리 — fetcher 1개 exit 1 이 뒤 fetcher·build·PR 을 skip 시키지 않음 (ADR-079, refresh-warnings step 3)
 - [x] 각 워크플로우의 마지막 step 은 `Fail if any fetcher failed` (`if: always()`) 게이트이고 그 워크플로우의 fetcher step id **전부**의 `steps.<id>.outcome` 을 참조 — 새 fetcher step 추가 시 게이트 누락 차단 (ADR-079)
 - [x] build_data / validate_cities / detect_outliers step 에는 `continue-on-error` 없음 — 스키마 위반 fail-fast 유지 (ADR-079)
+- [x] `refresh-rent.yml` 의 us_hud 는 `US_HUD_API_KEY` 가 있을 때만 실행하고, 없으면 skip 안내 step 이 `::warning::` 을 남긴다 — 키 등록 전에도 게이트 빨간불 없음 (AUTOMATION.md §4.5c, ADR-085)
 
 ### 9-A.14 `_registry.mjs` (도시 ↔ 출처 매핑)
 
@@ -3650,7 +3654,7 @@ DATA_SOURCES.md 부록 A 의 코드화. registry 가 사실상 단일 출처.
 
 ### 9-A.16 시간·환경 의존 테스트
 
-- [x] 5개 워크플로우 cron hour = 9 (UTC 09:00 = KST 18:00). round 21 회귀 차단 — `cron hour 가 18 이 되어선 안 됨` 단언 (`integration.test.ts`).
+- [x] prices·transit·tuition·visa 4개 워크플로우 cron hour = 9 (UTC 09:00 = KST 18:00), refresh-rent 는 14 (UTC 14:00 = KST 23:00 — StatCan WDS 점검 시간대 회피, ADR-085). round 21 회귀 차단 — `cron hour 가 18 이 되어선 안 됨` 단언 (`integration.test.ts`).
 - [x] 6개 refresh 워크플로우 `jobs.refresh.timeout-minutes` 가 합리적 범위(5~60) 안에 설정. GitHub Actions 기본값 360분 hang 회귀 차단 — round 24 (`integration.test.ts`).
 - [ ] 워크플로우 실행 시각 (UTC 09:00 = KST 18:00) 가정 → fetch URL 의 날짜 파라미터 정확 (수동 검증)
 - [ ] 시즌성 — 학비는 1월·8월 갱신 시 새 학년 데이터 (이전 학년 무시) (v1.x HTML 파싱 도입 후)
