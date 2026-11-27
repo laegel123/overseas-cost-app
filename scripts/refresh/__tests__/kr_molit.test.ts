@@ -241,7 +241,7 @@ describe('constants', () => {
     expect(SEOUL_DISTRICT_CODES[0]).toBe('11110');
   });
 
-  it('DEPOSIT_CONVERSION_RATE: 한국부동산원 서울 연립·다세대 전월세전환율 2026년 9월 4.6% (ADR-086)', () => {
+  it('DEPOSIT_CONVERSION_RATE: 한국부동산원 서울 연립·다세대 전월세전환율 2026년 9월 4.6% (ADR-087)', () => {
     expect(DEPOSIT_CONVERSION_RATE).toBe(0.046);
   });
 

@@ -7,7 +7,7 @@
  * 공공데이터포털 키 필요: KR_DATA_API_KEY
  *
  * 방법: 서울특별시 25개 자치구 월세 계약의 환산 월세 (월세 + 보증금 × 전월세전환율 ÷ 12) 메디안
- *       → share/studio/oneBed/twoBed 매핑. 전환율은 DEPOSIT_CONVERSION_RATE (ADR-086).
+ *       → share/studio/oneBed/twoBed 매핑. 전환율은 DEPOSIT_CONVERSION_RATE (ADR-087).
  * 면적 기준: share (<= 10㎡), studio (11~30㎡), oneBed (31~50㎡), twoBed (51~80㎡)
  * 응답 (공공데이터포털 기술문서): 정상 resultCode `000`, deposit·monthlyRent 는 만원 단위.
  */
@@ -19,10 +19,10 @@ const API_BASE = 'https://apis.data.go.kr/1613000/RTMSDataSvcRHRent/getRTMSDataS
 const MANWON = 10000;
 
 /**
- * 보증금 → 월세 환산에 쓰는 연 전월세전환율 (ADR-086).
+ * 보증금 → 월세 환산에 쓰는 연 전월세전환율 (ADR-087).
  * 출처: 한국부동산원 전국주택가격동향조사 「지역별 전월세 전환율_연립/다세대」 서울, 2026년 9월 4.6%
  * (2026-11 공표, R-ONE 통계표 A_2024_00157). 표본(RTMSDataSvcRHRent)과 같은 서울 연립·다세대의
- * 시장 전환율이다. 갱신은 이 상수 + 테스트 + ADR-086 을 함께 고친다.
+ * 시장 전환율이다. 갱신은 이 상수 + 테스트 + ADR-087 을 함께 고친다.
  */
 export const DEPOSIT_CONVERSION_RATE = 0.046;
 
