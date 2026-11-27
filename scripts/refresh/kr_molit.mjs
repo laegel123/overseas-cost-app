@@ -92,6 +92,74 @@ export function toConvertedRent({ deposit, monthlyRent }) {
   return Math.round(monthlyRent + (deposit * DEPOSIT_CONVERSION_RATE) / 12);
 }
 
+// TEMP DIAGNOSTIC (PR 에 포함하지 않음) — 실제 응답 분포 확인용.
+const DIAG = [];
+function diagParse(xml) {
+  const out = [];
+  const re = /<item>([\s\S]*?)<\/item>/g;
+  let m;
+  while ((m = re.exec(xml)) !== null) {
+    const x = m[1];
+    const g = (tag) => { const r = new RegExp(`<${tag}>([^<]*)</${tag}>`).exec(x); return r ? r[1].trim() : null; };
+    const area = parseFloat(g('excluUseAr') ?? 'NaN');
+    const dep = g('deposit');
+    const rent = g('monthlyRent');
+    out.push({
+      area,
+      deposit: dep === null ? null : parseInt(dep.replace(/,/g, ''), 10) * MANWON,
+      monthlyRent: rent === null ? null : parseInt(rent.replace(/,/g, ''), 10) * MANWON,
+      contractType: g('contractType'),
+      houseType: g('houseType'),
+    });
+  }
+  return out;
+}
+function diagReport() {
+  const q = (arr, p) => { if (!arr.length) return null; const s = [...arr].sort((a, b) => a - b); return s[Math.min(s.length - 1, Math.floor(p * s.length))]; };
+  const conv = (it, r) => Math.round(it.monthlyRent + (it.deposit * r) / 12);
+  const cats = { share: [], studio: [], oneBed: [], twoBed: [], over80: [] };
+  let noDeposit = 0;
+  const ctypes = {};
+  const htypes = {};
+  for (const it of DIAG) {
+    if (it.deposit === null) noDeposit++;
+    ctypes[it.contractType] = (ctypes[it.contractType] ?? 0) + 1;
+    htypes[it.houseType] = (htypes[it.houseType] ?? 0) + 1;
+    const c = areaToCategory(it.area) ?? 'over80';
+    cats[c].push(it);
+  }
+  const summary = { total: DIAG.length, noDeposit, ctypes, htypes, cats: {} };
+  for (const [c, list] of Object.entries(cats)) {
+    const wolse = list.filter((it) => it.monthlyRent > 0 && it.deposit !== null);
+    const jeonse = list.filter((it) => it.monthlyRent === 0 && it.deposit !== null);
+    const shin = wolse.filter((it) => it.contractType === '신규');
+    const row = {
+      nWolse: wolse.length,
+      nJeonse: jeonse.length,
+      nWolseNew: shin.length,
+      rawMedian: median(wolse.map((it) => it.monthlyRent)),
+      rawP25: q(wolse.map((it) => it.monthlyRent), 0.25),
+      rawP75: q(wolse.map((it) => it.monthlyRent), 0.75),
+      depositMedian: median(wolse.map((it) => it.deposit)),
+      depositP75: q(wolse.map((it) => it.deposit), 0.75),
+      depositP90: q(wolse.map((it) => it.deposit), 0.9),
+      shareDepositGe1eok: wolse.length ? +(wolse.filter((it) => it.deposit >= 100000000).length / wolse.length).toFixed(3) : null,
+      areaMedian: median(wolse.map((it) => Math.round(it.area * 10))) / 10,
+      jeonseDepositMedian: median(jeonse.map((it) => it.deposit)),
+    };
+    for (const r of [0.041, 0.046, 0.05, 0.0525, 0.06]) {
+      row[`conv_${r}`] = median(wolse.map((it) => conv(it, r)));
+    }
+    row.convP25_046 = q(wolse.map((it) => conv(it, 0.046)), 0.25);
+    row.convP75_046 = q(wolse.map((it) => conv(it, 0.046)), 0.75);
+    row.convNewOnly_046 = median(shin.map((it) => conv(it, 0.046)));
+    row.rawNewOnly = median(shin.map((it) => it.monthlyRent));
+    row.convInclJeonse_046 = median([...wolse, ...jeonse].map((it) => conv(it, 0.046)));
+    summary.cats[c] = row;
+  }
+  console.log(`KR_MOLIT_DIAG ${JSON.stringify(summary)}`);
+}
+
 /**
  * 응답 코드 체크.
  * @param {string} xml
@@ -179,6 +247,7 @@ export default async function refresh(opts = {}) {
           return { items: [], error: { reason: `API error for ${lawd}: ${result.code} ${result.msg}` } };
         }
         items.push(...parseRentXml(xml));
+        DIAG.push(...diagParse(xml));
         const totalCountMatch = /<totalCount>(\d+)<\/totalCount>/.exec(xml);
         if (!totalCountMatch) {
           // 기술문서상 필수 항목 — 없으면 다음 페이지가 있는지 알 수 없어 자치구 전체를 오류로 남긴다.
@@ -203,6 +272,7 @@ export default async function refresh(opts = {}) {
     }
   }
 
+  diagReport();
   const byCategory = { share: [], studio: [], oneBed: [], twoBed: [] };
   for (const item of allItems) {
     const cat = areaToCategory(item.area);
