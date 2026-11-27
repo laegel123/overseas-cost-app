@@ -3093,8 +3093,12 @@ afterEach(() => {
 - [x] 매물 면적 기반 카테고리 매핑 정확 (10㎡ 이하 = share, 11~30㎡ = studio 등)
 - [x] 응답에 매물 0건 (공개 지연): warnings + 기존값 유지, errors 는 비어 있음 · reason 에 `WARN:` 접두어 없음 (ADR-079)
 - [x] 자치구별 데이터 일부 결측: 가용 자치구 평균
-- [x] XML 응답 파싱 (공공데이터포털 일부 XML)
-- [x] API 키 만료 (200 with error message in body): errors
+- [x] XML 응답 파싱 (공공데이터포털 기술문서 응답 예제 형식 — 정상 resultCode `000`/`OK`)
+- [x] monthlyRent 만원 단위 → 원 환산, 월세 0 (전세) 제외
+- [x] totalCount 가 numOfRows(1000) 초과: pageNo 를 올려 다음 페이지까지 집계
+- [x] 정상 응답에 totalCount 누락: 잘림 여부를 알 수 없으므로 errors (silent fail 금지)
+- [x] 결과 코드 03 (No Data): errors 아님 — 매물 0건과 같이 warnings
+- [x] API 키 미등록·만료 (200 with resultCode 30·31 in body): errors
 
 #### `kr_kca.mjs` (한국소비자원 참가격)
 

@@ -8,12 +8,14 @@
  *
  * 방법: 서울특별시 25개 자치구 임대료 메디안 → share/studio/oneBed/twoBed 매핑
  * 면적 기준: share (<= 10㎡), studio (11~30㎡), oneBed (31~50㎡), twoBed (51~80㎡)
+ * 응답 (공공데이터포털 기술문서): 정상 resultCode `000`, monthlyRent 는 만원 단위.
  */
 
 import { fetchWithRetry, readCity, writeCity, createMissingApiKeyError, createCitySeed, redactErrorMessage} from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const API_BASE = 'https://apis.data.go.kr/1613000/RTMSDataSvcRHRent/getRTMSDataSvcRHRent';
+const MANWON = 10000;
 
 export const SEOUL_DISTRICT_CODES = [
   '11110', '11140', '11170', '11200', '11215', '11230', '11260', '11290',
@@ -41,7 +43,8 @@ export function areaToCategory(area) {
 }
 
 /**
- * XML 응답에서 매물 데이터 파싱.
+ * XML 응답에서 매물 데이터 파싱. monthlyRent 는 만원 단위로 오므로 원으로 환산해 반환한다.
+ * 월세 0 (전세) 은 제외.
  * @param {string} xml
  * @returns {Array<{area: number, monthlyRent: number}>}
  */
@@ -58,7 +61,7 @@ export function parseRentXml(xml) {
 
     if (areaMatch && rentMatch) {
       const area = parseFloat(areaMatch[1]);
-      const monthlyRent = parseInt(rentMatch[1].replace(/,/g, ''), 10);
+      const monthlyRent = parseInt(rentMatch[1].replace(/,/g, ''), 10) * MANWON;
 
       if (Number.isFinite(area) && Number.isFinite(monthlyRent) && monthlyRent > 0) {
         items.push({ area, monthlyRent });
@@ -81,7 +84,7 @@ export function parseResultCode(xml) {
   const code = codeMatch?.[1] ?? 'UNKNOWN';
   const msg = msgMatch?.[1] ?? '';
 
-  return { ok: code === '00', code, msg };
+  return { ok: code === '000', code, msg };
 }
 
 /**
@@ -126,29 +129,43 @@ export default async function refresh(opts = {}) {
 
   // 25개 자치구 병렬 fetch — concurrency 5 chunks (data.go.kr rate limit 보호 + GitHub Actions 6분 timeout 회피).
   const CONCURRENCY = 5;
+  const NUM_OF_ROWS = 1000;
   const fetchOne = async (lawd) => {
-    const params = new URLSearchParams({
-      serviceKey: apiKey,
-      LAWD_CD: lawd,
-      DEAL_YMD: dealYm,
-      numOfRows: '1000',
-    });
-    const url = `${API_BASE}?${params}`;
+    const items = [];
     try {
-      const response = await fetchWithRetry(url, { timeoutMs: 20000 });
-      const xml = await response.text();
+      // totalCount 가 numOfRows 를 넘는 자치구 (예: 송파구 월 1,300건+) 는 pageNo 를 올려 끝까지 받는다.
+      for (let pageNo = 1; ; pageNo++) {
+        const params = new URLSearchParams({
+          serviceKey: apiKey,
+          LAWD_CD: lawd,
+          DEAL_YMD: dealYm,
+          numOfRows: String(NUM_OF_ROWS),
+          pageNo: String(pageNo),
+        });
+        const url = `${API_BASE}?${params}`;
+        const response = await fetchWithRetry(url, { timeoutMs: 20000 });
+        const xml = await response.text();
 
-      const result = parseResultCode(xml);
-      if (!result.ok) {
-        if (result.code === '99' || result.code === 'SERVICE_KEY_IS_NOT_REGISTERED_ERROR') {
-          return { items: [], error: { reason: `API key invalid or expired: ${result.msg}` } };
+        const result = parseResultCode(xml);
+        if (!result.ok) {
+          // 기술문서 에러 코드: 30 등록되지 않은 서비스키, 31 기간 만료된 서비스키, 03 No Data.
+          if (result.code === '30' || result.code === '31') {
+            return { items: [], error: { reason: `API key invalid or expired: ${result.msg}` } };
+          }
+          if (result.code === '03') {
+            // 1페이지면 매물 0건, 이후 페이지면 앞서 받은 페이지까지가 전부 — 둘 다 오류 아님.
+            return { items };
+          }
+          return { items: [], error: { reason: `API error for ${lawd}: ${result.code} ${result.msg}` } };
         }
-        if (result.code === 'NO_DATA') {
-          return { items: [] };
+        items.push(...parseRentXml(xml));
+        const totalCountMatch = /<totalCount>(\d+)<\/totalCount>/.exec(xml);
+        if (!totalCountMatch) {
+          // 기술문서상 필수 항목 — 없으면 다음 페이지가 있는지 알 수 없어 자치구 전체를 오류로 남긴다.
+          return { items: [], error: { reason: `Missing totalCount for ${lawd} (page ${pageNo})` } };
         }
-        return { items: [], error: { reason: `API error for ${lawd}: ${result.code} ${result.msg}` } };
+        if (pageNo * NUM_OF_ROWS >= Number(totalCountMatch[1])) return { items };
       }
-      return { items: parseRentXml(xml) };
     } catch (err) {
       return {
         items: [],

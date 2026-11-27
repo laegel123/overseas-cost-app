@@ -42,36 +42,65 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-const VALID_RENT_XML = `<?xml version="1.0" encoding="UTF-8"?>
+// 공공데이터포털 RTMSDataSvcRHRent 기술문서의 응답 예제 형식 — 성공 코드 `000`/`OK`,
+// deposit·monthlyRent 는 만원 단위, 페이지 정보는 body 의 items 뒤에 온다.
+function rentItem(excluUseAr: string, deposit: string, monthlyRent: string): string {
+  return `
+      <item>
+        <buildYear>2019</buildYear>
+        <contractTerm/>
+        <contractType> </contractType>
+        <dealDay>10</dealDay>
+        <dealMonth>10</dealMonth>
+        <dealYear>2026</dealYear>
+        <deposit>${deposit}</deposit>
+        <excluUseAr>${excluUseAr}</excluUseAr>
+        <floor>2</floor>
+        <houseType>다세대</houseType>
+        <jibun>211-11</jibun>
+        <mhouseNm>테스트빌라</mhouseNm>
+        <monthlyRent>${monthlyRent}</monthlyRent>
+        <preDeposit/>
+        <preMonthlyRent/>
+        <sggCd>11110</sggCd>
+        <umdNm>신영동</umdNm>
+        <useRRRight> </useRRRight>
+      </item>`;
+}
+
+function rentResponse(
+  items: string[],
+  resultCode = '000',
+  resultMsg = 'OK',
+  totalCount = items.length,
+): string {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <response>
   <header>
-    <resultCode>00</resultCode>
-    <resultMsg>NORMAL SERVICE.</resultMsg>
+    <resultCode>${resultCode}</resultCode>
+    <resultMsg>${resultMsg}</resultMsg>
   </header>
   <body>
-    <items>
-      <item>
-        <excluUseAr>8.5</excluUseAr>
-        <monthlyRent>350000</monthlyRent>
-      </item>
-      <item>
-        <excluUseAr>25.0</excluUseAr>
-        <monthlyRent>650000</monthlyRent>
-      </item>
-      <item>
-        <excluUseAr>45.0</excluUseAr>
-        <monthlyRent>1200000</monthlyRent>
-      </item>
-      <item>
-        <excluUseAr>65.0</excluUseAr>
-        <monthlyRent>1800000</monthlyRent>
-      </item>
+    <items>${items.join('')}
     </items>
+    <numOfRows>1000</numOfRows>
+    <pageNo>1</pageNo>
+    <totalCount>${totalCount}</totalCount>
   </body>
 </response>`;
+}
+
+const VALID_RENT_XML = rentResponse([
+  rentItem('8.5', '500', '35'),
+  rentItem('25.0', '1,000', '65'),
+  rentItem('45.0', '3,000', '120'),
+  rentItem('65.0', '5,000', '180'),
+  // 전세 (월세 0) — 월세 집계에서 제외돼야 한다.
+  rentItem('84.99', '70,000', '0'),
+]);
 
 describe('parseRentXml', () => {
-  it('정상 XML 파싱: 매물 데이터 추출', () => {
+  it('정상 XML 파싱: 매물 데이터 추출 — 월세 만원 → 원 환산, 전세(월세 0) 제외', () => {
     const items = parseRentXml(VALID_RENT_XML);
     expect(items).toHaveLength(4);
     expect(items[0]).toEqual({ area: 8.5, monthlyRent: 350000 });
@@ -101,19 +130,20 @@ describe('parseRentXml', () => {
     expect(items).toEqual([]);
   });
 
-  it('콤마 포함 숫자 처리', () => {
-    const xml = `<item><excluUseAr>30</excluUseAr><monthlyRent>1,500,000</monthlyRent></item>`;
+  it('콤마 포함 숫자 처리 (만원 단위)', () => {
+    const xml = `<item><excluUseAr>30</excluUseAr><monthlyRent>1,050</monthlyRent></item>`;
     const items = parseRentXml(xml);
     expect(items).toHaveLength(1);
-    expect(items[0]?.monthlyRent).toBe(1500000);
+    expect(items[0]?.monthlyRent).toBe(10500000);
   });
 });
 
 describe('parseResultCode', () => {
-  it('정상 응답 코드', () => {
+  it('정상 응답 코드: 000 OK', () => {
     const result = parseResultCode(VALID_RENT_XML);
     expect(result.ok).toBe(true);
-    expect(result.code).toBe('00');
+    expect(result.code).toBe('000');
+    expect(result.msg).toBe('OK');
   });
 
   it('에러 응답 코드', () => {
@@ -207,7 +237,7 @@ describe('refresh (integration)', () => {
     await expect(refreshKrMolit()).rejects.toThrow('KR_DATA_API_KEY');
   });
 
-  it('정상 응답: 25개 자치구 평균 → rent 매핑', async () => {
+  it('정상 응답 (000 OK): 오류 없이 25개 자치구 메디안 → rent 원 단위 매핑', async () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
@@ -217,8 +247,17 @@ describe('refresh (integration)', () => {
     const result = await refreshKrMolit({ dryRun: true });
 
     expect(result.source).toBe('kr_molit');
-    expect(result.changes.length).toBeGreaterThan(0);
+    expect(result.errors).toEqual([]);
     expect(fetchSpy).toHaveBeenCalledTimes(25);
+    const newValues = Object.fromEntries(
+      result.changes.map((c: RefreshChange) => [c.field, c.newValue]),
+    );
+    expect(newValues).toEqual({
+      'rent.share': 350000,
+      'rent.studio': 650000,
+      'rent.oneBed': 1200000,
+      'rent.twoBed': 1800000,
+    });
   }, 30000);
 
   it('dryRun=true: 파일 미갱신', async () => {
@@ -234,8 +273,8 @@ describe('refresh (integration)', () => {
     expect(fs.existsSync(seoulPath)).toBe(false);
   }, 30000);
 
-  it('API 키 만료 응답: errors에 추가', async () => {
-    const errorXml = `<resultCode>99</resultCode><resultMsg>SERVICE_KEY_IS_NOT_REGISTERED_ERROR</resultMsg>`;
+  it('API 키 미등록 응답 (30): errors에 추가', async () => {
+    const errorXml = rentResponse([], '30', 'SERVICE_KEY_IS_NOT_REGISTERED_ERROR');
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
@@ -249,7 +288,7 @@ describe('refresh (integration)', () => {
   }, 30000);
 
   it('매물 0건 (공개 지연): warnings 추가 + 빈 cities, errors 는 비어 있음', async () => {
-    const emptyXml = `<resultCode>00</resultCode><body><items></items></body>`;
+    const emptyXml = rentResponse([]);
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
@@ -262,6 +301,53 @@ describe('refresh (integration)', () => {
     expect((result.warnings ?? []).length).toBeGreaterThan(0);
     expect((result.warnings ?? [])[0]?.reason).toContain('No rental data');
     expect((result.warnings ?? [])[0]?.reason).not.toContain('WARN:');
+    expect(result.errors).toEqual([]);
+  }, 30000);
+
+  it('totalCount 가 numOfRows(1000) 초과: 다음 페이지까지 모아 집계', async () => {
+    // 송파구처럼 한 달 거래가 1000건을 넘는 자치구 — 1페이지는 studio 만, 2페이지에만 twoBed.
+    const page1 = rentResponse(
+      Array.from({ length: 1000 }, () => rentItem('25.0', '1,000', '65')),
+      '000',
+      'OK',
+      1001,
+    );
+    const page2 = rentResponse([rentItem('65.0', '5,000', '180')], '000', 'OK', 1001);
+    fetchSpy.mockImplementation(async (url: string) => {
+      const pageNo = new URL(url).searchParams.get('pageNo');
+      return { ok: true, status: 200, text: async () => (pageNo === '2' ? page2 : page1) };
+    });
+
+    const result = await refreshKrMolit({ dryRun: true });
+
+    expect(result.errors).toEqual([]);
+    expect(fetchSpy).toHaveBeenCalledTimes(50);
+    const twoBed = result.changes.find((c: RefreshChange) => c.field === 'rent.twoBed');
+    expect(twoBed?.newValue).toBe(1800000);
+  }, 30000);
+
+  it('정상 응답에 totalCount 누락: 페이지가 잘렸는지 알 수 없으므로 errors 에 추가', async () => {
+    const noTotalCount = VALID_RENT_XML.replace(/<totalCount>\d+<\/totalCount>/, '');
+    fetchSpy.mockResolvedValue({ ok: true, status: 200, text: async () => noTotalCount });
+
+    const result = await refreshKrMolit({ dryRun: true });
+
+    expect(result.errors).toHaveLength(25);
+    expect(result.errors[0]?.reason).toContain('totalCount');
+    expect(result.cities).toHaveLength(0);
+  }, 30000);
+
+  it('결과 코드 03 (No Data): 오류가 아닌 매물 0건으로 처리', async () => {
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      status: 200,
+      text: async () => rentResponse([], '03', 'No Data'),
+    });
+
+    const result = await refreshKrMolit({ dryRun: true });
+
+    expect(result.cities).toHaveLength(0);
+    expect((result.warnings ?? [])[0]?.reason).toContain('No rental data');
     expect(result.errors).toEqual([]);
   }, 30000);
 

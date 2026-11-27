@@ -84,6 +84,7 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
 - **공공데이터포털 키 필요** (`KR_DATA_API_KEY`)
 - **자동화**: `scripts/refresh/kr_molit.mjs` — 월 1회
 - **방법**: 서울특별시 25개 자치구 임대료 메디안 → share/studio/oneBed/twoBed 매핑
+- **응답**: 정상 resultCode `000`. `monthlyRent` 는 만원 단위 → 원 환산, 월세 0 (전세) 제외. 자치구별 `totalCount` 가 1000건을 넘으면 `pageNo` 로 이어 받음
 - **한계**: 매물 면적 기준 → "share" 는 면적 가장 작은 그룹 (10㎡ 이하)
 
 ### 식재료
