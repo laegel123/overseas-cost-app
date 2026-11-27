@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-11-27T01:40:07.756Z",
+  "generatedAt": "2026-11-27T01:58:48.874Z",
   "fxBaseDate": "2026-11-27",
   "cities": {
     "amsterdam": {
@@ -1285,12 +1285,12 @@
       "country": "KR",
       "currency": "KRW",
       "region": "asia",
-      "lastUpdated": "2026-05-02",
+      "lastUpdated": "2026-11-27",
       "rent": {
-        "share": 350000,
-        "studio": 650000,
-        "oneBed": 1200000,
-        "twoBed": 1800000
+        "share": 698333,
+        "studio": 771667,
+        "oneBed": 849917,
+        "twoBed": 1076667
       },
       "food": {
         "restaurantMeal": 10400,
@@ -1316,7 +1316,7 @@
           "category": "rent",
           "name": "국토교통부 실거래가 공개시스템",
           "url": "https://rt.molit.go.kr/",
-          "accessedAt": "2026-05-02"
+          "accessedAt": "2026-11-27"
         },
         {
           "category": "food",
