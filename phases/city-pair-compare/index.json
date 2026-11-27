@@ -1,0 +1,31 @@
+{
+  "project": "overseas-cost-app",
+  "phase": "city-pair-compare",
+  "steps": [
+    {
+      "step": 0,
+      "name": "pair-store",
+      "status": "pending"
+    },
+    {
+      "step": 1,
+      "name": "compare-tab",
+      "status": "pending"
+    },
+    {
+      "step": 2,
+      "name": "compare-base",
+      "status": "pending"
+    },
+    {
+      "step": 3,
+      "name": "detail-base",
+      "status": "pending"
+    },
+    {
+      "step": 4,
+      "name": "e2e-docs",
+      "status": "pending"
+    }
+  ]
+}
