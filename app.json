@@ -3,7 +3,7 @@
     "name": "살까말까",
     "slug": "overseas-cost-app",
     "scheme": "overseascost",
-    "version": "1.1.0",
+    "version": "1.1.1",
     "runtimeVersion": {
       "policy": "appVersion"
     },
@@ -24,6 +24,13 @@
       "buildNumber": "1",
       "config": {
         "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "ko",
+        "CFBundleLocalizations": [
+          "ko"
+        ],
+        "CFBundleAllowMixedLocalizations": true
       }
     },
     "android": {
