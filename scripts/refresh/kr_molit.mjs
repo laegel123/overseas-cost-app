@@ -6,9 +6,10 @@
  * API: https://apis.data.go.kr/1613000/RTMSDataSvcRHRent (전월세)
  * 공공데이터포털 키 필요: KR_DATA_API_KEY
  *
- * 방법: 서울특별시 25개 자치구 임대료 메디안 → share/studio/oneBed/twoBed 매핑
+ * 방법: 서울특별시 25개 자치구 월세 계약의 환산 월세 (월세 + 보증금 × 전월세전환율 ÷ 12) 메디안
+ *       → share/studio/oneBed/twoBed 매핑. 전환율은 DEPOSIT_CONVERSION_RATE (ADR-087).
  * 면적 기준: share (<= 10㎡), studio (11~30㎡), oneBed (31~50㎡), twoBed (51~80㎡)
- * 응답 (공공데이터포털 기술문서): 정상 resultCode `000`, monthlyRent 는 만원 단위.
+ * 응답 (공공데이터포털 기술문서): 정상 resultCode `000`, deposit·monthlyRent 는 만원 단위.
  */
 
 import { fetchWithRetry, readCity, writeCity, createMissingApiKeyError, createCitySeed, redactErrorMessage} from './_common.mjs';
@@ -16,6 +17,14 @@ import { computePctChange } from './_outlier.mjs';
 
 const API_BASE = 'https://apis.data.go.kr/1613000/RTMSDataSvcRHRent/getRTMSDataSvcRHRent';
 const MANWON = 10000;
+
+/**
+ * 보증금 → 월세 환산에 쓰는 연 전월세전환율 (ADR-087).
+ * 출처: 한국부동산원 전국주택가격동향조사 「지역별 전월세 전환율_연립/다세대」 서울, 2026년 9월 4.6%
+ * (2026-11 공표, R-ONE 통계표 A_2024_00157). 표본(RTMSDataSvcRHRent)과 같은 서울 연립·다세대의
+ * 시장 전환율이다. 갱신은 이 상수 + 테스트 + ADR-087 을 함께 고친다.
+ */
+export const DEPOSIT_CONVERSION_RATE = 0.046;
 
 export const SEOUL_DISTRICT_CODES = [
   '11110', '11140', '11170', '11200', '11215', '11230', '11260', '11290',
@@ -43,10 +52,10 @@ export function areaToCategory(area) {
 }
 
 /**
- * XML 응답에서 매물 데이터 파싱. monthlyRent 는 만원 단위로 오므로 원으로 환산해 반환한다.
- * 월세 0 (전세) 은 제외.
+ * XML 응답에서 매물 데이터 파싱. deposit·monthlyRent 는 만원 단위로 오므로 원으로 환산해 반환한다.
+ * 월세 0 (전세) 은 제외. 보증금이 없는 item 은 환산할 수 없어 제외 (월세만 남기면 낮게 치우친다).
  * @param {string} xml
- * @returns {Array<{area: number, monthlyRent: number}>}
+ * @returns {Array<{area: number, deposit: number, monthlyRent: number}>}
  */
 export function parseRentXml(xml) {
   const items = [];
@@ -57,19 +66,30 @@ export function parseRentXml(xml) {
     const itemXml = match[1];
 
     const areaMatch = /<excluUseAr>([\d.]+)<\/excluUseAr>/.exec(itemXml);
+    const depositMatch = /<deposit>([\d,]+)<\/deposit>/.exec(itemXml);
     const rentMatch = /<monthlyRent>([\d,]+)<\/monthlyRent>/.exec(itemXml);
 
-    if (areaMatch && rentMatch) {
+    if (areaMatch && depositMatch && rentMatch) {
       const area = parseFloat(areaMatch[1]);
+      const deposit = parseInt(depositMatch[1].replace(/,/g, ''), 10) * MANWON;
       const monthlyRent = parseInt(rentMatch[1].replace(/,/g, ''), 10) * MANWON;
 
-      if (Number.isFinite(area) && Number.isFinite(monthlyRent) && monthlyRent > 0) {
-        items.push({ area, monthlyRent });
+      if (Number.isFinite(area) && Number.isFinite(deposit) && Number.isFinite(monthlyRent) && monthlyRent > 0) {
+        items.push({ area, deposit, monthlyRent });
       }
     }
   }
 
   return items;
+}
+
+/**
+ * 환산 월세 = 월세 + 보증금 × DEPOSIT_CONVERSION_RATE ÷ 12 (원, 반올림).
+ * @param {{deposit: number, monthlyRent: number}} item
+ * @returns {number}
+ */
+export function toConvertedRent({ deposit, monthlyRent }) {
+  return Math.round(monthlyRent + (deposit * DEPOSIT_CONVERSION_RATE) / 12);
 }
 
 /**
@@ -187,7 +207,7 @@ export default async function refresh(opts = {}) {
   for (const item of allItems) {
     const cat = areaToCategory(item.area);
     if (cat) {
-      byCategory[cat].push(item.monthlyRent);
+      byCategory[cat].push(toConvertedRent(item));
     }
   }
 

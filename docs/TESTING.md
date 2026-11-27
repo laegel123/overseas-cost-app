@@ -3094,7 +3094,9 @@ afterEach(() => {
 - [x] 응답에 매물 0건 (공개 지연): warnings + 기존값 유지, errors 는 비어 있음 · reason 에 `WARN:` 접두어 없음 (ADR-079)
 - [x] 자치구별 데이터 일부 결측: 가용 자치구 평균
 - [x] XML 응답 파싱 (공공데이터포털 기술문서 응답 예제 형식 — 정상 resultCode `000`/`OK`)
-- [x] monthlyRent 만원 단위 → 원 환산, 월세 0 (전세) 제외
+- [x] deposit·monthlyRent 만원 단위 → 원 환산, 월세 0 (전세) 제외, 보증금 0 은 포함, 보증금 태그 누락 item 제외
+- [x] 환산 월세 = 월세 + 보증금 × `DEPOSIT_CONVERSION_RATE`(4.6%, ADR-087) ÷ 12 — 구간 메디안은 환산 월세로 계산
+- [x] 보증금이 큰 반전세가 섞임: 월세만의 메디안이 아니라 환산 월세 메디안 (재현 테스트)
 - [x] totalCount 가 numOfRows(1000) 초과: pageNo 를 올려 다음 페이지까지 집계
 - [x] 정상 응답에 totalCount 누락: 잘림 여부를 알 수 없으므로 errors (silent fail 금지)
 - [x] 결과 코드 03 (No Data): errors 아님 — 매물 0건과 같이 warnings
