@@ -3,14 +3,18 @@
 # 도시 Compare 로 직행하므로(app/onboarding.tsx → router.replace('/compare/{id}')),
 # 홈으로 돌아오려면 Compare 상단 뒤로가기를 한 번 눌러야 한다.
 #
-# 도시는 밴쿠버 고정 — 번들 시드(seoul+vancouver)에 포함돼 오프라인에서도 존재한다.
+# 도시는 밴쿠버 고정 — 번들 시드(`data/seed/all.json`, ADR-074 이후 21개 전량)에 포함돼
+# 오프라인에서도 존재한다.
 # 이 서브플로우는 ~20개 downstream 플로우의 공통 전제라 네트워크 비의존이 중요하다
 # (smoke.yaml / open-vancouver-compare.yaml 과 동일한 시드 보장 정책).
 #
-# 부작용: 온보딩이 밴쿠버를 즐겨찾기+최근에 1건 남긴다. '빈 상태' 를 전제하는 플로우
-# (empty-states / tabs-empty-alert / favorite-toggle 말미)는 도시 선택 온보딩과 근본적으로
+# 부작용: 온보딩이 밴쿠버를 즐겨찾기+최근에 1건 남긴다. 즐겨찾기·최근의 '빈 상태' 를
+# 전제하는 플로우(empty-states / favorite-toggle 말미)는 도시 선택 온보딩과 근본적으로
 # 양립 불가하며(온보딩을 통과하면 즐겨찾기가 반드시 1건 생김), 별도 로컬 검증 세션에서
 # 재작성한다 — ADR-067 파급, PLAN.md 참조.
+# (옛 tabs-empty-alert 도 이 목록에 있었다. ADR-089 로 비교 탭이 선택 화면이 되면서
+#  tabs-compare-empty 로 바뀌었고, 빈 상태 판정이 즐겨찾기·최근과 무관한 별도 store
+#  (`comparePair:v1`) 로 옮겨가 더 이상 충돌하지 않는다.)
 appId: com.laegel.overseascostapp
 ---
 - launchApp:

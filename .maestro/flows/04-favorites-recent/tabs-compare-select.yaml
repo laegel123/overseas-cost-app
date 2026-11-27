@@ -1,0 +1,24 @@
+# UC(ADR-089): 최근 본 도시가 있어도 비교 탭은 두 도시 선택 화면을 띄운다.
+# 종전(ADR-041)의 라우팅 단축은 recent[0] 의 `서울 vs <도시>` Compare 로 곧바로 넘겼다.
+# 이 flow 는 그 단축이 되살아나지 않는지 지키는 회귀 가드다.
+appId: com.laegel.overseascostapp
+tags:
+  - tabs
+---
+- runFlow: ../../common/onboard.yaml
+# 밴쿠버 Compare 를 열어 recent[0]=vancouver 를 확실히 만든다.
+- runFlow: ../../common/open-vancouver-compare.yaml
+- tapOn:
+    id: 'compare-topbar-back'
+- assertVisible:
+    id: 'home-screen'
+# 커스텀 BottomTabBar(src/components/BottomTabBar.tsx)는 각 탭에 accessibilityLabel=라벨
+# ('비교')만 부여한다 — Expo Router 기본 탭바의 '비교, tab, N of M' 형식이 아니고 testID 도
+# 미부여. 홈 화면엔 '비교' 와 전체 매칭되는 다른 요소가 없어 라벨만으로 유일 매칭된다.
+- tapOn: '비교'
+# 옛 단축이 살아 있다면 여기서 compare-screen + '서울 vs 밴쿠버' 가 떴다.
+- assertVisible:
+    id: 'compare-tab-screen'
+- assertNotVisible:
+    id: 'compare-screen'
+- assertNotVisible: '서울 vs 밴쿠버'

@@ -15,8 +15,8 @@ overseas-cost-app/
 │   │   ├── compare.tsx           # 비교 탭 — 두 도시 선택 화면 (ADR-089)
 │   │   ├── favorites.tsx         # 즐겨찾기 목록 (ADR-084)
 │   │   └── settings.tsx          # 설정
-│   ├── compare/[cityId].tsx      # 비교 화면 (서울 vs 도시)
-│   ├── detail/[cityId]/[category].tsx  # 항목 상세 (식비, 월세, ...)
+│   ├── compare/[cityId].tsx      # 비교 화면 (기준 vs 도시 — ?base= 생략 시 서울, ADR-089)
+│   ├── detail/[cityId]/[category].tsx  # 항목 상세 (식비, 월세, ... — ?base= 동일)
 │   ├── sources/                  # 데이터 출처 (ADR-071)
 │   │   ├── index.tsx             # 도시 목록
 │   │   └── [cityId].tsx          # 도시별 출처 (카테고리 그룹)

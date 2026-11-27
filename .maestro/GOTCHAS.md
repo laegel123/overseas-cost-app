@@ -68,6 +68,11 @@ ScrollView(`Screen scroll`)·BottomSheet 는 키보드가 떠 있을 때 **첫 �
 - 설정 `menu-app-info` 의 버전 `v1.0.0`(MenuRow `rightText`) → 라벨은 `앱 정보` 뿐.
 - `accessible` Pressable 자손인 Switch (`compare-pair-{category}-toggle`) 는 iOS 접근성 트리에서 상태에 따라 사라졌음
   (ON 이면 미노출 — 2026-09-04 검증, e2e-defects step 2 에서 Switch 를 Pressable 밖 형제로 분리 + `accessibilityState.checked` 추가해 해결).
+- **명시적 `accessibilityLabel` 은 자식 텍스트를 가린다** (§4 의 역방향). 도시끼리 상세의 도시별 선택 줄
+  (`detail-picker-city-{cityId}`, ADR-089) 은 라벨이 `'밴쿠버 학교 변경'` 으로 고정이라 **지금 고른 학교명이
+  접근성 트리에 아예 없다** — maestro 로 단정 불가 + VoiceOver 로도 현재 선택을 읽을 수 없다.
+  → `city-pair-tuition.yaml` 은 선택 반영을 배수 텍스트(`detail-row-tuition-pair-mult`)로 대신 검증한다.
+  (2026-11-27 구현 코드에서 확인 — 실기 미검증. 접근성 개선 후보: 라벨에 현재 선택을 넣기.)
 
 → flow 는 노출되는 앵커(backdrop, 행 testID)로 대체 검증하고, **접근성 갭은 별도 이슈로 보고**.
 
@@ -94,6 +99,22 @@ Metro(`npm run dev`)가 죽으면 앱은 `No script URL provided` red-box → �
 때문에 신뢰 불가 — **`curl /status` = `packager-status:running` 실제 응답으로 확인**.
 → `npm run e2e:check` (프리플라이트)가 시뮬레이터·앱 설치·Metro 응답을 하드 게이트로 검사한다.
 `e2e`/`e2e:smoke` 는 pre-script 로 자동 실행되므로 별도 호출 불필요.
+
+**프리플라이트는 '설치된 앱이 Metro 를 쓰는지' 까지는 못 본다 (false-green).** 시뮬레이터에
+**Release 빌드**가 깔려 있으면 앱은 번들 내장 `main.jsbundle`(Hermes 바이트코드)로 뜨고 Metro 를
+무시한다 — 프리플라이트 3항목은 전부 통과하는데 flow 는 **지금 브랜치가 아니라 그 빌드가 담고 있는
+옛 코드**를 검증하게 된다 (2026-11-27 city-pair-compare step 4 에서 실증: 비교 탭이 ADR-041 의
+redirect 로 동작해 신규 flow 가 전부 실패). 확인법:
+
+```bash
+APP=$(xcrun simctl get_app_container <UDID> com.laegel.overseascostapp)
+ls "$APP/main.jsbundle"     # 존재하면 Release = Metro 무시
+# 세대 확인 (Hermes 문자열은 UTF-16LE)
+python3 -c "import sys;d=open(sys.argv[1],'rb').read();print(d.find('도시끼리'.encode('utf-16-le')))" "$APP/main.jsbundle"
+```
+
+Debug 빌드에는 `main.jsbundle` 이 없다. 또 Metro 로그에 `iOS Bundling` 줄이 **한 줄도 없으면**
+앱이 Metro 에서 JS 를 받지 않았다는 뜻이다.
 
 ## 8. takeScreenshot 직후 탭은 유실될 수 있다
 

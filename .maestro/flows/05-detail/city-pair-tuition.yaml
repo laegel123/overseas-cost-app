@@ -1,0 +1,79 @@
+# UC(ADR-089): 도시끼리 학비 상세 — 도시마다 선택 줄이 1개씩 있고, 한쪽 도시의 학교를
+# 바꿔도 반대쪽 선택값은 섞이지 않는다 (이 phase 에서 가장 틀리기 쉬운 지점).
+#
+# 배수 리터럴의 근거 — 두 도시가 모두 CAD 라 KRW 환산이 약분돼 **환율과 무관**하다
+# (§18-A.1 의 "실시간 환율 의존 값은 단정 금지" 를 우회하는 조건).
+#   기본 선택 = entries[0]: 밴쿠버 UBC 연 45,000 / 토론토 U of T 연 60,000 → 60/45 → '↑1.3×'
+#   밴쿠버만 SFU(연 32,000) 로 바꾸면                                → 60/32 → '↑1.9×'
+# `data/all.json` 기준. 학교명·학비가 갱신되면 이 리터럴도 갱신해야 한다
+# (tuition-sheet.yaml 과 동일 전제 — PLAN.md 05-detail 리스크).
+appId: com.laegel.overseascostapp
+tags:
+  - detail
+  - sheet
+---
+- runFlow: ../../common/onboard.yaml
+- tapOn: '비교'
+- runFlow: ../../common/open-vancouver-toronto-compare.yaml
+- tapOn:
+    id: 'compare-pair-tuition'
+- assertVisible:
+    id: 'detail-screen'
+# hero caption 은 양쪽 학교명이 달라 '{카테고리} · 선택 항목' 이다 (서울 모드는 '학비 · UBC').
+- assertVisible: '학비 · 선택 항목'
+# testID 정규식 — 라벨의 괄호를 이스케이프 (실제 id: 'detail-section-학교 (월 환산)', GOTCHAS §1).
+- assertVisible:
+    id: 'detail-section-학교 \(월 환산\)'
+# 도시마다 선택 줄 1개. 서울 모드의 '학교 변경 / 직접 입력' 줄은 도시끼리 모드엔 없다.
+- assertVisible:
+    id: 'detail-picker-city-vancouver'
+- assertVisible:
+    id: 'detail-picker-city-toronto'
+- assertNotVisible:
+    id: 'detail-picker-change-tuition'
+# 값 비교는 1행 — 기본 선택(UBC vs U of T) 배수
+- assertVisible:
+    id: 'detail-row-tuition-pair-mult'
+    text: '↑1.3×'
+# 밴쿠버 줄 → 밴쿠버 학교 시트 (preset 행은 role=button 으로 자식 텍스트가 라벨에 병합돼
+# 순수 'SFU' 노드가 없다 → 행 testID 로 검증, GOTCHAS §4)
+- tapOn:
+    id: 'detail-picker-city-vancouver'
+- assertVisible:
+    id: 'detail-tuition-sheet-body'
+- assertVisible: '학교 선택'
+- assertVisible:
+    id: 'detail-tuition-sheet-preset-UBC'
+- assertVisible:
+    id: 'detail-tuition-sheet-preset-SFU'
+- assertVisible:
+    id: 'detail-tuition-sheet-preset-BCIT'
+- tapOn:
+    id: 'detail-tuition-sheet-preset-SFU'
+- assertNotVisible:
+    id: 'detail-tuition-sheet-body'
+# 밴쿠버 쪽만 SFU 로 바뀌어 배수가 갱신된다. 선택 줄에 적힌 학교명 자체는 Pressable 의
+# accessibilityLabel('밴쿠버 학교 변경')에 가려 접근성 트리에 없다 (GOTCHAS §5) → 배수로 검증.
+- assertVisible:
+    id: 'detail-row-tuition-pair-mult'
+    text: '↑1.9×'
+# 토론토 줄 → 토론토 학교 시트. 밴쿠버 학교가 섞여 들어오지 않는다.
+- tapOn:
+    id: 'detail-picker-city-toronto'
+- assertVisible:
+    id: 'detail-tuition-sheet-body'
+- assertVisible:
+    id: 'detail-tuition-sheet-preset-University of Toronto'
+- assertVisible:
+    id: 'detail-tuition-sheet-preset-Seneca'
+- assertNotVisible:
+    id: 'detail-tuition-sheet-preset-SFU'
+# 현재 선택(U of T)을 그대로 다시 골라 시트를 닫는다 → 토론토 쪽 값은 그대로이므로
+# 배수도 ↑1.9× 에서 움직이지 않는다 (밴쿠버 선택이 토론토로 번지지 않았다는 확인).
+- tapOn:
+    id: 'detail-tuition-sheet-preset-University of Toronto'
+- assertNotVisible:
+    id: 'detail-tuition-sheet-body'
+- assertVisible:
+    id: 'detail-row-tuition-pair-mult'
+    text: '↑1.9×'

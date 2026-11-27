@@ -1,11 +1,18 @@
 # 설계 문서: 도시끼리 비교 (비교 탭을 두 도시 선택 화면으로 교체)
 
-> **상태**: 승인됨 (2026-11-27, 미착수) — phase 명세: `phases/city-pair-compare/` (5 step)
+> **상태**: **구현 완료 (phase `city-pair-compare`)** — 2026-11-27, 5 step 전부 수행 (`phases/city-pair-compare/`)
 > **작성일**: 2026-11-27
-> **실행 방식**: 다음 세션에서 하네스(`phases/`)로 phase 초기화 후 단계별 실행 예정
-> **관련 ADR**: 신규 ADR 1건 추가 예정 (작성 시점 다음 번호는 **089** — 실행 시점에 `docs/adr/` 를 다시 확인). ADR-041(비교 탭 라우팅 단축) supersede. ADR-060/061/062/067/075/076/077/084 참조.
+> **실행 방식**: 하네스(`phases/city-pair-compare/`) step 0~4 로 실행 완료
+> **관련 ADR**: **ADR-089** (`docs/adr/089-compare-tab-city-pair.md`) 로 확정. ADR-041(비교 탭 라우팅 단축) supersede. ADR-060/061/062/067/075/076/077/084 참조.
 
-이 문서는 다음 세션에서 하네스가 이어받을 수 있도록 저장소에 영속화한 설계 스펙이다. 코드 변경은 아직 수행하지 않았다.
+이 문서는 설계 당시의 스펙이다. 구현 결과와 어긋나는 서술이 생기면 **ADR-089 와 `docs/ARCHITECTURE.md`·`docs/UI_GUIDE.md` 가 우선**한다.
+
+구현 시 설계와 달라진 점:
+
+- 비교 탭의 도시 목록은 기존 `BottomSheet` 재사용, 선택 칸은 같은 파일의 로컬 `CitySlot` 서브컴포넌트 (신규 컴포넌트 없음).
+- 상세의 `Section` 에 `pickerCities?: PickerCity[]` 를 추가하고 `Row.seoulVal/cityVal` → `baseVal/cityVal: number | null` 로 넓혔다. 학비·세금 시트는 `sheetCityId` 로 대상 도시를 들고 열릴 때만 마운트한다 (시트 컴포넌트·store 무수정).
+- 결측 배수 숨김을 위해 `ComparePair.mult` / `GroceryRow.mult` 를 `number | '신규' | null` 로 넓혔다 (`HeroCard` 는 이미 optional 이라 무수정).
+- Maestro flow: 신규 3개(`03-compare/city-pair`, `03-compare/city-pair-seoul-normalize`, `05-detail/city-pair-tuition`) + 공통 서브플로우 1개, 기존 2개는 `tabs-compare-empty` / `tabs-compare-select` 로 개명·재작성.
 
 ---
 
@@ -150,7 +157,7 @@
 | `app/(tabs)/_layout.tsx` (+ test) | 비교 탭 redirect 제거. 기존 redirect 테스트는 "일반 탭으로 이동" 테스트로 교체 |
 | `app/compare/[cityId].tsx` (+ test) | `base` 지원 |
 | `app/detail/[cityId]/[category].tsx` (+ test) | `base` 지원, 학비·세금 도시별 선택 줄 |
-| `.maestro/flows/04-favorites-recent/tabs-empty-alert.yaml`, `tabs-populated-redirect.yaml` | 비교 탭 리다이렉트를 검증하던 부분 수정 (즐겨찾기 탭 부분은 유지) |
+| `.maestro/flows/04-favorites-recent/tabs-empty-alert.yaml`, `tabs-populated-redirect.yaml` | 비교 탭 리다이렉트를 검증하던 부분 수정 → 실제로는 `tabs-compare-empty.yaml` / `tabs-compare-select.yaml` 로 개명·재작성 |
 | `.maestro/flows/03-compare/`, `05-detail/` | 도시끼리 flow 신규: 탭에서 두 도시 선택 → 비교 → 학비 상세 → 한쪽 학교 변경 |
 | `docs/adr/089-*.md`, `docs/ADR.md` | 신규 ADR + 인덱스. ADR-041 에 superseded 표기 |
 | `docs/ARCHITECTURE.md`, `docs/UI_GUIDE.md`, `docs/TESTING.md` §7, `.maestro/PLAN.md` | 라우팅·탭·store 서술과 테스트 인벤토리 갱신 |

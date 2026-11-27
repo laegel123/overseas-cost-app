@@ -1,0 +1,48 @@
+# UC(ADR-089): 비교 탭에서 두 도시를 골라 '도시끼리' 비교 화면 진입 — 기본 경로.
+# 서울 모드(`?base` 없음)와 달리 왼쪽이 서울이 아닌 기준 도시가 된다
+# (`/compare/toronto?base=vancouver`).
+appId: com.laegel.overseascostapp
+tags:
+  - compare
+---
+- runFlow: ../../common/onboard.yaml
+# 커스텀 BottomTabBar(src/components/BottomTabBar.tsx)는 각 탭에 accessibilityLabel=라벨
+# ('비교')만 부여한다 — testID 는 없다. 홈 화면엔 '비교' 와 **전체 매칭**되는 다른 요소가
+# 없다 (GOTCHAS §1 — 선택 화면의 '도시끼리 비교'·'비교하기' 는 전체 매칭이 아니라 애초에
+# 걸리지 않지만, 탭은 홈에서만 누른다).
+- tapOn: '비교'
+- assertVisible:
+    id: 'compare-tab-screen'
+# 두 칸이 비어 있으면 '비교하기' 는 비활성 — 안내 문구가 그 상태를 텍스트로도 드러낸다.
+# (탭해도 아무 일이 없다는 행동 검증은 04-favorites-recent/tabs-compare-empty.yaml 담당.)
+- assertVisible: '서로 다른 두 도시를 골라주세요'
+- runFlow: ../../common/open-vancouver-toronto-compare.yaml
+# 제목의 왼쪽이 기준 도시다 ('서울 vs …' 가 아니다).
+- assertVisible: '밴쿠버 vs 토론토'
+- assertVisible:
+    id: 'compare-hero'
+- assertVisible:
+    id: 'compare-pair-rent'
+- assertVisible:
+    id: 'compare-pair-food'
+- assertVisible:
+    id: 'compare-pair-transport'
+# 학비·비자는 양쪽 모두 실데이터가 있어 노출된다 (서울 모드에선 왼쪽이 0 원이었다).
+- assertVisible:
+    id: 'compare-pair-tuition'
+- assertVisible:
+    id: 'compare-pair-visa'
+# tax 는 21개 도시 모두 비어 있어 '양쪽 결측' → 카드 숨김 (서울 모드와 동일 규칙).
+- assertNotVisible:
+    id: 'compare-pair-tax'
+# 도시끼리 모드에는 즐겨찾기 별이 없다 (어느 도시의 별인지 모호 — ADR-089).
+- assertNotVisible:
+    id: 'compare-topbar-right'
+# 뒤로 → 선택 화면 복귀. 고른 두 도시는 useComparePairStore 에 남아 그대로 보인다.
+# 칸 라벨은 Pressable 의 accessibilityLabel = '<칸 이름> <도시 한글명>'.
+- tapOn:
+    id: 'compare-topbar-back'
+- assertVisible:
+    id: 'compare-tab-screen'
+- assertVisible: '기준 도시 밴쿠버'
+- assertVisible: '비교 도시 토론토'

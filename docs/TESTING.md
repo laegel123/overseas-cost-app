@@ -4395,6 +4395,21 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 - [ ] (4) 온보딩·설정·출처(`/sources`, `/sources/[cityId]`)·개인정보(`/privacy`) 화면에 배너 없음
 - [ ] (5) 홈·비교·상세의 로딩(skeleton)·에러(ErrorView) 화면에 배너 없음
 
+### 18.10 도시끼리 비교 (ADR-089)
+
+자동 flow(`03-compare/city-pair*`, `05-detail/city-pair-tuition`, `04-favorites-recent/tabs-compare-*`)가 경로는 덮는다. 아래는 색·레이아웃·실데이터 조합처럼 flow 가 못 보는 것.
+
+- [ ] 비교 탭 → 두 칸 선택 → "비교하기" → `A vs B` 비교 화면. hero 왼쪽 라벨·카드 왼쪽 라벨·제목이 **모두 기준 도시**(서울 하드코딩 잔존 없음)
+- [ ] 부제가 두 도시 통화를 다 보여준다 (`1 CAD = …원 · 1 JPY = …원 · MM-DD`). 통화가 같으면 한 번만, KRW 는 생략, **한 줄에 들어간다**(iPhone SE 포함)
+- [ ] 카드 탭 → 상세. 학비 상세에 **도시별 선택 줄 2개** → 한쪽만 학교를 바꾸면 그 열의 값·배수만 바뀐다 (반대쪽 값 불변). 선택은 서울 모드 화면에도 그대로 반영된다 (도시별 store 공유)
+- [ ] 상세 하단 출처가 **도시별 2묶음**으로 모두 보인다 (ADR-076 — 화면에 나온 값의 출처는 화면에 있어야 한다)
+- [ ] 비교 화면의 포함 토글을 도시끼리에서 켜도 **서울 기준 화면의 토글은 그대로**다 (저장 키 `"<base>|<cityId>"`)
+- [ ] 도시끼리 모드에 즐겨찾기 별이 없고, 홈 "최근 본 도시"에 도시끼리 쌍이 쌓이지 않는다
+- [ ] 서울을 **오른쪽** 칸에 넣어도 `서울 vs <도시>` (서울 모드)로 열린다. 칸의 좌우 순서는 고른 그대로
+- [ ] 비교 탭 선택 화면에 **광고 배너가 없다** (ADR-089 — 광고는 `/compare/[cityId]` 쪽)
+- [ ] 서울 모드 회귀: 홈 검색·즐겨찾기 탭·온보딩으로 들어간 `서울 vs X` 비교·상세의 값·문구·배치가 ADR-089 이전과 동일
+- [ ] 한쪽만 결측인 조합은 현재 실데이터로 발생하지 않는다 (Jest fixture 전용 — §9.24 / §9.25). 자동 갱신으로 구멍이 생기면 `—` + 배수 없음 + hero 합계 제외를 눈으로 확인
+
 ---
 
 ## 18-A. 자동 E2E (Maestro)
@@ -4404,7 +4419,7 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 ### 18-A.1 정책
 
 - **앵커·리터럴 단일 출처 = 실제 구현 코드**(PRD/UI_GUIDE 스펙 아님). 스펙과 구현이 갈리는 항목은 구현 기준으로 검증하고 격차는 PLAN.md 로 추적.
-- **결정성:** 실시간 환율 의존 값(정확한 배수·KRW)은 단정 금지 — 방향(↑/↓)·정규식 패턴·testID 구조만 검증. 도시는 번들 시드 보장 도시(`seoul`/`vancouver`) 우선.
+- **결정성:** 실시간 환율 의존 값(정확한 배수·KRW)은 단정 금지 — 방향(↑/↓)·정규식 패턴·testID 구조만 검증. 도시는 번들 시드(`data/seed/all.json` — ADR-074 이후 21개 전량) 보장 도시 중 `seoul`/`vancouver` 우선. **예외:** 두 도시의 통화가 같으면 KRW 환산이 약분돼 배수가 환율과 무관해진다 — 밴쿠버·토론토(둘 다 CAD)의 학비 배수는 리터럴로 단정한다 (`city-pair-tuition`).
 - **독립성:** 각 flow 는 `launchApp: clearState` 로 시작해 독립. 온보딩·Compare 진입은 `common/` 서브플로우(runFlow 전용, 워크스페이스 글롭 제외) 재사용.
 - **자동 검증 밖(한계):** 색 토큰/그림자/애니메이션/햅틱/폰트 → §18(수동) + `07-visual-a11y` screenshot 수동 리뷰로 보완. `tax` 카테고리는 데이터 부재로 no-data 경로만 검증 가능.
 - **광고는 E2E 단언 대상 아님** — 테스트 광고도 네트워크 의존이라 비결정적. `ad-banner` testID 는 존재 확인용으로만. 동의 폼(ATT·GDPR)은 수동 체크 (§18.9). Maestro `launchApp` 기본 permissions 가 추적 권한을 미리 허용해 ATT 는 flow 안에서 구조적으로 뜨지 않는다 (ADR-077).
@@ -4413,6 +4428,7 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 
 - [x] `onboard.yaml` — clearState 런치 → 온보딩 → `PERSONA` env 선택 → 홈 (runFlow 전용)
 - [x] `open-vancouver-compare.yaml` — 홈 검색으로 밴쿠버 Compare 진입 (runFlow 전용)
+- [ ] `open-vancouver-toronto-compare.yaml` — 비교 탭 선택 화면에서 밴쿠버·토론토를 골라 **도시끼리** Compare 진입 (ADR-089, runFlow 전용 · 전제 = `compare-tab-screen`)
 
 ### 18-A.3 인벤토리 (배치별)
 
@@ -4441,14 +4457,16 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 - [x] `unified-categories` — 통합 뷰 6 카테고리 모두 표시 (persona-removal step 8; 옛 persona-card-diff 대체)
 - [x] `multiplier-encoding` — 배수 ↑+숫자+× 3중 인코딩(접근성)
 - [x] `back-nav` — 상단바 뒤로가기 → 홈
+- [ ] `city-pair` — 비교 탭에서 두 도시 선택 → `/compare/toronto?base=vancouver` (제목 `밴쿠버 vs 토론토`, 별 없음, tax 카드 숨김, 뒤로 가면 두 칸 유지) — ADR-089
+- [ ] `city-pair-seoul-normalize` — 서울을 **오른쪽** 칸에 넣어도 서울 모드(`/compare/tokyo`)로 열림(`서울 vs 도쿄` + 별 복귀), 칸의 좌우 순서는 고른 그대로 — ADR-089
 
 **04-favorites-recent**
 
 - [x] `favorite-toggle` — ⭐ 추가/제거 → 홈 즐겨찾기 카드 반영 (복귀 후 검색어 clear 필요)
 - [x] `recent-tracking` — Compare 진입 → 최근 본 목록 + 설정 통계 (복귀 후 검색어 clear 필요)
-- [x] `tabs-empty-alert` — 최근/즐겨찾기 없을 때 비교 탭 → 네이티브 Alert (탭 라벨 '비교, tab.*')
+- [ ] `tabs-compare-empty` — 비교 탭 선택 화면의 빈 상태: 두 칸 빈 칸 + `비교하기` 비활성(탭해도 전환 없음) + 옛 Alert 미표시 (ADR-089 로 `tabs-empty-alert` 대체 · 탭 라벨은 `'비교'`)
 - [x] `favorites-tab-list` — 즐겨찾기 탭 → 목록 → 행 탭 → Compare (ADR-084)
-- [x] `tabs-populated-redirect` — 최근 있으면 비교 탭이 Compare 로 redirect (탭 라벨 '비교, tab.*')
+- [ ] `tabs-compare-select` — 최근 본 도시가 있어도 비교 탭은 redirect 하지 않고 선택 화면 (ADR-089 로 `tabs-populated-redirect` 대체 · redirect 부활 회귀 가드)
 
 **05-detail**
 
@@ -4457,6 +4475,7 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 - [x] `tuition-sheet` — 학교 시트: preset(UBC/SFU/BCIT) + 직접 입력 (ADR-061; 저장은 조건부 재탭)
 - [x] `tax-nodata` — deep link 진입 → 세금 데이터 없음 검증. **시트 본문 텍스트는 접근성 미노출로 backdrop 오픈만 검증** (딥링크 의존)
 - [x] `sources` — 상세 하단 '출처 N개' 표기
+- [ ] `city-pair-tuition` — 도시끼리 학비 상세: 도시별 선택 줄 2개, 밴쿠버만 SFU 로 변경 → 배수 `↑1.3×`→`↑1.9×`, 토론토 시트엔 토론토 학교만 (ADR-089 · 두 도시 모두 CAD 라 배수가 환율 무관)
 
 **06-settings**
 

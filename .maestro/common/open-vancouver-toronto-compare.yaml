@@ -1,0 +1,47 @@
+# 재사용 서브플로우 — 비교 탭 선택 화면에서 밴쿠버·토론토를 골라 '도시끼리' Compare 진입
+# (ADR-089). 전제: 이미 `compare-tab-screen` 상태 (호출부가 홈에서 '비교' 탭을 누른다).
+#
+# 두 도시 모두 번들 시드(`data/seed/all.json` — 21개 전량)에 있어 오프라인에서도 존재한다.
+# 둘 다 CAD 라 배수가 환율에 좌우되지 않는다는 점도 downstream flow 가 쓴다
+# (05-detail/city-pair-tuition.yaml).
+#
+# 목록은 한글 가나다순 21행이고 시트의 ScrollView 는 `max-h-[420px]` 이라 아래쪽 도시는
+# 화면 밖이다 (토론토는 18번째) → `scrollUntilVisible`. 이미 보이면 즉시 통과한다.
+# BottomSheet 는 testID 를 자식에 접두사로 전개하므로 순수 `compare-tab-picker` 노드는
+# 없다 — `-body` 로 오픈을 검증한다 (GOTCHAS §3).
+appId: com.laegel.overseascostapp
+---
+- assertVisible:
+    id: 'compare-tab-screen'
+# 왼쪽(기준) 칸 = 밴쿠버
+- tapOn:
+    id: 'compare-tab-slot-base'
+- assertVisible:
+    id: 'compare-tab-picker-body'
+- scrollUntilVisible:
+    element:
+      id: 'compare-tab-option-vancouver'
+    direction: DOWN
+- tapOn:
+    id: 'compare-tab-option-vancouver'
+- assertNotVisible:
+    id: 'compare-tab-picker-body'
+# 오른쪽(대상) 칸 = 토론토
+- tapOn:
+    id: 'compare-tab-slot-city'
+- assertVisible:
+    id: 'compare-tab-picker-body'
+- scrollUntilVisible:
+    element:
+      id: 'compare-tab-option-toronto'
+    direction: DOWN
+- tapOn:
+    id: 'compare-tab-option-toronto'
+- assertNotVisible:
+    id: 'compare-tab-picker-body'
+# 서로 다른 두 도시가 채워지면 안내 문구가 사라지고 '비교하기' 가 활성된다.
+- assertNotVisible: '서로 다른 두 도시를 골라주세요'
+- tapOn:
+    id: 'compare-tab-submit'
+- assertVisible:
+    id: 'compare-screen'

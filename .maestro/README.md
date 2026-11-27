@@ -36,11 +36,12 @@ npm run e2e:smoke      # 스모크만
 ├── smoke.yaml        # 파이프라인 sanity
 ├── common/           # runFlow 전용 재사용 서브플로우 (단독 실행 X)
 │   ├── onboard.yaml              # clearState → 도시 선택 온보딩 → compare → 뒤로 → 홈
-│   └── open-vancouver-compare.yaml
+│   ├── open-vancouver-compare.yaml
+│   └── open-vancouver-toronto-compare.yaml  # 비교 탭에서 두 도시 선택 → 도시끼리 compare
 └── flows/            # 유스케이스 배치
     ├── 01-onboarding/   02-home/         03-compare/
     ├── 04-favorites-recent/  05-detail/  06-settings/
-    └── 07-visual-a11y/
+    └── 07-visual-a11y/       08-sources-privacy/
 ```
 
 - **배치별 실행 런북 + 리스크 + 문서-구현 격차:** `.maestro/PLAN.md`
@@ -58,6 +59,12 @@ maestro test .maestro/flows/05-detail/tuition-sheet.yaml  # 단일 flow
 플로우는 텍스트가 아닌 **`testID`(iOS accessibilityIdentifier)** 를 우선 사용한다.
 주요 앵커: `onboarding-screen`, `onboarding-city-{cityId}`, `compare-screen`, `home-screen`,
 `home-search-input`, `home-search-result-{cityId}`.
+
+> ADR-089: 비교 탭은 **두 도시 선택 화면**이다 (redirect 단축 제거). 앵커는
+> `compare-tab-screen`, `compare-tab-slot-base` / `-slot-city`, `compare-tab-option-{cityId}`,
+> `compare-tab-submit`, 시트는 `compare-tab-picker-body`. 비교·상세 화면의 기준 도시는
+> `?base=<id>` 이고(생략 = 서울 모드), 도시끼리 상세의 도시별 선택 줄은
+> `detail-picker-city-{cityId}` 다. 탭 바에는 testID 가 없어 라벨(`'비교'`)로 탭한다.
 
 > ADR-067: 온보딩은 페르소나 선택이 아니라 **도시 선택**이다. 도시를 고르면 서울 vs 그 도시
 > Compare 로 직행하고, 그 도시가 즐겨찾기에 담긴다. 옛 `persona-card-*` 앵커는 더 이상 없다.
