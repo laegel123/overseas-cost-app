@@ -3164,8 +3164,9 @@ afterEach(() => {
 #### `us_hud.mjs`
 
 - [x] 출처명에 내부 참조(`ADR-`) 없음 + 구 이름 `legacyNames` 등록
-- [x] HUD FMR API 응답 파싱 (`parseHudResponse`)
-- [x] MSA entityId 별 매핑 (NYC, LA, SF, Seattle, Boston — 5 cities)
+- [x] HUD FMR API 응답 파싱 (`parseHudResponse`) — fixture 는 실제 응답 형식 (FY2027, 값은 숫자)
+- [x] HMFA entityId 매핑 (NYC, LA, SF, Seattle, Boston — `listMetroAreas` 확인값, MSA 코드는 404, ADR-086)
+- [x] Small Area FMR 지역 (LA·시애틀): `basicdata` 배열에서 `zip_code: "MSA level"` 행 사용 — 순서 무관, 행 없으면 null (ADR-086)
 - [x] # bedrooms 매핑 (Efficiency → studio, One-Bedroom → oneBed, Two-Bedroom → twoBed)
 - [x] share = studio × 0.65 추정 (ADR-059)
 - [x] `mapToRent` 변환

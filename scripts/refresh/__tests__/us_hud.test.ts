@@ -43,22 +43,74 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
-const VALID_HUD_RESPONSE = {
+// 실제 HUD 응답 (FY2027, `GET /fmr/data/{entityId}`, 2026-11-27 Actions 진단 실행 45924160488).
+// 일반 FMR 지역 — basicdata 가 객체. 값은 숫자, 연도는 basicdata.year.
+const NYC_HUD_RESPONSE = {
   data: {
+    county_name: '',
+    counties_msa:
+      'Bronx County, NY; Kings County, NY; New York County, NY; Putnam County, NY; Queens County, NY; Richmond County, NY; Rockland County, NY; and Westchester County, NY',
+    town_name: '',
+    metro_status: '1.0',
+    metro_name: 'New York-Newark-Jersey City, NY-NJ',
+    area_name: 'New York, NY HUD Metro FMR Area',
     basicdata: {
-      Efficiency: '1850',
-      'One-Bedroom': '2100',
-      'Two-Bedroom': '2800',
+      Efficiency: 2593,
+      'One-Bedroom': 2729,
+      'Two-Bedroom': 2971,
+      'Three-Bedroom': 3760,
+      'Four-Bedroom': 4121,
+      year: '2027',
     },
   },
 };
 
+// Small Area FMR 지역 (smallarea_status '1') — basicdata 가 우편번호별 행 배열 (LA 실제 475행 중 앞 3행).
+// zip_code 'MSA level' 행이 지역 전체 FMR (statedata/CA 의 같은 지역 값과 일치). 연도는 data.year.
+const LA_SAFMR_ROWS = [
+  { zip_code: 'MSA level', Efficiency: 2151, 'One-Bedroom': 2402, 'Two-Bedroom': 2964, 'Three-Bedroom': 3760, 'Four-Bedroom': 4208 },
+  { zip_code: '90001', Efficiency: 1690, 'One-Bedroom': 1890, 'Two-Bedroom': 2330, 'Three-Bedroom': 2960, 'Four-Bedroom': 3310 },
+  { zip_code: '90002', Efficiency: 1690, 'One-Bedroom': 1890, 'Two-Bedroom': 2330, 'Three-Bedroom': 2960, 'Four-Bedroom': 3310 },
+];
+
+function laSafmrResponse(basicdata: unknown[] = LA_SAFMR_ROWS) {
+  return {
+    data: {
+      county_name: '',
+      counties_msa: 'Los Angeles County, CA; ',
+      town_name: '',
+      metro_status: '1.0',
+      metro_name: 'Los Angeles-Long Beach-Anaheim, CA',
+      area_name: 'Los Angeles-Long Beach-Glendale, CA HUD Metro FMR Area',
+      smallarea_status: '1',
+      year: '2027',
+      basicdata,
+    },
+  };
+}
+
 describe('parseHudResponse', () => {
-  it('정상 응답 파싱: Efficiency → studio', () => {
-    const result = parseHudResponse(VALID_HUD_RESPONSE);
-    expect(result.studio).toBe(1850);
-    expect(result.oneBed).toBe(2100);
-    expect(result.twoBed).toBe(2800);
+  it('일반 FMR 지역 (뉴욕): basicdata 객체 — Efficiency → studio', () => {
+    const result = parseHudResponse(NYC_HUD_RESPONSE);
+    expect(result.studio).toBe(2593);
+    expect(result.oneBed).toBe(2729);
+    expect(result.twoBed).toBe(2971);
+  });
+
+  it('Small Area FMR 지역 (LA): basicdata 배열에서 zip_code "MSA level" 행 사용', () => {
+    const result = parseHudResponse(laSafmrResponse());
+    expect(result).toEqual({ studio: 2151, oneBed: 2402, twoBed: 2964 });
+  });
+
+  it('SAFMR: "MSA level" 행이 첫 행이 아니어도 zip_code 로 찾음', () => {
+    const [msaRow, ...zipRows] = LA_SAFMR_ROWS;
+    const result = parseHudResponse(laSafmrResponse([...zipRows, msaRow]));
+    expect(result).toEqual({ studio: 2151, oneBed: 2402, twoBed: 2964 });
+  });
+
+  it('SAFMR: "MSA level" 행이 없으면 null — 우편번호 행 값으로 대체 안 함', () => {
+    const result = parseHudResponse(laSafmrResponse(LA_SAFMR_ROWS.slice(1)));
+    expect(result).toEqual({ studio: null, oneBed: null, twoBed: null });
   });
 
   it('빈 객체: null 반환', () => {
@@ -134,6 +186,14 @@ describe('constants', () => {
     expect(CITY_CONFIGS.boston).toBeDefined();
   });
 
+  it('entityId: HUD 하위 FMR 지역(HMFA) 코드 — listMetroAreas 확인값 (MSA 코드 METRO#####M##### 는 404)', () => {
+    expect(CITY_CONFIGS.nyc.entityId).toBe('METRO35620MM5600'); // New York, NY HUD Metro FMR Area
+    expect(CITY_CONFIGS.la.entityId).toBe('METRO31080MM4480'); // Los Angeles-Long Beach-Glendale, CA HUD Metro FMR Area
+    expect(CITY_CONFIGS.sf.entityId).toBe('METRO41860MM7360'); // San Francisco, CA HUD Metro FMR Area
+    expect(CITY_CONFIGS.seattle.entityId).toBe('METRO42660MM7600'); // Seattle-Bellevue, WA HUD Metro FMR Area
+    expect(CITY_CONFIGS.boston.entityId).toBe('METRO14460MM1120'); // Boston-Cambridge-Quincy, MA-NH HUD Metro FMR Area
+  });
+
   it('각 도시 설정에 필수 필드 포함', () => {
     for (const [cityId, config] of Object.entries(CITY_CONFIGS)) {
       expect(config.id).toBe(cityId);
@@ -181,7 +241,7 @@ describe('refresh (integration)', () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => VALID_HUD_RESPONSE,
+      json: async () => NYC_HUD_RESPONSE,
     });
 
     await refreshUsHud({ dryRun: true, cities: ['nyc'] });
@@ -208,7 +268,7 @@ describe('refresh (integration)', () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => VALID_HUD_RESPONSE,
+      json: async () => NYC_HUD_RESPONSE,
     });
 
     const result = await refreshUsHud({ dryRun: true });
@@ -217,11 +277,31 @@ describe('refresh (integration)', () => {
     expect(result.changes.length).toBeGreaterThan(0);
   }, 30000);
 
+  it('SAFMR 응답 도시 (la): "MSA level" 행 값으로 rent 매핑', async () => {
+    fetchSpy.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => laSafmrResponse(),
+    });
+
+    const result = await refreshUsHud({ dryRun: true, cities: ['la'] });
+
+    expect(result.errors).toHaveLength(0);
+    expect(result.cities).toEqual(['la']);
+    const byField = Object.fromEntries(result.changes.map((c: RefreshChange) => [c.field, c.newValue]));
+    expect(byField).toEqual({
+      'rent.share': Math.round(2151 * 0.65),
+      'rent.studio': 2151,
+      'rent.oneBed': 2402,
+      'rent.twoBed': 2964,
+    });
+  }, 30000);
+
   it('dryRun=true: 파일 미갱신', async () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => VALID_HUD_RESPONSE,
+      json: async () => NYC_HUD_RESPONSE,
     });
 
     await refreshUsHud({ dryRun: true });
@@ -234,7 +314,7 @@ describe('refresh (integration)', () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => VALID_HUD_RESPONSE,
+      json: async () => NYC_HUD_RESPONSE,
     });
 
     const result = await refreshUsHud({ dryRun: true, cities: ['nyc'] });
@@ -291,7 +371,7 @@ describe('refresh (integration)', () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => VALID_HUD_RESPONSE,
+      json: async () => NYC_HUD_RESPONSE,
     });
 
     const result = await refreshUsHud({ dryRun: true, cities: ['nyc'] });
@@ -306,7 +386,7 @@ describe('refresh (integration)', () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => VALID_HUD_RESPONSE,
+      json: async () => NYC_HUD_RESPONSE,
     });
 
     const result = await refreshUsHud({ dryRun: true });

@@ -241,7 +241,7 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
   - HUD: https://www.huduser.gov/hudapi/public/fmr (키 필요 — `US_HUD_API_KEY`)
   - Census ACS: https://api.census.gov/data/2022/acs/acs5 (키 필요 — `US_CENSUS_API_KEY`)
 - **자동화**: `scripts/refresh/us_hud.mjs` + `us_census.mjs` — 월 1회
-- **방법**: New York-Newark-Jersey City MSA HUD FMR + ACS B25064 median gross rent
+- **방법**: HUD FMR `New York, NY HUD Metro FMR Area` (HMFA `METRO35620MM5600`, ADR-086) + ACS B25064 median gross rent (New York-Newark-Jersey City MSA)
 
 ### 식재료·외식
 
@@ -277,7 +277,7 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
 
 ### 임차료
 
-- HUD FMR LA-Long Beach-Anaheim MSA + Census ACS
+- HUD FMR `Los Angeles-Long Beach-Glendale, CA HUD Metro FMR Area` (HMFA `METRO31080MM4480`, Small Area FMR → `MSA level` 행, ADR-086) + Census ACS (LA-Long Beach-Anaheim MSA)
 - 자동화: `us_hud.mjs` + `us_census.mjs`
 
 ### 식재료·외식
@@ -311,7 +311,7 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
 
 ### 임차료
 
-- HUD FMR San Francisco-Oakland-Hayward MSA + Census ACS
+- HUD FMR `San Francisco, CA HUD Metro FMR Area` (HMFA `METRO41860MM7360`, ADR-086) + Census ACS (San Francisco-Oakland-Fremont MSA)
 
 ### 식재료·외식
 
@@ -338,7 +338,7 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
 
 ### 임차료
 
-- HUD FMR Seattle-Tacoma-Bellevue MSA + Census ACS
+- HUD FMR `Seattle-Bellevue, WA HUD Metro FMR Area` (HMFA `METRO42660MM7600`, Small Area FMR → `MSA level` 행, ADR-086) + Census ACS (Seattle-Tacoma-Bellevue MSA)
 
 ### 식재료·외식
 
@@ -367,7 +367,7 @@ CPI 또는 공공 가격조사 데이터에서 매핑. 항목별 매핑은 도�
 
 ### 임차료
 
-- HUD FMR Boston-Cambridge-Newton MSA + Census ACS
+- HUD FMR `Boston-Cambridge-Quincy, MA-NH HUD Metro FMR Area` (HMFA `METRO14460MM1120`, ADR-086) + Census ACS (Boston-Cambridge-Newton MSA)
 
 ### 식재료·외식
 
