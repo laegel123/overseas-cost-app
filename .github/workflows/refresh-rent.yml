@@ -2,7 +2,11 @@ name: Refresh Rent
 
 on:
   schedule:
-    - cron: '0 9 1 * *' # 매월 1일 09:00 UTC (= 18:00 KST). 과거 '0 18'은 UTC 18:00 = 익일 03:00 KST 였음.
+    # 매월 1일 14:00 UTC (= 23:00 KST, 09:00 EST / 10:00 EDT). ca_cmhc 가 부르는 StatCan WDS 는
+    # 미 동부 00:00~08:30 에 데이터를 주지 않을 수 있어(409/503) 이 구간을 피한다 (ADR-085).
+    # 과거 '0 9'(= 04:00 EST) 는 구간 한가운데였고, 그 전 '0 18'은 UTC 18:00 = 익일 03:00 KST 였음.
+    - cron: '0 14 1 * *'
+  # 수동 실행도 StatCan 점검 구간(KST 14:00~22:30, 서머타임 기간 13:00~21:30)은 피한다 (AUTOMATION.md §4.2).
   workflow_dispatch:  # 운영자 수동 트리거 — feature 브랜치 dispatch 시 해당 브랜치에 데이터 commit. main 외 브랜치는 의도된 운영자만 사용 (AUTOMATION.md §8.1).
 
 concurrency:
@@ -26,6 +30,7 @@ jobs:
     env:
       KR_DATA_API_KEY: ${{ secrets.KR_DATA_API_KEY }}
       US_CENSUS_API_KEY: ${{ secrets.US_CENSUS_API_KEY }}
+      US_HUD_API_KEY: ${{ secrets.US_HUD_API_KEY }}
       # JP_ESTAT_APP_ID / SG_DATA_GOV_KEY 는 v1.0 에서 사용 안 함 (jp_estat / sg_singstat 가
       # --useStatic 모드). v1.x 응답 단위 검증 도입 시 다시 wire up.
     steps:
@@ -58,9 +63,14 @@ jobs:
         run: node scripts/refresh/_run.mjs ca_cmhc
         continue-on-error: true
 
-      # US - HUD (no key required)
+      # US - HUD (Bearer token required, ADR-085)
+      - name: Skip us_hud if API key absent
+        if: env.US_HUD_API_KEY == ''
+        run: echo "::warning::US_HUD_API_KEY not set, skipping us_hud.mjs"
+
       - name: Refresh US HUD
         id: us_hud
+        if: env.US_HUD_API_KEY != ''
         run: node scripts/refresh/_run.mjs us_hud
         continue-on-error: true
 

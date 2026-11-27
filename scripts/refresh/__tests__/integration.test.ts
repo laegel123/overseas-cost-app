@@ -309,6 +309,21 @@ describe('Integration: Workflow YAML Validation', () => {
     }
   });
 
+  // HUD User API 는 Bearer 토큰 필수 (ADR-085). 키가 없으면 실행 step 을 skip 하고 안내 step 이
+  // 경고를 남긴다 (§4.5c) — 키 등록 전에도 us_hud 때문에 게이트가 빨간불이 되지 않는다.
+  it('refresh-rent: us_hud 는 US_HUD_API_KEY 있을 때만 실행, 없으면 skip 경고', () => {
+    const content = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-rent.yml'), 'utf-8');
+    expect(content).toMatch(/^\s+US_HUD_API_KEY: \$\{\{ secrets\.US_HUD_API_KEY \}\}$/m);
+    const steps = splitSteps(content);
+    const run = steps.find((s) => fetcherIdOf(s) === 'us_hud');
+    expect(run).toBeDefined();
+    expect(run).toMatch(/^\s+if: env\.US_HUD_API_KEY != ''$/m);
+    const skip = steps.find((s) => /^\s+if: env\.US_HUD_API_KEY == ''$/m.test(s));
+    expect(skip).toBeDefined();
+    expect(skip).toContain('::warning::US_HUD_API_KEY not set, skipping us_hud.mjs');
+    expect(fetcherIdOf(skip!)).toBeNull();
+  });
+
   it('build / validate / detect_outliers step 에는 continue-on-error 없음 (스키마 위반 fail-fast)', () => {
     for (const workflow of REFRESH_WORKFLOWS) {
       const content = fs.readFileSync(path.join(WORKFLOW_DIR, workflow), 'utf-8');
@@ -341,7 +356,8 @@ describe('Integration: Schedule Validation', () => {
 
   // GitHub Actions cron 은 UTC 기준. KST 운영 시각 → UTC 변환:
   //  - 09:00 KST = 00:00 UTC (refresh-fx 만)
-  //  - 18:00 KST = 09:00 UTC (refresh-prices/rent/transit/tuition/visa)
+  //  - 18:00 KST = 09:00 UTC (refresh-prices/transit/tuition/visa)
+  //  - 23:00 KST = 14:00 UTC (refresh-rent 만 — StatCan WDS 점검 시간대 회피, ADR-085)
   // 과거 round 0~20 까지 5개 워크플로우 cron 이 '0 18 ...' 로 적혀 있어 실제로는 UTC 18:00 = 익일
   // 03:00 KST 새벽 실행.  에서 발견 후 '0 9 ...' 로 정정.
 
@@ -355,9 +371,11 @@ describe('Integration: Schedule Validation', () => {
     expect(content).toContain("cron: '0 9 * * 1'");
   });
 
-  it('refresh-rent: 매월 1일 09:00 UTC (= 18:00 KST)', () => {
+  // ca_cmhc 가 부르는 StatCan WDS 는 미 동부 00:00~08:30 (= 05:00~13:30 UTC, 서머타임 04:00~12:30 UTC)
+  // 에 일부 메서드가 데이터를 주지 않는다 (409/503). 14:00 UTC 는 연중 이 구간 밖 (ADR-085).
+  it('refresh-rent: 매월 1일 14:00 UTC (= 23:00 KST). StatCan WDS 점검 시간대 밖', () => {
     const content = fs.readFileSync(path.join(WORKFLOW_DIR, 'refresh-rent.yml'), 'utf-8');
-    expect(content).toContain("cron: '0 9 1 * *'");
+    expect(content).toContain("cron: '0 14 1 * *'");
   });
 
   it('refresh-transit: 분기 첫 달 2일 09:00 UTC (= 18:00 KST). 1일 rent 와 동시 실행 충돌 회피', () => {

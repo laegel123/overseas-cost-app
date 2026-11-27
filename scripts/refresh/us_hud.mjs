@@ -5,13 +5,14 @@
  *
  * 출처: HUD User FMR API
  * URL: https://www.huduser.gov/hudapi/public/fmr
- * API 키 불필요 (공개 데이터).
+ * API 키: `US_HUD_API_KEY` 필요 — HUD User 계정에서 발급한 access token 을
+ * `Authorization: Bearer` 헤더로 보낸다. 없으면 401 (ADR-085).
  *
  * 방법: MSA 별 FMR by # bedrooms
  * 0BR → studio, 1BR → oneBed, 2BR → twoBed, share → studio × 0.65 추정 (ADR-059)
  */
 
-import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage } from './_common.mjs';
+import { fetchWithRetry, readCity, writeCity, createCitySeed, redactErrorMessage, createMissingApiKeyError } from './_common.mjs';
 import { computePctChange } from './_outlier.mjs';
 
 const HUD_FMR_BASE = 'https://www.huduser.gov/hudapi/public/fmr/data';
@@ -121,6 +122,11 @@ export default async function refresh(opts = {}) {
   const fields = [];
   const updatedCities = [];
 
+  const apiKey = process.env.US_HUD_API_KEY;
+  if (!apiKey) {
+    throw createMissingApiKeyError('US_HUD_API_KEY environment variable is required');
+  }
+
   const targetCities = opts.cities ?? Object.keys(CITY_CONFIGS);
 
   for (const cityId of targetCities) {
@@ -133,7 +139,7 @@ export default async function refresh(opts = {}) {
     let parsed;
     try {
       const url = `${HUD_FMR_BASE}/${config.entityId}`;
-      const response = await fetchWithRetry(url);
+      const response = await fetchWithRetry(url, { headers: { Authorization: `Bearer ${apiKey}` } });
       const data = await response.json();
       parsed = parseHudResponse(data);
     } catch (err) {
