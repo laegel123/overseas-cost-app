@@ -299,7 +299,7 @@ src/__fixtures__/
 ├── cities/
 │   ├── seoul-valid.ts         # CityCostData (정상 케이스, schema-pass)
 │   ├── vancouver-valid.ts     # CityCostData (full-shape, tuition/tax/visa 채움)
-│   ├── (향후 추가) tokyo-valid.ts   # JPY (소수 없는 통화)
+│   ├── tokyo-valid.ts         # JPY (소수 없는 통화), tax 없음 — 도시끼리 비교용 2번째 비-서울 도시
 │   ├── (향후 추가) invalid-*.ts     # 스키마 위반 — 검증 테스트용 (현재는 인라인)
 │   └── (향후 추가) empty-*.ts       # 필드 결측 (graceful degradation)
 ├── seed-roundtrip.test.ts     # data/seed/all.json drift 방지
@@ -353,6 +353,7 @@ UI_GUIDE.md §카테고리별 상세 화면 사양 의 5개 카테고리에 대�
 ### 7.3 fixture 카탈로그
 
 - [x] schema 통과 도시 객체 빌더 — `src/__fixtures__/cities/{seoul-valid, vancouver-valid}.ts`. citySchema 테스트 + 통합 smoke 에서 사용.
+- [x] `src/__fixtures__/cities/tokyo-valid.ts` — JPY(소수 없는 통화) 도시. 값·모양은 실데이터(`data/cities/tokyo.json`) 를 따른다: `tuition` 3개 + `visa` 보유, **`tax` 없음**. 밴쿠버 fixture 는 tax 를 갖고 있어 두 fixture 를 맞붙이면 도시끼리 비교의 "한쪽만 결측" 조합이 그대로 재현된다 (ADR-089, §9.24 참조).
 - [x] `data/seed/all.json` — v1.0 시드 = **실 도시 데이터 21개 전량** (ADR-074, ADR-045 supersede). `scripts/build_data.mjs` 가 `data/all.json` 과 같은 내용으로 함께 쓴다. 네트워크 실패 시에도 도시 수가 퇴행하지 않는다.
 - [x] `src/__fixtures__/seed-roundtrip.test.ts` — 시드 round-trip + 21개 계약 + `시드 == data/all.json` drift 검증 (ADR-074).
 - [ ] 정상 도시 (서울, 밴쿠버, 도쿄)
@@ -1633,6 +1634,15 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] mult='신규' → "신규" 표기, navy 색
 - [x] 신규 시 막대: not hot (bg-light)
 
+**mult=null — 한쪽 도시 값 결측 (ADR-089, city-pair-compare step 2):**
+
+도시끼리 비교에서 한쪽 값이 없으면 호출부가 값 자리에 `—`, `mult` 에 `null` 을 넘긴다. 결측을 0 으로 바꿔 배수를 꾸미지 않는다 (CLAUDE.md 에러 삼킴 금지) — `formatMultiplier`/`getMultColor` 는 0·null 을 throw 하므로 아예 호출하지 않는다.
+
+- [x] `mult=null` → 배수 영역(`-mult`) 미렌더, 값(`sValue`/`cValue`) 은 그대로 표시
+- [x] `mult=null` → not hot (아이콘 `bg-light`), 라벨·막대는 정상 렌더
+- [x] `mult=null` + `hot=true` override → 아이콘만 orange, 배수는 여전히 미렌더
+- [x] `mult=null` + `onToggleInclude` → Switch·"제외됨" 배지 정상 렌더
+
 **막대 폭:**
 
 - [x] sw=0.4, cw=1.0 → SEO 40%, CITY 100%
@@ -2005,7 +2015,7 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 - [x] 정상 cityId: 데이터 로드 + 표시 (screens step 0)
 - [x] 잘못된 cityId: ErrorView + 돌아가기 CTA (screens step 0)
 - [x] 서울 데이터 없음: ErrorView (screens step 0)
-- [ ] cityId 가 'seoul': 자기 비교 차단 (안내)
+- [x] cityId 가 'seoul': 자기 비교 차단 — `base === cityId` 오류 화면 (city-pair-compare step 2; `/compare/seoul` 로 가는 진입 경로는 앱 안에 없다)
 
 **데이터 로드:**
 
@@ -2118,6 +2128,58 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 - [x] loading 상태 (`compare-screen-loading`) → `ad-banner` 부재
 - [x] error 상태 (`compare-screen-error`) → `ad-banner` 부재
 - [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재 (렌더 조건은 `AdBanner` 소유, §9.44)
+
+**도시끼리 모드 (`?base=<id>`, ADR-089 / city-pair-compare step 2):**
+
+> 기준 도시(왼쪽)는 query param `base` 다. 생략·`seoul` 이면 **서울 모드** = 위 모든 케이스가 한 줄도 고치지 않고 통과해야 한다 ("서울 모드 무변경" 의 증거). 두 번째 비-서울 도시는 `src/__fixtures__/cities/tokyo-valid.ts` (JPY, tax 없음 — §7.3). 환율은 `{ KRW: 1, CAD: 980, USD: 1380, JPY: 9 }`.
+
+서울 모드 정규화:
+
+- [x] `base` 생략 과 `base=seoul` 이 같은 화면을 낸다 (렌더 트리의 텍스트 노드 전량 비교 — 함수 prop 참조 차이 회피)
+- [x] `base=seoul` 도 즐겨찾기 별 + `recent.push` 유지
+- [x] `cityId=seoul` + `base=tokyo` → `router.replace('/compare/tokyo')` + 정규화 중 loading 유지 (서울이 오른쪽인 화면을 그리지 않는다 — `0 ÷ 값` 배수 throw 회피)
+
+제목·라벨·값·배수:
+
+- [x] 제목 `"밴쿠버 vs 도쿄"`, hero `leftLabel` / 카드 `sLabel` = 기준 도시 한글명
+- [x] 양쪽 실제 값 + 배수는 기준 대비 대상 — 월세 93.1만원 / 58.5만원 → `↓0.6×`, 교통 10.3만원 / 9.5만원, hero 171만원 / 105.3만원 `↓0.6×` `-65.7만원`
+- [x] 기준·대상 맞바꾸면 배수 반전 (월세 `↑1.6×`) + Hot 판정 추종 (학비 40.2만원 → 367.5만원 = `↑9.1×` → 아이콘 `bg-orange-soft`, `isHot` 단일 함수)
+
+부제 (환율) — 서울 모드 문자열은 현행 유지:
+
+- [x] 두 도시 통화 모두 한 줄 (기준 → 대상 순): `1 CAD = 980원 · 1 JPY = 9원 · 04-30`
+- [x] 두 도시 통화가 같으면 한 번만: `1 CAD = 980원 · 04-30`
+
+학비·세금 선택값 분리 (**이 phase 의 핵심 실패 조건**):
+
+- [x] 밴쿠버=SFU / 도쿄=早稲田 → 각 열에 285.8만원 / 112.5만원. 대상 선택값이 기준 열에 섞였을 때 나오는 UBC fallback (367.5만원) 부재
+- [x] 대상(도쿄) 선택만 慶應 으로 바꿔도 기준(밴쿠버 SFU 285.8만원) 불변 → 대상만 120만원 으로 갱신
+- [x] 세금 `(근사)` 는 **어느 한쪽이라도** `kind='custom'` 이면 붙는다 (기준 도시만 custom 인 케이스)
+
+포함 토글 저장 키:
+
+- [x] 도시끼리 모드 토글 → `inclusions['vancouver|tokyo'] === { tuition: true }`, `inclusions['tokyo']` / `['vancouver']` 는 undefined (서울 기준 화면 불변)
+- [x] 서울 모드 키(`'tokyo'`) 에 저장된 토글은 도시끼리 화면에 영향 없음 (고정 default OFF 유지)
+
+결측 표기 (한쪽만 값 없음 — 실데이터로는 발생하지 않는 조합, fixture 로만 검증):
+
+- [x] 세금 (밴쿠버 보유 / 도쿄 결측) → 없는 쪽 `—`, 배수(`-mult`) 미표시, **`0원` 표기 없음** (0원은 "무료" 로 오독됨)
+- [x] 포함 토글을 켜도 hero 합계는 양쪽 모두 제외 (hero 171만원 / 105.3만원 불변, 토글 자체는 ON 으로 갱신)
+- [x] 양쪽 모두 값 없음 → 카드 숨김 (현행 유지)
+
+도시끼리 모드에서만 달라지는 것:
+
+- [x] 즐겨찾기 별(`compare-topbar-right`) 미렌더 (어느 도시의 별인지 모호)
+- [x] `pushRecent` 미호출 (홈의 최근 목록은 서울 모드로 열린다)
+- [x] 카드 탭 → `/detail/tokyo/tuition?base=vancouver`
+- [x] 출처 개수 = 두 도시 합 (`출처 11개 · 갱신 04-30` — 밴쿠버 6 + 도쿄 5)
+- [x] 광고 footer 는 현행 유지 (ready 화면 `ad-banner` 존재, ADR-077)
+
+에러 분기:
+
+- [x] `base` 가 도시 목록에 없음 → ErrorView `"도시 데이터를 찾을 수 없습니다"`
+- [x] `base === cityId` → ErrorView `"같은 도시끼리는 비교할 수 없어요"`
+- [x] `/compare/seoul` (base 생략) 도 같은 오류 화면
 
 ### 9.24.1 `src/lib/search.ts` (홈 검색)
 
