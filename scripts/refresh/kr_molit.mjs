@@ -9,6 +9,7 @@
  * 방법: 서울특별시 25개 자치구 월세 계약의 환산 월세 (월세 + 보증금 × 전월세전환율 ÷ 12) 메디안
  *       → share/studio/oneBed/twoBed 매핑. 전환율은 DEPOSIT_CONVERSION_RATE (ADR-087).
  * 면적 기준: share (<= 10㎡), studio (11~30㎡), oneBed (31~50㎡), twoBed (51~80㎡)
+ * 월세 계약이 MIN_SAMPLE_SIZE 건 미만인 구간은 갱신하지 않고 기존 값 유지 + warnings (ADR-088).
  * 응답 (공공데이터포털 기술문서): 정상 resultCode `000`, deposit·monthlyRent 는 만원 단위.
  */
 
@@ -25,6 +26,15 @@ const MANWON = 10000;
  * 시장 전환율이다. 갱신은 이 상수 + 테스트 + ADR-087 을 함께 고친다.
  */
 export const DEPOSIT_CONVERSION_RATE = 0.046;
+
+/**
+ * 구간 메디안을 갱신에 쓰는 최소 월세 계약 수 (ADR-088). 네 구간에 같은 기준을 쓴다.
+ * 못 미치는 구간은 갱신하지 않고 기존 값을 유지하며, 구간·표본 수를 warnings 에 남긴다.
+ * 30건이면 순서통계량으로 메디안의 95% 구간을 10번째~21번째 값 사이로 좁힐 수 있다. 3건으로는
+ * 95% 구간 자체를 만들 수 없다 (최소·최대 사이도 75%). 2026-10 실제 응답은 share 3건,
+ * 나머지 구간 1,129~2,966건이라 어느 쪽도 30 근처가 아니다.
+ */
+export const MIN_SAMPLE_SIZE = 30;
 
 export const SEOUL_DISTRICT_CODES = [
   '11110', '11140', '11170', '11200', '11215', '11230', '11260', '11290',
@@ -211,13 +221,6 @@ export default async function refresh(opts = {}) {
     }
   }
 
-  const newRent = {
-    share: median(byCategory.share),
-    studio: median(byCategory.studio),
-    oneBed: median(byCategory.oneBed),
-    twoBed: median(byCategory.twoBed),
-  };
-
   if (allItems.length === 0) {
     // NO_DATA — 1-2개월 지연 공개 특성상 일시적으로 발생 가능. 결과값(기존값)은 유효하므로
     // warnings 채널로 기록해 종료 코드에 영향을 주지 않는다 (ADR-079). 구 단위 fetch 실패는
@@ -242,15 +245,29 @@ export default async function refresh(opts = {}) {
     }
   }
 
+  // 표본이 MIN_SAMPLE_SIZE 에 못 미치는 구간은 newRent 에 넣지 않는다 — 아래 write 에서 기존 값이 남는다.
+  const newRent = {};
+  for (const field of ['share', 'studio', 'oneBed', 'twoBed']) {
+    const count = byCategory[field].length;
+    if (count < MIN_SAMPLE_SIZE) {
+      warnings.push({
+        cityId: 'seoul',
+        reason: `rent.${field}: only ${count} monthly-rent contracts for ${dealYm} (< MIN_SAMPLE_SIZE ${MIN_SAMPLE_SIZE}), keeping existing value`,
+      });
+      continue;
+    }
+    newRent[field] = median(byCategory[field]);
+  }
+
   const changes = [];
   const fields = [];
   const oldRent = oldData?.rent ?? {};
 
-  for (const field of ['share', 'studio', 'oneBed', 'twoBed']) {
+  for (const field of Object.keys(newRent)) {
     const oldVal = oldRent[field] ?? null;
     const newVal = newRent[field];
 
-    if (oldVal !== newVal && newVal !== null) {
+    if (oldVal !== newVal) {
       fields.push(field);
       const pctChange = computePctChange(oldVal, newVal);
       changes.push({ cityId: 'seoul', field: `rent.${field}`, oldValue: oldVal, newValue: newVal, pctChange });

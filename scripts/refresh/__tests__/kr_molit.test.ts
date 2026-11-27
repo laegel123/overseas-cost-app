@@ -13,6 +13,7 @@ import refreshKrMolit, {
   median,
   toConvertedRent,
   DEPOSIT_CONVERSION_RATE,
+  MIN_SAMPLE_SIZE,
   SEOUL_DISTRICT_CODES,
   SOURCE,
 } from '../kr_molit.mjs';
@@ -92,14 +93,19 @@ function rentResponse(
 </response>`;
 }
 
-const VALID_RENT_XML = rentResponse([
+const VALID_RENT_ITEMS = [
   rentItem('8.5', '500', '35'),
   rentItem('25.0', '1,000', '65'),
   rentItem('45.0', '3,000', '120'),
   rentItem('65.0', '5,000', '180'),
   // 전세 (월세 0) — 월세 집계에서 제외돼야 한다.
   rentItem('84.99', '70,000', '0'),
-]);
+];
+const VALID_RENT_XML = rentResponse(VALID_RENT_ITEMS);
+
+// refresh 통합 테스트용 — 25개 구가 모두 이 응답을 받는다. 구마다 같은 계약을 2건씩 두어 구간별 표본이
+// MIN_SAMPLE_SIZE(30) 를 넘게 한다 (25개 구 × 2 = 50건, 5개 구가 실패해도 40건). 메디안은 VALID_RENT_XML 과 같다.
+const DISTRICT_RENT_XML = rentResponse([...VALID_RENT_ITEMS, ...VALID_RENT_ITEMS]);
 
 describe('parseRentXml', () => {
   it('정상 XML 파싱: 매물 데이터 추출 — 보증금·월세 만원 → 원 환산, 전세(월세 0) 제외', () => {
@@ -245,6 +251,10 @@ describe('constants', () => {
     expect(DEPOSIT_CONVERSION_RATE).toBe(0.046);
   });
 
+  it('MIN_SAMPLE_SIZE: 구간 메디안을 갱신에 쓰는 최소 월세 계약 수 30건 (ADR-088)', () => {
+    expect(MIN_SAMPLE_SIZE).toBe(30);
+  });
+
   it('SOURCE 정의', () => {
     expect(SOURCE.category).toBe('rent');
     expect(SOURCE.name).toBe('국토교통부 실거래가 공개시스템');
@@ -269,7 +279,7 @@ describe('refresh (integration)', () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
-      text: async () => VALID_RENT_XML,
+      text: async () => DISTRICT_RENT_XML,
     });
 
     const result = await refreshKrMolit({ dryRun: true });
@@ -308,11 +318,115 @@ describe('refresh (integration)', () => {
     expect(oneBed?.newValue).toBe(1166667);
   }, 30000);
 
+  describe('구간 표본 부족', () => {
+    // 첫 구에만 계약을 두고 나머지 24개 구는 0건 — 구간별 표본 수를 정확히 맞춘다.
+    function mockFirstDistrictOnly(items: string[]): void {
+      fetchSpy.mockImplementation(async (url: string) => {
+        const lawd = new URL(url).searchParams.get('LAWD_CD');
+        const xml = rentResponse(lawd === SEOUL_DISTRICT_CODES[0] ? items : []);
+        return { ok: true, status: 200, text: async () => xml };
+      });
+    }
+
+    function writeExistingSeoul(rent: Record<string, number>): void {
+      const existingData = {
+        id: 'seoul',
+        name: { ko: '서울', en: 'Seoul' },
+        country: 'KR',
+        currency: 'KRW',
+        region: 'asia',
+        lastUpdated: '2026-05-02',
+        rent,
+        food: { restaurantMeal: 9000, cafe: 5000, groceries: { milk1L: 3000, eggs12: 6000, rice1kg: 5000, chicken1kg: 15000, bread: 3500 } },
+        transport: { monthlyPass: 65000, singleRide: 1400, taxiBase: 4800 },
+        sources: [{ category: 'rent', name: '국토교통부 실거래가 공개시스템', url: 'https://rt.molit.go.kr/', accessedAt: '2026-05-02' }],
+      };
+      fs.writeFileSync(path.join(testDir, 'cities', 'seoul.json'), JSON.stringify(existingData));
+    }
+
+    function readSeoulRent(): Record<string, number> {
+      const json = JSON.parse(fs.readFileSync(path.join(testDir, 'cities', 'seoul.json'), 'utf-8'));
+      return json.rent;
+    }
+
+    const repeat = (n: number, item: string): string[] => Array.from({ length: n }, () => item);
+    // 현재 앱 값 (초기 시드).
+    const EXISTING_RENT = { share: 350000, studio: 650000, oneBed: 1200000, twoBed: 1800000 };
+
+    it('share 월세 계약 3건 (2026-10 실제 응답 규모): 기존 값 유지 + warnings, 나머지 구간만 갱신', async () => {
+      // 2026-10 실제 응답은 share 3건 · studio 2,966 · oneBed 2,038 · twoBed 1,129 건이었다.
+      writeExistingSeoul(EXISTING_RENT);
+      mockFirstDistrictOnly([
+        rentItem('8.0', '1,000', '65'),
+        rentItem('9.5', '500', '60'),
+        rentItem('7.2', '2,000', '70'),
+        ...repeat(40, rentItem('25.0', '5,000', '45')),
+        ...repeat(40, rentItem('45.0', '7,500', '45')),
+        ...repeat(40, rentItem('65.0', '13,000', '50')),
+      ]);
+
+      const result = await refreshKrMolit();
+
+      expect(result.errors).toEqual([]);
+      expect(result.fields).toEqual(['studio', 'oneBed', 'twoBed']);
+      expect(result.changes.map((c: RefreshChange) => c.field)).not.toContain('rent.share');
+      expect(readSeoulRent()).toEqual({
+        share: EXISTING_RENT.share,
+        // 45만 + 5,000만 × 4.6% ÷ 12 = 641,667 · 45만 + 7,500만 × 4.6% ÷ 12 = 737,500 · 50만 + 1억 3,000만 × 4.6% ÷ 12 = 998,333
+        studio: 641667,
+        oneBed: 737500,
+        twoBed: 998333,
+      });
+      const shareWarnings = (result.warnings ?? []).filter((w: { reason: string }) => w.reason.includes('rent.share'));
+      expect(shareWarnings).toHaveLength(1);
+      expect(shareWarnings[0]?.cityId).toBe('seoul');
+      expect(shareWarnings[0]?.reason).toContain('3 monthly-rent contracts');
+    }, 30000);
+
+    const BIN_AREAS = { share: '8.0', studio: '25.0', oneBed: '45.0', twoBed: '65.0' } as const;
+    const BINS = Object.keys(BIN_AREAS) as Array<keyof typeof BIN_AREAS>;
+
+    it.each(BINS)('%s 만 MIN_SAMPLE_SIZE - 1 건: 그 구간만 기존 값 유지 + warnings (네 구간 같은 기준)', async (bin) => {
+      writeExistingSeoul(EXISTING_RENT);
+      mockFirstDistrictOnly(
+        BINS.flatMap((b) =>
+          repeat(b === bin ? MIN_SAMPLE_SIZE - 1 : MIN_SAMPLE_SIZE, rentItem(BIN_AREAS[b], '0', '50')),
+        ),
+      );
+
+      const result = await refreshKrMolit();
+
+      expect(result.errors).toEqual([]);
+      expect(result.fields).toEqual(BINS.filter((b) => b !== bin));
+      const rent = readSeoulRent();
+      for (const b of BINS) {
+        expect(rent[b]).toBe(b === bin ? EXISTING_RENT[b] : 500000);
+      }
+      expect(result.warnings).toEqual([
+        {
+          cityId: 'seoul',
+          reason: expect.stringContaining(`rent.${bin}: only ${MIN_SAMPLE_SIZE - 1} monthly-rent contracts`),
+        },
+      ]);
+    }, 30000);
+
+    it('네 구간 모두 정확히 MIN_SAMPLE_SIZE 건: 전부 갱신, warnings 없음', async () => {
+      writeExistingSeoul(EXISTING_RENT);
+      mockFirstDistrictOnly(BINS.flatMap((b) => repeat(MIN_SAMPLE_SIZE, rentItem(BIN_AREAS[b], '0', '50'))));
+
+      const result = await refreshKrMolit();
+
+      expect(result.fields).toEqual(BINS);
+      expect(readSeoulRent()).toEqual({ share: 500000, studio: 500000, oneBed: 500000, twoBed: 500000 });
+      expect(result.warnings ?? []).toEqual([]);
+    }, 30000);
+  });
+
   it('dryRun=true: 파일 미갱신', async () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
-      text: async () => VALID_RENT_XML,
+      text: async () => DISTRICT_RENT_XML,
     });
 
     await refreshKrMolit({ dryRun: true });
@@ -353,14 +467,16 @@ describe('refresh (integration)', () => {
   }, 30000);
 
   it('totalCount 가 numOfRows(1000) 초과: 다음 페이지까지 모아 집계', async () => {
-    // 송파구처럼 한 달 거래가 1000건을 넘는 자치구 — 1페이지는 studio 만, 2페이지에만 twoBed.
+    // 송파구처럼 한 달 거래가 1000건을 넘는 자치구 — 1페이지는 studio 만, 2페이지에만 twoBed
+    // (구마다 2건 → 25개 구 50건으로 MIN_SAMPLE_SIZE 이상).
     const page1 = rentResponse(
       Array.from({ length: 1000 }, () => rentItem('25.0', '1,000', '65')),
       '000',
       'OK',
-      1001,
+      1002,
     );
-    const page2 = rentResponse([rentItem('65.0', '5,000', '180')], '000', 'OK', 1001);
+    const twoBedItem = rentItem('65.0', '5,000', '180');
+    const page2 = rentResponse([twoBedItem, twoBedItem], '000', 'OK', 1002);
     fetchSpy.mockImplementation(async (url: string) => {
       const pageNo = new URL(url).searchParams.get('pageNo');
       return { ok: true, status: 200, text: async () => (pageNo === '2' ? page2 : page1) };
@@ -412,7 +528,7 @@ describe('refresh (integration)', () => {
       return {
         ok: true,
         status: 200,
-        text: async () => VALID_RENT_XML,
+        text: async () => DISTRICT_RENT_XML,
       };
     });
 
@@ -467,7 +583,7 @@ describe('refresh (integration)', () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
-      text: async () => VALID_RENT_XML,
+      text: async () => DISTRICT_RENT_XML,
     });
 
     const result = await refreshKrMolit({ dryRun: true });
@@ -482,7 +598,7 @@ describe('refresh (integration)', () => {
     fetchSpy.mockResolvedValue({
       ok: true,
       status: 200,
-      text: async () => VALID_RENT_XML,
+      text: async () => DISTRICT_RENT_XML,
     });
 
     const result = await refreshKrMolit({ dryRun: true });
