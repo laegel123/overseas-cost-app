@@ -109,14 +109,14 @@ overseas-cost-app/
 /(tabs)/favorites               # 즐겨찾기 목록 → 행 탭 시 /compare/[cityId] (ADR-084)
 /(tabs)/settings                # 설정
 /compare/[cityId]               # 비교 (서울 vs city). ?base=<id> 면 기준 도시 교체 (ADR-089)
-/detail/[cityId]/[category]     # 항목 상세 (food | rent | transport | tuition | tax | visa)
+/detail/[cityId]/[category]     # 항목 상세 (food | rent | transport | tuition | tax | visa). ?base=<id> 면 기준 도시 교체 (ADR-089)
 /sources                        # 데이터 출처 — 도시 목록
 /sources/[cityId]               # 도시별 출처 (카테고리 그룹)
 /privacy                        # 개인정보 처리방침
 ```
 
 - 비교 탭은 두 도시를 고르는 선택 화면이다 (ADR-089 — ADR-041 의 라우팅 단축 제거). 즐겨찾기 탭은 목록 화면이다 (ADR-084). 4개 탭 모두 redirect 없이 기본 navigate 로만 동작한다.
-- **`base` query param (ADR-089)**: `/compare/[cityId]` 와 `/detail/[cityId]/[category]` 의 **기준 도시(왼쪽)**. 생략하거나 `seoul` 이면 서울 모드 = 종전 동작과 완전히 동일하다. 도시 목록에 없는 `base` 는 `"도시 데이터를 찾을 수 없습니다"`, `base === cityId` 는 `"같은 도시끼리는 비교할 수 없어요"` ErrorView. `cityId === 'seoul'` + 다른 `base` 는 `router.replace('/compare/<base>')` 로 정규화한다 (서울은 항상 왼쪽 — 오른쪽에 두면 `0 ÷ 값` 배수로 `formatMultiplier`·`isHot` 이 throw). 도시끼리 모드에서는 학비·세금 선택값을 도시별로 따로 적용하고, 포함 토글 저장 키는 `"<base>|<cityId>"` 다.
+- **`base` query param (ADR-089)**: `/compare/[cityId]` 와 `/detail/[cityId]/[category]` 의 **기준 도시(왼쪽)**. 생략하거나 `seoul` 이면 서울 모드 = 종전 동작과 완전히 동일하다. 도시 목록에 없는 `base` 는 `"도시 데이터를 찾을 수 없습니다"`, `base === cityId` 는 `"같은 도시끼리는 비교할 수 없어요"` ErrorView. `cityId === 'seoul'` + 다른 `base` 는 서울 모드 주소(`/compare/<base>` · `/detail/<base>/<category>`)로 `router.replace` 정규화한다 (서울은 항상 왼쪽 — 오른쪽에 두면 `0 ÷ 값` 배수로 `formatMultiplier`·`isHot` 이 throw). 도시끼리 모드에서는 학비·세금 선택값을 도시별로 따로 적용하고(상세는 도시마다 선택 줄 1개 — `detail-picker-city-<도시 id>`), 비교 화면의 포함 토글 저장 키는 `"<base>|<cityId>"`, 상세의 출처는 도시별로 묶어 양쪽 모두 노출한다 (ADR-076). 한쪽만 값이 없으면 그 값은 `—` 로 적고 배수·합계에서 제외한다 (0원으로 표시하지 않는다).
 - Stack 기반 push/pop. 비교 → 상세 → 비교 → 홈 백 스택 보존.
 
 ## 데이터 흐름

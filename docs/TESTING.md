@@ -1823,6 +1823,13 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] mult='신규' + hot=true override → hot 스타일 (orange-soft + mult orange), 텍스트는 '신규' 유지
 - [x] mult='신규' + selected=true → white 반전 규칙 유지 (mult white + emoji box white)
 
+**결측 케이스 (mult=null — 도시끼리 비교에서 한쪽 도시 값 결측, ADR-089 / city-pair-compare step 3):**
+
+- [x] mult=null → 배수 영역(`<testID>-mult`) 미렌더 (`formatMultiplier` 미호출 — 유효하지 않은 배수는 throw)
+- [x] mult=null → 품목명·가격(`1.2만 → —`) 은 그대로 (행 자체는 사라지지 않는다)
+- [x] mult=null → not hot (`isHot` 미호출, emoji box bg-light)
+- [x] mult=null + hot=true override → hot 시각만 적용, 배수는 여전히 미렌더
+
 **이모지 박스:**
 
 - [x] 36×36 (w-9 h-9) 크기
@@ -2339,6 +2346,60 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] loading 상태 (`detail-screen-loading`) → `ad-banner` 부재
 - [x] error 상태 (`detail-screen-error`) → `ad-banner` 부재
 - [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재
+
+**도시끼리 모드 (`?base=<id>`, ADR-089 / city-pair-compare step 3):**
+
+> 기준 도시(왼쪽)는 query param `base` 다. 생략·`seoul` 이면 **서울 모드** = 위 모든 케이스가 한 줄도 고치지 않고 통과해야 한다 ("서울 모드 무변경" 의 증거). 두 번째 비-서울 도시는 `src/__fixtures__/cities/tokyo-valid.ts` (JPY, tuition 3개·visa 보유, **tax 없음** — §7.3). 환율은 `{ KRW: 1, CAD: 980, USD: 1380, JPY: 9 }`.
+
+서울 모드 정규화:
+
+- [x] `base` 생략과 `base=seoul` 이 같은 화면을 낸다 (렌더 트리의 텍스트 노드 전량 비교 — 함수 prop 참조 차이 회피)
+- [x] `cityId=seoul` + `base=tokyo` → `router.replace('/detail/tokyo/food')` + 정규화 중 loading 유지 (서울이 오른쪽인 화면을 그리지 않는다)
+
+제목·부제:
+
+- [x] 제목 `"식비 · 밴쿠버 vs 도쿄"` (서울 모드는 현행 `"{카테고리} · {대상}"`), hero `leftLabel` = 기준 도시 한글명 ('서울' 부재)
+- [x] 부제 = 두 도시 통화 모두 한 줄 (기준 → 대상 순): `1 CAD = 980원 · 1 JPY = 9원 · 04-30`. 두 통화가 같으면 한 번만
+
+식비·월세·교통 — 왼쪽 열이 기준 도시 값:
+
+- [x] food `detail-row-restaurantMeal` = `2.2만원 → 1.1만원` / `↓0.5×`, hero 합계 7.5만원 / 4.3만원 `↓0.6×`
+- [x] rent 기본 선택(share) → hero 93.1만원 / 58.5만원 `↓0.6×`
+- [x] 기준·대상을 맞바꾸면 배수 반전 (share `↑1.6×`)
+- [x] transport `monthlyPass` 10.3만원 / 9.5만원, `taxiBase` `↑1.3×`
+
+visa — 양쪽 모두 실제 값 (왼쪽 0원·`'신규'` 는 서울 모드 전용 정책):
+
+- [x] `detail-row-visa-fee` = `14.7만원 → 2.7만원` / `↓0.2×`, `'신규'` 부재
+- [x] `detail-row-visa-settle` = `147만원 → 180만원`
+
+학비·세금 도시별 선택 줄 (**이 step 의 핵심 실패 조건** — 한쪽 선택이 반대쪽 계산에 섞이면 실패):
+
+- [x] 선택 줄 2개 — `detail-picker-city-vancouver` / `detail-picker-city-tokyo` 에 각 도시 한글명 + 현재 선택 항목 (UBC / 東京大学). 서울 모드 전용 `detail-picker-change-tuition` 은 미렌더
+- [x] 값 1행 `detail-row-tuition-pair` = `367.5만원 → 40.2만원` / `↓0.1×`
+- [x] hero caption `"학비 · 선택 항목"` + footer `"도시별 선택 항목 기준 (바꾸기로 변경)"`
+- [x] 기준 도시 줄 탭 → **그 도시** 학교 목록 시트 (`detail-tuition-sheet-preset-UBC` / `-SFU` 존재, 도쿄 학교 부재) + 시트 선택이 `choices['vancouver']` 에만 기록 (`choices['tokyo']` 는 undefined)
+- [x] 대상 도시 줄 탭 → 도쿄 학교 목록 시트 (`-preset-東京大学` / `-早稲田大学`, UBC 부재)
+- [x] 대상(도쿄) 선택만 早稲田 로 바꿔도 기준(밴쿠버 SFU 285.8만원) 불변 → `285.8만원 → 112.5만원`
+- [x] tax 양쪽 결측 (v1.0 실데이터 모양) → 빈 상태 **1회** (`세금 데이터가 아직 준비되지 않았어요.` 1개) + 선택 줄 없음 + `detail-picker-empty-tax` 없음 (entries 없으면 직접 입력이 silent fail — ADR-089)
+- [x] tax 양쪽 데이터 있음 (fixture) → 학비와 같은 구조: 선택 줄 `연봉 5880만원` / `연봉 4500만원`, `detail-row-tax-pair` = `127.4만원 → 75만원` / `↓0.6×`, 줄 탭 시 그 도시의 연봉 목록 (`detail-tax-sheet-preset-5000000`, 밴쿠버 tier 부재)
+
+결측 표기 (한쪽만 값 없음 — 실데이터로는 발생하지 않는 조합, fixture 로만 검증):
+
+- [x] 대상 도시에 학비 없음 → 행 `367.5만원 → —`, 배수(`-mult`) 미표시, **`0원` 표기 없음**, hero 도 `—` + 가운데 배수 미표시 (`신규` 아님)
+- [x] 결측 쪽 선택 줄은 유지하고 `데이터 없음` 표기
+- [x] 합계 모드 (visa) — 한쪽만 결측인 행은 양쪽 합계에서 제외. 모든 행이 결측이면 hero 좌·우 모두 `—` + 배수 미표시 (0원 표기 없음)
+
+출처 — 도시별 묶음 (ADR-076, 화면에 나온 값의 출처는 화면에):
+
+- [x] 묶음 2개 (`detail-sources-city-vancouver` / `-tokyo`) 에 도시명 소제목 + 그 도시 출처명, 개수는 합 (`출처 2개`)
+- [x] 한쪽 도시에 그 카테고리 출처가 없으면 그 묶음만 `출처 정보가 없어요` (tax: 밴쿠버 1 + 도쿄 0 → `출처 1개`)
+
+에러 분기 / 광고:
+
+- [x] `base` 가 도시 목록에 없음 → ErrorView `"도시 데이터를 찾을 수 없습니다"`
+- [x] `base === cityId` → ErrorView `"같은 도시끼리는 비교할 수 없어요"`
+- [x] 광고 footer 는 현행 유지 (ready 화면 `ad-banner` 존재, ADR-077)
 
 ### 9.26.1 `app/(tabs)/favorites.tsx` (즐겨찾기 탭 — 목록 화면, ADR-084)
 
