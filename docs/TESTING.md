@@ -3099,6 +3099,7 @@ afterEach(() => {
 - [x] 보증금이 큰 반전세가 섞임: 월세만의 메디안이 아니라 환산 월세 메디안 (재현 테스트)
 - [x] share 월세 계약 3건 (2026-10 실제 응답 규모): share 는 기존 값 유지 + warnings (구간·표본 수), 나머지 구간만 갱신 (재현 테스트, ADR-088)
 - [x] 구간별 `MIN_SAMPLE_SIZE`(30) - 1 건: 네 구간 각각 그 구간만 기존 값 유지 + warnings — 네 구간 같은 기준
+- [x] 네 구간 모두 `MIN_SAMPLE_SIZE` 미만: 파일 미갱신 + 구간별 warnings 4건, errors 없음 → `isTotalFailure` false (exit 0)
 - [x] 네 구간 모두 정확히 `MIN_SAMPLE_SIZE` 건: 전부 갱신, warnings 없음 (경계값)
 - [x] totalCount 가 numOfRows(1000) 초과: pageNo 를 올려 다음 페이지까지 집계
 - [x] 정상 응답에 totalCount 누락: 잘림 여부를 알 수 없으므로 errors (silent fail 금지)

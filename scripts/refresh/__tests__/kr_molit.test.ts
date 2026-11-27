@@ -17,6 +17,7 @@ import refreshKrMolit, {
   SEOUL_DISTRICT_CODES,
   SOURCE,
 } from '../kr_molit.mjs';
+import { isTotalFailure } from '../_common.mjs';
 import type { RefreshChange } from './_test-types';
 
 let originalDataDir: string | undefined;
@@ -408,6 +409,22 @@ describe('refresh (integration)', () => {
           reason: expect.stringContaining(`rent.${bin}: only ${MIN_SAMPLE_SIZE - 1} monthly-rent contracts`),
         },
       ]);
+    }, 30000);
+
+    it('네 구간 모두 MIN_SAMPLE_SIZE 미만: 파일 미갱신 + warnings 4건, 전부 실패가 아님 (exit 0)', async () => {
+      writeExistingSeoul(EXISTING_RENT);
+      mockFirstDistrictOnly(BINS.flatMap((b) => repeat(MIN_SAMPLE_SIZE - 1, rentItem(BIN_AREAS[b], '0', '50'))));
+
+      const result = await refreshKrMolit();
+
+      expect(result.cities).toEqual([]);
+      expect(result.changes).toEqual([]);
+      expect(result.errors).toEqual([]);
+      expect(isTotalFailure(result)).toBe(false);
+      expect(readSeoulRent()).toEqual(EXISTING_RENT);
+      expect((result.warnings ?? []).map((w: { reason: string }) => w.reason.split(':')[0])).toEqual(
+        BINS.map((b) => `rent.${b}`),
+      );
     }, 30000);
 
     it('네 구간 모두 정확히 MIN_SAMPLE_SIZE 건: 전부 갱신, warnings 없음', async () => {
