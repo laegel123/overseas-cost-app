@@ -16,7 +16,7 @@
       "status": "completed",
       "started_at": "2026-11-27T14:33:14+0900",
       "summary": "ADR-089 신규 (docs/adr/089-compare-tab-city-pair.md + docs/ADR.md 인덱스 행, ADR-041 상태 줄을 Superseded 로 변경). app/(tabs)/compare.tsx placeholder → 두 도시 선택 화면: loading/error(ErrorView screen)/ready 3상태, loadAllCities→getAllCities (환율 미사용, lastSync·reloadKey 로 재로드), 도시 목록 UI 는 기존 BottomSheet 재사용 (신규 컴포넌트 없음 — 선택 칸은 같은 파일의 로컬 CitySlot 서브컴포넌트, app/sources/[cityId].tsx 의 SourceCard 선례). testID: compare-tab-screen / -loading / -error, compare-tab-slot-base, compare-tab-slot-city, compare-tab-option-<cityId>, compare-tab-submit, compare-tab-picker(시트). 이동 규칙: 둘 다 서울 아님 → push('/compare/<오른쪽>?base=<왼쪽>'), 왼쪽 서울 → push('/compare/<오른쪽>'), 오른쪽 서울 → push('/compare/<왼쪽>') (서울은 항상 기준). 목록은 서울 포함 전체 name.ko localeCompare(,'ko') 정렬, 반대편 칸 도시는 disabled, 목록에 없는 저장 id 는 빈 칸(store 값 유지), submit 비활성은 accessibilityState.disabled 로 노출, 광고 없음. app/(tabs)/_layout.tsx 에서 handleCompareTabPress·listeners·Alert·useRouter·useRecentStore·useFavoritesStore·TabPressEvent 제거 (renderTabBar 의 tabPress emit 어댑터는 유지). 테스트: compare.test.tsx 13건 신규, _layout.test.tsx 를 redirect 3케이스 → 기본 navigate 3케이스로 교체(8건). docs/TESTING.md §9.26.2 신규 + §9.21.1·§9.27.3 갱신, docs/ARCHITECTURE.md 트리·라우트·탭 정책표, docs/UI_GUIDE.md 편차표·상태 매트릭스·토스트 현황 갱신. AC 전부 통과 (typecheck / lint / jest app/(tabs) 90건 / npm test 2258건 / grep 4종 / 금지 경로 diff 없음).",
-      "completed_at": "2026-11-27T14:43:22+0900"
+      "completed_at": "2026-11-27T14:43:50+0900"
     },
     {
       "step": 2,
