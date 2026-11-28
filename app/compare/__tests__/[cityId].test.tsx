@@ -21,6 +21,7 @@ import { useTaxChoiceStore } from '@/store/taxChoice';
 import { useTuitionChoiceStore } from '@/store/tuitionChoice';
 
 import { seoulValid } from '../../../src/__fixtures__/cities/seoul-valid';
+import { tokyoValid } from '../../../src/__fixtures__/cities/tokyo-valid';
 import { vancouverValid } from '../../../src/__fixtures__/cities/vancouver-valid';
 import CompareScreen from '../[cityId]';
 
@@ -805,6 +806,504 @@ describe('CompareScreen', () => {
       // 영향받지 않음.
       const visaToggle = getByTestId('compare-pair-visa-toggle');
       expect(visaToggle.props.value).toBe(false);
+    });
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 도시끼리 비교 (`?base=<id>`, ADR-089 / city-pair-compare step 2)
+//
+// 위 `describe('CompareScreen')` 의 케이스는 전부 서울 모드다 — 한 줄도 고치지
+// 않고 통과해야 한다 ("서울 모드 무변경" 의 증거). 아래는 추가 케이스만 담는다.
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** JPY 환율 추가 — 도쿄 fixture 환산용. */
+const pairFx = { ...defaultFx, JPY: 9 };
+
+/** 양쪽 모두 세금 데이터가 없는 조합 (실데이터 모양) — 카드 숨김 검증용. */
+const { tax: _vancouverTax, ...vancouverNoTax } = vancouverValid;
+
+function setupPairMocks(overrides?: {
+  baseId?: string;
+  cityId?: string;
+  base?: typeof vancouverValid | undefined;
+  city?: typeof tokyoValid | undefined;
+  fx?: typeof pairFx;
+  lastSync?: string | null;
+}) {
+  const opts = {
+    baseId: 'vancouver',
+    cityId: 'tokyo',
+    base: vancouverValid,
+    city: tokyoValid,
+    fx: pairFx,
+    lastSync: '2026-04-30T10:00:00.000Z',
+    ...overrides,
+  };
+
+  (useLocalSearchParams as jest.Mock).mockReturnValue({
+    cityId: opts.cityId,
+    base: opts.baseId,
+  });
+  (mockLoadAllCities as jest.Mock).mockResolvedValue({});
+  (mockGetCity as jest.Mock).mockImplementation((id: string) => {
+    if (id === 'seoul') return seoulValid;
+    if (id === opts.baseId) return opts.base;
+    if (id === opts.cityId) return opts.city;
+    return undefined;
+  });
+  (mockFetchExchangeRates as jest.Mock).mockResolvedValue(opts.fx);
+  (mockGetLastSync as jest.Mock).mockResolvedValue(opts.lastSync);
+}
+
+/**
+ * `render(...).toJSON()` 트리의 텍스트 노드를 순서대로 수집. 함수 prop (onPress 등)
+ * 은 렌더마다 참조가 달라 트리 자체를 toEqual 로 비교할 수 없어, 사용자가 보는
+ * 문자열만 뽑아 비교한다.
+ */
+function collectTexts(node: unknown): string[] {
+  if (typeof node === 'string') return [node];
+  if (Array.isArray(node)) return node.flatMap((child) => collectTexts(child));
+  if (node !== null && typeof node === 'object') {
+    return collectTexts((node as { children?: unknown }).children);
+  }
+  return [];
+}
+
+describe('CompareScreen — 도시끼리 모드 (`?base=`, ADR-089)', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetStores();
+    jest.useRealTimers();
+  });
+
+  afterEach(() => {
+    jest.useFakeTimers();
+  });
+
+  describe('서울 모드 정규화', () => {
+    it('`base` 생략과 `base=seoul` 이 같은 화면을 낸다', async () => {
+      setupMocks();
+      const first = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+      const withoutBase = collectTexts(first.toJSON());
+      expect(withoutBase).toContain('서울 vs 밴쿠버');
+      first.unmount();
+
+      resetStores();
+      setupMocks();
+      (useLocalSearchParams as jest.Mock).mockReturnValue({
+        cityId: 'vancouver',
+        base: 'seoul',
+      });
+      const second = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(collectTexts(second.toJSON())).toEqual(withoutBase);
+    });
+
+    it('`base=seoul` 도 즐겨찾기 별과 recent.push 를 유지 (서울 모드)', async () => {
+      setupMocks();
+      (useLocalSearchParams as jest.Mock).mockReturnValue({
+        cityId: 'vancouver',
+        base: 'seoul',
+      });
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('compare-topbar-right')).toBeTruthy();
+      expect(useRecentStore.getState().cityIds).toContain('vancouver');
+    });
+
+    it('cityId=seoul + base=tokyo → `/compare/tokyo` 로 replace (서울은 항상 기준)', async () => {
+      setupPairMocks({ baseId: 'tokyo', cityId: 'seoul', base: tokyoValid });
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(mockReplace).toHaveBeenCalledWith('/compare/tokyo');
+      // 정규화 중에는 loading 유지 — 서울이 오른쪽인 화면을 그리지 않는다.
+      expect(getByTestId('compare-screen-loading')).toBeTruthy();
+    });
+  });
+
+  describe('제목 · 라벨 · 값 · 배수', () => {
+    it('제목 = "기준 vs 대상", hero / 카드 왼쪽 라벨 = 기준 도시 한글명', async () => {
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(within(getByTestId('compare-topbar')).getByText('밴쿠버 vs 도쿄')).toBeTruthy();
+      const hero = getByTestId('compare-hero');
+      expect(within(hero).getByText('밴쿠버')).toBeTruthy();
+      expect(within(hero).getByText('도쿄')).toBeTruthy();
+      const rentCard = getByTestId('compare-pair-rent');
+      expect(within(rentCard).getByText('밴쿠버')).toBeTruthy();
+      expect(within(rentCard).getByText('도쿄')).toBeTruthy();
+    });
+
+    it('양쪽 실제 값 + 배수는 기준 대비 대상 (base=vancouver, city=tokyo)', async () => {
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // 월세: 밴쿠버 share 950 CAD = 93.1만원 / 도쿄 share 65000 JPY = 58.5만원 → 0.628
+      const rentCard = getByTestId('compare-pair-rent');
+      expect(within(rentCard).getByText('93.1만원')).toBeTruthy();
+      expect(within(rentCard).getByText('58.5만원')).toBeTruthy();
+      expect(within(rentCard).getByTestId('compare-pair-rent-mult').props.children).toBe(
+        '↓0.6×',
+      );
+
+      // 교통: 102,900원 / 95,400원 → 0.927
+      const transportCard = getByTestId('compare-pair-transport');
+      expect(within(transportCard).getByText('10.3만원')).toBeTruthy();
+      expect(within(transportCard).getByText('9.5만원')).toBeTruthy();
+
+      // hero 합계 (기본 ON = rent/food/transport)
+      const hero = getByTestId('compare-hero');
+      expect(within(hero).getByText('171만원')).toBeTruthy();
+      expect(within(hero).getByText('105.3만원')).toBeTruthy();
+      expect(within(hero).getByText('↓0.6×')).toBeTruthy();
+      expect(within(hero).getByText('-65.7만원')).toBeTruthy();
+    });
+
+    it('기준·대상을 맞바꾸면 배수가 뒤집히고 Hot 판정도 따라온다 (base=tokyo, city=vancouver)', async () => {
+      setupPairMocks({
+        baseId: 'tokyo',
+        cityId: 'vancouver',
+        base: tokyoValid,
+        city: vancouverValid,
+      });
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const rentCard = getByTestId('compare-pair-rent');
+      expect(within(rentCard).getByTestId('compare-pair-rent-mult').props.children).toBe(
+        '↑1.6×',
+      );
+      expect(getByTestId('compare-pair-rent-icon-box').props.className).toContain('bg-light');
+
+      // 학비: 도쿄 東京大学 40.2만원 → 밴쿠버 UBC 367.5만원 = 9.1× → isHot
+      const tuitionCard = getByTestId('compare-pair-tuition');
+      expect(within(tuitionCard).getByText('40.2만원')).toBeTruthy();
+      expect(within(tuitionCard).getByText('367.5만원')).toBeTruthy();
+      expect(
+        within(tuitionCard).getByTestId('compare-pair-tuition-mult').props.children,
+      ).toBe('↑9.1×');
+      expect(getByTestId('compare-pair-tuition-icon-box').props.className).toContain(
+        'bg-orange-soft',
+      );
+    });
+  });
+
+  describe('부제 (환율)', () => {
+    it('두 도시 통화를 모두 한 줄에 표시 (기준 → 대상 순)', async () => {
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(
+        within(getByTestId('compare-topbar')).getByText(
+          '1 CAD = 980원 · 1 JPY = 9원 · 04-30',
+        ),
+      ).toBeTruthy();
+    });
+
+    it('두 도시 통화가 같으면 한 번만 표시', async () => {
+      setupPairMocks({ city: { ...tokyoValid, currency: 'CAD' } });
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(
+        within(getByTestId('compare-topbar')).getByText('1 CAD = 980원 · 04-30'),
+      ).toBeTruthy();
+    });
+  });
+
+  describe('학비 선택값 분리 (ADR-061 + ADR-089)', () => {
+    it('두 도시에 서로 다른 선택을 넣으면 각자의 학교 값이 각 열에 나온다', async () => {
+      useTuitionChoiceStore
+        .getState()
+        .setTuitionChoice('vancouver', { kind: 'preset', school: 'SFU' });
+      useTuitionChoiceStore
+        .getState()
+        .setTuitionChoice('tokyo', { kind: 'preset', school: '早稲田大学' });
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const card = getByTestId('compare-pair-tuition');
+      // 기준: SFU 35000 CAD / 12 * 980 = 285.8만원
+      expect(within(card).getByText('285.8만원')).toBeTruthy();
+      // 대상: 早稲田 1,500,000 JPY / 12 * 9 = 112.5만원
+      expect(within(card).getByText('112.5만원')).toBeTruthy();
+      // 대상 선택값이 기준 열에 섞이면 UBC fallback (367.5만원) 이 나온다 — 없어야 한다.
+      expect(within(card).queryByText('367.5만원')).toBeNull();
+    });
+
+    it('한쪽 선택만 바꿔도 반대쪽 값은 불변', async () => {
+      useTuitionChoiceStore
+        .getState()
+        .setTuitionChoice('vancouver', { kind: 'preset', school: 'SFU' });
+      useTuitionChoiceStore
+        .getState()
+        .setTuitionChoice('tokyo', { kind: 'preset', school: '早稲田大学' });
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      await act(async () => {
+        useTuitionChoiceStore
+          .getState()
+          .setTuitionChoice('tokyo', { kind: 'preset', school: '慶應義塾大学' });
+      });
+
+      const card = getByTestId('compare-pair-tuition');
+      // 대상만 1,600,000 / 12 * 9 = 120만원 으로 갱신
+      expect(within(card).getByText('120만원')).toBeTruthy();
+      // 기준(밴쿠버 SFU) 은 그대로
+      expect(within(card).getByText('285.8만원')).toBeTruthy();
+    });
+  });
+
+  describe('포함 토글 저장 키 (`"<base>|<cityId>"`)', () => {
+    it('도시끼리 모드 토글은 쌍 키로 저장되고 cityId 단독 키는 불변', async () => {
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // 학비는 고정 default OFF — 사용자가 켠다.
+      const toggle = getByTestId('compare-pair-tuition-toggle');
+      expect(toggle.props.value).toBe(false);
+      await act(async () => {
+        fireEvent(toggle, 'valueChange', true);
+      });
+
+      const { inclusions } = useCategoryInclusionStore.getState();
+      expect(inclusions['vancouver|tokyo']).toEqual({ tuition: true });
+      expect(inclusions['tokyo']).toBeUndefined();
+      expect(inclusions['vancouver']).toBeUndefined();
+      expect(getByTestId('compare-pair-tuition-toggle').props.value).toBe(true);
+    });
+
+    it('서울 모드 토글(cityId 단독 키) 은 도시끼리 화면에 영향 없음', async () => {
+      // 서울 기준 화면에서 도쿄의 학비를 ON 해 둔다.
+      useCategoryInclusionStore.getState().setInclusion('tokyo', 'tuition', true);
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      // 도시끼리 화면은 쌍 키를 보므로 고정 default (OFF) 그대로.
+      expect(getByTestId('compare-pair-tuition-toggle').props.value).toBe(false);
+    });
+  });
+
+  describe('결측 표기 (한쪽만 값 없음)', () => {
+    it('없는 쪽은 `—`, 배수 미표시, 0원 표기 금지 (세금: 밴쿠버 보유 / 도쿄 결측)', async () => {
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const taxCard = getByTestId('compare-pair-tax');
+      // 기준(밴쿠버) 60000 CAD tier → 127.4만원
+      expect(within(taxCard).getByText('127.4만원')).toBeTruthy();
+      expect(within(taxCard).getByText('—')).toBeTruthy();
+      expect(within(taxCard).queryByText('0원')).toBeNull();
+      expect(within(taxCard).queryByTestId('compare-pair-tax-mult')).toBeNull();
+    });
+
+    it('포함 토글을 켜도 hero 합계는 양쪽 모두 제외 (결측 카테고리)', async () => {
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      const hero = getByTestId('compare-hero');
+      expect(within(hero).getByText('171만원')).toBeTruthy();
+      expect(within(hero).getByText('105.3만원')).toBeTruthy();
+
+      await act(async () => {
+        useCategoryInclusionStore
+          .getState()
+          .setInclusion('vancouver|tokyo', 'tax', true);
+      });
+
+      // 세금이 합산되면 기준 합이 298.4만원 이 된다 — 결측 카테고리는 빠져야 한다.
+      const heroAfter = getByTestId('compare-hero');
+      expect(within(heroAfter).getByText('171만원')).toBeTruthy();
+      expect(within(heroAfter).getByText('105.3만원')).toBeTruthy();
+      expect(getByTestId('compare-pair-tax-toggle').props.value).toBe(true);
+    });
+
+    it('양쪽 모두 값 없음 → 카드 숨김 (현행 유지)', async () => {
+      setupPairMocks({ base: vancouverNoTax });
+
+      const { queryByTestId, getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('compare-screen')).toBeTruthy();
+      expect(queryByTestId('compare-pair-tax')).toBeNull();
+    });
+  });
+
+  describe('도시끼리 모드에서만 달라지는 것', () => {
+    it('즐겨찾기 별 미렌더 + pushRecent 미호출', async () => {
+      setupPairMocks();
+
+      const { getByTestId, queryByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('compare-topbar')).toBeTruthy();
+      expect(queryByTestId('compare-topbar-right')).toBeNull();
+      expect(useRecentStore.getState().cityIds).toEqual([]);
+    });
+
+    it('카드 탭 → `/detail/<대상>/<카테고리>?base=<기준>`', async () => {
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      fireEvent.press(within(getByTestId('compare-pair-tuition')).getByRole('button'));
+
+      expect(mockPush).toHaveBeenCalledWith('/detail/tokyo/tuition?base=vancouver');
+    });
+
+    it('출처 개수 = 두 도시 합 (밴쿠버 6 + 도쿄 5)', async () => {
+      setupPairMocks();
+
+      const { getByText } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByText('출처 11개 · 갱신 04-30')).toBeTruthy();
+    });
+
+    it('세금 `(근사)` 는 어느 한쪽이라도 직접 입력이면 붙는다', async () => {
+      // 기준 도시(밴쿠버) 만 custom — 대상(도쿄) 은 선택 없음.
+      useTaxChoiceStore
+        .getState()
+        .setTaxChoice('vancouver', { kind: 'custom', annualSalary: 100000 });
+      setupPairMocks();
+
+      const { getByTestId } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(within(getByTestId('compare-pair-tax')).getByText('세금 (근사)')).toBeTruthy();
+    });
+
+    // 광고 위치 정책은 서울 모드와 같다 (ADR-077 — ready 화면 footer). 주입·복원은
+    // 위 서울 모드 광고 describe 와 동일 패턴.
+    describe('광고 배너 (ADR-077)', () => {
+      beforeEach(() => {
+        useAdsStore.setState({ status: 'ready', canRequestAds: true });
+      });
+
+      afterEach(() => {
+        useAdsStore.getState().reset();
+      });
+
+      it('ready 상태 → ad-banner 존재 (현행 유지)', async () => {
+        setupPairMocks();
+
+        const { getByTestId } = render(<CompareScreen />);
+        await act(async () => {
+          await flushPromises();
+        });
+
+        expect(getByTestId('compare-screen')).toBeTruthy();
+        expect(getByTestId('ad-banner')).toBeTruthy();
+      });
+    });
+  });
+
+  describe('에러 분기', () => {
+    it('`base` 가 도시 목록에 없음 → ErrorView', async () => {
+      setupPairMocks({ baseId: 'nowhere', base: undefined });
+
+      const { getByTestId, getByText } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('compare-screen-error')).toBeTruthy();
+      expect(getByText('도시 데이터를 찾을 수 없습니다')).toBeTruthy();
+    });
+
+    it('`base === cityId` → ErrorView ("같은 도시끼리는 비교할 수 없어요")', async () => {
+      setupPairMocks({ baseId: 'tokyo', cityId: 'tokyo', base: tokyoValid });
+
+      const { getByTestId, getByText } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('compare-screen-error')).toBeTruthy();
+      expect(getByText('같은 도시끼리는 비교할 수 없어요')).toBeTruthy();
+    });
+
+    it('`/compare/seoul` (base 생략) 도 자기 비교 차단', async () => {
+      setupMocks({ cityId: 'seoul' });
+      (useLocalSearchParams as jest.Mock).mockReturnValue({ cityId: 'seoul' });
+
+      const { getByTestId, getByText } = render(<CompareScreen />);
+      await act(async () => {
+        await flushPromises();
+      });
+
+      expect(getByTestId('compare-screen-error')).toBeTruthy();
+      expect(getByText('같은 도시끼리는 비교할 수 없어요')).toBeTruthy();
     });
   });
 });

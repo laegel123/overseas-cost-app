@@ -3,6 +3,9 @@
  * design/README §4 + UI_GUIDE §GroceryRow.
  *
  * Hot 판정은 isHot(mult) 단일 함수 사용 (CLAUDE.md CRITICAL).
+ *
+ * `mult=null` 은 한쪽 도시의 값이 결측인 도시끼리 비교 (ADR-089) — 배수 영역만
+ * 비우고 이모지·품목명·가격은 그대로 그린다. 값 자리에는 호출부가 `—` 를 넘긴다.
  */
 
 import * as React from 'react';
@@ -22,8 +25,13 @@ export type GroceryRowProps = {
   seoulPrice: string;
   /** 도시 가격 문자열 — 예: "2.2만" */
   cityPrice: string;
-  /** 배수 — `computeMultiplier` 결과 그대로. `'신규'` 는 서울에 없는 항목(학비·비자 등). */
-  mult: number | '신규';
+  /**
+   * 배수 — `computeMultiplier` 결과 그대로. `'신규'` 는 서울에 없는 항목(학비·비자 등).
+   *
+   * `null` = 한쪽 도시의 값이 결측인 도시끼리 비교 (ADR-089) → 배수 영역을
+   * 렌더하지 않는다. 결측을 0 으로 바꿔 배수를 꾸미지 않는다.
+   */
+  mult: number | '신규' | null;
   /** 마지막 행 — bottom border 없음 */
   isLast?: boolean;
   /** hot override — 미지정 시 isHot(mult) 자동 판정 */
@@ -56,9 +64,7 @@ export function GroceryRow({
   testID,
 }: GroceryRowProps): React.ReactElement {
   const effectiveHot =
-    hot !== undefined ? hot : isHot(mult);
-
-  const multText = formatMultiplier(mult);
+    hot !== undefined ? hot : mult !== null && isHot(mult);
   // 디자인 의도 — design/README.md §4 "우측 배수 ... (hot=orange, normal=gray)".
   // ComparePair / FavCard / RecentRow 의 cool/mid 구분 (gray-2 / navy) 과 다르게
   // GroceryRow 는 hot 여부 1축 만 표현 — 그래서 lib `getMultColor` 미사용.
@@ -104,15 +110,18 @@ export function GroceryRow({
         </Tiny>
       </View>
 
-      {/* 배수 */}
-      <Small
-        color={multColor}
-        className="font-manrope-extrabold shrink-0"
-        numberOfLines={1}
-        {...(testID !== undefined ? { testID: `${testID}-mult` } : {})}
-      >
-        {multText}
-      </Small>
+      {/* 배수 — mult=null 이면 formatMultiplier 를 호출하지 않는다. 이 함수는
+          유효하지 않은 배수를 삼키지 않고 throw 한다 (ADR-089). */}
+      {mult !== null && (
+        <Small
+          color={multColor}
+          className="font-manrope-extrabold shrink-0"
+          numberOfLines={1}
+          {...(testID !== undefined ? { testID: `${testID}-mult` } : {})}
+        >
+          {formatMultiplier(mult)}
+        </Small>
+      )}
     </>
   );
 

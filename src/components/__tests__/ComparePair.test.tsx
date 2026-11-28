@@ -109,6 +109,43 @@ describe('ComparePair', () => {
     });
   });
 
+  describe('mult=null — 한쪽 도시 값 결측 (ADR-089)', () => {
+    // 도시끼리 비교에서 한쪽 값이 없으면 호출부가 값 자리에 `—` 를, 배수에 null 을
+    // 넘긴다. 결측을 0 으로 바꿔 배수를 꾸미지 않는다 (CLAUDE.md 에러 삼킴 금지).
+
+    it('mult=null → 배수 영역 미렌더 (값은 그대로 표시)', () => {
+      renderPair({ mult: null, sValue: '127.4만원', cValue: '\u2014' });
+      expect(screen.queryByTestId('compare-pair-mult')).toBeNull();
+      expect(screen.getByText('127.4만원')).toBeTruthy();
+      expect(screen.getByText('\u2014')).toBeTruthy();
+    });
+
+    it('mult=null → not hot (아이콘 bg-light), 라벨·막대는 그대로', () => {
+      renderPair({ mult: null, swPct: 1.0, cwPct: 0 });
+      expect(screen.getByTestId('compare-pair-icon-box').props.className).toContain(
+        'bg-light',
+      );
+      expect(screen.getByText('월세')).toBeTruthy();
+      expect(screen.getByTestId('compare-pair-bar-seoul')).toBeTruthy();
+      expect(screen.queryByTestId('compare-pair-bar-city')).toBeNull();
+    });
+
+    it('mult=null + hot=true override → 아이콘만 orange (배수는 여전히 미렌더)', () => {
+      renderPair({ mult: null, hot: true });
+      expect(screen.getByTestId('compare-pair-icon-box').props.className).toContain(
+        'bg-orange-soft',
+      );
+      expect(screen.queryByTestId('compare-pair-mult')).toBeNull();
+    });
+
+    it('mult=null + 토글 → Switch 는 그대로 렌더', () => {
+      renderPair({ mult: null, included: false, onToggleInclude: jest.fn() });
+      expect(screen.getByTestId('compare-pair-toggle').props.value).toBe(false);
+      expect(screen.getByTestId('compare-pair-excluded-badge')).toBeTruthy();
+      expect(screen.queryByTestId('compare-pair-mult')).toBeNull();
+    });
+  });
+
   describe('막대 폭', () => {
     it('sw=0.4, cw=1.0 → 막대 정상 렌더', () => {
       renderPair({ swPct: 0.4, cwPct: 1.0 });

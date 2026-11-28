@@ -12,10 +12,11 @@ overseas-cost-app/
 │   ├── (tabs)/                   # 하단 탭 그룹
 │   │   ├── _layout.tsx           # BottomTabBar (홈/비교/즐겨찾기/설정)
 │   │   ├── index.tsx             # 홈
+│   │   ├── compare.tsx           # 비교 탭 — 두 도시 선택 화면 (ADR-089)
 │   │   ├── favorites.tsx         # 즐겨찾기 목록 (ADR-084)
 │   │   └── settings.tsx          # 설정
-│   ├── compare/[cityId].tsx      # 비교 화면 (서울 vs 도시)
-│   ├── detail/[cityId]/[category].tsx  # 항목 상세 (식비, 월세, ...)
+│   ├── compare/[cityId].tsx      # 비교 화면 (기준 vs 도시 — ?base= 생략 시 서울, ADR-089)
+│   ├── detail/[cityId]/[category].tsx  # 항목 상세 (식비, 월세, ... — ?base= 동일)
 │   ├── sources/                  # 데이터 출처 (ADR-071)
 │   │   ├── index.tsx             # 도시 목록
 │   │   └── [cityId].tsx          # 도시별 출처 (카테고리 그룹)
@@ -104,16 +105,18 @@ overseas-cost-app/
 
 /onboarding                     # 1회성 도시 선택, 즐겨찾기 추가 + onboarded=true 후 /compare/[cityId] 로 이동 (ADR-067)
 /(tabs)/index                   # 홈 (즐겨찾기·검색·최근)
+/(tabs)/compare                 # 비교 탭 — 두 도시 선택 → /compare/[cityId](?base=) (ADR-089)
 /(tabs)/favorites               # 즐겨찾기 목록 → 행 탭 시 /compare/[cityId] (ADR-084)
 /(tabs)/settings                # 설정
-/compare/[cityId]               # 비교 (서울 vs city)
-/detail/[cityId]/[category]     # 항목 상세 (food | rent | transport | tuition | tax | visa)
+/compare/[cityId]               # 비교 (서울 vs city). ?base=<id> 면 기준 도시 교체 (ADR-089)
+/detail/[cityId]/[category]     # 항목 상세 (food | rent | transport | tuition | tax | visa). ?base=<id> 면 기준 도시 교체 (ADR-089)
 /sources                        # 데이터 출처 — 도시 목록
 /sources/[cityId]               # 도시별 출처 (카테고리 그룹)
 /privacy                        # 개인정보 처리방침
 ```
 
-- 비교 탭은 별도 화면 없이 라우팅 단축으로 동작한다 (ADR-041). 즐겨찾기 탭은 목록 화면이다 (ADR-084).
+- 비교 탭은 두 도시를 고르는 선택 화면이다 (ADR-089 — ADR-041 의 라우팅 단축 제거). 즐겨찾기 탭은 목록 화면이다 (ADR-084). 4개 탭 모두 redirect 없이 기본 navigate 로만 동작한다.
+- **`base` query param (ADR-089)**: `/compare/[cityId]` 와 `/detail/[cityId]/[category]` 의 **기준 도시(왼쪽)**. 생략하거나 `seoul` 이면 서울 모드 = 종전 동작과 완전히 동일하다. 도시 목록에 없는 `base` 는 `"도시 데이터를 찾을 수 없습니다"`, `base === cityId` 는 `"같은 도시끼리는 비교할 수 없어요"` ErrorView. `cityId === 'seoul'` + 다른 `base` 는 서울 모드 주소(`/compare/<base>` · `/detail/<base>/<category>`)로 `router.replace` 정규화한다 (서울은 항상 왼쪽 — 오른쪽에 두면 `0 ÷ 값` 배수로 `formatMultiplier`·`isHot` 이 throw). 도시끼리 모드에서는 학비·세금 선택값을 도시별로 따로 적용하고(상세는 도시마다 선택 줄 1개 — `detail-picker-city-<도시 id>`), 비교 화면의 포함 토글 저장 키는 `"<base>|<cityId>"`, 상세의 출처는 도시별로 묶어 양쪽 모두 노출한다 (ADR-076). 한쪽만 값이 없으면 그 값은 `—` 로 적고 배수·합계에서 제외한다 (0원으로 표시하지 않는다).
 - Stack 기반 push/pop. 비교 → 상세 → 비교 → 홈 백 스택 보존.
 
 ## 데이터 흐름
@@ -186,8 +189,9 @@ export async function refreshCache(): Promise<{ ok: boolean; lastSync: string }>
 | `useFavoritesStore` | `cityIds: string[]`                                                 | ✅     | 홈 즐겨찾기 카드, Compare ⭐ 토글 |
 | `useRecentStore`    | `cityIds: string[]` (max 5, FIFO)                                   | ✅     | 홈 최근 본 도시                   |
 | `useSettingsStore`  | `lastSync: ISOString \| null`                                       | ✅     | 설정 화면, 데이터 새로고침 표시   |
+| `useComparePairStore` | `baseId: string \| null` · `cityId: string \| null`              | ✅     | 비교 탭(도시끼리 비교) 의 두 칸 — 마지막으로 고른 기준·대상 도시 |
 
-위 4개가 부팅 hydration 합성(`waitForAllStoresHydrated`)에 참여하는 코어 store. 이 외에 Compare/Detail 상호작용용 도시별 선택 store (`useRentChoiceStore` / `useTuitionChoiceStore` / `useTaxChoiceStore` / `useCategoryInclusionStore` — ADR-060~062) 도 동일 hydration 합성에 포함된다.
+위 표의 앞 4개가 부팅 hydration 합성(`waitForAllStoresHydrated`)에 참여하는 코어 store. 이 외에 Compare/Detail 상호작용용 도시별 선택 store (`useRentChoiceStore` / `useTuitionChoiceStore` / `useTaxChoiceStore` / `useCategoryInclusionStore` — ADR-060~062) 도 동일 hydration 합성에 포함된다. 비교 탭의 `useComparePairStore` (`comparePair:v1`) 도 같은 합성에 참여한다 — 도시 id 의 존재 여부와 `baseId === cityId` 는 store 가 검증하지 않고 선택 화면이 판단한다.
 
 모두 `zustand/middleware` 의 `persist` + AsyncStorage 어댑터 사용. 첫 렌더 전 hydration 보장 위해 `_layout.tsx` 에서 `useStore.persist.onFinishHydration` 으로 splash 유지.
 
@@ -338,11 +342,11 @@ export class AppError extends Error {
 | 탭           | 동작                                                                                                                                                                                           |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **홈**       | `/(tabs)/index` 로 이동. 항상 활성.                                                                                                                                                            |
-| **비교**     | 마지막으로 본 비교 도시(`useRecentStore.cityIds[0]`)로 `/compare/<id>` 이동. 최근 본 도시 0개일 때 → 홈의 "관심 도시 골라보기" CTA 영역으로 스크롤 + 안내 토스트 ("먼저 도시를 선택해 주세요") |
+| **비교**     | `/(tabs)/compare` 선택 화면. 두 칸(기준·대상)을 골라 "비교하기" → 도시끼리면 `/compare/<대상>?base=<기준>`, 어느 칸이든 서울이면 `/compare/<서울이 아닌 도시>` (서울은 항상 기준). 칸 값은 `useComparePairStore` 에 저장 (ADR-089) |
 | **즐겨찾기** | `/(tabs)/favorites` 목록 화면. 행 탭 → `/compare/<id>`. 즐겨찾기 0개일 때: 화면 내 빈 상태 + "도시 둘러보기" CTA(홈으로) (ADR-084) |
 | **설정**     | `/(tabs)/settings`                                                                                                                                                                             |
 
-별도 비교 탭 화면은 미도입 (ADR-038). 즐겨찾기 목록의 편집·정렬은 미도입 (ADR-084).
+비교 탭 선택 화면의 좌우 바꾸기·최근 비교 쌍 목록·검색창은 미도입 (ADR-089 — 도시가 21개뿐). 즐겨찾기 목록의 편집·정렬은 미도입 (ADR-084).
 
 ### 화면별 백 동작
 

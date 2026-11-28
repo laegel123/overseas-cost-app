@@ -299,7 +299,7 @@ src/__fixtures__/
 ├── cities/
 │   ├── seoul-valid.ts         # CityCostData (정상 케이스, schema-pass)
 │   ├── vancouver-valid.ts     # CityCostData (full-shape, tuition/tax/visa 채움)
-│   ├── (향후 추가) tokyo-valid.ts   # JPY (소수 없는 통화)
+│   ├── tokyo-valid.ts         # JPY (소수 없는 통화), tax 없음 — 도시끼리 비교용 2번째 비-서울 도시
 │   ├── (향후 추가) invalid-*.ts     # 스키마 위반 — 검증 테스트용 (현재는 인라인)
 │   └── (향후 추가) empty-*.ts       # 필드 결측 (graceful degradation)
 ├── seed-roundtrip.test.ts     # data/seed/all.json drift 방지
@@ -353,6 +353,7 @@ UI_GUIDE.md §카테고리별 상세 화면 사양 의 5개 카테고리에 대�
 ### 7.3 fixture 카탈로그
 
 - [x] schema 통과 도시 객체 빌더 — `src/__fixtures__/cities/{seoul-valid, vancouver-valid}.ts`. citySchema 테스트 + 통합 smoke 에서 사용.
+- [x] `src/__fixtures__/cities/tokyo-valid.ts` — JPY(소수 없는 통화) 도시. 값·모양은 실데이터(`data/cities/tokyo.json`) 를 따른다: `tuition` 3개 + `visa` 보유, **`tax` 없음**. 밴쿠버 fixture 는 tax 를 갖고 있어 두 fixture 를 맞붙이면 도시끼리 비교의 "한쪽만 결측" 조합이 그대로 재현된다 (ADR-089, §9.24 참조).
 - [x] `data/seed/all.json` — v1.0 시드 = **실 도시 데이터 21개 전량** (ADR-074, ADR-045 supersede). `scripts/build_data.mjs` 가 `data/all.json` 과 같은 내용으로 함께 쓴다. 네트워크 실패 시에도 도시 수가 퇴행하지 않는다.
 - [x] `src/__fixtures__/seed-roundtrip.test.ts` — 시드 round-trip + 21개 계약 + `시드 == data/all.json` drift 검증 (ADR-074).
 - [ ] 정상 도시 (서울, 밴쿠버, 도쿄)
@@ -1364,6 +1365,48 @@ step 시점엔 persona/onboarding 두 store 가 공존.
 
 - [ ] (step 2) `waitForAllStoresHydrated` 가 본 store 도 동시 await + forceInitial 적용 cover
 
+### 9.8.6 `src/store/comparePair.ts` (city-pair-compare phase step 0)
+
+비교 탭(도시끼리 비교)에서 마지막으로 고른 두 도시를 기억하는 store — 왼쪽
+`baseId`(기준) / 오른쪽 `cityId`(대상), 미선택은 `null`. 칸을 고를 때마다 저장.
+store 는 도시 id 의 존재 여부도 `baseId === cityId` 도 검증하지 않는다 (존재
+검증·같은 도시 방지는 선택 화면 책임, `src/lib/data.ts` 의존 금지).
+
+**기본 동작:**
+
+- [x] 초기 상태 `{ baseId: null, cityId: null }`
+- [x] `setBase('vancouver')` → baseId 만 변경
+- [x] `setCity('toronto')` → cityId 만 변경
+- [x] 두 칸 모두 채우면 둘 다 보관
+- [x] 같은 칸 재선택 → 마지막 값으로 교체
+- [x] 도시 목록에 없는 id 도 그대로 보관 (존재 검증은 화면 책임)
+- [x] 두 칸에 같은 도시도 허용 (같은 도시 방지는 화면 규칙)
+
+**영속화:**
+
+- [x] persist key 정확히 `comparePair:v1`
+- [x] partialize: 액션 미영속화, baseId/cityId 만 저장
+- [x] round-trip: 저장된 v1 entry → rehydrate 후 두 칸 복원
+- [x] 한 칸만 고른 상태 (`cityId: null`) 도 round-trip
+
+**손상 캐시 — INITIAL fallback, 부분 복구 금지 (silent fail 금지, CLAUDE.md CRITICAL):**
+
+- [x] 잘못된 JSON → INITIAL + INITIAL 직렬화로 정리
+- [x] 저장된 state 가 객체 아님 → INITIAL
+- [x] baseId 가 `string | null` 아님 (number) → **두 칸 모두** 초기화 (살아남은 반대편 칸도 버린다)
+- [x] cityId 가 `string | null` 아님 (객체) → 두 칸 모두 초기화
+- [x] 필드 누락 → 그 칸은 미선택 (`null`) 으로 복원 (merge 가 INITIAL 로 채움 — 타입 위반 아님)
+
+**Hydration:**
+
+- [x] `hasHydrated()` 가 rehydrate 후 true
+- [x] `waitForAllStoresHydrated` 대기 목록 포함 + timeout 시 forceInitial 적용 — §9.4.2 / §9.4.3
+
+**마이그레이션 (deferred):**
+
+- [x] v0 entry → migrate stub 통과 + 메모리 반영
+- [ ] (v2 도입 시 추가) v1 → v2: migrate 함수 spy + 새 필드 기본값 검증
+
 ### 9.9 `src/components/typography/Text.tsx` (components phase step 0)
 
 8 variant — Display / H1 / H2 / H3 / Body / Small / Tiny / MonoLabel. 단일 base
@@ -1591,6 +1634,15 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] mult='신규' → "신규" 표기, navy 색
 - [x] 신규 시 막대: not hot (bg-light)
 
+**mult=null — 한쪽 도시 값 결측 (ADR-089, city-pair-compare step 2):**
+
+도시끼리 비교에서 한쪽 값이 없으면 호출부가 값 자리에 `—`, `mult` 에 `null` 을 넘긴다. 결측을 0 으로 바꿔 배수를 꾸미지 않는다 (CLAUDE.md 에러 삼킴 금지) — `formatMultiplier`/`getMultColor` 는 0·null 을 throw 하므로 아예 호출하지 않는다.
+
+- [x] `mult=null` → 배수 영역(`-mult`) 미렌더, 값(`sValue`/`cValue`) 은 그대로 표시
+- [x] `mult=null` → not hot (아이콘 `bg-light`), 라벨·막대는 정상 렌더
+- [x] `mult=null` + `hot=true` override → 아이콘만 orange, 배수는 여전히 미렌더
+- [x] `mult=null` + `onToggleInclude` → Switch·"제외됨" 배지 정상 렌더
+
 **막대 폭:**
 
 - [x] sw=0.4, cw=1.0 → SEO 40%, CITY 100%
@@ -1771,6 +1823,13 @@ disabled + showChevron + rightText. design/README §5 (Settings).
 - [x] mult='신규' + hot=true override → hot 스타일 (orange-soft + mult orange), 텍스트는 '신규' 유지
 - [x] mult='신규' + selected=true → white 반전 규칙 유지 (mult white + emoji box white)
 
+**결측 케이스 (mult=null — 도시끼리 비교에서 한쪽 도시 값 결측, ADR-089 / city-pair-compare step 3):**
+
+- [x] mult=null → 배수 영역(`<testID>-mult`) 미렌더 (`formatMultiplier` 미호출 — 유효하지 않은 배수는 throw)
+- [x] mult=null → 품목명·가격(`1.2만 → —`) 은 그대로 (행 자체는 사라지지 않는다)
+- [x] mult=null → not hot (`isHot` 미호출, emoji box bg-light)
+- [x] mult=null + hot=true override → hot 시각만 적용, 배수는 여전히 미렌더
+
 **이모지 박스:**
 
 - [x] 36×36 (w-9 h-9) 크기
@@ -1927,19 +1986,20 @@ data layer 가 source of truth (DATA.md §269). 부트로더가 hydration 완료
 
 BottomTabBar(제어형, §9.13)를 expo-router Tabs 의 `tabBar` prop 에 어댑터로 연결.
 §125 스펙(active=orange / inactive=gray-2, icon 22px, label 10px Mulish)은
-BottomTabBar 단일 출처 — `_layout` 에 중복 구현하지 않는다. 리다이렉트 정책은 §9.27.3.
+BottomTabBar 단일 출처 — `_layout` 에 중복 구현하지 않는다. 탭 동작 정책은 §9.27.3.
 
 wiring 계약: `onSelect(tab)` → 대상 route 로 `tabPress` emit → screen `listeners` 가
 `preventDefault` 시 기본 `navigate` 억제(`event.defaultPrevented`), 아니면 navigate.
+ADR-089 이후 네 탭 모두 listener 가 없어 항상 기본 navigate 로 끝나지만, emit 계약은
+그대로 mock 으로 재현해 검증한다.
 
 - [x] route name ↔ Tab 매핑 — index 스크린 active → 홈 탭 `selected` 파생
 - [x] settings 스크린 active → 설정 탭 `selected`
-- [x] 비focus 탭 선택 → `navigation.navigate(<routeName>)` (home=`index` / favorites / settings)
+- [x] 비focus 탭 선택 → `navigation.navigate(<routeName>)` (home=`index` / settings)
 - [x] 이미 focus 된 탭 재선택 → navigate no-op (중복 push 방지)
-- [x] compare 선택 → `tabPress` emit → listener preventDefault + redirect → 기본 navigate 억제
-- [x] compare 타깃 = `recent[0] ?? favorites[0]` (recent 우선, 없으면 favorites fallback)
-- [x] compare + 도시 0개 → `router.replace('/')` + Alert
-- [x] favorites 선택 → 기본 `navigate('favorites')`, redirect·Alert 없음 — 즐겨찾기 유무 무관 (ADR-084)
+- [x] compare 선택 → 기본 `navigate('compare')` — redirect·Alert 없음 (ADR-089)
+- [x] compare 스크린에 `tabPress` listener 부재 (navigate 1회 호출로 증명 — redirect 제거 회귀 방지)
+- [x] favorites 선택 → 기본 `navigate('favorites')` (ADR-084)
 
 ### 9.22 `app/onboarding.tsx` — placeholder spec (deprecated)
 
@@ -1962,7 +2022,7 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 - [x] 정상 cityId: 데이터 로드 + 표시 (screens step 0)
 - [x] 잘못된 cityId: ErrorView + 돌아가기 CTA (screens step 0)
 - [x] 서울 데이터 없음: ErrorView (screens step 0)
-- [ ] cityId 가 'seoul': 자기 비교 차단 (안내)
+- [x] cityId 가 'seoul': 자기 비교 차단 — `base === cityId` 오류 화면 (city-pair-compare step 2; `/compare/seoul` 로 가는 진입 경로는 앱 안에 없다)
 
 **데이터 로드:**
 
@@ -2075,6 +2135,58 @@ screens phase step 2 에서 본 화면이 실제 구현됐고 테스트 인벤�
 - [x] loading 상태 (`compare-screen-loading`) → `ad-banner` 부재
 - [x] error 상태 (`compare-screen-error`) → `ad-banner` 부재
 - [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재 (렌더 조건은 `AdBanner` 소유, §9.44)
+
+**도시끼리 모드 (`?base=<id>`, ADR-089 / city-pair-compare step 2):**
+
+> 기준 도시(왼쪽)는 query param `base` 다. 생략·`seoul` 이면 **서울 모드** = 위 모든 케이스가 한 줄도 고치지 않고 통과해야 한다 ("서울 모드 무변경" 의 증거). 두 번째 비-서울 도시는 `src/__fixtures__/cities/tokyo-valid.ts` (JPY, tax 없음 — §7.3). 환율은 `{ KRW: 1, CAD: 980, USD: 1380, JPY: 9 }`.
+
+서울 모드 정규화:
+
+- [x] `base` 생략 과 `base=seoul` 이 같은 화면을 낸다 (렌더 트리의 텍스트 노드 전량 비교 — 함수 prop 참조 차이 회피)
+- [x] `base=seoul` 도 즐겨찾기 별 + `recent.push` 유지
+- [x] `cityId=seoul` + `base=tokyo` → `router.replace('/compare/tokyo')` + 정규화 중 loading 유지 (서울이 오른쪽인 화면을 그리지 않는다 — `0 ÷ 값` 배수 throw 회피)
+
+제목·라벨·값·배수:
+
+- [x] 제목 `"밴쿠버 vs 도쿄"`, hero `leftLabel` / 카드 `sLabel` = 기준 도시 한글명
+- [x] 양쪽 실제 값 + 배수는 기준 대비 대상 — 월세 93.1만원 / 58.5만원 → `↓0.6×`, 교통 10.3만원 / 9.5만원, hero 171만원 / 105.3만원 `↓0.6×` `-65.7만원`
+- [x] 기준·대상 맞바꾸면 배수 반전 (월세 `↑1.6×`) + Hot 판정 추종 (학비 40.2만원 → 367.5만원 = `↑9.1×` → 아이콘 `bg-orange-soft`, `isHot` 단일 함수)
+
+부제 (환율) — 서울 모드 문자열은 현행 유지:
+
+- [x] 두 도시 통화 모두 한 줄 (기준 → 대상 순): `1 CAD = 980원 · 1 JPY = 9원 · 04-30`
+- [x] 두 도시 통화가 같으면 한 번만: `1 CAD = 980원 · 04-30`
+
+학비·세금 선택값 분리 (**이 phase 의 핵심 실패 조건**):
+
+- [x] 밴쿠버=SFU / 도쿄=早稲田 → 각 열에 285.8만원 / 112.5만원. 대상 선택값이 기준 열에 섞였을 때 나오는 UBC fallback (367.5만원) 부재
+- [x] 대상(도쿄) 선택만 慶應 으로 바꿔도 기준(밴쿠버 SFU 285.8만원) 불변 → 대상만 120만원 으로 갱신
+- [x] 세금 `(근사)` 는 **어느 한쪽이라도** `kind='custom'` 이면 붙는다 (기준 도시만 custom 인 케이스)
+
+포함 토글 저장 키:
+
+- [x] 도시끼리 모드 토글 → `inclusions['vancouver|tokyo'] === { tuition: true }`, `inclusions['tokyo']` / `['vancouver']` 는 undefined (서울 기준 화면 불변)
+- [x] 서울 모드 키(`'tokyo'`) 에 저장된 토글은 도시끼리 화면에 영향 없음 (고정 default OFF 유지)
+
+결측 표기 (한쪽만 값 없음 — 실데이터로는 발생하지 않는 조합, fixture 로만 검증):
+
+- [x] 세금 (밴쿠버 보유 / 도쿄 결측) → 없는 쪽 `—`, 배수(`-mult`) 미표시, **`0원` 표기 없음** (0원은 "무료" 로 오독됨)
+- [x] 포함 토글을 켜도 hero 합계는 양쪽 모두 제외 (hero 171만원 / 105.3만원 불변, 토글 자체는 ON 으로 갱신)
+- [x] 양쪽 모두 값 없음 → 카드 숨김 (현행 유지)
+
+도시끼리 모드에서만 달라지는 것:
+
+- [x] 즐겨찾기 별(`compare-topbar-right`) 미렌더 (어느 도시의 별인지 모호)
+- [x] `pushRecent` 미호출 (홈의 최근 목록은 서울 모드로 열린다)
+- [x] 카드 탭 → `/detail/tokyo/tuition?base=vancouver`
+- [x] 출처 개수 = 두 도시 합 (`출처 11개 · 갱신 04-30` — 밴쿠버 6 + 도쿄 5)
+- [x] 광고 footer 는 현행 유지 (ready 화면 `ad-banner` 존재, ADR-077)
+
+에러 분기:
+
+- [x] `base` 가 도시 목록에 없음 → ErrorView `"도시 데이터를 찾을 수 없습니다"`
+- [x] `base === cityId` → ErrorView `"같은 도시끼리는 비교할 수 없어요"`
+- [x] `/compare/seoul` (base 생략) 도 같은 오류 화면
 
 ### 9.24.1 `src/lib/search.ts` (홈 검색)
 
@@ -2235,6 +2347,60 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] error 상태 (`detail-screen-error`) → `ad-banner` 부재
 - [x] 광고 store `idle` → ready 화면에도 `ad-banner` 부재
 
+**도시끼리 모드 (`?base=<id>`, ADR-089 / city-pair-compare step 3):**
+
+> 기준 도시(왼쪽)는 query param `base` 다. 생략·`seoul` 이면 **서울 모드** = 위 모든 케이스가 한 줄도 고치지 않고 통과해야 한다 ("서울 모드 무변경" 의 증거). 두 번째 비-서울 도시는 `src/__fixtures__/cities/tokyo-valid.ts` (JPY, tuition 3개·visa 보유, **tax 없음** — §7.3). 환율은 `{ KRW: 1, CAD: 980, USD: 1380, JPY: 9 }`.
+
+서울 모드 정규화:
+
+- [x] `base` 생략과 `base=seoul` 이 같은 화면을 낸다 (렌더 트리의 텍스트 노드 전량 비교 — 함수 prop 참조 차이 회피)
+- [x] `cityId=seoul` + `base=tokyo` → `router.replace('/detail/tokyo/food')` + 정규화 중 loading 유지 (서울이 오른쪽인 화면을 그리지 않는다)
+
+제목·부제:
+
+- [x] 제목 `"식비 · 밴쿠버 vs 도쿄"` (서울 모드는 현행 `"{카테고리} · {대상}"`), hero `leftLabel` = 기준 도시 한글명 ('서울' 부재)
+- [x] 부제 = 두 도시 통화 모두 한 줄 (기준 → 대상 순): `1 CAD = 980원 · 1 JPY = 9원 · 04-30`. 두 통화가 같으면 한 번만
+
+식비·월세·교통 — 왼쪽 열이 기준 도시 값:
+
+- [x] food `detail-row-restaurantMeal` = `2.2만원 → 1.1만원` / `↓0.5×`, hero 합계 7.5만원 / 4.3만원 `↓0.6×`
+- [x] rent 기본 선택(share) → hero 93.1만원 / 58.5만원 `↓0.6×`
+- [x] 기준·대상을 맞바꾸면 배수 반전 (share `↑1.6×`)
+- [x] transport `monthlyPass` 10.3만원 / 9.5만원, `taxiBase` `↑1.3×`
+
+visa — 양쪽 모두 실제 값 (왼쪽 0원·`'신규'` 는 서울 모드 전용 정책):
+
+- [x] `detail-row-visa-fee` = `14.7만원 → 2.7만원` / `↓0.2×`, `'신규'` 부재
+- [x] `detail-row-visa-settle` = `147만원 → 180만원`
+
+학비·세금 도시별 선택 줄 (**이 step 의 핵심 실패 조건** — 한쪽 선택이 반대쪽 계산에 섞이면 실패):
+
+- [x] 선택 줄 2개 — `detail-picker-city-vancouver` / `detail-picker-city-tokyo` 에 각 도시 한글명 + 현재 선택 항목 (UBC / 東京大学). 서울 모드 전용 `detail-picker-change-tuition` 은 미렌더
+- [x] 값 1행 `detail-row-tuition-pair` = `367.5만원 → 40.2만원` / `↓0.1×`
+- [x] hero caption `"학비 · 선택 항목"` + footer `"도시별 선택 항목 기준 (바꾸기로 변경)"`
+- [x] 기준 도시 줄 탭 → **그 도시** 학교 목록 시트 (`detail-tuition-sheet-preset-UBC` / `-SFU` 존재, 도쿄 학교 부재) + 시트 선택이 `choices['vancouver']` 에만 기록 (`choices['tokyo']` 는 undefined)
+- [x] 대상 도시 줄 탭 → 도쿄 학교 목록 시트 (`-preset-東京大学` / `-早稲田大学`, UBC 부재)
+- [x] 대상(도쿄) 선택만 早稲田 로 바꿔도 기준(밴쿠버 SFU 285.8만원) 불변 → `285.8만원 → 112.5만원`
+- [x] tax 양쪽 결측 (v1.0 실데이터 모양) → 빈 상태 **1회** (`세금 데이터가 아직 준비되지 않았어요.` 1개) + 선택 줄 없음 + `detail-picker-empty-tax` 없음 (entries 없으면 직접 입력이 silent fail — ADR-089)
+- [x] tax 양쪽 데이터 있음 (fixture) → 학비와 같은 구조: 선택 줄 `연봉 5880만원` / `연봉 4500만원`, `detail-row-tax-pair` = `127.4만원 → 75만원` / `↓0.6×`, 줄 탭 시 그 도시의 연봉 목록 (`detail-tax-sheet-preset-5000000`, 밴쿠버 tier 부재)
+
+결측 표기 (한쪽만 값 없음 — 실데이터로는 발생하지 않는 조합, fixture 로만 검증):
+
+- [x] 대상 도시에 학비 없음 → 행 `367.5만원 → —`, 배수(`-mult`) 미표시, **`0원` 표기 없음**, hero 도 `—` + 가운데 배수 미표시 (`신규` 아님)
+- [x] 결측 쪽 선택 줄은 유지하고 `데이터 없음` 표기
+- [x] 합계 모드 (visa) — 한쪽만 결측인 행은 양쪽 합계에서 제외. 모든 행이 결측이면 hero 좌·우 모두 `—` + 배수 미표시 (0원 표기 없음)
+
+출처 — 도시별 묶음 (ADR-076, 화면에 나온 값의 출처는 화면에):
+
+- [x] 묶음 2개 (`detail-sources-city-vancouver` / `-tokyo`) 에 도시명 소제목 + 그 도시 출처명, 개수는 합 (`출처 2개`)
+- [x] 한쪽 도시에 그 카테고리 출처가 없으면 그 묶음만 `출처 정보가 없어요` (tax: 밴쿠버 1 + 도쿄 0 → `출처 1개`)
+
+에러 분기 / 광고:
+
+- [x] `base` 가 도시 목록에 없음 → ErrorView `"도시 데이터를 찾을 수 없습니다"`
+- [x] `base === cityId` → ErrorView `"같은 도시끼리는 비교할 수 없어요"`
+- [x] 광고 footer 는 현행 유지 (ready 화면 `ad-banner` 존재, ADR-077)
+
 ### 9.26.1 `app/(tabs)/favorites.tsx` (즐겨찾기 탭 — 목록 화면, ADR-084)
 
 - [x] 로딩 중 → `favorites-screen-loading` 스피너
@@ -2245,6 +2411,25 @@ screens phase step 1 구현 — v1.0 1차 타겟 food + 다른 카테고리는 �
 - [x] 서울 데이터 없음 → `favorites-screen-error`
 - [x] 로드 실패 → 에러 메시지 + "다시 시도" → 재로드 후 ready
 - [x] 광고 footer 없음 (ADR-077)
+
+### 9.26.2 `app/(tabs)/compare.tsx` (비교 탭 — 두 도시 선택 화면, ADR-089)
+
+로드 패턴은 §9.26.1 과 동일(타이머 역전 + `setImmediate` flush). 환율은 이 화면이 읽지
+않으므로 `fetchExchangeRates` 를 mock 하지 않는다.
+
+- [x] 로딩 중 → `compare-tab-screen-loading` 스피너
+- [x] 로드 실패 → `compare-tab-screen-error` + `ErrorView`(screen) 메시지, "다시 시도" → 재로드 후 ready
+- [x] 초기 상태 → 두 칸 모두 `도시 선택`, `compare-tab-submit` 이 `accessibilityState.disabled`
+- [x] 칸 탭 → 도시 목록 시트에 `compare-tab-option-<id>` 전부(서울 포함) 한글 가나다순
+- [x] 도시 선택 → `useComparePairStore` 반영 + 시트 닫힘 (base·city 칸 각각)
+- [x] 반대편 칸에 든 도시는 `disabled` — 눌러도 store 가 바뀌지 않음, 나머지는 `disabled: false`
+- [x] 저장된 id 가 도시 목록에 없으면 그 칸은 빈 칸 + submit 비활성 (store 값은 유지)
+- [x] 두 칸 모두 유효 → submit 활성
+- [x] 도시끼리 → `router.push('/compare/<대상>?base=<기준>')`
+- [x] 왼쪽이 서울 → `router.push('/compare/<대상>')` (`?base` 없음)
+- [x] 오른쪽이 서울 → `router.push('/compare/<왼쪽>')` (서울은 항상 기준)
+- [x] 비활성 submit 탭 → push 없음
+- [x] 광고 footer 없음 (ADR-077 — 선택 화면은 광고 대상이 아니다)
 
 ### 9.26 `app/(tabs)/index.tsx` (홈)
 
@@ -2472,11 +2657,11 @@ UI_GUIDE.md §에러 메시지 한국어 표준 카탈로그 검증.
 ### 9.27.3 하단 탭 동작 정책 (ARCHITECTURE.md §하단 탭)
 
 > 어댑터 wiring(route↔Tab 매핑, `tabPress` emit 계약, focus 시 navigate 억제) 테스트는 §9.21.1.
-> 아래는 정책 명세이며, 토스트 문구는 v1.0 에서 네이티브 `Alert` 로 대체(ADR-041). 즐겨찾기 탭은 ADR-084.
+> 아래는 정책 명세다. ADR-041 의 redirect·`Alert` 는 즐겨찾기 탭이 ADR-084, 비교 탭이
+> ADR-089 로 대체되면서 모두 사라졌다 — 네 탭 전부 일반 탭 화면이다.
 
 - [ ] 홈 탭 → `/(tabs)/index`
-- [ ] 비교 탭 + 최근 본 ≥1 → `/compare/<recent[0]>`
-- [ ] 비교 탭 + 최근 본 0개 → 홈 + "먼저 도시를 선택해 주세요" 토스트
+- [x] 비교 탭 → `/(tabs)/compare` 선택 화면 (두 칸 선택 → `?base=` 또는 서울 모드 주소) — §9.26.2
 - [x] 즐겨찾기 탭 → `/(tabs)/favorites` 목록 화면 (행 탭 → `/compare/<id>`, 0개 → 화면 내 빈 상태) — §9.26.1
 - [ ] 설정 탭 → `/(tabs)/settings`
 
@@ -4210,6 +4395,21 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 - [ ] (4) 온보딩·설정·출처(`/sources`, `/sources/[cityId]`)·개인정보(`/privacy`) 화면에 배너 없음
 - [ ] (5) 홈·비교·상세의 로딩(skeleton)·에러(ErrorView) 화면에 배너 없음
 
+### 18.10 도시끼리 비교 (ADR-089)
+
+자동 flow(`03-compare/city-pair*`, `05-detail/city-pair-tuition`, `04-favorites-recent/tabs-compare-*`)가 경로는 덮는다. 아래는 색·레이아웃·실데이터 조합처럼 flow 가 못 보는 것.
+
+- [ ] 비교 탭 → 두 칸 선택 → "비교하기" → `A vs B` 비교 화면. hero 왼쪽 라벨·카드 왼쪽 라벨·제목이 **모두 기준 도시**(서울 하드코딩 잔존 없음)
+- [ ] 부제가 두 도시 통화를 다 보여준다 (`1 CAD = …원 · 1 JPY = …원 · MM-DD`). 통화가 같으면 한 번만, KRW 는 생략, **한 줄에 들어간다**(iPhone SE 포함)
+- [ ] 카드 탭 → 상세. 학비 상세에 **도시별 선택 줄 2개** → 한쪽만 학교를 바꾸면 그 열의 값·배수만 바뀐다 (반대쪽 값 불변). 선택은 서울 모드 화면에도 그대로 반영된다 (도시별 store 공유)
+- [ ] 상세 하단 출처가 **도시별 2묶음**으로 모두 보인다 (ADR-076 — 화면에 나온 값의 출처는 화면에 있어야 한다)
+- [ ] 비교 화면의 포함 토글을 도시끼리에서 켜도 **서울 기준 화면의 토글은 그대로**다 (저장 키 `"<base>|<cityId>"`)
+- [ ] 도시끼리 모드에 즐겨찾기 별이 없고, 홈 "최근 본 도시"에 도시끼리 쌍이 쌓이지 않는다
+- [ ] 서울을 **오른쪽** 칸에 넣어도 `서울 vs <도시>` (서울 모드)로 열린다. 칸의 좌우 순서는 고른 그대로
+- [ ] 비교 탭 선택 화면에 **광고 배너가 없다** (ADR-089 — 광고는 `/compare/[cityId]` 쪽)
+- [ ] 서울 모드 회귀: 홈 검색·즐겨찾기 탭·온보딩으로 들어간 `서울 vs X` 비교·상세의 값·문구·배치가 ADR-089 이전과 동일
+- [ ] 한쪽만 결측인 조합은 현재 실데이터로 발생하지 않는다 (Jest fixture 전용 — §9.24 / §9.25). 자동 갱신으로 구멍이 생기면 `—` + 배수 없음 + hero 합계 제외를 눈으로 확인
+
 ---
 
 ## 18-A. 자동 E2E (Maestro)
@@ -4219,7 +4419,7 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 ### 18-A.1 정책
 
 - **앵커·리터럴 단일 출처 = 실제 구현 코드**(PRD/UI_GUIDE 스펙 아님). 스펙과 구현이 갈리는 항목은 구현 기준으로 검증하고 격차는 PLAN.md 로 추적.
-- **결정성:** 실시간 환율 의존 값(정확한 배수·KRW)은 단정 금지 — 방향(↑/↓)·정규식 패턴·testID 구조만 검증. 도시는 번들 시드 보장 도시(`seoul`/`vancouver`) 우선.
+- **결정성:** 실시간 환율 의존 값(정확한 배수·KRW)은 단정 금지 — 방향(↑/↓)·정규식 패턴·testID 구조만 검증. 도시는 번들 시드(`data/seed/all.json` — ADR-074 이후 21개 전량) 보장 도시 중 `seoul`/`vancouver` 우선. **예외:** 두 도시의 통화가 같으면 KRW 환산이 약분돼 배수가 환율과 무관해진다 — 밴쿠버·토론토(둘 다 CAD)의 학비 배수는 리터럴로 단정한다 (`city-pair-tuition`).
 - **독립성:** 각 flow 는 `launchApp: clearState` 로 시작해 독립. 온보딩·Compare 진입은 `common/` 서브플로우(runFlow 전용, 워크스페이스 글롭 제외) 재사용.
 - **자동 검증 밖(한계):** 색 토큰/그림자/애니메이션/햅틱/폰트 → §18(수동) + `07-visual-a11y` screenshot 수동 리뷰로 보완. `tax` 카테고리는 데이터 부재로 no-data 경로만 검증 가능.
 - **광고는 E2E 단언 대상 아님** — 테스트 광고도 네트워크 의존이라 비결정적. `ad-banner` testID 는 존재 확인용으로만. 동의 폼(ATT·GDPR)은 수동 체크 (§18.9). Maestro `launchApp` 기본 permissions 가 추적 권한을 미리 허용해 ATT 는 flow 안에서 구조적으로 뜨지 않는다 (ADR-077).
@@ -4228,6 +4428,7 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 
 - [x] `onboard.yaml` — clearState 런치 → 온보딩 → `PERSONA` env 선택 → 홈 (runFlow 전용)
 - [x] `open-vancouver-compare.yaml` — 홈 검색으로 밴쿠버 Compare 진입 (runFlow 전용)
+- [ ] `open-vancouver-toronto-compare.yaml` — 비교 탭 선택 화면에서 밴쿠버·토론토를 골라 **도시끼리** Compare 진입 (ADR-089, runFlow 전용 · 전제 = `compare-tab-screen`)
 
 ### 18-A.3 인벤토리 (배치별)
 
@@ -4256,14 +4457,16 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 - [x] `unified-categories` — 통합 뷰 6 카테고리 모두 표시 (persona-removal step 8; 옛 persona-card-diff 대체)
 - [x] `multiplier-encoding` — 배수 ↑+숫자+× 3중 인코딩(접근성)
 - [x] `back-nav` — 상단바 뒤로가기 → 홈
+- [ ] `city-pair` — 비교 탭에서 두 도시 선택 → `/compare/toronto?base=vancouver` (제목 `밴쿠버 vs 토론토`, 별 없음, tax 카드 숨김, 뒤로 가면 두 칸 유지) — ADR-089
+- [ ] `city-pair-seoul-normalize` — 서울을 **오른쪽** 칸에 넣어도 서울 모드(`/compare/tokyo`)로 열림(`서울 vs 도쿄` + 별 복귀), 칸의 좌우 순서는 고른 그대로 — ADR-089
 
 **04-favorites-recent**
 
 - [x] `favorite-toggle` — ⭐ 추가/제거 → 홈 즐겨찾기 카드 반영 (복귀 후 검색어 clear 필요)
 - [x] `recent-tracking` — Compare 진입 → 최근 본 목록 + 설정 통계 (복귀 후 검색어 clear 필요)
-- [x] `tabs-empty-alert` — 최근/즐겨찾기 없을 때 비교 탭 → 네이티브 Alert (탭 라벨 '비교, tab.*')
+- [ ] `tabs-compare-empty` — 비교 탭 선택 화면의 빈 상태: 두 칸 빈 칸 + `비교하기` 비활성(탭해도 전환 없음) + 옛 Alert 미표시 (ADR-089 로 `tabs-empty-alert` 대체 · 탭 라벨은 `'비교'`)
 - [x] `favorites-tab-list` — 즐겨찾기 탭 → 목록 → 행 탭 → Compare (ADR-084)
-- [x] `tabs-populated-redirect` — 최근 있으면 비교 탭이 Compare 로 redirect (탭 라벨 '비교, tab.*')
+- [ ] `tabs-compare-select` — 최근 본 도시가 있어도 비교 탭은 redirect 하지 않고 선택 화면 (ADR-089 로 `tabs-populated-redirect` 대체 · redirect 부활 회귀 가드)
 
 **05-detail**
 
@@ -4272,6 +4475,7 @@ Maestro 로 자동화하지 않는다 (§18-A.1). dev build(테스트 광고 단
 - [x] `tuition-sheet` — 학교 시트: preset(UBC/SFU/BCIT) + 직접 입력 (ADR-061; 저장은 조건부 재탭)
 - [x] `tax-nodata` — deep link 진입 → 세금 데이터 없음 검증. **시트 본문 텍스트는 접근성 미노출로 backdrop 오픈만 검증** (딥링크 의존)
 - [x] `sources` — 상세 하단 '출처 N개' 표기
+- [ ] `city-pair-tuition` — 도시끼리 학비 상세: 도시별 선택 줄 2개, 밴쿠버만 SFU 로 변경 → 배수 `↑1.3×`→`↑1.9×`, 토론토 시트엔 토론토 학교만 (ADR-089 · 두 도시 모두 CAD 라 배수가 환율 무관)
 
 **06-settings**
 

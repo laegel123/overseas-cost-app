@@ -21,6 +21,13 @@ npm run dev
 
 > 이미 이 세션에서 dev build 설치 + Metro 기동은 완료된 상태다. 새 세션이라면 위 2단계를 먼저.
 
+> ⚠ **설치된 것이 Release 빌드면 flow 는 옛 코드를 검증한다.** Release 빌드는 번들 내장
+> `main.jsbundle` 로 떠서 Metro 를 무시하는데 `npm run e2e:check` 는 이를 통과시킨다
+> (GOTCHAS §7 의 false-green). `ls "$(xcrun simctl get_app_container <UDID>
+> com.laegel.overseascostapp)/main.jsbundle"` 가 파일을 찾으면 **Debug 빌드를 다시 깔아야**
+> 한다. 2026-11-27 city-pair-compare step 4 가 이 상태라 신규 flow 를 실기 검증하지 못했다
+> (스토어 1.1.0 Release 빌드가 깔려 있었다).
+
 ## 실행 방법 (배치 단위)
 
 ```bash
@@ -43,7 +50,7 @@ npm run e2e                               # 전체 (smoke + flows/**)
 
 ### 01-onboarding
 - **관찰(ADR-067):** 온보딩은 **도시 선택**이다. `city-select` — 도시 탭 → 서울 vs 그 도시 Compare 직행 + 즐겨찾기 반영. `onboarding-once` — 1회 통과 후 재실행 시 온보딩 skip(`onboarding:v1` 영속).
-- **리스크:** 도시 선택 온보딩은 **즐겨찾기를 반드시 1건 남긴다** → '빈 상태' 전제 플로우(empty-states / tabs-empty-alert / favorite-toggle 말미)와 근본적으로 양립 불가. onboard.yaml 공통 전제는 밴쿠버(시드 보장)로 고정 — 별도 로컬 검증 세션에서 빈-상태 플로우 재작성 필요(아래 §3).
+- **리스크:** 도시 선택 온보딩은 **즐겨찾기를 반드시 1건 남긴다** → 즐겨찾기·최근의 '빈 상태' 전제 플로우(empty-states / favorite-toggle 말미)와 근본적으로 양립 불가. onboard.yaml 공통 전제는 밴쿠버(시드 보장)로 고정 — 별도 로컬 검증 세션에서 빈-상태 플로우 재작성 필요(아래 §3). (옛 `tabs-empty-alert` 도 이 목록이었다 — ADR-089 로 `tabs-compare-empty` 가 되면서 빈 상태 판정이 즐겨찾기·최근과 무관한 `comparePair:v1` store 로 옮겨가 충돌이 사라졌다.)
 - **ATT 관찰(ADR-077, admob-banner-ads step 5):** 도시 선택 → Compare 도착 후에도 ATT 다이얼로그 **미표시**. 원인은 샘플 App ID(IDFA 메시지 없음)만이 아니다 — Maestro `launchApp` 기본 permissions(all allow)가 실행 시각에 시뮬레이터 TCC.db 에 `kTCCServiceUserTracking` 허용을 미리 기록하므로 **Maestro 실행에서는 IDFA 메시지 게시 여부와 무관하게 ATT 가 구조적으로 뜨지 않는다.** 그래서 `common/onboard.yaml` 에 ATT `optional: true` 탭을 넣지 않았다. 실 App ID + IDFA 메시지 게시 후라도 `launchApp` 에 추적 권한을 허용하지 않는 `permissions` 를 지정하는 flow 를 만들 때에만 ATT 가 뜰 수 있으니, 그때 optional 탭을 추가한다. ATT 실제 노출 확인은 `docs/TESTING.md §18.9` 수동.
 
 ### 02-home
@@ -53,15 +60,20 @@ npm run e2e                               # 전체 (smoke + flows/**)
 
 ### 03-compare
 - **관찰(ADR-067):** hero, **통합 6 카테고리**(페르소나 분기 없음 — `unified-categories`: 학비·비자 항상 노출, tax 는 데이터 부재로 숨김), 배수 3중 인코딩, 뒤로가기.
+- **관찰(ADR-089, 신규 2개):** `city-pair` — 비교 탭에서 밴쿠버·토론토를 골라 `/compare/toronto?base=vancouver` 진입(제목 `밴쿠버 vs 토론토`, 즐겨찾기 별 없음, tax 카드 숨김, 뒤로 가면 두 칸 유지). `city-pair-seoul-normalize` — 서울을 **오른쪽** 칸에 넣어도 `/compare/tokyo` (서울 모드)로 열려 제목이 `서울 vs 도쿄` 이고 별이 다시 생긴다. 칸의 좌우 순서는 사용자가 고른 그대로 남는다.
 - **리스크:** `multiplier-encoding` 은 정규식 `↑\d.*×` — 밴쿠버 총비용>서울이라 방향(↑)은 고정이나, **환율 로드 완료 후**라야 hero 에 배수가 렌더된다(로딩 넘어갈 시간 필요, Maestro 기본 대기로 흡수).
-- **리스크(광고, ADR-077):** 하단 배너(로드 시 높이 발생)로 스크롤 거리가 달라질 수 있음. 스크린샷에 'Test Ad' 라벨은 정상(dev 빌드).
+- **리스크(도시끼리):** 도시 목록 시트는 21행 × `max-h-[420px]` 이라 가나다순 10번째 이후(토론토 18·서울 13)는 화면 밖이다 → `scrollUntilVisible` 필수(이미 보이면 즉시 통과). 시트 오픈 단정은 `compare-tab-picker-body`(접두사 전개 — GOTCHAS §3).
+- **리스크(광고, ADR-077):** 하단 배너(로드 시 높이 발생)로 스크롤 거리가 달라질 수 있음. 스크린샷에 'Test Ad' 라벨은 정상(dev 빌드). 비교 탭 선택 화면에는 배너가 없다(ADR-089).
 
 ### 04-favorites-recent
-- **관찰:** ⭐ 토글 → 홈 카드, 최근 누적, 비교 탭 redirect(빈=Alert / 채워짐=Compare), 즐겨찾기 탭 목록 → Compare (ADR-084).
-- **리스크:** `tabs-empty-alert` 의 확인 버튼은 시뮬레이터 로케일에 따라 `확인`/`OK` — 정규식 `확인|OK` 로 대응. 탭 탭은 라벨 텍스트('비교'/'즐겨찾기')로 탭.
+- **관찰:** ⭐ 토글 → 홈 카드, 최근 누적, 즐겨찾기 탭 목록 → Compare (ADR-084).
+- **관찰(ADR-089, 비교 탭 redirect 제거):** `tabs-compare-empty`(옛 `tabs-empty-alert`) — 비교 탭 → 선택 화면, 두 칸이 비어 `비교하기` 비활성(탭해도 화면 전환 없음) + 옛 Alert 미표시. `tabs-compare-select`(옛 `tabs-populated-redirect`) — **최근 본 도시가 있어도** redirect 하지 않고 선택 화면이 뜬다(`compare-screen`·`서울 vs 밴쿠버` 미표시). 단축이 되살아나는 회귀를 지키는 가드다.
+- **리스크:** 탭 바는 라벨 텍스트로 탭한다 — 커스텀 `BottomTabBar` 는 `accessibilityLabel` = 라벨('비교'/'즐겨찾기')만 주고 testID 를 주지 않으며, Expo Router 기본 탭바의 `'비교, tab, N of M'` 형식이 **아니다**(admob step 9 에서 옛 `'비교, tab.*'` 매칭이 실패한 원인). 선택 화면의 `도시끼리 비교`·`비교하기` 는 전체 매칭(GOTCHAS §1)이 아니라 `'비교'` 와 충돌하지 않지만, 탭은 홈에서만 누른다.
 
 ### 05-detail
 - **관찰:** 식비 상세, 월세 인라인 선택(hero 반영), 학비 시트(preset+직접입력), 세금 no-data, 출처.
+- **관찰(ADR-089, 신규 1개):** `city-pair-tuition` — 도시끼리 학비 상세. 도시마다 선택 줄 1개(`detail-picker-city-vancouver` / `-toronto`), 서울 모드의 `detail-picker-change-tuition` 줄은 없음, hero caption 은 `학비 · 선택 항목`. 밴쿠버만 SFU 로 바꿔도 토론토 선택값은 그대로다(시트에 토론토 학교만 뜨고 SFU 는 없다).
+- **리스크(도시끼리 학비):** 선택 줄에 적힌 학교명은 Pressable 의 `accessibilityLabel`('밴쿠버 학교 변경')에 가려 접근성 트리에 없다(GOTCHAS §5 — VoiceOver 로도 현재 선택을 읽을 수 없는 접근성 갭). 그래서 선택 반영은 **배수 텍스트**(`detail-row-tuition-pair-mult`)로 검증한다. 밴쿠버·토론토가 모두 CAD 라 KRW 환산이 약분돼 배수가 환율과 무관한 것이 전제다 — `↑1.3×`(UBC 45,000 vs U of T 60,000) → `↑1.9×`(SFU 32,000 vs 60,000). 학비 데이터가 갱신되면 두 리터럴도 갱신 필요.
 - **리스크(중요):**
   - `tax-nodata` 는 **deep link**(`overseascost://detail/vancouver/tax`)에 의존한다. tax 카드가 어디에도 안 떠(데이터 전무) UI 로는 도달 불가하기 때문. dev client 에서 openLink 라우팅이 앱 내부로 이어지지 않으면(런처 가로채기) 이 flow 는 **'데이터 추가 전 검증 보류'**로 처리하고 TESTING §18-A 에 사유 기록.
   - 섹션 testID 에 한글 라벨 사용(`detail-section-외식` 등). 대부분의 iOS accessibilityIdentifier 는 유니코드를 허용하나, 혹시 매칭 실패 시 텍스트 assert(예: '외식')로 대체 가능.
@@ -105,12 +117,19 @@ flow 는 **실제 구현 기준**으로 작성했다. 아래는 PRD/UI_GUIDE 스
 
 > **ADR-067(페르소나 제거):** 페르소나 개념 자체가 삭제됐다. 온보딩=도시 선택, Compare=통합
 > 6 카테고리, 설정=데이터 최신화 카드. 아래 페르소나 관련 행은 "폐기"로 갱신. 다만 도시 선택
-> 온보딩은 즐겨찾기를 1건 남겨 **빈-상태 전제 플로우(empty-states / tabs-empty-alert /
-> favorite-toggle 말미)와 양립 불가** → 별도 로컬 검증 세션에서 재작성 필요(신규 격차).
+> 온보딩은 즐겨찾기를 1건 남겨 **빈-상태 전제 플로우(empty-states / favorite-toggle 말미)와
+> 양립 불가** → 별도 로컬 검증 세션에서 재작성 필요(신규 격차). 옛 `tabs-empty-alert` 도 이
+> 목록이었으나 ADR-089 로 `tabs-compare-empty` 가 되면서 빠졌다 — 비교 탭의 빈 상태는
+> 즐겨찾기·최근이 아니라 별도 store(`comparePair:v1`)로 판정한다.
+>
+> **ADR-089(비교 탭 = 두 도시 선택 화면):** PRD 의 "비교 탭 = 마지막으로 본 비교 도시로 이동"
+> (ADR-041 의 라우팅 단축) 은 폐기됐다. PRD 는 수정 금지라 격차가 남으며, 정본 기록은
+> ADR-089 다. flow 는 구현 기준(선택 화면 + `?base=`)으로 검증한다.
 
 | 스펙(PRD/UI_GUIDE) | 현재 구현 | E2E 처리 |
 | --- | --- | --- |
-| 토스트(즐겨찾기/새로고침) | 토스트 컴포넌트 없음. 탭 redirect 안내만 네이티브 Alert | 상태 변화로 검증, 토스트 assert 안 함 |
+| 토스트(즐겨찾기/새로고침) | 토스트 컴포넌트 없음. 탭 redirect 안내 `Alert` 도 ADR-089 로 제거 → 화면 피드백은 설정 새로고침 rightText 뿐 | 상태 변화로 검증, 토스트 assert 안 함 |
+| 비교 탭 = 마지막 비교 도시로 이동(PRD) | 비교 탭 = 두 도시 선택 화면 (ADR-089) | 선택 화면 기준으로 검증 (`city-pair*`, `tabs-compare-*`) |
 | 페르소나 개념 전반(ADR-067로 폐기) | 온보딩=도시 선택 · Compare=통합 6 카테고리 · 설정=데이터 최신화 카드 | 도시 선택/통합 카테고리로 검증 |
 | hero ❓ '가정' 시트(Sheet A) | Compare hero 에 ❓ 없음(footer '항목 단가 합'만, ADR-075) | 미검증(구현 없음) |
 | '출처 보기' 모달(Sheet C) | Compare 는 비활성('준비 중'), 상세는 인라인 텍스트 | 상세 인라인 출처만 검증 |

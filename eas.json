@@ -42,6 +42,9 @@
   },
   "submit": {
     "production": {
+      "ios": {
+        "ascAppId": "6832399256"
+      },
       "android": {
         "track": "alpha",
         "releaseStatus": "completed"

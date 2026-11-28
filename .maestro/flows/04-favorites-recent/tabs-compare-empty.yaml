@@ -1,0 +1,31 @@
+# UC(ADR-089): 비교 탭 선택 화면의 빈 상태 — 두 칸이 비어 있으면 '비교하기' 가 비활성이다.
+#
+# 종전(ADR-041)에는 최근·즐겨찾기가 없으면 비교 탭이 홈으로 튕기며 네이티브 Alert
+# ('최근 본 도시나 즐겨찾기가 없어요')로 안내했다. 탭이 선택 화면이 되면서 그 Alert 는
+# 사라졌고, 빈 상태는 화면 안에서 안내 문구 + 비활성 버튼으로 표현된다.
+#
+# `useComparePairStore` 는 즐겨찾기·최근과 별개 store 라, '빈 상태' 전제가 도시 선택
+# 온보딩(즐겨찾기 1건 강제)과 충돌하지 않는다 — PLAN.md §3 의 빈-상태 격차에서 빠졌다.
+appId: com.laegel.overseascostapp
+tags:
+  - tabs
+---
+- runFlow: ../../common/onboard.yaml
+# 탭에는 testID 가 없고 accessibilityLabel=라벨('비교')만 있다 (BottomTabBar).
+- tapOn: '비교'
+- assertVisible:
+    id: 'compare-tab-screen'
+# 빈 칸의 접근성 라벨은 '<칸 이름> 선택' (clearState 직후라 저장된 쌍이 없다).
+# 같은 문자열이 도시 목록 시트의 제목에도 쓰이지만 시트가 닫혀 있어 유일하다.
+- assertVisible: '기준 도시 선택'
+- assertVisible: '비교 도시 선택'
+- assertVisible: '서로 다른 두 도시를 골라주세요'
+# 비활성 버튼은 탭해도 아무 일이 없다 — 선택 화면에 머문다.
+- tapOn:
+    id: 'compare-tab-submit'
+- assertVisible:
+    id: 'compare-tab-screen'
+- assertNotVisible:
+    id: 'compare-screen'
+# 종전의 Alert 는 더 이상 뜨지 않는다 (다중 라인이었으므로 DOTALL 정규식 그대로 둔다).
+- assertNotVisible: '(?s)최근 본 도시나 즐겨찾기가 없어요.*'

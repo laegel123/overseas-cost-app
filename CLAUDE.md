@@ -1,6 +1,6 @@
 # 프로젝트: 해외 생활비 비교 앱 (overseas-cost-app)
 
-서울 거주 한국인이 유학·취업 등 해외 이주 준비 시 **서울 vs 해외 도시**의 생활비를 항목별로 1:1 비교하는 모바일 앱. v1.0 출시 도시 20개 + 서울. 사이드 프로젝트, 무료 인프라로 시작. 자세한 요구사항은 `docs/PRD.md` (단, 페르소나 관련 요구는 ADR-067 로 폐기 — 아래 참조).
+서울 거주 한국인이 유학·취업 등 해외 이주 준비 시 **서울 vs 해외 도시**의 생활비를 항목별로 1:1 비교하는 모바일 앱. 비교 탭에서는 **해외 도시끼리**(예: 밴쿠버 vs 토론토) 직접 맞붙여 볼 수도 있다 (ADR-089). v1.0 출시 도시 20개 + 서울. 사이드 프로젝트, 무료 인프라로 시작. 자세한 요구사항은 `docs/PRD.md` (단, 페르소나 관련 요구는 ADR-067 로 폐기 — 아래 참조).
 
 ## 기술 스택
 
@@ -19,9 +19,10 @@
 
 - **CRITICAL**: 모든 디자인 토큰(색·폰트·간격·라운드·shadow)은 `tailwind.config.js` + `src/theme/tokens.ts` 단일 출처에서만 정의한다. 컴포넌트에 매직 넘버 색상값을 직접 박지 않는다.
 - **CRITICAL**: 외부 데이터(도시 JSON, 환율)는 반드시 `src/lib/data.ts` / `src/lib/currency.ts` 를 경유한다. 컴포넌트가 `fetch` 를 직접 호출하지 않는다.
-- **CRITICAL**: 광고 SDK(`react-native-google-mobile-ads`)는 `src/lib/ads.native.ts` 와 `src/components/AdBanner.native.tsx` 만 import 한다 (ESLint 강제). 광고는 홈·비교·상세 **ready 상태**의 `Screen footer` 에만 둔다. 온보딩·설정·출처·개인정보 화면과 loading·error 화면에 광고 금지. 개발·프리뷰 빌드는 `EXPO_PUBLIC_ADS_TEST=1` (테스트 광고 단위). 개인정보 처리방침 '광고' 섹션의 수집 항목이 SDK 실태와 어긋나면 안 된다 (ADR-077).
+- **CRITICAL**: 광고 SDK(`react-native-google-mobile-ads`)는 `src/lib/ads.native.ts` 와 `src/components/AdBanner.native.tsx` 만 import 한다 (ESLint 강제). 광고는 홈(`app/(tabs)/index.tsx`)·비교(`app/compare/[cityId].tsx`)·상세(`app/detail/[cityId]/[category].tsx`) **ready 상태**의 `Screen footer` 에만 둔다. 온보딩·설정·출처·개인정보 화면과 **비교 탭 선택 화면**(`app/(tabs)/compare.tsx` — 여기서 말하는 '비교' 가 아니다, ADR-089), loading·error 화면에 광고 금지. 개발·프리뷰 빌드는 `EXPO_PUBLIC_ADS_TEST=1` (테스트 광고 단위). 개인정보 처리방침 '광고' 섹션의 수집 항목이 SDK 실태와 어긋나면 안 된다 (ADR-077).
 - **CRITICAL**: 데이터는 **공공 출처에서 자동으로** 만 갱신한다 (ADR-032). 정부 통계 API·공식 정부 페이지·공식 교통공사·공식 대학 페이지 외 출처 (Numbeo·Expatistan·Zillow·Kijiji·Yelp 등 상업 플랫폼) 사용 금지. 자동 fetch 는 `scripts/refresh/<source>.mjs` + GitHub Actions cron 으로만 (수동 큐레이션 금지).
 - **CRITICAL**: 페르소나(유학생/취업자/모름) 개념은 **제거됨** (ADR-067). 모든 사용자가 통합 뷰(rent·food·transport·tuition·tax·visa 6 카테고리)를 본다. Compare 는 페르소나로 분기하지 않고, 온보딩은 페르소나 선택이 아니라 **도시 선택**이다. hero 합산 기본 포함은 rent/food/transport = ON, tuition/tax/visa = OFF 고정 (사용자가 카드 토글로 변경 가능). 새 코드는 페르소나를 되살리지 말 것. 이력: ADR-067(ADR-062 부분 supersede), `docs/plans/persona-removal-city-onboarding.md`.
+- **CRITICAL**: 비교·상세 화면의 **기준 도시(왼쪽)는 query param `?base=<도시 id>`** 다 (ADR-089). 생략하거나 `seoul` 이면 서울 모드 = 종전 동작과 완전히 동일해야 한다 (기존 링크·테스트·Maestro flow 불변). **서울은 항상 왼쪽** — 서울을 대상(오른쪽)에 두면 `0 ÷ 값` 배수로 `formatMultiplier`·`isHot` 이 throw 하므로 그 조합을 만들지 않고 서울 모드 주소로 정규화한다. 비교 탭(`app/(tabs)/compare.tsx`)은 두 도시를 고르는 선택 화면이고 **광고를 넣지 않는다**. 도시끼리 모드에서는 학비·세금 선택값을 도시별로 따로 적용하고, 한쪽만 결측이면 `—` + 배수 없음 + hero 합계 제외(0원으로 표시 금지)다.
 - **CRITICAL**: Hot 규칙 — 배수 ≥ 2.0× 면 `hot=true` (아이콘 박스 orange tint, 배수 텍스트 orange). 단일 함수 `isHot(mult)` 로 일관 판정.
 - **CRITICAL**: TypeScript `strict` 모드 유지. `any` 사용 금지(불가피하면 ADR 추가). 외부 라이브러리 타입은 `unknown` + 타입 가드로 처리.
 - **CRITICAL**: 에러는 삼키지 않는다. 네트워크·파싱·검증 실패는 명시적 에러 타입(`UnknownCurrencyError`, `CityParseError`, `CitySchemaError` 등)으로 throw 하고 화면 단에서 ErrorView 또는 inline 배지로 노출. silent fail 금지.

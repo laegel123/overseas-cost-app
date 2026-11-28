@@ -118,6 +118,35 @@ describe('GroceryRow', () => {
     });
   });
 
+  // 도시끼리 비교에서 한쪽 도시의 값이 결측인 경우 (ADR-089 / city-pair-compare
+  // step 3). 값 자리에는 호출부가 `—` 를 넘기고 배수는 내지 않는다.
+  describe('결측 케이스 (mult=null — 도시끼리 비교 한쪽 결측, ADR-089)', () => {
+    it('mult=null → 배수 영역 미렌더 (formatMultiplier 미호출)', () => {
+      renderRow({ mult: null, cityPrice: '—' });
+      expect(screen.queryByTestId('grocery-row-mult')).toBeNull();
+    });
+
+    it('mult=null → 품목명·가격은 그대로 (행 자체는 사라지지 않는다)', () => {
+      renderRow({ mult: null, cityPrice: '—' });
+      expect(screen.getByText('라멘 한 그릇')).toBeTruthy();
+      expect(screen.getByText('1.2만 → —')).toBeTruthy();
+    });
+
+    it('mult=null → not hot (isHot 미호출, bg-light)', () => {
+      renderRow({ mult: null, cityPrice: '—' });
+      const emojiBox = screen.getByTestId('grocery-row-emoji-box');
+      expect(emojiBox.props.className).toContain('bg-light');
+      expect(emojiBox.props.className).not.toContain('bg-orange-soft');
+    });
+
+    it('mult=null + hot=true override → hot 시각만 적용, 배수는 여전히 미렌더', () => {
+      renderRow({ mult: null, cityPrice: '—', hot: true });
+      const emojiBox = screen.getByTestId('grocery-row-emoji-box');
+      expect(emojiBox.props.className).toContain('bg-orange-soft');
+      expect(screen.queryByTestId('grocery-row-mult')).toBeNull();
+    });
+  });
+
   describe('isLast border', () => {
     it('isLast=false → border-b 표시', () => {
       renderRow({ isLast: false });

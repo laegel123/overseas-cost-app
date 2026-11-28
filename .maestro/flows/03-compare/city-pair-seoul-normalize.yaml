@@ -1,0 +1,57 @@
+# UC(ADR-089): 서울은 항상 기준(왼쪽)이다. 서울을 오른쪽 칸에 넣어도 선택 화면은 서울 모드
+# 주소(`/compare/<서울이 아닌 도시>`, `?base` 없음)로 연다 — 서울은 학비·세금·비자가 정책상
+# 0 원이라 대상(오른쪽)에 두면 `0 ÷ 값` 배수가 되어 `formatMultiplier`·`isHot` 이 throw 한다
+# (`src/lib/format.ts`). 공용 lib 을 고치는 대신 그 조합 자체를 만들지 않는다.
+#
+# 목록 순서(한글 가나다순): 도쿄 2번째 / 서울 13번째 — 서울은 시트 ScrollView 밖이라
+# `scrollUntilVisible` 이 필요하다 (이미 보이면 즉시 통과).
+appId: com.laegel.overseascostapp
+tags:
+  - compare
+---
+- runFlow: ../../common/onboard.yaml
+- tapOn: '비교'
+- assertVisible:
+    id: 'compare-tab-screen'
+# 왼쪽(기준) 칸 = 도쿄
+- tapOn:
+    id: 'compare-tab-slot-base'
+- assertVisible:
+    id: 'compare-tab-picker-body'
+- scrollUntilVisible:
+    element:
+      id: 'compare-tab-option-tokyo'
+    direction: DOWN
+- tapOn:
+    id: 'compare-tab-option-tokyo'
+- assertNotVisible:
+    id: 'compare-tab-picker-body'
+# 오른쪽(대상) 칸 = 서울
+- tapOn:
+    id: 'compare-tab-slot-city'
+- assertVisible:
+    id: 'compare-tab-picker-body'
+- scrollUntilVisible:
+    element:
+      id: 'compare-tab-option-seoul'
+    direction: DOWN
+- tapOn:
+    id: 'compare-tab-option-seoul'
+- assertNotVisible:
+    id: 'compare-tab-picker-body'
+- tapOn:
+    id: 'compare-tab-submit'
+- assertVisible:
+    id: 'compare-screen'
+# 서울 모드로 열렸다 — 제목의 왼쪽이 서울이다 ('도쿄 vs 서울' 이 아니다).
+- assertVisible: '서울 vs 도쿄'
+# 즐겨찾기 별은 서울 모드에만 있다 (도시끼리 모드는 미표시) → 서울 모드로 열렸다는 두 번째 증거.
+- assertVisible:
+    id: 'compare-topbar-right'
+# 주소만 정규화한다 — 칸에 보이는 순서는 사용자가 고른 그대로 둔다.
+- tapOn:
+    id: 'compare-topbar-back'
+- assertVisible:
+    id: 'compare-tab-screen'
+- assertVisible: '기준 도시 도쿄'
+- assertVisible: '비교 도시 서울'

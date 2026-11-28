@@ -16,12 +16,17 @@
  * fallback 시킨 후 hasHydrated() 가 true 가 되므로 정상적으로 resolve 된다.
  *
  * store 추가 시 본 함수의 Promise.all 인자에 한 줄 추가하는 패턴 (ADR-051).
+ * 도시끼리 비교 쌍 store (comparePair) 도 본 대기 목록에 포함된다.
  */
 
 import {
   INITIAL_STATE as CATEGORY_INCLUSION_INITIAL,
   useCategoryInclusionStore,
 } from './categoryInclusion';
+import {
+  INITIAL_STATE as COMPARE_PAIR_INITIAL,
+  useComparePairStore,
+} from './comparePair';
 import {
   INITIAL_STATE as FAVORITES_INITIAL,
   useFavoritesStore,
@@ -75,6 +80,7 @@ export function waitForAllStoresHydrated(): Promise<void> {
     waitOne(useTuitionChoiceStore),
     waitOne(useTaxChoiceStore),
     waitOne(useCategoryInclusionStore),
+    waitOne(useComparePairStore),
   ]).then(() => undefined);
 }
 
@@ -147,5 +153,8 @@ function forceInitialOnUnhydratedStores(): void {
   }
   if (!useCategoryInclusionStore.persist.hasHydrated()) {
     useCategoryInclusionStore.setState(CATEGORY_INCLUSION_INITIAL);
+  }
+  if (!useComparePairStore.persist.hasHydrated()) {
+    useComparePairStore.setState(COMPARE_PAIR_INITIAL);
   }
 }

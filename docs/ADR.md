@@ -56,7 +56,7 @@
 | [038](adr/038-city-picker-defer.md) | 도시 picker — quick-switch 미도입 | Active | back→홈→다른 도시 경로 |
 | [039](adr/039-operator-absence.md) | 운영자 부재 시 절차 — 자동화 + 휴면 | Active | outlier PR 정체 시 stale 알림 |
 | [040](adr/040-scale-infra-v2.md) | 사용자 1M+ 확장 시 인프라 전환 | Active | v1.0 무료, 1M+ 시 CDN 전환 검토 |
-| [041](adr/041-bottom-tab-routing.md) | 하단 탭 동작 — 즐겨찾기·비교 라우팅 단축 | Active | 비교=최근 도시, 즐겨찾기=첫 즐겨찾기 |
+| [041](adr/041-bottom-tab-routing.md) | 하단 탭 동작 — 즐겨찾기·비교 라우팅 단축 | Superseded (ADR-084 · ADR-089) | 즐겨찾기 탭은 ADR-084, 비교 탭은 ADR-089 로 대체 |
 | [042](adr/042-unit-1kg.md) | 사과·양파 단위 — 1kg 통일 | Active | 디자인 "1개"→데이터 1kg 유지 |
 | [043](adr/043-worklets-stub.md) | react-native-worklets 빈 plugin stub | Superseded by ADR-044 | (폐기) SDK 52 우회책 |
 | [044](adr/044-expo-sdk-54-upgrade.md) | Expo SDK 52 → 54 업그레이드 | Active | React 19 / RN 0.81 / Router 6 |
@@ -99,8 +99,9 @@
 | [081](adr/081-eas-remote-app-version.md) | 빌드 번호 EAS 원격 관리 + production 자동 증가 | Active | `appVersionSource: remote`, 사용자 버전은 app.json 유지 |
 | [082](adr/082-ca-statcan-live-cpi-disabled.md) | `ca_statcan` 실시간 CPI 임시 비활성 (ADR-032 예외) | Active | vector 전부 오류·지수×현재가 공식 오류, 재구현 전까지 정적값 고정 |
 | [083](adr/083-favorite-star-yellow-fill.md) | 즐겨찾기 별 — 배경 강조 대신 아이콘 yellow 채움 | Active | `yellow` 토큰 추가, `Icon` `fill` prop, TopBar accent='star' 배경은 `bg-light` 유지 |
-| [084](adr/084-favorites-tab-list-screen.md) | 즐겨찾기 탭 — 라우팅 단축 대신 목록 화면 | Active | ADR-041 부분 대체(비교 탭 단축은 유지), `RecentRow` 재사용, 빈 상태는 화면 내 CTA, 광고 없음 |
+| [084](adr/084-favorites-tab-list-screen.md) | 즐겨찾기 탭 — 라우팅 단축 대신 목록 화면 | Active | ADR-041 부분 대체(비교 탭 단축은 ADR-089 가 대체), `RecentRow` 재사용, 빈 상태는 화면 내 CTA, 광고 없음 |
 | [085](adr/085-refresh-rent-hud-token-cron.md) | refresh-rent — `us_hud` Bearer 토큰 인증 + 실행 시각 14:00 UTC | Active | `US_HUD_API_KEY` 없으면 skip + 경고, cron `0 14 1 * *` 로 StatCan WDS 점검 구간 회피 |
 | [086](adr/086-us-hud-hmfa-entity-ids.md) | `us_hud` — 도시 중심 HMFA 코드 + Small Area FMR 의 `MSA level` 행 | Active | MSA 코드는 404, `listMetroAreas` 확인값 사용, `basicdata` 배열이면 `MSA level` 행만, 연도 미지정 |
 | [087](adr/087-kr-molit-deposit-conversion.md) | 서울 월세 = 보증금 환산 월세 메디안 (전환율 4.6%) | Active | 월세 + 보증금 × 4.6% ÷ 12, 한국부동산원 서울 연립·다세대 2026-09, 상수로 고정 |
 | [088](adr/088-kr-molit-min-sample-size.md) | 서울 월세 — 월세 계약 30건 미만 면적 구간은 기존 값 유지 | Active | `MIN_SAMPLE_SIZE = 30`, 네 구간 같은 기준, 건너뛴 구간·표본 수는 warnings, 2026-10 share 3건 |
+| [089](adr/089-compare-tab-city-pair.md) | 비교 탭 = 두 도시 선택 화면, 기준 도시는 `?base=` (Supersedes ADR-041 비교 탭) | Active | 서울은 항상 기준(왼쪽), 선택 화면 광고 없음, 포함 토글 키 `"<base>\|<cityId>"` |

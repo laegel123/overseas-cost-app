@@ -4,6 +4,9 @@
  *
  * Hot 판정은 isHot(mult) 단일 함수 사용 (CLAUDE.md CRITICAL).
  *
+ * `mult=null` 은 한쪽 도시의 값이 결측인 도시끼리 비교 (ADR-089) — 배수 영역만
+ * 비우고 라벨·값·막대는 그대로 그린다. 값 자리에는 호출부가 `—` 를 넘긴다.
+ *
  * 포함/제외 토글 (ADR-062):
  *   사용자가 카드별 Switch 로 hero 합산에 포함할지 결정. 미포함 카드는 화면에서
  *   숨기지 않고 카드 전체 opacity + "제외됨" 배지 + 토글 OFF 색 = 3중 인코딩
@@ -40,8 +43,13 @@ export type ComparePairProps = {
   cLabel: string;
   /** 도시 값 — 예: "240만" */
   cValue: string;
-  /** 배수 — 1.0 = 동일, > 1 = 도시가 비쌈 */
-  mult: number | '신규';
+  /**
+   * 배수 — 1.0 = 동일, > 1 = 도시가 비쌈.
+   *
+   * `null` = 한쪽 도시의 값이 결측인 도시끼리 비교 (ADR-089) → 배수 영역을
+   * 렌더하지 않는다. 결측을 0 으로 바꿔 배수를 꾸미지 않는다.
+   */
+  mult: number | '신규' | null;
   /** 서울 막대 폭 [0, 1] */
   swPct: number;
   /** 도시 막대 폭 [0, 1] */
@@ -98,9 +106,6 @@ export function ComparePair({
   const sw = clampPct(swPct, 'swPct');
   const cw = clampPct(cwPct, 'cwPct');
 
-  const multText = formatMultiplier(mult);
-  const multColor = getMultColor(mult, effectiveHot);
-
   const handleToggle = React.useCallback(
     (next: boolean) => {
       onToggleInclude?.(next);
@@ -145,14 +150,18 @@ export function ComparePair({
         <View
           className={`flex-row items-center gap-2 shrink-0${hasToggle ? ' mr-20' : ''}`}
         >
-          <H3
-            color={multColor}
-            numberOfLines={1}
-            className="font-manrope-extrabold"
-            {...(testID !== undefined ? { testID: `${testID}-mult` } : {})}
-          >
-            {multText}
-          </H3>
+          {/* mult=null 이면 formatMultiplier / getMultColor 를 호출하지 않는다 —
+              두 함수는 유효하지 않은 배수를 삼키지 않고 throw 한다 (ADR-089). */}
+          {mult !== null && (
+            <H3
+              color={getMultColor(mult, effectiveHot)}
+              numberOfLines={1}
+              className="font-manrope-extrabold"
+              {...(testID !== undefined ? { testID: `${testID}-mult` } : {})}
+            >
+              {formatMultiplier(mult)}
+            </H3>
+          )}
         </View>
       </View>
 
